@@ -17,19 +17,7 @@
 #ifndef ANDROID_JNI_PTR_WRAP_H
 #define ANDROID_JNI_PTR_WRAP_H
 
-#include "device/device.h"
-#include "device/device_parameters.h"
 #include "java_environment.h"
-
-template<>
-constexpr const char *jni::java_class_name<Neuro::DeviceState>() { return "ru/neurotech/neurosdk/state/DeviceState"; };
-
-template<>
-constexpr const char *jni::constructor_signature<Neuro::DeviceState>() { return "(I)Lru/neurotech/neurosdk/state/DeviceState;"; };
-
-template<>
-template<>
-jni::java_object<Neuro::DeviceState>::java_object(const Neuro::DeviceState &);
 
 template <typename JniPtrObj>
 jobject find_notifier(jobject java_obj, const char *notifier_name) {
@@ -44,18 +32,7 @@ jobject find_notifier(jobject java_obj, const char *notifier_name) {
     return deviceStateChangedNotifier;
 };
 
-inline void callJavaSendNotification(jobject subscriberNotifier, jobject param){
-    JNIEnv *env;
-    auto resCode = jni::get_env(&env);
-    if (resCode == 2) return;
-
-    auto subscriberClass = env->GetObjectClass(subscriberNotifier);
-    auto callbackMethod = env->GetMethodID(subscriberClass, "sendNotification",
-                                           "(Ljava/lang/Object;Ljava/lang/Object;)V");
-    env->CallVoidMethod(subscriberNotifier, callbackMethod, nullptr, param);
-
-    if (resCode == 1) jni::detach_thread();
-}
+void callJavaSendNotification(jobject subscriberNotifier, jobject param);
 
 template <typename T>
 void sendNotification(std::weak_ptr<jni::jobject_t> subscriberRefPtr, T param){
@@ -76,14 +53,28 @@ public:
     JniPtrWrap &operator=(const JniPtrWrap &) = delete;
     virtual ~JniPtrWrap() = default;
 
-    typedef std::shared_ptr<Obj> object_ptr_t;
+    using object_ptr_t = std::shared_ptr<Obj>;
+    using obj_t = Obj;
 
-    Obj *operator->() const {
+    Obj* operator->() const {
         return object.operator->();
     }
+
+    object_ptr_t operator*() const {
+        return object;
+    }
+
 protected:
-    JniPtrWrap(std::shared_ptr<Obj> objPtr) : object(objPtr){}
+    JniPtrWrap(object_ptr_t objPtr) : object(objPtr){}
     object_ptr_t object;
 };
+
+template <typename T>
+T* extract_pointer(JNIEnv *env, jobject object, const char *pointer_field_name = "mNativeObjPtr"){
+    auto objectClass = env->GetObjectClass(object);
+    auto pointerFieldID = env->GetFieldID(objectClass, pointer_field_name, "J");
+    auto longPtr = env->GetLongField(object, pointerFieldID);
+    return reinterpret_cast<T*>(longPtr);
+}
 
 #endif //ANDROID_JNI_PTR_WRAP_H

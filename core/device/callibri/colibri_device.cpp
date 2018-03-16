@@ -23,7 +23,7 @@
 
 /*
 ColibriDevice::ColibriDevice(std::unique_ptr<BleDevice> bleDevice):
-        NeuroDevice(std::move(bleDevice)),
+        Device(std::move(bleDevice)),
         requestHandler(std::make_shared<ColibriRequestHandler>([this](std::shared_ptr<ColibriCommandData> commandData){this->sendCommandPacket(commandData);})),
         sensorAddress(0){
 

@@ -25,7 +25,7 @@ using std::shared_ptr;
 
 /*
 BrainbitDevice::BrainbitDevice(std::unique_ptr<BleDevice> bleDevice):
-        NeuroDevice(std::move(bleDevice)),
+        Device(std::move(bleDevice)),
         deviceState(BrainbitCommand::ERROR),
         batteryLevel(0),
         requestHandler(new BrainbitRequestHandler([this](shared_ptr<BrainbitCommandData> commandData){this->sendCommandPacket(commandData);})){}

@@ -18,28 +18,25 @@ package ru.neurotech.neurosdk;
 
 import android.util.Log;
 
-import ru.neurotech.common.VisualizableDevice;
-import ru.neurotech.neurosdk.features.SignalSubsystem;
-import ru.neurotech.neurosdk.features.StimulationSubsystem;
 import ru.neurotech.neurosdk.state.NeuroDeviceError;
 import ru.neurotech.neurosdk.state.NeuroDeviceState;
 
-/**
- * Represents Neurotech™ device on a layer of algorithmic functionality
- * Provides signal and misc channels and methods for signal processing and viewing
- */
-public class NeuroDevice extends VisualizableDevice {
+public class Device {
+    static {
+        System.loadLibrary("neurosdk");
+    }
+
     private long mNativeObjPtr = 0;
 
-    private NeuroDevice(long nativeObjPtr) {
+    private Device(long nativeObjPtr) {
         mNativeObjPtr = nativeObjPtr;
     }
 
     public void finalize() throws Throwable {
         if (mNativeObjPtr != 0) {
-            Log.d("NeuroDevice", "Finalizing");
+            Log.d("Device", "Finalizing");
             deleteDevice(mNativeObjPtr);
-            Log.d("NeuroDevice", "Finalized");
+            Log.d("Device", "Finalized");
             mNativeObjPtr = 0;
         }
         super.finalize();
@@ -52,7 +49,7 @@ public class NeuroDevice extends VisualizableDevice {
      */
     public NeuroDeviceState getState() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         return getDeviceState(mNativeObjPtr);
     }
@@ -64,7 +61,7 @@ public class NeuroDevice extends VisualizableDevice {
      */
     public NeuroDeviceError getError() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         // return getDeviceError(mNativeObjPtr);
         return NeuroDeviceError.NO_ERROR;
@@ -78,7 +75,7 @@ public class NeuroDevice extends VisualizableDevice {
     @Override
     public String getName() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         return getDeviceName(mNativeObjPtr);
     }
@@ -86,7 +83,7 @@ public class NeuroDevice extends VisualizableDevice {
     @Override
     public String getAddress(){
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         return getDeviceAddress(mNativeObjPtr);
     }
@@ -98,13 +95,13 @@ public class NeuroDevice extends VisualizableDevice {
     @Override
     public int getBatteryLevel(){
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         return getBatteryLevel(mNativeObjPtr);
     }
 
     @Override
-    public NeuroDevice getNeuroDevice() {
+    public Device getNeuroDevice() {
         return this;
     }
 
@@ -115,7 +112,7 @@ public class NeuroDevice extends VisualizableDevice {
      */
     public DeviceFeature[] getFeatures() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         return getFeatures(mNativeObjPtr);
     }
@@ -125,7 +122,7 @@ public class NeuroDevice extends VisualizableDevice {
      */
     public void connect() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         connectDevice(mNativeObjPtr);
     }
@@ -135,17 +132,32 @@ public class NeuroDevice extends VisualizableDevice {
      */
     public void disconnect() {
         if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+            throw new RuntimeException("Device object been disposed");
 
         disconnectFromDevice(mNativeObjPtr);
     }
 
-    public void close(){
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("NeuroDevice object been disposed");
+    ChannelInfo[] channels() {
 
-        closeDevice(mNativeObjPtr);
     }
+
+    Command[] commands() {
+
+    }
+
+    Parameter[] parameters() {
+
+    }
+
+    boolean execute(Command cmd){
+
+    }
+
+    template <Parameter P>
+    typename ParamValue<P>::Type readParam() const;
+
+    template <Parameter P>
+    bool setParam(typename ParamValue<P>::Type value);
 
     private native void deleteDevice(long objPtr);
 

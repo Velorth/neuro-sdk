@@ -84,7 +84,7 @@ Java_ru_neurotech_neurodevices_NeuroConnection_findDeviceByAddress(JNIEnv *env, 
 
     auto device = new JniNeuroDevice(devicePtr);
 
-    //creating java wrapper object for NeuroDevice
+    //creating java wrapper object for Device
     jni::java_object<decltype(device)> deviceWrapObj(device);
 
     device->subscribeStateChanged(find_notifier<decltype(device)>(deviceWrapObj, "deviceStateChanged"));

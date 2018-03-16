@@ -137,7 +137,7 @@ std::unique_ptr<Device> DeviceScanner::findDeviceByAddress(std::string address){
 
 std::unique_ptr<Device> DeviceScanner::onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Creating NeuroDevice", "NeuroConnection", __FUNCTION__);
+    log->debug("[%s: %s] Creating Device", "NeuroConnection", __FUNCTION__);
     switch (ble_device->getDeviceType()) {
        case DeviceType::Brainbit:
             return BrainbitDeviceFactory().create(std::move(ble_device));

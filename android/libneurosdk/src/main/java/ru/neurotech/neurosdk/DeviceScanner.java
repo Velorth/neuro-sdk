@@ -30,7 +30,7 @@ public class DeviceScanner {
         System.loadLibrary("neurosdk");
     }
 
-    public SubscribersNotifier<NeuroDevice> deviceFound = new SubscribersNotifier<>();
+    public SubscribersNotifier<Device> deviceFound = new SubscribersNotifier<>();
 
     /**
      * Notifies about changing device scanning state
@@ -62,11 +62,11 @@ public class DeviceScanner {
         stopScan(mNativeObjPtr);
     }
 
-    public NeuroDevice getDeviceByAddress(String address){
+    public Device getDeviceByAddress(String address){
         return findDeviceByAddress(mNativeObjPtr, address);
     }
 
-    private void onDeviceFound(NeuroDevice device) {
+    private void onDeviceFound(Device device) {
         deviceFound.sendNotification(this, device);
     }
     private void onScanStateChanged(boolean isScanning) {
@@ -81,5 +81,5 @@ public class DeviceScanner {
 
     private native void stopScan(long objPtr);
 
-    private native NeuroDevice findDeviceByAddress(long objPtr, String address);
+    private native Device findDeviceByAddress(long objPtr, String address);
 }

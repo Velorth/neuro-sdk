@@ -23,42 +23,42 @@ using std::shared_ptr;
 using std::vector;
 
 /*
-NeuroDevice::NeuroDevice(std::unique_ptr<BleDevice> bleDev):
+Device::Device(std::unique_ptr<BleDevice> bleDev):
         bleDevice(std::move(bleDev)),
         deviceState(DeviceState::UNKNOWN),
         deviceStateError(DeviceError::NO_ERROR),
         isInitialized(false) {}
 
-NeuroDevice::~NeuroDevice(){
+Device::~Device(){
 
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Neuro device destructor. Device %s, address: %s", "NeuroDevice", __FUNCTION__, getName().c_str(), getAddress().c_str());
+    log->debug("[%s: %s] Neuro device destructor. Device %s, address: %s", "Device", __FUNCTION__, getName().c_str(), getAddress().c_str());
     bleDevice->disconnect();
     bleDevice->close();
-    log->debug("[%s: %s] Neuro device destructor EXIT", "NeuroDevice", __FUNCTION__);
+    log->debug("[%s: %s] Neuro device destructor EXIT", "Device", __FUNCTION__);
 }
 
-void NeuroDevice::disconnect(){
+void Device::disconnect(){
 
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Ble disconnect. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+    log->debug("[%s: %s] Ble disconnect. Device %s, address: %s", "Device", __FUNCTION__,
                getName().c_str(), getAddress().c_str());
     pendingDisconnectRequest = true;
     bleDevice->disconnect();
 }
 
-void NeuroDevice::close() {
+void Device::close() {
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Ble close. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+    log->debug("[%s: %s] Ble close. Device %s, address: %s", "Device", __FUNCTION__,
                getName().c_str(), getAddress().c_str());
     pendingDisconnectRequest = true;
     bleDevice->close();
 }
 
-void NeuroDevice::connect(){
+void Device::connect(){
 
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Ble connect. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+    log->debug("[%s: %s] Ble connect. Device %s, address: %s", "Device", __FUNCTION__,
                getName().c_str(), getAddress().c_str());
     if (!bleDeviceStateHandler) {
         subscribeBleDeviceStateChanged();
@@ -72,61 +72,61 @@ void NeuroDevice::connect(){
     bleDevice->connect();
 }
 
-DeviceState NeuroDevice::getState() const {
+DeviceState Device::getState() const {
 
     return deviceState;
 }
 
-DeviceError NeuroDevice::getError() const {
+DeviceError Device::getError() const {
 
     return deviceStateError;
 }
 
-vector<DeviceFeature> NeuroDevice::getFeatures() const {
+vector<DeviceFeature> Device::getFeatures() const {
 
     return deviceFeatures;
 }
 
-std::string NeuroDevice::getName() const {
+std::string Device::getName() const {
 
     return bleDevice->getName();
 }
 
-std::string NeuroDevice::getAddress() const {
+std::string Device::getAddress() const {
 
     return bleDevice->getNetAddress();
 }
 
-std::vector<Neuro::ChannelInfo> NeuroDevice::availableChannels() const noexcept {
+std::vector<Neuro::ChannelInfo> Device::availableChannels() const noexcept {
     return mAvailableChannels;
 }
 
-void NeuroDevice::notifyDeviceStateChanged(DeviceState state, DeviceError error) {
+void Device::notifyDeviceStateChanged(DeviceState state, DeviceError error) {
     deviceStateChanged(*this, state, error);
 }
 
-void NeuroDevice::notifyBatteryStateChanged(int batteryLevel, bool isCharging) {
+void Device::notifyBatteryStateChanged(int batteryLevel, bool isCharging) {
     batteryStateChanged(*this, batteryLevel, isCharging);
 }
 
-void NeuroDevice::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError error) {
+void Device::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError error) {
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Ble device state: %d. Device %s, address: %s", "NeuroDevice", __FUNCTION__, static_cast<int>(state),
+    log->debug("[%s: %s] Ble device state: %d. Device %s, address: %s", "Device", __FUNCTION__, static_cast<int>(state),
                getName().c_str(), getAddress().c_str());
     if (state == BleDeviceState::CONNECTED) {
-        log->debug("[%s: %s] Ble device connected. Device %s, address: %s. Initializing...", "NeuroDevice", __FUNCTION__,
+        log->debug("[%s: %s] Ble device connected. Device %s, address: %s. Initializing...", "Device", __FUNCTION__,
                    getName().c_str(), getAddress().c_str());
         pendingDisconnectRequest = false;
         if (initialize()) {
             deviceState = DeviceState::CONNECTED;
             deviceStateError = DeviceError::NO_ERROR;
-            log->debug("[%s: %s] Neuro device connected. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+            log->debug("[%s: %s] Neuro device connected. Device %s, address: %s", "Device", __FUNCTION__,
                        getName().c_str(), getAddress().c_str());
         }
         else{
             deviceState = DeviceState::ERROR;
             deviceStateError = DeviceError::PROTOCOL_ERROR;
-            log->error("[%s: %s] Neuro device protocol error. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+            log->error("[%s: %s] Neuro device protocol error. Device %s, address: %s", "Device", __FUNCTION__,
                        getName().c_str(), getAddress().c_str());
             bleDevice->disconnect();
         }
@@ -135,7 +135,7 @@ void NeuroDevice::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError e
         deviceState = DeviceState::DISCONNECTED;
         deviceStateError = DeviceError::NO_ERROR;
         isInitialized = false;
-        log->debug("[%s: %s] Neuro device disconnected. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+        log->debug("[%s: %s] Neuro device disconnected. Device %s, address: %s", "Device", __FUNCTION__,
                    getName().c_str(), getAddress().c_str());
         if (!pendingDisconnectRequest){
             connect();
@@ -145,14 +145,14 @@ void NeuroDevice::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError e
         deviceState = DeviceState::ERROR;
         deviceStateError = DeviceError::BLUETOOTH_CONNECTION_ERROR;
         isInitialized = false;
-        log->error("[%s: %s] Neuro device bluetooth error. Device %s, address: %s", "NeuroDevice", __FUNCTION__,
+        log->error("[%s: %s] Neuro device bluetooth error. Device %s, address: %s", "Device", __FUNCTION__,
                    getName().c_str(), getAddress().c_str());
     }
     notifyDeviceStateChanged(deviceState, deviceStateError);
 }
 
-void NeuroDevice::subscribeBleDeviceStateChanged() {
-    std::weak_ptr<NeuroDevice> neuroDevicePtr = shared_from_this();
+void Device::subscribeBleDeviceStateChanged() {
+    std::weak_ptr<Device> neuroDevicePtr = shared_from_this();
     bleDeviceStateHandler = MakeHandler(BleDevice, deviceStateChanged,
                                         [neuroDevicePtr](const BleDevice &, BleDeviceState state,
                                             BleDeviceError error) {
@@ -164,8 +164,8 @@ void NeuroDevice::subscribeBleDeviceStateChanged() {
     bleDevice->deviceStateChanged += bleDeviceStateHandler;
 }
 
-void NeuroDevice::subscribeDataReceived() {
-    std::weak_ptr<NeuroDevice> neuroDevicePtr = shared_from_this();
+void Device::subscribeDataReceived() {
+    std::weak_ptr<Device> neuroDevicePtr = shared_from_this();
     dataReceivedHandler = MakeHandler(BleDevice, dataReceived,
                                       [neuroDevicePtr](const BleDevice &, const std::vector<Byte> &data) {
                                           auto neuroDevice = neuroDevicePtr.lock();
@@ -176,8 +176,8 @@ void NeuroDevice::subscribeDataReceived() {
     bleDevice->dataReceived += dataReceivedHandler;
 }
 
-void NeuroDevice::subscribeStatusReceived() {
-    std::weak_ptr<NeuroDevice> neuroDevicePtr = shared_from_this();
+void Device::subscribeStatusReceived() {
+    std::weak_ptr<Device> neuroDevicePtr = shared_from_this();
     statusReceivedHandler = MakeHandler(BleDevice, statusReceived,
                                         [neuroDevicePtr](const BleDevice &, const std::vector<Byte> &status) {
                                                 auto neuroDevice = neuroDevicePtr.lock();
