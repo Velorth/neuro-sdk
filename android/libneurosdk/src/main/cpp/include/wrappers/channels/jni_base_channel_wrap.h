@@ -52,12 +52,12 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device){
         return reinterpret_cast<jlong>(batteryChannelWrap);
     }
     catch (std::exception &e){
-        auto exceptionClass = env->FindClass("java/lang/OutOfMemoryError");
+        auto exceptionClass = env->FindClass("java/lang/IllegalArgumentException");
         if (exceptionClass == nullptr) {
-            return throwNoClassDefError( env, className );
+            return 0;
         }
-
-        return (*env)->ThrowNew( env, exClass, message );
+        env->ThrowNew(exceptionClass, e.what());
+        return 0;
     }
 }
 

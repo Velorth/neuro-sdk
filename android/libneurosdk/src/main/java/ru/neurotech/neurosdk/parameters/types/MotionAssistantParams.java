@@ -1,4 +1,4 @@
-package ru.neurotech.neurosdk.stimulation;
+package ru.neurotech.neurosdk.parameters.types;
 
 public class MotionAssistantParams {
     public int gyroStart = 0;

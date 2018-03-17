@@ -16,10 +16,10 @@
 
 package ru.neurotech.neurosdk;
 
-import android.util.Log;
-
-import ru.neurotech.neurosdk.state.NeuroDeviceError;
-import ru.neurotech.neurosdk.state.NeuroDeviceState;
+import ru.neurotech.neurosdk.channels.ChannelInfo;
+import ru.neurotech.neurosdk.parameters.Command;
+import ru.neurotech.neurosdk.parameters.Parameter;
+import ru.neurotech.neurosdk.parameters.ParameterName;
 
 public class Device {
     static {
@@ -34,152 +34,27 @@ public class Device {
 
     public void finalize() throws Throwable {
         if (mNativeObjPtr != 0) {
-            Log.d("Device", "Finalizing");
             deleteDevice(mNativeObjPtr);
-            Log.d("Device", "Finalized");
             mNativeObjPtr = 0;
         }
         super.finalize();
     }
 
-    /**
-     * Returns common device state. To get error info call getError method
-     *
-     * @return device state
-     */
-    public NeuroDeviceState getState() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
+    public native void connect();
 
-        return getDeviceState(mNativeObjPtr);
-    }
+    public native void disconnect();
 
-    /**
-     * Returns device error state information
-     *
-     * @return error type
-     */
-    public NeuroDeviceError getError() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
+    public native ChannelInfo[] channels();
 
-        // return getDeviceError(mNativeObjPtr);
-        return NeuroDeviceError.NO_ERROR;
-    }
+    public native Command[] commands();
 
-    /**
-     * Returns name of BLE device
-     *
-     * @return BLE device name
-     */
-    @Override
-    public String getName() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
+    public native Parameter[] parameters();
 
-        return getDeviceName(mNativeObjPtr);
-    }
+    public native boolean execute(Command cmd);
 
-    @Override
-    public String getAddress(){
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
+    public native Object readParam(ParameterName param);
 
-        return getDeviceAddress(mNativeObjPtr);
-    }
-
-    /**
-     * Returns battery state
-     * @return battery charge level in percents
-     */
-    @Override
-    public int getBatteryLevel(){
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
-
-        return getBatteryLevel(mNativeObjPtr);
-    }
-
-    @Override
-    public Device getNeuroDevice() {
-        return this;
-    }
-
-    /**
-     * Returns supported device features
-     *
-     * @return device feature
-     */
-    public DeviceFeature[] getFeatures() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
-
-        return getFeatures(mNativeObjPtr);
-    }
-
-    /**
-     * Establishes connection with device services
-     */
-    public void connect() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
-
-        connectDevice(mNativeObjPtr);
-    }
-
-    /**
-     * Disconnect from device
-     */
-    public void disconnect() {
-        if (mNativeObjPtr == 0)
-            throw new RuntimeException("Device object been disposed");
-
-        disconnectFromDevice(mNativeObjPtr);
-    }
-
-    ChannelInfo[] channels() {
-
-    }
-
-    Command[] commands() {
-
-    }
-
-    Parameter[] parameters() {
-
-    }
-
-    boolean execute(Command cmd){
-
-    }
-
-    template <Parameter P>
-    typename ParamValue<P>::Type readParam() const;
-
-    template <Parameter P>
-    bool setParam(typename ParamValue<P>::Type value);
+    public native boolean setParam(ParameterName param, Object value);
 
     private native void deleteDevice(long objPtr);
-
-    private native void connectDevice(long objPtr);
-
-    private native void disconnectFromDevice(long objPtr);
-
-    private native void closeDevice(long objPtr);
-
-    private native String getDeviceName(long objPtr);
-
-    private native String getDeviceAddress(long objPtr);
-
-    private native int getBatteryLevel(long objPtr);
-
-    private native NeuroDeviceState getDeviceState(long objPtr);
-
-    private native NeuroDeviceError getDeviceError(long objPtr);
-
-    private native DeviceFeature[] getFeatures(long objPtr);
-
-    private native SignalSubsystem getSignalSubsystem(long objPtr);
-
-    private native StimulationSubsystem getStimulationSubsystem(long objPtr);
 }

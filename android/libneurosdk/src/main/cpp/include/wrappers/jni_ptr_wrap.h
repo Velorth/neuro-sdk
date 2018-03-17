@@ -70,11 +70,18 @@ protected:
 };
 
 template <typename T>
-T* extract_pointer(JNIEnv *env, jobject object, const char *pointer_field_name = "mNativeObjPtr"){
+T*
+extract_pointer(JNIEnv *env, jobject object, const char *pointer_field_name = "mNativeObjPtr"){
     auto objectClass = env->GetObjectClass(object);
     auto pointerFieldID = env->GetFieldID(objectClass, pointer_field_name, "J");
     auto longPtr = env->GetLongField(object, pointerFieldID);
     return reinterpret_cast<T*>(longPtr);
+}
+
+template <typename T>
+void
+deleteNativeObject(JNIEnv *env, jobject object, const char *pointer_field_name = "mNativeObjPtr"){
+    delete extract_pointer<T>(env, object, pointer_field_name);
 }
 
 #endif //ANDROID_JNI_PTR_WRAP_H

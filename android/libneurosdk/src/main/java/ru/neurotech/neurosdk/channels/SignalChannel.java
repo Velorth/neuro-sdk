@@ -2,18 +2,13 @@ package ru.neurotech.neurosdk.channels;
 
 import ru.neurotech.neurosdk.Device;
 
-public class BatteryChannel extends NativeChannel<Integer> {
-    private BatteryChannel(Device device) {
+public class SignalChannel extends NativeChannel<Double> {
+    private SignalChannel(Device device) {
         super(create(device));
     }
 
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
-    }
-
     @Override
-    public native Integer[] readData(long offset, long length);
+    public native Double[] readData(long offset, long length);
 
     @Override
     public native long totalLength();
@@ -31,5 +26,4 @@ public class BatteryChannel extends NativeChannel<Integer> {
     public native Device underlyingDevice();
 
     private static native long create(Device device);
-    private native void deleteNative();
 }

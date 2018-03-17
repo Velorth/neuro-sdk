@@ -14,10 +14,29 @@
  * limitations under the License.
  */
 
-package ru.neurotech.neurosdk.state;
+package ru.neurotech.neurosdk.parameters.types;
 
-public enum NeuroDeviceError {
-    NO_ERROR,
-    BLUETOOTH_CONNECTION_ERROR,
-    PROTOCOL_ERROR
+public enum MotionAssistantLimb {
+    RIGHT_LEG(0),
+    LEFT_LEG(1),
+    RIGHT_ARM(2),
+    LEFT_ARM(3);
+
+    private final int mLimbCode;
+
+    MotionAssistantLimb(int limbCode) {
+        mLimbCode = limbCode;
+    }
+
+    public static MotionAssistantLimb fromIntCode(int limbCode) {
+        for (MotionAssistantLimb stateField : MotionAssistantLimb.values()) {
+            if (limbCode == stateField.mLimbCode)
+                return stateField;
+        }
+        return RIGHT_LEG;
+    }
+
+    public int getCode(){
+        return mLimbCode;
+    }
 }

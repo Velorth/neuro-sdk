@@ -1,4 +1,4 @@
-package ru.neurotech.neurosdk.stimulation;
+package ru.neurotech.neurosdk.parameters.types;
 
 public class StimulationParams {
     public int amplitude;

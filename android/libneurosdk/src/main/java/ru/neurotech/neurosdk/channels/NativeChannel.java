@@ -1,5 +1,6 @@
 package ru.neurotech.neurosdk.channels;
 
+import ru.neurotech.common.Assert;
 import ru.neurotech.neurosdk.Device;
 
 public abstract class NativeChannel<SampleType> extends BaseChannel<SampleType> {
@@ -11,6 +12,7 @@ public abstract class NativeChannel<SampleType> extends BaseChannel<SampleType> 
 
     protected NativeChannel(long mObjPtr){
         mNativeObjPtr = mObjPtr;
+        Assert.expects(mNativeObjPtr != 0, "Native channel pointer is null");
         init();
     }
 
