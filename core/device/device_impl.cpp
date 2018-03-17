@@ -2,7 +2,7 @@
 #include "device/device_impl.h"
 #include "device/parameter_reader.h"
 #include "device/parameter_writer.h"
-#include "device/ble_device.h"
+#include "ble/ble_device.h"
 
 namespace Neuro {
 

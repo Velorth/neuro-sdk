@@ -1,7 +1,7 @@
 #ifndef CALLIBRI_IMPL_H
 #define CALLIBRI_IMPL_H
 
-#include "device_impl.h"
+#include "device/device_impl.h"
 #include "callibri_command.h"
 #include "signal/safe_buffer.h"
 

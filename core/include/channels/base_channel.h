@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 #include "common_types.h"
+#include "channel_info.h"
 
 namespace Neuro {
 
-class ChannelInfo;
 class Device;
 
 template <typename DataType>

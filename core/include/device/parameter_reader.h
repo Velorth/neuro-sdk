@@ -2,7 +2,7 @@
 #define PARAMETER_READER_H
 
 #include <memory>
-#include "ble_device.h"
+#include "ble/ble_device.h"
 #include "param_values.h"
 #include "event_observer.h"
 

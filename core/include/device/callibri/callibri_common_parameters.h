@@ -1,7 +1,7 @@
 #ifndef CALLIBRI_COMMON_PARAMETERS_H
 #define CALLIBRI_COMMON_PARAMETERS_H
 
-#include "param_values.h"
+#include "device/param_values.h"
 #include "callibri_command.h"
 
 namespace Neuro {

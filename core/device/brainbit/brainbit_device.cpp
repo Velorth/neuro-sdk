@@ -15,9 +15,8 @@
  */
 
 #include <cmath>
-#include "device/brainbit_device.h"
-#include "device/brainbit_protocol.h"
-#include "signal/channel.h"
+#include "device/brainbit/brainbit_device.h"
+#include "device/brainbit/brainbit_protocol.h"
 
 using std::pair;
 using std::string;

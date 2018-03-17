@@ -1,7 +1,7 @@
 #ifndef CALLIBRI_PARAMETER_WRITER_H
 #define CALLIBRI_PARAMETER_WRITER_H
 
-#include "parameter_writer.h"
+#include "device/parameter_writer.h"
 
 namespace Neuro {
 

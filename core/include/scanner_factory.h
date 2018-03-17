@@ -7,8 +7,8 @@
 namespace Neuro {
 
 #ifdef __ANDROID__
-    #include "connection/bluetooth_scanner.h"
-    #define CurrentPlatformScanner BluetoothScannerJni
+    #include "ble/android/bluetooth_scanner.h"
+    using CurrentPlatformScanner = BluetoothScannerJni;
 #elif __linux__
     #include "device_scanner_z.h"
     using CurrentPlatformScanner = DeviceScannerZ;

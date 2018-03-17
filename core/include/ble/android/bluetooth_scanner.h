@@ -18,37 +18,40 @@
 #define ANDROID_BLUETOOTH_SCANNER_H
 
 #include <atomic>
-#include "ble_scanner.h"
+#include "ble/ble_scanner.h"
 #include "java_environment.h"
 
-class BluetoothScannerJni : public BleScanner {
-public:
-    BluetoothScannerJni(jobject);
+namespace Neuro {
 
-    ~BluetoothScannerJni();
+    class BluetoothScannerJni : public BleScanner {
+    public:
+        BluetoothScannerJni(jobject);
 
-    void startScan() override;
+        ~BluetoothScannerJni();
 
-    void stopScan() override;
+        void startScan() override;
 
-    std::unique_ptr<BleDevice> getDeviceByAddress(std::string) override;
+        void stopScan() override;
 
-    void setFilter(std::vector<std::string>) override;
+        std::unique_ptr<BleDevice> getDeviceByAddress(std::string) override;
 
-    void subscribeDeviceFound(std::function<void(std::unique_ptr<BleDevice>)>) override;
+        void setFilter(std::vector<std::string>) override;
 
-    void releaseDevice(std::string name, std::string address) override;
+        void subscribeDeviceFound(std::function<void(std::unique_ptr<BleDevice>)>) override;
 
-    void onDeviceFound(jobject);
+        void releaseDevice(std::string name, std::string address) override;
 
-    bool isScanning() override { return isScanProcessing.load() || emulator.isScanning(); }
+        void onDeviceFound(jobject);
 
-private:
-    jobject appContext;
-    jobject javaScannerInstance;
+        bool isScanning() override { return isScanProcessing.load() || emulator.isScanning(); }
 
-    std::atomic<bool> isScanProcessing;
-    std::function<void(std::unique_ptr<BleDevice>)> deviceFoundCallback;
-};
+    private:
+        jobject appContext;
+        jobject javaScannerInstance;
 
+        std::atomic<bool> isScanProcessing;
+        std::function<void(std::unique_ptr<BleDevice>)> deviceFoundCallback;
+    };
+
+}
 #endif //ANDROID_BLUETOOTH_SCANNER_H

@@ -1,7 +1,7 @@
 #ifndef BRAINBIT_PARAMETER_READER_H
 #define BRAINBIT_PARAMETER_READER_H
 
-#include "parameter_reader.h"
+#include "device/parameter_reader.h"
 
 namespace Neuro {
 

@@ -17,35 +17,11 @@
 #ifndef ANDROID_JNI_BASE_CHANNEL_WRAP_H
 #define ANDROID_JNI_BASE_CHANNEL_WRAP_H
 
-#include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/jni_device_wrap.h"
-#include "channels/base_channel.h"
-
-class JniBaseChannelWrap : public JniPtrWrap<Neuro::BaseChannel> {
-public:
-    void subscribeLengthChanged(jobject stateChangedSubscriberRef);
-
-protected:
-    JniBaseChannelWrap(object_ptr_t devicePtr) :
-            JniPtrWrap<Neuro::BaseChannel>(devicePtr) {}
-
-private:
-    std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
-};
-
-template<>
-constexpr const char *jni::java_class_name<JniBaseChannelWrap *>() {
-    return "ru/neurotech/neurosdk/channels/NativeChannel";
-}
-
-template<>
-constexpr const char *jni::constructor_signature<JniBaseChannelWrap *>() {
-    return "(J)V";
-}
 
 template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device){
-    auto deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
+    auto deviceWrapPtr = extract_pointer<JniDeviceWrap>(env, device);
     try {
         auto batteryChannel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr);
         auto batteryChannelWrap = new ChannelWrap(batteryChannel);

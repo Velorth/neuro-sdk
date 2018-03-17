@@ -1,8 +1,8 @@
 #ifndef BRAINBIT_IMPL_H
 #define BRAINBIT_IMPL_H
 
-#include "device_impl.h"
-#include "request_handler.h"
+#include "device/device_impl.h"
+#include "device/request_handler.h"
 #include "brainbit_command.h"
 #include "signal/safe_buffer.h"
 

@@ -21,9 +21,8 @@
 #include <atomic>
 #include <map>
 #include <list>
-#include "request_handler.h"
+#include "device/request_handler.h"
 #include "brainbit_command.h"
-#include "neuro_device.h"
 
 #define BRAINBIT_SOURCE_CLASSNAME "Brainbit source"
 

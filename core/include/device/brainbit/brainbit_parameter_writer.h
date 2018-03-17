@@ -1,7 +1,7 @@
 #ifndef BRAINBIT_PARAMETER_WRITER_H
 #define BRAINBIT_PARAMETER_WRITER_H
 
-#include "parameter_writer.h"
+#include "device/parameter_writer.h"
 
 namespace Neuro {
 

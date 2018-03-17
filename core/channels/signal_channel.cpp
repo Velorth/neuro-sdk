@@ -3,6 +3,7 @@
 #include "channels/signal_channel.h"
 #include "device/device.h"
 #include "device/device_impl.h"
+#include "device/param_values.h"
 #include "signal/base_buffer.h"
 
 namespace Neuro {
@@ -49,7 +50,7 @@ public:
     }
 
     sampling_frequency_t samplingFrequency() const noexcept {
-        return getSamplingFrequencyValue(mDevice->readParam<SamplingFrequency>());
+        return getSamplingFrequencyValue(mDevice->readParam<Parameter::SamplingFrequency>());
     }
 };
 

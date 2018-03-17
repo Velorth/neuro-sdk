@@ -1,6 +1,6 @@
 #include "gsl/gsl_assert"
 #include "device/parameter_reader.h"
-#include "device/ble_device.h"
+#include "ble/ble_device.h"
 #include "logger.h"
 
 namespace Neuro {

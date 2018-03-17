@@ -1,11 +1,11 @@
 #include "gsl/gsl_assert"
-#include "device_factory.h"
+#include "device/device_factory.h"
 #include "device/device.h"
-#include "device/ble_device.h"
-#include "device/callibri_impl.h"
-#include "device/brainbit_impl.h"
+#include "ble/ble_device.h"
+#include "device/callibri/callibri_impl.h"
+#include "device/brainbit/brainbit_impl.h"
 #include "device/request_handler.h"
-#include "device/callibri_common_parameters.h"
+#include "device/callibri/callibri_common_parameters.h"
 #include "channels/channel_info.h"
 
 namespace Neuro {

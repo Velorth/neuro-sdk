@@ -1,7 +1,7 @@
 #ifndef COLIBRI_COMMAND_H
 #define COLIBRI_COMMAND_H
 
-#include "command_data.h"
+#include "device/command_data.h"
 
 #define COLIBRI_CMD_MAX_LIFETIME_MS 4000
 #define COLIBRI_CMD_SEND_TIMEOUT_MS 2000

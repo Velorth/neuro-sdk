@@ -19,7 +19,7 @@
 
 #include <mutex>
 #include <condition_variable>
-#include "ble_scanner.h"
+#include "ble/ble_scanner.h"
 #include "device/device.h"
 
 namespace Neuro {
@@ -39,7 +39,7 @@ public:
     void releaseDevice(std::string name, std::string address);
 private:
 #ifdef __ANDROID__
-    friend std::unique_ptr<DeviceScanner> createDeviceScanner(jobject);
+    friend std::unique_ptr<DeviceScanner> createDeviceScanner(void*);
 #else
     friend std::unique_ptr<DeviceScanner> createDeviceScanner();
 #endif

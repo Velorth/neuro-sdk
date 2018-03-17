@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 #include "common_types.h"
-#include "ble_device.h"
+#include "ble/ble_device.h"
 #include "event_observer.h"
 
 namespace Neuro {

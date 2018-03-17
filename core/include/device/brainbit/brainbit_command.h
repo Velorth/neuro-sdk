@@ -1,7 +1,7 @@
 #ifndef BRAINBIT_COMMAND_H
 #define BRAINBIT_COMMAND_H
 
-#include "command_data.h"
+#include "device/command_data.h"
 
 #define BRAINBIT_CMD_MAX_LIFETIME_MS 4000
 #define BRAINBIT_CMD_SEND_TIMEOUT_MS 2000

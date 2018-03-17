@@ -1,4 +1,4 @@
-#include "ble_scanner_win.h"
+#include "ble/win/ble_scanner_win.h"
 
 namespace Neuro {
 

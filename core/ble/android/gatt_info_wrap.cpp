@@ -15,7 +15,7 @@
  */
 
 #include "java_environment.h"
-#include "device/device_info.h"
+#include "ble/ble_device_info.h"
 
 
 extern "C"
@@ -27,7 +27,7 @@ JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getDeviceServiceUUID(JNIEnv *env,
                                                                               jobject instance,
                                                                               jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto deviceServiceUUID = gattInfo->deviceServiceUUID();
     return env->NewStringUTF(deviceServiceUUID.c_str());
 }
@@ -39,7 +39,7 @@ JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getRxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto rxCharUUID = gattInfo->rxCharacteristicUUID();
     return env->NewStringUTF(rxCharUUID.c_str());
 }
@@ -51,7 +51,7 @@ JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getTxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto txCharUUID = gattInfo->txCharacteristicUUID();
     return env->NewStringUTF(txCharUUID.c_str());
 }
@@ -63,7 +63,7 @@ JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getStatusCharacteristicUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto statusCharUUID = gattInfo->statusCharacteristicUUID();
     return env->NewStringUTF(statusCharUUID.c_str());
 }
@@ -75,7 +75,7 @@ JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getGenericAccessServiceUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto genericServiceUUID = gattInfo->genericAccessUUID();
     return env->NewStringUTF(genericServiceUUID.c_str());
 }
@@ -86,7 +86,7 @@ Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getGenericAccessService
 JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurodevices_connection_DeviceGattInfo_getCCCD(JNIEnv *env, jobject instance,
                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (DeviceGattInfo *) deviceInfoPtr;
+    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto cccd = gattInfo->cccd();
     return env->NewStringUTF(cccd.c_str());
 }

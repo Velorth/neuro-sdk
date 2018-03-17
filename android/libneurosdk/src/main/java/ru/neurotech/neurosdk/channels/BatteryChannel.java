@@ -1,16 +1,29 @@
 package ru.neurotech.neurosdk.channels;
 
+import ru.neurotech.common.Assert;
 import ru.neurotech.neurosdk.Device;
 
-public class BatteryChannel extends NativeChannel<Integer> {
+public class BatteryChannel extends BaseChannel<Integer> {
+    static {
+        System.loadLibrary("neurosdk");
+    }
+
+    protected long mNativeObjPtr = 0;
+
     private BatteryChannel(Device device) {
-        super(create(device));
+        mNativeObjPtr = create(device);
+        Assert.ensures(mNativeObjPtr != 0,
+                "Battery channel native object is null");
+        init();
     }
 
     public void finalize() throws Throwable {
         deleteNative();
         super.finalize();
     }
+
+    @Override
+    public native ChannelInfo info();
 
     @Override
     public native Integer[] readData(long offset, long length);
@@ -31,5 +44,6 @@ public class BatteryChannel extends NativeChannel<Integer> {
     public native Device underlyingDevice();
 
     private static native long create(Device device);
+    private native void init();
     private native void deleteNative();
 }

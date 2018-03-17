@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "device/ble_device_info.h"
+#include "ble/ble_device_info.h"
 
 using std::string;
 

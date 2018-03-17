@@ -1,7 +1,7 @@
 #ifndef EMULATED_DEVICE_H
 #define EMULATED_DEVICE_H
 
-#include "ble_device.h"
+#include "ble/ble_device.h"
 #include "socket.h"
 
 namespace Neuro {

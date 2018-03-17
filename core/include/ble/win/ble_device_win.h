@@ -1,7 +1,7 @@
 #ifndef BLE_DEVICE_WIN
 #define BLE_DEVICE_WIN
 
-#include "device/ble_device.h"
+#include "ble/ble_device.h"
 
 namespace Neuro {
 

@@ -1,4 +1,4 @@
-#include "device/brainbit_parameter_writer.h"
+#include "device/brainbit/brainbit_parameter_writer.h"
 
 namespace Neuro {
 

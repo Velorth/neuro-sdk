@@ -1,7 +1,7 @@
 #ifndef CALLIBRI_PARAMETER_READER_H
 #define CALLIBRI_PARAMETER_READER_H
 
-#include "parameter_reader.h"
+#include "device/parameter_reader.h"
 #include "callibri_command.h"
 
 namespace Neuro {

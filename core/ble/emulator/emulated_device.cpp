@@ -1,4 +1,4 @@
-#include "device/emulated_device.h"
+#include "ble/emulator/emulated_device.h"
 #include "socket.h"
 #include <cassert>
 #include <iostream>

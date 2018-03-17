@@ -1,10 +1,10 @@
 #include "channels/channel_info.h"
-#include "device/brainbit_impl.h"
+#include "device/brainbit/brainbit_impl.h"
 #include "device/device_parameters.h"
-#include "device/brainbit_parameter_reader.h"
-#include "device/brainbit_parameter_writer.h"
-#include "device/brainbit_command.h"
-#include "device/brainbit_protocol.h"
+#include "device/brainbit/brainbit_parameter_reader.h"
+#include "device/brainbit/brainbit_parameter_writer.h"
+#include "device/brainbit/brainbit_command.h"
+#include "device/brainbit/brainbit_protocol.h"
 #include "signal/circular_buffer.h"
 
 namespace Neuro {

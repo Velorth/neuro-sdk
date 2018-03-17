@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "device/ble_device.h"
-#include "emulator_client.h"
+#include "ble/ble_device.h"
+#include "ble/emulator/emulator_client.h"
 
 namespace Neuro {
 

@@ -11,7 +11,7 @@ class ChannelInfo;
 class DeviceImpl;
 
 template <Parameter>
-class ParamValue;
+struct ParamValue;
 
 class Device final {
 private:

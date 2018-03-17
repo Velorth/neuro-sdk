@@ -15,12 +15,7 @@
  */
 
 #include <functional>
-#include "device/neuro_device.h"
-#include "device/brainbit_device.h"
-#include "device/colibri_device.h"
 
-using std::shared_ptr;
-using std::vector;
 
 /*
 Device::Device(std::unique_ptr<BleDevice> bleDev):

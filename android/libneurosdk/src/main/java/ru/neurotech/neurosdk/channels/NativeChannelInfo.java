@@ -1,5 +1,7 @@
 package ru.neurotech.neurosdk.channels;
 
+import ru.neurotech.common.Assert;
+
 public class NativeChannelInfo implements ChannelInfo {
     static {
         System.loadLibrary("neurosdk");
@@ -9,6 +11,7 @@ public class NativeChannelInfo implements ChannelInfo {
 
     private NativeChannelInfo(long ptr){
         mNativeObjPtr = ptr;
+        Assert.ensures(mNativeObjPtr != 0, "Channel info pointer is null");
     }
 
     @Override

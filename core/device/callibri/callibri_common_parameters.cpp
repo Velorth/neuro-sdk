@@ -1,5 +1,5 @@
-#include "device/callibri_common_parameters.h"
-#include "device/callibri_protocol.h"
+#include "device/callibri/callibri_common_parameters.h"
+#include "device/callibri/callibri_protocol.h"
 #include "device/request_handler.h"
 #include "channels/channel_info.h"
 #include "logger.h"

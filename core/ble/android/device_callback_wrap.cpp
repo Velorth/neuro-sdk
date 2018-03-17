@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include "connection/ble_device_jni.h"
+#include "ble/android/ble_device_jni.h"
 
 extern "C"
 {
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onConnected__J(JNIEnv *env, jobject instance,
                                                                   jlong callbackPtr) {
-    auto bleDevice = (BleDeviceJni *) callbackPtr;
+    auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onConnected();
 }
 
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onDisconnected__J(JNIEnv *env, jobject instance,
                                                                   jlong callbackPtr) {
-    auto bleDevice = (BleDeviceJni *) callbackPtr;
+    auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onDisconnected();
 }
 
@@ -37,8 +37,8 @@ Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onBluetoothDeviceErr
                                                                           jobject instance,
                                                                           jlong callbackPtr,
                                                                           jint error) {
-    auto bleDevice = (BleDeviceJni *) callbackPtr;
-    bleDevice->onError(parseBleErrorType(error));
+    auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
+    bleDevice->onError(Neuro::parseBleErrorType(error));
 }
 
 JNIEXPORT void JNICALL
@@ -47,9 +47,9 @@ Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onDataReceived(JNIEn
                                                                   jbyteArray data_, jint length) {
     if (length <= 0) return;
     jbyte *data = env->GetByteArrayElements(data_, NULL);
-    std::vector<Byte> receivedData(data, data+length);
+    std::vector<Neuro::Byte> receivedData(data, data+length);
 
-    auto bleDevice = (BleDeviceJni *) callbackPtr;
+    auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onDataReceived(receivedData);
 
     env->ReleaseByteArrayElements(data_, data, 0);
@@ -62,9 +62,9 @@ Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onStatusReceived(JNI
                                                                     jint length) {
     if (length <= 0) return;
     jbyte *statusData = env->GetByteArrayElements(statusData_, NULL);
-    std::vector<Byte> receivedStatus(statusData, statusData+length);
+    std::vector<Neuro::Byte> receivedStatus(statusData, statusData+length);
 
-    auto bleDevice = (BleDeviceJni *) callbackPtr;
+    auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onStatusReceived(receivedStatus);
     env->ReleaseByteArrayElements(statusData_, statusData, 0);
 }

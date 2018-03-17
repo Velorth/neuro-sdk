@@ -1,7 +1,9 @@
-#include <saturation_cast.h>
+#include "saturation_cast.h"
+#include "wrappers/channels/jni_channel_factory.h"
 #include "wrappers/jni_device_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "channels/battery_channel.h"
+
 
 extern "C"
 {
@@ -10,6 +12,25 @@ JNIEXPORT jlong JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_create(JNIEnv *env, jclass type,
                                                           jobject device) {
     return createChannelFromDevice<JniBatteryChannelWrap>(env, device);
+}
+
+JNIEXPORT jobject
+JNICALL
+Java_ru_neurotech_neurosdk_channels_BatteryChannel_info(JNIEnv *env, jobject instance) {
+
+    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto channelInfo = &batteryChannelWrap->info();
+    jni::java_object<decltype(channelInfo)> nativeChannelInfo(channelInfo);
+    return env->NewLocalRef(nativeChannelInfo);
+}
+
+JNIEXPORT void
+JNICALL
+Java_ru_neurotech_neurosdk_channels_BatteryChannel_init(JNIEnv *env, jobject instance) {
+
+    auto batteryChannelWrap = extract_pointer<JniBatteryChannelWrap>(env, instance);
+    batteryChannelWrap->subscribeLengthChanged(
+            find_notifier<decltype(batteryChannelWrap)>(instance, "dataLengthChanged"));
 }
 
 JNIEXPORT void JNICALL
@@ -80,6 +101,14 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject
         return nullptr;
 
     env->SetIntArrayRegion(dataArray, 0, static_cast<jsize>(data.size()), data.data());
+}
+
+void JniBatteryChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
+    lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
+    std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
+    this->object->setLengthChangedCallback([weakReference](auto length){
+        sendNotification<long>(weakReference, length);
+    });
 }
 
 }

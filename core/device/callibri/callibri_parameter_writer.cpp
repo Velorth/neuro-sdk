@@ -1,5 +1,5 @@
-#include "device/callibri_parameter_writer.h"
-#include "device/callibri_common_parameters.h"
+#include "device/callibri/callibri_parameter_writer.h"
+#include "device/callibri/callibri_common_parameters.h"
 
 namespace Neuro {
 

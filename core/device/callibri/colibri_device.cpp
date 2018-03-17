@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-#include "device/colibri_device.h"
-#include "logger.h"
-#include <algorithm>
-#include <sstream>
-#include <iomanip>
-#include <device/callibri_protocol.h>
 
 /*
 ColibriDevice::ColibriDevice(std::unique_ptr<BleDevice> bleDevice):

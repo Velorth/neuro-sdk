@@ -14,34 +14,19 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include "subsystem/signal_subsystem.h"
+#ifndef ANDROID_JNI_CHANNEL_INFO_WRAP_H
+#define ANDROID_JNI_CHANNEL_INFO_WRAP_H
 
-/*SignalSubsystem::SignalSubsystem(){
+#include "channels/channel_info.h"
 
+template<>
+constexpr const char *jni::java_class_name<Neuro::ChannelInfo *>() {
+    return "ru/neurotech/neurosdk/channels/NativeChannelInfo";
 }
 
-SignalSubsystem::~SignalSubsystem() {
+template<>
+constexpr const char *jni::constructor_signature<Neuro::ChannelInfo *>() {
+    return "(J)V";
 }
 
-std::vector<std::weak_ptr<Channel>> SignalSubsystem::getChannels() const
-{
-    return std::vector<std::weak_ptr<Channel>>(channels.begin(), channels.end());
-}
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif //ANDROID_JNI_CHANNEL_INFO_WRAP_H

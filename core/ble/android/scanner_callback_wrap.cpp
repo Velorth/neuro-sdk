@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "connection/bluetooth_scanner.h"
+#include "ble/android/bluetooth_scanner.h"
 
 extern "C"
 {
@@ -23,7 +23,7 @@ Java_ru_neurotech_neurodevices_connection_DeviceFoundCallback_notifyDeviceFound(
                                                                                 jobject instance,
                                                                                 jlong subscriberPtr,
                                                                                 jobject foundDevice) {
-    auto btScannerCallback = (BluetoothScannerJni *) subscriberPtr;
+    auto btScannerCallback = (Neuro::BluetoothScannerJni *) subscriberPtr;
     btScannerCallback->onDeviceFound(foundDevice);
 }
 }

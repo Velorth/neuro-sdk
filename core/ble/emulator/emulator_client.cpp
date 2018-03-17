@@ -1,5 +1,5 @@
-#include "emulator_client.h"
-#include "device/emulated_device.h"
+#include "ble/emulator/emulator_client.h"
+#include "ble/emulator/emulated_device.h"
 #include "socket.h"
 #include <thread>
 #include <algorithm>

@@ -17,13 +17,17 @@
 #ifndef ANDROID_JNI_BATTERY_CHANNEL_WRAP_H
 #define ANDROID_JNI_BATTERY_CHANNEL_WRAP_H
 
-#include "wrappers/channels/jni_base_channel_wrap.h"
+#include "wrappers/jni_ptr_wrap.h"
 #include "channels/battery_channel.h"
 
-class JniBatteryChannelWrap : public JniBaseChannelWrap {
+class JniBatteryChannelWrap : public JniPtrWrap<Neuro::BatteryChannel> {
+public:
+    void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:
     JniBatteryChannelWrap(object_ptr_t devicePtr) :
-            JniBaseChannelWrap(devicePtr) {}
+            JniPtrWrap(devicePtr) {}
+private:
+    std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
 };
 
 template<>

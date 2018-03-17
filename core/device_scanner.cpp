@@ -15,7 +15,7 @@
  */
 
 #include "device_scanner.h"
-#include "device_factory.h"
+#include "device/device_factory.h"
 #include "logger.h"
 
 using std::function;

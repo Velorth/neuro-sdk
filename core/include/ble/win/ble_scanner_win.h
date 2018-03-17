@@ -1,7 +1,7 @@
 #ifndef BLE_SCANNER_WIN
 #define BLE_SCANNER_WIN
 
-#include "ble_scanner.h"
+#include "ble/ble_scanner.h"
 
 namespace Neuro {
 

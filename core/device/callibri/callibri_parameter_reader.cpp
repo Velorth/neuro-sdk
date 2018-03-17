@@ -1,7 +1,7 @@
-#include "device/callibri_parameter_reader.h"
-#include "device/callibri_common_parameters.h"
-#include "device/callibri_command.h"
-#include "device/callibri_protocol.h"
+#include "device/callibri/callibri_parameter_reader.h"
+#include "device/callibri/callibri_common_parameters.h"
+#include "device/callibri/callibri_command.h"
+#include "device/callibri/callibri_protocol.h"
 #include "device/request_handler.h"
 #include "common_types.h"
 

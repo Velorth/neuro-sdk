@@ -17,42 +17,49 @@
 #ifndef ANDROID_BLE_DEVICE_JNI_H
 #define ANDROID_BLE_DEVICE_JNI_H
 
-#include "device/ble_device.h"
+#include "ble/ble_device.h"
 #include "java_environment.h"
 
-class BleDeviceJni : public BleDevice {
-public:
-    BleDeviceJni(jobject bluetoothDevice, jobject context);
+namespace Neuro {
 
-    BleDeviceJni(const BleDeviceJni &) = delete;
+    class BleDeviceJni : public BleDevice {
+    public:
+        BleDeviceJni(jobject bluetoothDevice, jobject context);
 
-    BleDeviceJni &operator=(const BleDeviceJni &) = delete;
+        BleDeviceJni(const BleDeviceJni &) = delete;
 
-    ~BleDeviceJni();
+        BleDeviceJni &operator=(const BleDeviceJni &) = delete;
 
-    void connect() override;
+        ~BleDeviceJni();
 
-    void disconnect() override;
+        void connect() override;
 
-    void close() override;
+        void disconnect() override;
 
-    bool sendCommand(const std::vector<Byte> &commandData) override;
+        void close() override;
 
-    std::string getName() const override;
+        bool sendCommand(const std::vector<Byte> &commandData) override;
 
-    std::string getNetAddress() const override;
+        std::string getName() const override;
 
-    BleDeviceState getState() const override;
+        std::string getNetAddress() const override;
 
-    void onConnected();
-    void onDisconnected();
-    void onError(BleDeviceError);
-    void onDataReceived(const std::vector<Byte> &);
-    void onStatusReceived(const std::vector<Byte> &);
+        BleDeviceState getState() const override;
 
-private:
-    jobject javaBleDevice;
-    jobject appContext;
-};
+        void onConnected();
 
+        void onDisconnected();
+
+        void onError(BleDeviceError);
+
+        void onDataReceived(const std::vector<Byte> &);
+
+        void onStatusReceived(const std::vector<Byte> &);
+
+    private:
+        jobject javaBleDevice;
+        jobject appContext;
+    };
+
+}
 #endif //ANDROID_BLE_DEVICE_JNI_H
