@@ -27,6 +27,7 @@ namespace Neuro {
 class DeviceScanner
 {
 public:
+    DeviceScanner(std::unique_ptr<BleScanner> deviceScanner);
     DeviceScanner(const DeviceScanner&) = delete;
     DeviceScanner& operator=(const DeviceScanner&) = delete;
     ~DeviceScanner();
@@ -38,12 +39,6 @@ public:
     std::unique_ptr<Device> findDeviceByAddress(std::string address);
     void releaseDevice(std::string name, std::string address);
 private:
-#ifdef __ANDROID__
-    friend std::unique_ptr<DeviceScanner> createDeviceScanner(void*);
-#else
-    friend std::unique_ptr<DeviceScanner> createDeviceScanner();
-#endif
-    DeviceScanner(std::unique_ptr<BleScanner> deviceScanner);
 
     std::shared_ptr<BleScanner> scanner;
     std::condition_variable stopScanCondition;

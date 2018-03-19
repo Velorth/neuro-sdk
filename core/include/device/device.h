@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 #include "device_parameters.h"
 
 namespace Neuro {
@@ -26,6 +27,7 @@ public:
     std::vector<Command> commands() const;
     std::vector<std::pair<Parameter, ParamAccess>> parameters() const;
     bool execute(Command);
+    void setParamChangedCallback(std::function<void(Parameter)>);
 
     template <Parameter P>
     typename ParamValue<P>::Type readParam() const;

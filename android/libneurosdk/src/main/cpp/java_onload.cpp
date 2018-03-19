@@ -1,5 +1,7 @@
-#include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "wrappers/jni_device_wrap.h"
+#include "wrappers/channels/jni_battery_channel_wrap.h"
+#include "wrappers/channels/jni_signal_channel_wrap.h"
+#include "wrappers/channels/jni_channel_info_wrap.h"
 #include "jni_logger.h"
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -12,6 +14,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<bool>(env);
     jni::initJavaObjClass<JniDeviceWrap *>(env);
     jni::initJavaObjClass<JniBatteryChannelWrap *>(env);
+    jni::initJavaObjClass<JniSignalChannelWrap *>(env);
+    jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());

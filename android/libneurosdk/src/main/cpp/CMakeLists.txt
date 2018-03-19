@@ -37,7 +37,7 @@ add_library(neurosdk SHARED  ${SOURCE_FILES_CORE_COMMON}
                                 ${SOURCE_FILES_CORE_BLE_EMUL}
                                 ${SOURCE_FILES_CORE_BLE_ANDROID}
                                 ${SOURCE_FILES_ANDROID}
-                                &{SOURCE_FILES_NET})
+                                ${SOURCE_FILES_NET})
 target_link_libraries(neurosdk log android)
 set_target_properties(neurosdk
                       PROPERTIES

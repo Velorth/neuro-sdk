@@ -38,7 +38,7 @@ namespace Neuro {
             throw std::runtime_error("Failed to initialize device");
 
         auto btDeviceName = env->GetStringUTFChars(btDeviceNameObj, NULL);
-        deviceInfo = std::move(BleDeviceInfo::fromDeviceName(btDeviceName));
+        deviceInfo = BleDeviceInfo::fromDeviceName(btDeviceName);
         env->ReleaseStringUTFChars(btDeviceNameObj, btDeviceName);
 
         //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for

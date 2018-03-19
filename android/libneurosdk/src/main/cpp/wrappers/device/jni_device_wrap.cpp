@@ -16,94 +16,89 @@
 
 #include "wrappers/jni_device_wrap.h"
 
-void JniDeviceWrap::subscribeStateChanged(jobject stateChangedSubscriberRef) {
-
-    deviceStateChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = deviceStateChangedGlobalSubscriberRef;
-    auto onDeviceStateChangedFunc = std::bind(sendNotification<Neuro::DeviceState>,
-                                              weakReference,
-                                              std::placeholders::_2);
-    this->object->setStateChangedCallback([weakReference](Neuro::DeviceState state){
-        sendNotification<Neuro::DeviceState>(weakReference, state);
-    });
-}
-
 extern "C"
 {
 
-JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_deleteDevice(JNIEnv *env, jobject instance,
-                                                        jlong objPtr) {
-    auto devicePtr = reinterpret_cast<JniDeviceWrap *>(objPtr);
-    delete devicePtr;
+JNIEXPORT void
+JNICALL
+Java_ru_neurotech_neurosdk_Device_init(JNIEnv *env, jobject instance) {
+
+    auto deviceWrap = extract_pointer<JniDeviceWrap>(env, instance);
+    deviceWrap->subscribeStateChanged(
+            find_notifier<decltype(deviceWrap)>(instance, "parameterChanged"));
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_connectDevice(JNIEnv *env, jobject instance,
-                                                         jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
+Java_ru_neurotech_neurosdk_Device_deleteDevice(JNIEnv *env, jobject instance) {
+    deleteNativeObject(env, instance);
+}
+
+JNIEXPORT void JNICALL
+Java_ru_neurotech_neurosdk_Device_connect(JNIEnv *env, jobject instance) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     devicePtr->connect();
 }
 
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_disconnectFromDevice(JNIEnv *env, jobject instance,
-                                                                jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
+Java_ru_neurotech_neurosdk_Device_disconnect(JNIEnv *env, jobject instance) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     devicePtr->disconnect();
 }
 
-JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_closeDevice(JNIEnv *env, jobject instance,
-                                                       jlong objPtr) {
+JNIEXPORT jobjectArray JNICALL
+Java_ru_neurotech_neurosdk_Device_channels(JNIEnv *env, jobject instance) {
 
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    devicePtr->close();
-}
+    // TODO
 
-JNIEXPORT jstring JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getDeviceName(JNIEnv *env, jobject instance,
-                                                         jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    auto name = devicePtr->getName();
-    return env->NewStringUTF(name.c_str());
-}
-
-JNIEXPORT jstring JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getDeviceAddress(JNIEnv *env, jobject instance,
-                                                            jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    auto address = devicePtr->getAddress();
-    return env->NewStringUTF(address.c_str());
-}
-
-JNIEXPORT jint JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getBatteryLevel__J(JNIEnv *env, jobject instance,
-                                                              jlong objPtr) {
-
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    return devicePtr->getBatteryLevel();
-}
-
-JNIEXPORT jobject JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getDeviceState(JNIEnv *env, jobject instance,
-                                                          jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    auto state = devicePtr->getState();
-    LoggerFactory::getCurrentPlatformLogger()->debug("[NeuroDeviceWrap: getDeviceState] State: %d",
-                                                     static_cast<int>(state));
-    return env->NewLocalRef(jni::java_object<DeviceState>(state));
-}
-
-JNIEXPORT jobject JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getDeviceError(JNIEnv *env, jobject instance,
-                                                          jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    //TODO return device error
-    return NULL;
 }
 
 JNIEXPORT jobjectArray JNICALL
+Java_ru_neurotech_neurosdk_Device_commands(JNIEnv *env, jobject instance) {
+
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
+    auto deviceCommands = devicePtr->commands();
+    auto commandEnum = env->FindClass("ru/neurotech/neurosdk/parameters/Command");
+    auto commandsArray = env->NewObjectArray(deviceCommands.size(), commandEnum, NULL);
+
+    for (auto it = deviceCommands.begin(); it != deviceCommands.end(); ++it) {
+
+        env->SetObjectArrayElement(commandsArray, it - deviceCommands.begin(), commandEnumValue);
+    }
+
+    return commandsArray;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_ru_neurotech_neurosdk_Device_setParam(JNIEnv *env, jobject instance, jobject param,
+                                           jobject value) {
+
+    // TODO
+
+}
+
+JNIEXPORT jobject JNICALL
+Java_ru_neurotech_neurosdk_Device_readParam(JNIEnv *env, jobject instance, jobject param) {
+
+    // TODO
+
+}
+
+JNIEXPORT jboolean JNICALL
+Java_ru_neurotech_neurosdk_Device_execute(JNIEnv *env, jobject instance, jobject cmd) {
+
+    // TODO
+
+}
+
+JNIEXPORT jobjectArray JNICALL
+Java_ru_neurotech_neurosdk_Device_parameters(JNIEnv *env, jobject instance) {
+
+    // TODO
+
+}
+
+/*JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurodevices_NeuroDevice_getFeatures(JNIEnv *env, jobject instance,
                                                        jlong objPtr) {
     auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
@@ -121,7 +116,14 @@ Java_ru_neurotech_neurodevices_NeuroDevice_getFeatures(JNIEnv *env, jobject inst
     }
 
     return featuresArray;
-}
+}*/
 
 }
 
+void JniDeviceWrap::subscribeStateChanged(jobject stateChangedSubscriberRef) {
+    deviceStateChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
+    std::weak_ptr<jni::jobject_t> weakReference = deviceStateChangedGlobalSubscriberRef;
+    this->object->setParamChangedCallback([weakReference](Neuro::Parameter parameter){
+        sendNotification<Neuro::Parameter>(weakReference, parameter);
+    });
+}

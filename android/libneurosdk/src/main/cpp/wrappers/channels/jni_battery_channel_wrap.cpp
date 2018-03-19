@@ -18,7 +18,7 @@ JNIEXPORT jobject
 JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_info(JNIEnv *env, jobject instance) {
 
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     auto channelInfo = &batteryChannelWrap->info();
     jni::java_object<decltype(channelInfo)> nativeChannelInfo(channelInfo);
     return env->NewLocalRef(nativeChannelInfo);
@@ -40,7 +40,7 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_deleteNative(JNIEnv *env, job
 
 JNIEXPORT jobject JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
 
 }
 
@@ -48,11 +48,11 @@ JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_setSamplingFrequency(JNIEnv *env,
                                                                         jobject instance,
                                                                         jfloat frequency) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
-    try{
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    try {
         batteryChannelWrap->setSamplingFrequency(frequency);
     }
-    catch (std::runtime_error &e){
+    catch (std::runtime_error &e) {
         auto exceptionClass = env->FindClass("java/lang/UnsupportedOperationException");
         if (exceptionClass == nullptr) {
             return;
@@ -65,29 +65,29 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_setSamplingFrequency(JNIEnv *
 JNIEXPORT jfloat JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_samplingFrequency(JNIEnv *env,
                                                                      jobject instance) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     return batteryChannelWrap->samplingFrequency();
 }
 
 JNIEXPORT jlong JNICALL
-Java_ru_neurotech_neurosdk_channels_BatteryChannel_availableLength(JNIEnv *env, jobject instance) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
-    return saturation_cast<jlong>(batteryChannelWrap->availableLength());
+Java_ru_neurotech_neurosdk_channels_BatteryChannel_bufferSize(JNIEnv *env, jobject instance) {
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    return saturation_cast<jlong>(batteryChannelWrap->bufferSize());
 }
 
 JNIEXPORT jlong JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     return saturation_cast<jlong>(batteryChannelWrap->totalLength());
 }
 
 JNIEXPORT jintArray JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject instance,
                                                             jlong offset, jlong length) {
-    auto batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     auto data = batteryChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
                                              saturation_cast<Neuro::data_length_t>(length));
-    if (data.size() > std::numeric_limits<jsize>::max()){
+    if (data.size() > std::numeric_limits<jsize>::max()) {
         auto exceptionClass = env->FindClass("java/lang/ArrayIndexOutOfBoundsException");
         if (exceptionClass == nullptr) {
             return nullptr;
@@ -101,6 +101,9 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject
         return nullptr;
 
     env->SetIntArrayRegion(dataArray, 0, static_cast<jsize>(data.size()), data.data());
+    return dataArray;
+}
+
 }
 
 void JniBatteryChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
@@ -111,4 +114,3 @@ void JniBatteryChannelWrap::subscribeLengthChanged(jobject stateChangedSubscribe
     });
 }
 
-}

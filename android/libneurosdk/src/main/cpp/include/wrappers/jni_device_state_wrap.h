@@ -23,11 +23,5 @@
 template<>
 constexpr const char *jni::java_class_name<Neuro::DeviceState>() { return "ru/neurotech/neurosdk/state/DeviceState"; };
 
-template<>
-constexpr const char *jni::constructor_signature<Neuro::DeviceState>() { return "(I)Lru/neurotech/neurosdk/state/DeviceState;"; };
-
-template<>
-template<>
-jni::java_object<Neuro::DeviceState>::java_object(const Neuro::DeviceState &);
 
 #endif //ANDROID_JNI_NEURO_DEVICE_WRAP_H

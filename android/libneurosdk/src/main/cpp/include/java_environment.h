@@ -19,6 +19,7 @@
 
 #include <jni.h>
 #include <memory>
+#include <string>
 
 namespace jni {
 
@@ -134,7 +135,5 @@ namespace jni {
 
     template <typename T>
     jclass java_object<T>::object_class = nullptr;
-
-    jclass getChannelClass();
 }
 #endif //ANDROID_JAVA_ENVIRONMENT_H

@@ -38,10 +38,15 @@ bool Device::execute(Command cmd) {
     return mImpl->execute(cmd);
 }
 
+void Device::setParamChangedCallback(std::function<void(Parameter)> callback) {
+    mImpl->setParamChangedCallback(callback);
+}
+
 Device::Device(std::unique_ptr<DeviceImpl> impl) :
     mImpl(std::move(impl)) {
     Ensures(mImpl != nullptr);
 }
+
 
 bool checkHasChannel(const Device &device, const ChannelInfo &info){
     auto channels = device.channels();

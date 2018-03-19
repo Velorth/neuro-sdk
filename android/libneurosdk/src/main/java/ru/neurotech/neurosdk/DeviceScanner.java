@@ -24,13 +24,13 @@ import ru.neurotech.common.SubscribersNotifier;
  * Provides common methods for device scanning and
  */
 public class DeviceScanner {
-    private final long mNativeObjPtr;
+    private long mNativeObjPtr;
 
     static {
         System.loadLibrary("neurosdk");
     }
 
-    public SubscribersNotifier<Device> deviceFound = new SubscribersNotifier<>();
+    public final SubscribersNotifier<Device> deviceFound = new SubscribersNotifier<>();
 
     /**
      * Notifies about changing device scanning state
@@ -43,7 +43,15 @@ public class DeviceScanner {
      * @param context Current application context
      */
     public DeviceScanner(Context context) {
-        mNativeObjPtr = createNeuroConnectionObj(context);
+        mNativeObjPtr = create(context);
+    }
+
+    public void finalize() throws Throwable {
+        if (mNativeObjPtr != 0) {
+            deleteNative(mNativeObjPtr);
+            mNativeObjPtr = 0;
+        }
+        super.finalize();
     }
 
     /**
@@ -69,13 +77,14 @@ public class DeviceScanner {
     private void onDeviceFound(Device device) {
         deviceFound.sendNotification(this, device);
     }
+
     private void onScanStateChanged(boolean isScanning) {
         scanStateChanged.sendNotification(this, isScanning);
     }
 
-    private native long createNeuroConnectionObj(Context appContext);
+    private native long create(Context appContext);
 
-    private native void deleteNeuroConnectionObj(long objPtr);
+    private native void deleteNative(long objPtr);
 
     private native void startScan(long objPtr, int timeout);
 

@@ -30,7 +30,7 @@ jobject find_notifier(jobject java_obj, const char *notifier_name) {
 
     if (resCode == 1) jni::detach_thread();
     return deviceStateChangedNotifier;
-};
+}
 
 void callJavaSendNotification(jobject subscriberNotifier, jobject param);
 

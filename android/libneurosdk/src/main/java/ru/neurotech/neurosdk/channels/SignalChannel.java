@@ -3,6 +3,10 @@ package ru.neurotech.neurosdk.channels;
 import ru.neurotech.common.Assert;
 import ru.neurotech.neurosdk.Device;
 
+
+/**
+ * Built-in channel containing signal samples of one physical channel of device
+ */
 public class SignalChannel extends BaseChannel<Double> {
     static {
         System.loadLibrary("neurosdk");
@@ -32,7 +36,7 @@ public class SignalChannel extends BaseChannel<Double> {
     public native long totalLength();
 
     @Override
-    public native long availableLength();
+    public native long bufferSize();
 
     @Override
     public native float samplingFrequency();

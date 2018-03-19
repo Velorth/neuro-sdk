@@ -16,10 +16,12 @@
 
 package ru.neurotech.neurosdk;
 
+import ru.neurotech.common.SubscribersNotifier;
 import ru.neurotech.neurosdk.channels.ChannelInfo;
 import ru.neurotech.neurosdk.parameters.Command;
 import ru.neurotech.neurosdk.parameters.Parameter;
 import ru.neurotech.neurosdk.parameters.ParameterName;
+import ru.neurotech.neurosdk.parameters.types.DeviceState;
 
 public class Device {
     static {
@@ -30,31 +32,82 @@ public class Device {
 
     private Device(long nativeObjPtr) {
         mNativeObjPtr = nativeObjPtr;
+        init();
     }
 
     public void finalize() throws Throwable {
         if (mNativeObjPtr != 0) {
-            deleteDevice(mNativeObjPtr);
+            deleteDevice();
             mNativeObjPtr = 0;
         }
         super.finalize();
     }
 
+    /**
+     * Subscribe this event to receive notifications about changes of device parameters
+     */
+    public final SubscribersNotifier<DeviceState> parameterChanged = new SubscribersNotifier<>();
+
+    /**
+     * Tries to establish connection with device
+     * Check DeviceState parameter or subscribe parameterChanged event for operation result
+     */
     public native void connect();
 
+    /**
+     * Disconnects from device
+     * Check DeviceState parameter or subscribe parameterChanged event for operation result
+     */
     public native void disconnect();
 
+    /**
+     * Returns information about supported channels
+     * Check this information before creation of channel. If device does not support channel,
+     * channel object won't be initialized with it
+     * @return Array of channel info objects
+     */
     public native ChannelInfo[] channels();
 
+    /**
+     * Returns supported commands of device
+     * @return Array of supported commands
+     */
     public native Command[] commands();
 
+    /**
+     * Returns all available parameters of device, their types and access rights
+     * @return Array of available parameters
+     */
     public native Parameter[] parameters();
 
+    /**
+     * Tries to execute command and returns value indicating operations success. Will throw if
+     * device does not support specified command. To get supported commands call commands() method
+     * @param cmd Command to execute
+     * @return Operation success indicator
+     */
     public native boolean execute(Command cmd);
 
+    /**
+     * Return value of specified parameter of device. Will throw if parameter does not present in
+     * device. To get supported parameters and type information for parameter call parameters()
+     * method. It returns Parameter object which consists of parameter name, type and access mode
+     * @param param ParameterName to read
+     * @return Parameter value
+     */
     public native Object readParam(ParameterName param);
 
+    /**
+     * Sets value for specified parameter and returns value indicating success of operation. Will
+     * throw if parameter does not present in device or has only Read access mode. To get supported
+     * parameters and type information for parameter call parameters() method. It returns Parameter
+     * object which consists of parameter name, type and access mode
+     * @param param Name of parameter to set
+     * @param value Parameter value
+     * @return Operation success
+     */
     public native boolean setParam(ParameterName param, Object value);
 
-    private native void deleteDevice(long objPtr);
+    private native void init();
+    private native void deleteDevice();
 }

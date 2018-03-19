@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_JNI_BATTERY_CHANNEL_WRAP_H
-#define ANDROID_JNI_BATTERY_CHANNEL_WRAP_H
+#ifndef ANDROID_JNI_SIGNAL_CHANNEL_WRAP_H
+#define ANDROID_JNI_SIGNAL_CHANNEL_WRAP_H
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/battery_channel.h"
+#include "channels/signal_channel.h"
 
-class JniBatteryChannelWrap : public JniPtrWrap<Neuro::BatteryChannel> {
+class JniSignalChannelWrap : public JniPtrWrap<Neuro::SignalChannel> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:
-    JniBatteryChannelWrap(object_ptr_t devicePtr) :
+    JniSignalChannelWrap(object_ptr_t devicePtr) :
             JniPtrWrap(devicePtr) {}
 private:
     std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
 };
 
 template<>
-constexpr const char *jni::java_class_name<JniBatteryChannelWrap *>() {
-    return "ru/neurotech/neurosdk/channels/BatteryChannel";
+constexpr const char *jni::java_class_name<JniSignalChannelWrap *>() {
+    return "ru/neurotech/neurosdk/channels/SignalChannel";
 }
 
 template<>
-constexpr const char *jni::constructor_signature<JniBatteryChannelWrap *>() {
+constexpr const char *jni::constructor_signature<JniSignalChannelWrap *>() {
     return "(J)V";
 }
 
-#endif //ANDROID_JNI_BATTERY_CHANNEL_WRAP_H
+#endif //ANDROID_JNI_SIGNAL_CHANNEL_WRAP_H

@@ -18,6 +18,7 @@
 #define ANDROID_JNI_CHANNEL_INFO_WRAP_H
 
 #include "channels/channel_info.h"
+#include "java_environment.h"
 
 template<>
 constexpr const char *jni::java_class_name<Neuro::ChannelInfo *>() {

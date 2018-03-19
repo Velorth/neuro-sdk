@@ -1,5 +1,8 @@
 package ru.neurotech.neurosdk.channels;
 
+/**
+ * Represents all possible channel types
+ */
 public enum ChannelType {
     Signal,
     Battery,

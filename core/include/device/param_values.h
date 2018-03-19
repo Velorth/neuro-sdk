@@ -1,6 +1,7 @@
 #ifndef PARAM_VALUES_H
 #define PARAM_VALUES_H
 
+#include <string>
 #include "device.h"
 
 namespace Neuro {

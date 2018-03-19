@@ -15,10 +15,6 @@ void deviceFoundCallback(void *subscriber, typename JniDevice::object_ptr_t foun
 
     //creating java wrapper object for JniDevice
     jni::java_object<decltype(device)> deviceWrapObj(device);
-
-    device->subscribeStateChanged(find_notifier<decltype(device)>(deviceWrapObj, "deviceStateChanged"));
-    device->subscribeBatteryLevelChanged(find_notifier<decltype(device)>(deviceWrapObj, "batteryLevelChanged"));
-
     __android_log_print(ANDROID_LOG_VERBOSE, "DeviceConnectionJni",
                         "Device object created. Passing to java method");
     //pass wrapper object to callback function

@@ -26,7 +26,7 @@ public class DummyChannel extends BaseChannel<Integer> {
     }
 
     @Override
-    public long availableLength() {
+    public long bufferSize() {
         return 0;
     }
 

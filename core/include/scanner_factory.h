@@ -4,11 +4,9 @@
 #include "device_scanner.h"
 #include <memory>
 
-namespace Neuro {
-
 #ifdef __ANDROID__
     #include "ble/android/bluetooth_scanner.h"
-    using CurrentPlatformScanner = BluetoothScannerJni;
+    using CurrentPlatformScanner = Neuro::BluetoothScannerJni;
 #elif __linux__
     #include "device_scanner_z.h"
     using CurrentPlatformScanner = DeviceScannerZ;
@@ -26,6 +24,8 @@ namespace Neuro {
 #else
     #error "Unsupported platform"
 #endif
+
+namespace Neuro {
 
 #ifdef __ANDROID__
 std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context){

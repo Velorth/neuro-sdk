@@ -79,7 +79,7 @@ void EmulatedDevice::disconnect(){
             std::condition_variable waitCondition;
             std::unique_lock<std::mutex> waitLock(waitResponseMutex);
             Net::TcpClientSocket socket("localhost", 27001);
-            socket.setDataReceivedCallback([&waitCondition, this](Net::ByteBuffer){
+            socket.setDataReceivedCallback([&waitCondition](Net::ByteBuffer){
                 waitCondition.notify_all();
             });
             if (socket.connectRemote()){

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_JNI_BASE_CHANNEL_WRAP_H
-#define ANDROID_JNI_BASE_CHANNEL_WRAP_H
+#ifndef ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
+#define ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
 
 #include "wrappers/jni_device_wrap.h"
 
 template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device){
-    auto deviceWrapPtr = extract_pointer<JniDeviceWrap>(env, device);
+    auto& deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
     try {
         auto batteryChannel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr);
         auto batteryChannelWrap = new ChannelWrap(batteryChannel);
@@ -37,4 +37,4 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device){
     }
 }
 
-#endif //ANDROID_JNI_BASE_CHANNEL_WRAP_H
+#endif //ANDROID_JNI_CHANNEL_FACTORY_WRAP_H

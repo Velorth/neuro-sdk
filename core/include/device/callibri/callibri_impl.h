@@ -33,7 +33,8 @@ private:
 
     void onDataReceived(const ByteBuffer &) override;
     void onStatusDataReceived(const ByteBuffer &) override;
-    void onCommandPacketReceived(const unsigned char *const, size_t);
+    void onCommandPacketReceived(const unsigned char *const, std::size_t);
+    void onSignalReceived(int, const unsigned char *, std::size_t);
     void sendCommandPacket(std::shared_ptr<CallibriCommandData>);
     int requestBattryVoltage();
     int convertVoltageToPercents(int);

@@ -15,18 +15,20 @@
  */
 
 
+#include "wrappers/jni_device_wrap.h"
 #include "scanner_factory.h"
 #include "wrappers/scan_state_callback.h"
 #include "wrappers/jni_connection_callback.h"
+#include "logger.h"
 
 extern "C"
 {
 
 JNIEXPORT jlong JNICALL
-Java_ru_neurotech_neurodevices_NeuroConnection_createNeuroConnectionObj(JNIEnv *env,
+Java_ru_neurotech_neurosdk_DeviceScanner_create(JNIEnv *env,
                                                                         jobject instance,
                                                                         jobject appContext) {
-    auto neuroConnectionPtr = getNeuroConnectionScanner(appContext).release();
+    auto neuroConnectionPtr = Neuro::createDeviceScanner(appContext).release();
     auto globalSubscriberRef = env->NewGlobalRef(
             instance);
     neuroConnectionPtr->subscribeScanStateChanged(
@@ -36,60 +38,54 @@ Java_ru_neurotech_neurodevices_NeuroConnection_createNeuroConnectionObj(JNIEnv *
                 javaOnScanStateChanged(globalSubscriberRef, isScanning);
             });
     neuroConnectionPtr->subscribeDeviceFound(
-            [globalSubscriberRef](std::shared_ptr<NeuroDevice> device) {
+            [globalSubscriberRef](std::shared_ptr<Neuro::Device> device) {
                 //here we have to pass heap allocated shared_ptr to callback function
                 //to be sure that shared_ptr and object, managed by it will be alive
                 //as long as managed code needs
                 auto log = LoggerFactory::getCurrentPlatformLogger();
                 log->debug("[%s] On device found", __FUNCTION__);
-                deviceFoundCallback<JniNeuroDevice>(globalSubscriberRef, device);
+                deviceFoundCallback<JniDeviceWrap>(globalSubscriberRef, device);
             });
     return reinterpret_cast<jlong>(neuroConnectionPtr);
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroConnection_deleteNeuroConnectionObj(JNIEnv *env,
+Java_ru_neurotech_neurosdk_DeviceScanner_deleteNative(JNIEnv *env,
                                                                         jobject instance,
                                                                         jlong objPtr) {
-    auto neuroConnection = (NeuroConnection *) objPtr;
+    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
     delete neuroConnection;
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroConnection_startScan__JI(JNIEnv *env, jobject instance,
+Java_ru_neurotech_neurosdk_DeviceScanner_startScan__JI(JNIEnv *env, jobject instance,
                                                              jlong objPtr, jint timeout) {
     __android_log_print(ANDROID_LOG_VERBOSE, "NeuroConnectionWrap",
                         "Start scan. DeviceScanner ptr is %lld", objPtr);
-    auto neuroConnection = (NeuroConnection *) objPtr;
+    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
     neuroConnection->startScan(timeout);
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_NeuroConnection_stopScan__J(JNIEnv *env, jobject instance,
+Java_ru_neurotech_neurosdk_DeviceScanner_stopScan__J(JNIEnv *env, jobject instance,
                                                            jlong objPtr) {
-    auto neuroConnection = (NeuroConnection *) objPtr;
+    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
     neuroConnection->stopScan();
 }
 
 JNIEXPORT jobject JNICALL
-Java_ru_neurotech_neurodevices_NeuroConnection_findDeviceByAddress(JNIEnv *env, jobject instance,
+Java_ru_neurotech_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobject instance,
                                                                    jlong objPtr,
                                                                    jstring address_) {
     const char *address = env->GetStringUTFChars(address_, 0);
 
-    auto neuroConnection = (NeuroConnection *) objPtr;
+    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
 
     auto devicePtr = neuroConnection->findDeviceByAddress(address);
     if (!devicePtr) return NULL;
 
-    auto device = new JniNeuroDevice(devicePtr);
-
-    //creating java wrapper object for Device
+    auto device = new JniDeviceWrap(std::shared_ptr<Neuro::Device>(devicePtr.release()));
     jni::java_object<decltype(device)> deviceWrapObj(device);
-
-    device->subscribeStateChanged(find_notifier<decltype(device)>(deviceWrapObj, "deviceStateChanged"));
-    device->subscribeBatteryLevelChanged(find_notifier<decltype(device)>(deviceWrapObj, "batteryLevelChanged"));
-
     env->ReleaseStringUTFChars(address_, address);
 
     return env->NewLocalRef(deviceWrapObj);

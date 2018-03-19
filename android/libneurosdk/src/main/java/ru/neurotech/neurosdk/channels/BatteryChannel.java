@@ -3,6 +3,9 @@ package ru.neurotech.neurosdk.channels;
 import ru.neurotech.common.Assert;
 import ru.neurotech.neurosdk.Device;
 
+/**
+ * Built-in channel containing battery charge data
+ */
 public class BatteryChannel extends BaseChannel<Integer> {
     static {
         System.loadLibrary("neurosdk");
@@ -32,7 +35,7 @@ public class BatteryChannel extends BaseChannel<Integer> {
     public native long totalLength();
 
     @Override
-    public native long availableLength();
+    public native long bufferSize();
 
     @Override
     public native float samplingFrequency();
