@@ -31,7 +31,37 @@ namespace jni {
 
     void detach_thread();
 
-    void delete_global_ref(jobject ref);
+    class attached_env final{
+    public:
+        attached_env(){
+            auto resCode = get_env(&mEnv);
+            if (resCode == 2)
+                throw std::runtime_error("Cannot retrieve JNI environment");
+            needDetach = (resCode == 1);
+        }
+
+        ~attached_env(){
+            if (needDetach){
+                detach_thread();
+            }
+        }
+
+        JNIEnv* env() const noexcept{
+            return mEnv;
+        }
+
+    private:
+        JNIEnv *mEnv;
+        bool needDetach;
+    };
+
+    template <typename Callable>
+    auto call_in_attached_thread(Callable func) {
+        attached_env env;
+        return func(env.env());
+    }
+
+    void delete_global_ref(jobject ref) noexcept;
 
     std::shared_ptr<jobject_t> make_global_ref_ptr(jobject localRef);
 
@@ -48,6 +78,12 @@ namespace jni {
     constexpr const char *constructor_signature<int>() { return "(I)V"; };
 
     template<>
+    constexpr const char *java_class_name<long>() { return "java/lang/Long"; };
+
+    template<>
+    constexpr const char *constructor_signature<long>() { return "(J)V"; };
+
+    template<>
     constexpr const char *java_class_name<double>() { return "java/lang/Double"; };
 
     template<>
@@ -59,21 +95,21 @@ namespace jni {
     template<>
     constexpr const char *constructor_signature<bool>() { return "(Z)V"; };
 
-    template<typename T> class java_object;
+    template<typename T>
+    class java_object;
 
-    template <typename NativeObj>
+    template<typename NativeObj>
     void initJavaObjClass(JNIEnv *env) {
         java_object<NativeObj>::object_class = static_cast<jclass>(env->NewGlobalRef(
                 env->FindClass(jni::java_class_name<NativeObj>())));
     }
 
-    inline std::string getClassName(JNIEnv *env, jclass clazz)
-    {
+    inline std::string getClassName(JNIEnv *env, jclass clazz) {
         jclass clazzz = env->GetObjectClass(clazz);
         auto mid = env->GetMethodID(clazzz, "toString", "()Ljava/lang/String;");
-        jstring strObj = (jstring)env->CallObjectMethod(clazz, mid);
+        jstring strObj = (jstring) env->CallObjectMethod(clazz, mid);
 
-        const char* str = env->GetStringUTFChars(strObj, NULL);
+        const char *str = env->GetStringUTFChars(strObj, NULL);
         std::string res(str);
 
         env->ReleaseStringUTFChars(strObj, str);
@@ -81,38 +117,45 @@ namespace jni {
         return res;
     }
 
+    template<typename NativeObj>
+    jobject getEnumFieldRef(JNIEnv *env, const char *name) {
+        auto enumSignature = std::string("L") + jni::java_class_name<NativeObj>() + ";";
+        auto enumFieldID = env->GetStaticFieldID(java_object<NativeObj>::java_class(),
+                                                 name,
+                                                 enumSignature.c_str());
+        auto enumField = env->GetStaticObjectField(java_object<NativeObj>::java_class(),
+                                                   enumFieldID);
+        return enumField;
+    }
+
     template<typename T>
-    class java_object{
+    class java_object {
     public:
-        template <typename U = T>
-        java_object(const typename std::enable_if<!std::is_pointer<U>::value, U>::type &obj) : nativeObj(obj) {
-            JNIEnv *env;
-            auto resCode = get_env(&env);
-            if (resCode == 2) return;
-
-            auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
-                                                           constructor_signature<T>());
-            javaObj = make_global_ref_ptr(
-                    env->NewObject(object_class, objectClassConstructor, nativeObj));
-
-            if (resCode == 1) detach_thread();
+        template<typename U = T>
+        java_object(const typename std::enable_if<!std::is_pointer<U>::value, U>::type &obj)
+                : nativeObj(obj) {
+            call_in_attached_thread([=](auto env) {
+                auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                               constructor_signature<T>());
+                javaObj = make_global_ref_ptr(
+                        env->NewObject(object_class, objectClassConstructor, nativeObj));
+            });
         }
 
-        template <typename U = T>
-        java_object(const typename std::enable_if<std::is_pointer<U>::value, U>::type &obj) : nativeObj(obj) {
-            JNIEnv *env;
-            auto resCode = get_env(&env);
-            if (resCode == 2) return;
-
-            auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
-                                                           constructor_signature<T>());
-            javaObj = make_global_ref_ptr(env->NewObject(object_class, objectClassConstructor,
-                                                       reinterpret_cast<jlong>(nativeObj)));
-            if (resCode == 1) detach_thread();
+        template<typename U = T>
+        java_object(const typename std::enable_if<std::is_pointer<U>::value, U>::type &obj)
+                : nativeObj(obj) {
+            call_in_attached_thread([=](auto env){
+                auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                               constructor_signature<T>());
+                javaObj = make_global_ref_ptr(env->NewObject(object_class, objectClassConstructor,
+                                                             reinterpret_cast<jlong>(nativeObj)));
+            });
         }
 
         java_object(const java_object &jObj) = delete;
-        java_object& operator=(java_object rhs) = delete;
+
+        java_object &operator=(java_object rhs) = delete;
 
         operator jobject() {
             return javaObj.get();
@@ -122,18 +165,19 @@ namespace jni {
             return nativeObj;
         }
 
-        static jclass java_class(){
+        static jclass java_class() {
             return object_class;
         }
 
     private:
         friend void initJavaObjClass<T>(JNIEnv *env);
+
         static jclass object_class;
         T nativeObj;
         std::shared_ptr<jobject_t> javaObj;
     };
 
-    template <typename T>
+    template<typename T>
     jclass java_object<T>::object_class = nullptr;
 }
 #endif //ANDROID_JAVA_ENVIRONMENT_H

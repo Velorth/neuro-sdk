@@ -19,21 +19,15 @@ void DeviceImpl::disconnect(){
 }
 
 void DeviceImpl::subscribeDataReceived() {
-    dataReceivedHandler = MakeHandler(BleDevice, dataReceived,
-                                      [=](const BleDevice &,
-                                      const std::vector<Byte> &data) {
-        onDataReceived(data);
+    mBleDevice->setDataReceivedCallback([=](auto&& data) {
+        onDataReceived(std::forward<decltype(data)>(data));
     });
-    mBleDevice->dataReceived += dataReceivedHandler;
 }
 
 void DeviceImpl::subscribeStatusReceived() {
-    statusReceivedHandler = MakeHandler(BleDevice, statusReceived,
-                                        [=](const BleDevice &,
-                                        const std::vector<Byte> &status) {
-        onStatusDataReceived(status);
+    mBleDevice->setStatusReceivedCallback([=](auto&& status) {
+        onStatusDataReceived(std::forward<decltype(status)>(status));
     });
-    mBleDevice->statusReceived += statusReceivedHandler;
 }
 
 DeviceImpl::DeviceImpl(std::shared_ptr<BleDevice> ble_device,

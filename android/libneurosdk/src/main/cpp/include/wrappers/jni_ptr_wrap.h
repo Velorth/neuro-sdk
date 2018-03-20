@@ -21,15 +21,13 @@
 
 template <typename JniPtrObj>
 jobject find_notifier(jobject java_obj, const char *notifier_name) {
-    JNIEnv *env;
-    auto resCode = jni::get_env(&env);
-    if (resCode == 2) return nullptr;
-
-    auto notifierFieldID = env->GetFieldID(jni::java_object<JniPtrObj>::java_class(), notifier_name, "Lru/neurotech/common/SubscribersNotifier;");
-    auto deviceStateChangedNotifier = env->GetObjectField(java_obj, notifierFieldID);
-
-    if (resCode == 1) jni::detach_thread();
-    return deviceStateChangedNotifier;
+    return jni::call_in_attached_thread([=](auto env) {
+        auto notifierFieldID = env->GetFieldID(jni::java_object<JniPtrObj>::java_class(),
+                                               notifier_name,
+                                               "Lru/neurotech/common/SubscribersNotifier;");
+        auto deviceStateChangedNotifier = env->GetObjectField(java_obj, notifierFieldID);
+        return deviceStateChangedNotifier;
+    });
 }
 
 void callJavaSendNotification(jobject subscriberNotifier, jobject param);

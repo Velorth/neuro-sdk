@@ -2,8 +2,9 @@
 
 namespace Neuro {
 
-BrainbitParameterReader::BrainbitParameterReader(std::shared_ptr<BleDevice> ble_device):
-    ParameterReader(ble_device){
+BrainbitParameterReader::BrainbitParameterReader(std::shared_ptr<BleDevice> ble_device,
+                                                 param_changed_callback_t callback):
+    ParameterReader(ble_device, callback){
 
 }
 

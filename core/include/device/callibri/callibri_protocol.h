@@ -17,6 +17,7 @@
 #ifndef COLIBRI_PROTOCOL_H
 #define COLIBRI_PROTOCOL_H
 
+#include <initializer_list>
 
 #define COLIBRI_SORT_MAP_SIZE 250
 #define COLIBRI_BUFFER_DURATION 60

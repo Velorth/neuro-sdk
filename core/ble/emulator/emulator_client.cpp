@@ -80,6 +80,7 @@ void EmulatorClient::stopScan(){
 
 std::unique_ptr<BleDevice> EmulatorClient::getDeviceByAddress(std::string address){
     static_cast<void>(address);
+    return std::unique_ptr<BleDevice>();
 }
 
 void EmulatorClient::setFilter(std::vector<std::string> filter){

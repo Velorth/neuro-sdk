@@ -5,9 +5,12 @@
 
 namespace Neuro {
 
-ParameterReader::ParameterReader(std::shared_ptr<BleDevice> ble_device):
-    mBleDevice(ble_device){
+ParameterReader::ParameterReader(std::shared_ptr<BleDevice> ble_device,
+                                 param_changed_callback_t callback):
+    mBleDevice(ble_device),
+    parameterChangedCallback(callback){
     Ensures(mBleDevice != nullptr);
+    Ensures(parameterChangedCallback != nullptr);
     subscribeBleDeviceStateChanged();
 }
 
@@ -26,13 +29,9 @@ typename ParamValue<Parameter::Address>::Type ParameterReader::readAddress() con
 }
 
 void ParameterReader::subscribeBleDeviceStateChanged() {
-    bleDeviceStateHandler = MakeHandler(BleDevice, deviceStateChanged,
-                                        [=](const BleDevice &,
-                                        BleDeviceState state,
-                                        BleDeviceError error){
-        onBleDeviceStateChanged(state, error);
-    });
-   mBleDevice->deviceStateChanged += bleDeviceStateHandler;
+   mBleDevice->setStateChangedCallback([=](BleDeviceState state, BleDeviceError error){
+       onBleDeviceStateChanged(state, error);
+   });
 }
 
 void ParameterReader::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError error) {
@@ -50,6 +49,7 @@ void ParameterReader::onBleConnected(){
                mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
     if (loadDeviceParams()) {
         mState = DeviceState::Connected;
+        parameterChangedCallback(Parameter::State);
         log->debug("[%s: %s] Neuro device connected. Device %s, address: %s", "ParameterReader", __FUNCTION__,
                    mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
     }
@@ -63,7 +63,8 @@ void ParameterReader::onBleConnected(){
 void ParameterReader::onBleDisconnected(BleDeviceError error){
     auto log = LoggerFactory::getCurrentPlatformLogger();
     mState = DeviceState::Disconnected;
-    if (error != BleDeviceError::NO_ERROR)        {
+    parameterChangedCallback(Parameter::State);
+    if (error != BleDeviceError::NO_ERROR){
         log->error("[%s: %s] Neuro device bluetooth error. Device %s, address: %s", "ParameterReader", __FUNCTION__,
                    mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
     }

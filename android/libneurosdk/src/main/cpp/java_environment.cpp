@@ -41,27 +41,24 @@ void jni::detach_thread() {
     java_machine->DetachCurrentThread();
 }
 
-void jni::delete_global_ref(jobject ref){
+void jni::delete_global_ref(jobject ref) noexcept {
+    try {
+        jni::call_in_attached_thread([=](auto env) {
+            if (env->GetObjectRefType(ref) != JNIGlobalRefType)
+                return;
 
-    JNIEnv *env;
-    auto resCode = jni::get_env(&env);
-    if (resCode == 2) return;
-
-    if (env->GetObjectRefType(ref) != JNIGlobalRefType)
-        return;
-
-    env->DeleteGlobalRef(ref);
-
-    if (resCode == 1) jni::detach_thread();
+            env->DeleteGlobalRef(ref);
+        });
+    }
+    catch (std::exception &e){
+        __android_log_print(ANDROID_LOG_FATAL, "DeleteGlobalRef",
+                            "Error deleting global ref: %s", e.what());
+    }
 }
 
 std::shared_ptr<jni::jobject_t> jni::make_global_ref_ptr(jobject localRef){
-    JNIEnv *env;
-    auto resCode = jni::get_env(&env);
-    if (resCode == 2) std::shared_ptr<jni::jobject_t>();
-
-    auto globalRef = env->NewGlobalRef(localRef);
-
-    if (resCode == 1) jni::detach_thread();
-    return std::shared_ptr<jni::jobject_t>(globalRef, delete_global_ref);
+    return jni::call_in_attached_thread([=](auto env) {
+        auto globalRef = env->NewGlobalRef(localRef);
+        return std::shared_ptr<jni::jobject_t>(globalRef, delete_global_ref);
+    });
 }

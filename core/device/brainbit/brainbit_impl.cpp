@@ -11,10 +11,13 @@ namespace Neuro {
 
 BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
     DeviceImpl(ble_device,
-               std::make_unique<BrainbitParameterReader>(ble_device),
+               std::make_unique<BrainbitParameterReader>(ble_device,
+                                                         [=](auto param){
+                                                             onParameterChanged(param);
+                                                         }),
                std::make_unique<BrainbitParameterWriter>()),
     mRequestHandler(std::make_unique<BrainbitRequestHandler>(
-                        [=](std::shared_ptr<BrainbitCommandData> cmd){this->sendCommandPacket(cmd);})){
+                        [=](std::shared_ptr<BrainbitCommandData> cmd){sendCommandPacket(cmd);})){
 
 }
 
@@ -40,6 +43,10 @@ std::vector<std::pair<Parameter, ParamAccess> > BrainbitImpl::parameters() const
         { Parameter::SamplingFrequency, ParamAccess::Read },
         { Parameter::Gain, ParamAccess::Read },
         { Parameter::Offset, ParamAccess::Read }};
+}
+
+void BrainbitImpl::setParamChangedCallback(param_changed_callback_t callback) {
+    parameterChangedCallback = callback;
 }
 
 bool BrainbitImpl::execute(Command command){
@@ -123,6 +130,12 @@ void BrainbitImpl::onStatusDataReceived(const ByteBuffer &status_data){
     }
     parseBattery(status_data);
     parseState(cmd, status_data);
+}
+
+void BrainbitImpl::onParameterChanged(Parameter param) {
+    if (parameterChangedCallback){
+        parameterChangedCallback(param);
+    }
 }
 
 void BrainbitImpl::parseBattery(const ByteBuffer &status_data){

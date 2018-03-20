@@ -19,17 +19,16 @@
 #include "java_environment.h"
 
 void javaOnScanStateChanged(void *subscriber, bool isScanning) {
-    JNIEnv *env;
-    auto resCode = jni::get_env(&env);
-    if (resCode == 2) return;
+    jni::call_in_attached_thread([=](auto env) {
+        LoggerFactory::getCurrentPlatformLogger()->debug(
+                "[%s: %s] Notifying scan state changed: %s", "ScanStateCallback", __FUNCTION__,
+                isScanning ? "TRUE" : "FALSE");
+        auto subscriberClass = env->GetObjectClass((jobject) subscriber);
+        auto callbackMethod = env->GetMethodID(subscriberClass, "onScanStateChanged",
+                                               "(Z)V");
 
-    LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Notifying scan state changed: %s", "ScanStateCallback", __FUNCTION__, isScanning?"TRUE":"FALSE");
-    auto subscriberClass = env->GetObjectClass((jobject) subscriber);
-    auto callbackMethod = env->GetMethodID(subscriberClass, "onScanStateChanged",
-                                           "(Z)V");
-
-    LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Calling java callback", "ScanStateCallback", __FUNCTION__);
-    env->CallVoidMethod((jobject) subscriber, callbackMethod, (jboolean)isScanning);
-
-    if (resCode == 1) jni::detach_thread();
+        LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Calling java callback",
+                                                         "ScanStateCallback", __FUNCTION__);
+        env->CallVoidMethod((jobject) subscriber, callbackMethod, (jboolean) isScanning);
+    });
 }

@@ -1,3 +1,4 @@
+#include <device/callibri/callibri_protocol.h>
 #include "channels/channel_info.h"
 #include "device/device_parameters.h"
 #include "device/callibri/callibri_impl.h"
@@ -14,10 +15,16 @@ CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                            std::shared_ptr<CallibriRequestHandler> request_handler,
                            std::shared_ptr<CallibriCommonParameters> common_params) :
     DeviceImpl(ble_device,
-               std::make_unique<CallibriParameterReader>(ble_device, common_params, request_handler),
+               std::make_unique<CallibriParameterReader>(ble_device,
+                                                         [=](Parameter param){
+                                                             onParameterChanged(param);
+                                                         },
+                                                         common_params,
+                                                         request_handler),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
-    mCommonParams(common_params){
+    mCommonParams(common_params),
+    mSignalBuffer(mCommonParams){
     mRequestHandler->setSendFunction([=](std::shared_ptr<CallibriCommandData> cmd_data){this->sendCommandPacket(cmd_data);});
 }
 
@@ -31,6 +38,10 @@ std::vector<Command> CallibriImpl::commands() const {
 
 std::vector<std::pair<Parameter, ParamAccess> > CallibriImpl::parameters() const {
     return mCommonParams->availableParameters();
+}
+
+void CallibriImpl::setParamChangedCallback(param_changed_callback_t callback) {
+   parameterChangedCallback = callback;
 }
 
 bool CallibriImpl::execute(Command command){
@@ -107,7 +118,7 @@ bool CallibriImpl::isElectrodesAttached(){
 }
 
 const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {
-
+    return mSignalBuffer.buffer();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -124,7 +135,9 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
 
     //Signal data received
     if (marker.value <= COLIBRI_DATA_MAX_PACKET_NMB){
-        onSignalReceived(marker.value, data.data()+COLIBRI_SIGNAL_DATA_START_POS, data.size()-COLIBRI_SIGNAL_DATA_START_POS);
+        mSignalBuffer.onSignalReceived(marker.value,
+                                         ByteBuffer(data.begin() + COLIBRI_SIGNAL_DATA_START_POS,
+                                                    data.end()));
     }
     //Colibri command response received
     else if (marker.value == COLIBRI_COMMAND_MARKER){
@@ -162,24 +175,6 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
     else if (marker.value == COLIBRI_MEMS_DATA_MARKER){
         //onMemsDataReceived(data,length);
     }
-}
-
-void CallibriImpl::onSignalReceived(int, const unsigned char *data, size_t length){
-    std::vector<double> samples;
-    for (auto sample = data; sample<data+length; sample+=sizeof(ColibriShort::bytes)) {
-        ColibriShort shortSample;
-        shortSample.bytes[0] = *sample;
-        shortSample.bytes[1] = *(sample + 1);
-
-        auto adcValue = shortSample.value;
-        double sampleValue =
-                ((double) COLIBRI_ADC_REF_VOLTAGE / COLIBRI_ADC_CAPACITY) * adcValue /
-                colibriGainToInt(static_cast<ColibriGain>(mCommonParams->gain()));
-
-        samples.push_back(sampleValue);
-    }
-
-    //signalSubsystem->onDataReceived(samples);//buffer
 }
 
 void CallibriImpl::onCommandPacketReceived(const unsigned char *const command_packet, size_t length){
@@ -298,6 +293,12 @@ int CallibriImpl::convertVoltageToPercents(int voltage){
 
 void CallibriImpl::onStatusDataReceived(const ByteBuffer &){
     throw std::logic_error("Status data is not suitable for Callibri device");
+}
+
+void CallibriImpl::onParameterChanged(Parameter param) {
+    if (parameterChangedCallback){
+        parameterChangedCallback(param);
+    }
 }
 
 }

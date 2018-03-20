@@ -10,11 +10,13 @@ namespace Neuro {
 
 class BrainbitImpl : public DeviceImpl {
 public:
+    using param_changed_callback_t = std::function<void(Parameter)>;
     BrainbitImpl(std::shared_ptr<BleDevice>);
 
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;
     std::vector<std::pair<Parameter, ParamAccess> > parameters() const override;
+    void setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;    
@@ -22,14 +24,18 @@ public:
 
 private:
     using BrainbitRequestHandler = RequestHandler<BrainbitCommandData>;
+
     static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 250 Hz fsam and 4 channels
+
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;
     int mBatteryPercents;    
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
+    param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;
     void onStatusDataReceived(const ByteBuffer &) override;
+    void onParameterChanged(Parameter);
     void parseBattery(const ByteBuffer &);
     void parseState(BrainbitCommand cmd, const ByteBuffer &);
     bool execStartSignalCommand();

@@ -91,8 +91,8 @@ public:
         return mBuffer.totalLength();
     }
 
-    data_length_t availableLength() const noexcept {
-        return mBuffer.availableLength();
+    data_length_t bufferSize() const noexcept {
+        return mBuffer.bufferSize();
     }
 
     std::weak_ptr<Device> underlyingDevice() const noexcept {
@@ -126,8 +126,8 @@ data_length_t ElectrodeStateChannel::totalLength() const noexcept {
     return mImpl->totalLength();
 }
 
-data_length_t ElectrodeStateChannel::availableLength() const noexcept {
-    return mImpl->availableLength();
+data_length_t ElectrodeStateChannel::bufferSize() const noexcept {
+    return mImpl->bufferSize();
 }
 
 std::weak_ptr<Device> ElectrodeStateChannel::underlyingDevice() const noexcept {

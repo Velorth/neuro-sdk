@@ -5,7 +5,6 @@
 #include <vector>
 #include "common_types.h"
 #include "ble/ble_device.h"
-#include "event_observer.h"
 
 namespace Neuro {
 
@@ -27,7 +26,7 @@ public:
     virtual std::vector<ChannelInfo> channels() const = 0;
     virtual std::vector<Command> commands() const = 0;
     virtual std::vector<std::pair<Parameter, ParamAccess>> parameters() const = 0;
-    virtual void setParamChangedCallback(std::function<void(Parameter)>);
+    virtual void setParamChangedCallback(std::function<void(Parameter)>) = 0;
     virtual bool execute(Command) = 0;
     virtual int batteryChargePercents() = 0;
     virtual bool isElectrodesAttached() = 0;
@@ -50,9 +49,6 @@ private:
     void subscribeStatusReceived();
     virtual void onDataReceived(const ByteBuffer &) = 0;
     virtual void onStatusDataReceived(const ByteBuffer &) = 0;
-
-    EventHandler(BleDevice, dataReceived) dataReceivedHandler;
-    EventHandler(BleDevice, statusReceived) statusReceivedHandler;
 };
 
 

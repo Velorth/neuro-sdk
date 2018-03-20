@@ -7,7 +7,7 @@ namespace Neuro {
 
 class BrainbitParameterReader : public ParameterReader {
 public:
-    BrainbitParameterReader(std::shared_ptr<BleDevice>);
+    BrainbitParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t);
 
     ParamValue<Parameter::SerialNumber>::Type readSerialNumber() const override;
     ParamValue<Parameter::HardwareFilterState>::Type readHardwareFilterState() const override;

@@ -20,240 +20,219 @@
 namespace Neuro {
 
     BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) : BleDevice() {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Constructor");
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
+        jni::call_in_attached_thread([=](auto env) {
+            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Constructor");
+            appContext = env->NewGlobalRef(context);
 
-        appContext = env->NewGlobalRef(context);
+            //first we need to get name of bluetooth device
+            auto btDeviceClass = env->GetObjectClass(bluetoothDevice);
+            auto btDeviceNameMethod = env->GetMethodID(btDeviceClass, "getName",
+                                                       "()Ljava/lang/String;");
+            auto btDeviceNameObj = (jstring) env->CallObjectMethod(bluetoothDevice,
+                                                                   btDeviceNameMethod);
 
-        //first we need to get name of bluetooth device
-        auto btDeviceClass = env->GetObjectClass(bluetoothDevice);
-        auto btDeviceNameMethod = env->GetMethodID(btDeviceClass, "getName",
-                                                   "()Ljava/lang/String;");
-        auto btDeviceNameObj = (jstring) env->CallObjectMethod(bluetoothDevice, btDeviceNameMethod);
+            //if name string is null it means that device is unavailable now
+            if (btDeviceNameObj == NULL)
+                throw std::runtime_error("Failed to initialize device");
 
-        //if name string is null it means that device is unavailable now
-        if (btDeviceNameObj == NULL)
-            throw std::runtime_error("Failed to initialize device");
+            auto btDeviceName = env->GetStringUTFChars(btDeviceNameObj, NULL);
+            deviceInfo = BleDeviceInfo::fromDeviceName(btDeviceName);
+            env->ReleaseStringUTFChars(btDeviceNameObj, btDeviceName);
 
-        auto btDeviceName = env->GetStringUTFChars(btDeviceNameObj, NULL);
-        deviceInfo = BleDeviceInfo::fromDeviceName(btDeviceName);
-        env->ReleaseStringUTFChars(btDeviceNameObj, btDeviceName);
+            //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
+            //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
+            //class constructor
+            auto gattInfo = deviceInfo->getGattInfo();
+            auto gattInfoWrapClass = env->FindClass(
+                    "ru/neurotech/neurodevices/connection/DeviceGattInfo");
+            auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");
+            auto gattInfoWrapper = env->NewObject(gattInfoWrapClass,
+                                                  gattInfoWrapConstructor,
+                                                  (jlong) gattInfo.get());
 
-        //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
-        //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
-        //class constructor
-        auto gattInfo = deviceInfo->getGattInfo();
-        auto gattInfoWrapClass = env->FindClass(
-                "ru/neurotech/neurodevices/connection/DeviceGattInfo");
-        auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");
-        auto gattInfoWrapper = env->NewObject(gattInfoWrapClass,
-                                              gattInfoWrapConstructor,
-                                              (jlong) gattInfo.get());
+            auto bleDeviceClass = env->FindClass("ru/neurotech/neurodevices/connection/BleDevice");
+            auto bleDeviceConstructor = env->GetMethodID(bleDeviceClass, "<init>",
+                                                         "(Landroid/bluetooth/BluetoothDevice;Lru/neurotech/neurodevices/connection/DeviceGattInfo;)V");
+            auto bleDevice = env->NewObject(bleDeviceClass, bleDeviceConstructor,
+                                            bluetoothDevice, gattInfoWrapper);
 
-        auto bleDeviceClass = env->FindClass("ru/neurotech/neurodevices/connection/BleDevice");
-        auto bleDeviceConstructor = env->GetMethodID(bleDeviceClass, "<init>",
-                                                     "(Landroid/bluetooth/BluetoothDevice;Lru/neurotech/neurodevices/connection/DeviceGattInfo;)V");
-        auto bleDevice = env->NewObject(bleDeviceClass, bleDeviceConstructor,
-                                        bluetoothDevice, gattInfoWrapper);
+            javaBleDevice = env->NewGlobalRef(bleDevice);
 
-        javaBleDevice = env->NewGlobalRef(bleDevice);
+            //Instantiate callback class
+            auto deviceCallbackWrapClass = env->FindClass(
+                    "ru/neurotech/neurodevices/connection/BleDeviceCallback");
+            auto deviceCallbackWrapConstructor = env->GetMethodID(deviceCallbackWrapClass, "<init>",
+                                                                  "(J)V");
+            auto deviceCallbackWrapper = env->NewObject(deviceCallbackWrapClass,
+                                                        deviceCallbackWrapConstructor,
+                                                        (jlong) this);
 
-        //Instantiate callback class
-        auto deviceCallbackWrapClass = env->FindClass(
-                "ru/neurotech/neurodevices/connection/BleDeviceCallback");
-        auto deviceCallbackWrapConstructor = env->GetMethodID(deviceCallbackWrapClass, "<init>",
-                                                              "(J)V");
-        auto deviceCallbackWrapper = env->NewObject(deviceCallbackWrapClass,
-                                                    deviceCallbackWrapConstructor,
-                                                    (jlong) this);
-
-        //And pass it to BleDevice
-        auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
-        env->CallVoidMethod(javaBleDevice, subscribeMethod, deviceCallbackWrapper);
-
-        if (resCode == 1) jni::detach_thread();
+            //And pass it to BleDevice
+            auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
+                                                    "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
+            env->CallVoidMethod(javaBleDevice, subscribeMethod, deviceCallbackWrapper);
+        });
     }
 
     BleDeviceJni::~BleDeviceJni() {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor");
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
-
-        //Unsubscribe device events
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
-        env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
-
-        env->DeleteGlobalRef(javaBleDevice);
-        env->DeleteGlobalRef(appContext);
-
-        if (resCode == 1) jni::detach_thread();
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor EXIT");
+        try {
+            jni::call_in_attached_thread([=](auto env) {
+                __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor");
+                auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+                auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
+                                                        "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
+                env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
+                env->DeleteGlobalRef(javaBleDevice);
+                env->DeleteGlobalRef(appContext);
+                __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor EXIT");
+            });
+        }
+        catch (std::runtime_error &e){
+            __android_log_print(ANDROID_LOG_FATAL,
+                                "BleDeviceJni",
+                                "Destructon failure: %s", e.what());
+        }
     }
 
     void BleDeviceJni::connect() {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
-
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto connectMethod = env->GetMethodID(bleDeviceClass, "connect",
-                                              "(Landroid/content/Context;)V");
-        env->CallVoidMethod(javaBleDevice, connectMethod, appContext);
-
-        if (resCode == 1) jni::detach_thread();
+        jni::call_in_attached_thread([=](auto env) {
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto connectMethod = env->GetMethodID(bleDeviceClass, "connect",
+                                                  "(Landroid/content/Context;)V");
+            env->CallVoidMethod(javaBleDevice, connectMethod, appContext);
+        });
     }
 
     void BleDeviceJni::disconnect() {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "disconnect");
+        jni::call_in_attached_thread([=](auto env) {
+            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "disconnect");
 
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto disconnectMethod = env->GetMethodID(bleDeviceClass, "disconnect", "()V");
-        env->CallVoidMethod(javaBleDevice, disconnectMethod);
-
-        if (resCode == 1) jni::detach_thread();
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto disconnectMethod = env->GetMethodID(bleDeviceClass, "disconnect", "()V");
+            env->CallVoidMethod(javaBleDevice, disconnectMethod);
+        });
     }
 
     void BleDeviceJni::close() {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "close");
+        jni::call_in_attached_thread([=](auto env) {
+            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "close");
 
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto closeMethod = env->GetMethodID(bleDeviceClass, "close", "()V");
-        env->CallVoidMethod(javaBleDevice, closeMethod);
-
-        if (resCode == 1) jni::detach_thread();
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto closeMethod = env->GetMethodID(bleDeviceClass, "close", "()V");
+            env->CallVoidMethod(javaBleDevice, closeMethod);
+        });
     }
 
     bool BleDeviceJni::sendCommand(const std::vector<Byte> &commandData) {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
+        return jni::call_in_attached_thread([=](auto env) {
+            jbyteArray retArray = env->NewByteArray((jsize) commandData.size());
 
-        jbyteArray retArray = env->NewByteArray((jsize) commandData.size());
+            if (env->GetArrayLength(retArray) != commandData.size()) {
+                env->DeleteLocalRef(retArray);
+                retArray = env->NewByteArray((jsize) commandData.size());
+            }
 
-        if (env->GetArrayLength(retArray) != commandData.size()) {
-            env->DeleteLocalRef(retArray);
-            retArray = env->NewByteArray((jsize) commandData.size());
-        }
+            void *tempCmdArray = env->GetPrimitiveArrayCritical((jarray) retArray, 0);
+            memcpy(tempCmdArray, commandData.data(), commandData.size());
+            env->ReleasePrimitiveArrayCritical(retArray, tempCmdArray, 0);
 
-        void *tempCmdArray = env->GetPrimitiveArrayCritical((jarray) retArray, 0);
-        memcpy(tempCmdArray, commandData.data(), commandData.size());
-        env->ReleasePrimitiveArrayCritical(retArray, tempCmdArray, 0);
+            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Sending command");
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto sendCommandMethod = env->GetMethodID(bleDeviceClass, "sendCommand", "([B)Z");
+            auto sendResult = env->CallBooleanMethod(javaBleDevice, sendCommandMethod, retArray);
 
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Sending command");
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto sendCommandMethod = env->GetMethodID(bleDeviceClass, "sendCommand", "([B)Z");
-        auto sendResult = env->CallBooleanMethod(javaBleDevice, sendCommandMethod, retArray);
+            if (sendResult)
+                __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command sent");
+            else __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command not sent");
 
-        if (sendResult) __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command sent");
-        else __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command not sent");
-
-        if (resCode == 1) jni::detach_thread();
-        return sendResult;
+            return sendResult;
+        });
     }
 
     std::string BleDeviceJni::getName() const {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
-
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto getNameMethod = env->GetMethodID(bleDeviceClass, "name", "()Ljava/lang/String;");
-        auto javaStringName = (jstring) env->CallObjectMethod(javaBleDevice, getNameMethod);
+        return jni::call_in_attached_thread([=](auto env) {
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto getNameMethod = env->GetMethodID(bleDeviceClass, "name", "()Ljava/lang/String;");
+            auto javaStringName = (jstring) env->CallObjectMethod(javaBleDevice, getNameMethod);
 
 
-        std::string stringName;
-        if (javaStringName != NULL) {
-            auto cName = env->GetStringUTFChars(javaStringName, NULL);
-            stringName = cName;
-            env->ReleaseStringUTFChars(javaStringName, cName);
-        } else {
-            stringName = "NULL";
-            __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
-        }
+            std::string stringName;
+            if (javaStringName != NULL) {
+                auto cName = env->GetStringUTFChars(javaStringName, NULL);
+                stringName = cName;
+                env->ReleaseStringUTFChars(javaStringName, cName);
+            } else {
+                stringName = "NULL";
+                __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
+            }
 
-        if (resCode == 1) jni::detach_thread();
-        return stringName;
+            return stringName;
+        });
     }
 
     std::string BleDeviceJni::getNetAddress() const {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
+        return jni::call_in_attached_thread([=](auto env) {
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto getAddressMethod = env->GetMethodID(bleDeviceClass, "address",
+                                                     "()Ljava/lang/String;");
+            auto javaStringAddress = (jstring) env->CallObjectMethod(javaBleDevice,
+                                                                     getAddressMethod);
 
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto getAddressMethod = env->GetMethodID(bleDeviceClass, "address", "()Ljava/lang/String;");
-        auto javaStringAddress = (jstring) env->CallObjectMethod(javaBleDevice, getAddressMethod);
+            std::string stringAddress;
+            if (javaStringAddress != NULL) {
+                auto cName = env->GetStringUTFChars(javaStringAddress, NULL);
+                stringAddress = cName;
+                env->ReleaseStringUTFChars(javaStringAddress, cName);
+            } else {
+                stringAddress = "NULL";
+                __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
+            }
 
-        std::string stringAddress;
-        if (javaStringAddress != NULL) {
-            auto cName = env->GetStringUTFChars(javaStringAddress, NULL);
-            stringAddress = cName;
-            env->ReleaseStringUTFChars(javaStringAddress, cName);
-        } else {
-            stringAddress = "NULL";
-            __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
-        }
-
-        if (resCode == 1) jni::detach_thread();
-        return stringAddress;
+            return stringAddress;
+        });
     }
 
     BleDeviceState BleDeviceJni::getState() const {
-        JNIEnv *env;
-        auto resCode = jni::get_env(&env);
-        if (resCode == 2) throw std::runtime_error("Cannot retrieve JNI environment");
+        return jni::call_in_attached_thread([=](auto env) {
+            auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
+            auto getStateMethod = env->GetMethodID(bleDeviceClass, "state",
+                                                   "()Lru/neurotech/neurodevices/connection/BleDeviceState;");
+            auto javaState = env->CallObjectMethod(javaBleDevice, getStateMethod);
 
-        auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
-        auto getStateMethod = env->GetMethodID(bleDeviceClass, "state",
-                                               "()Lru/neurotech/neurodevices/connection/BleDeviceState;");
-        auto javaState = env->CallObjectMethod(javaBleDevice, getStateMethod);
+            BleDeviceState state;
+            if (javaState != NULL) {
+                auto javaStateClass = env->FindClass(
+                        "ru/neurotech/neurodevices/connection/DeviceGattInfo");
+                auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
+                auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
+                state = parseBleDeviceState(stateCode);
+            } else {
+                state = BleDeviceState::ERROR;
+                __android_log_print(ANDROID_LOG_ERROR, "BleDeviceJni", "State is null");
+            }
 
-        BleDeviceState state;
-        if (javaState != NULL) {
-            auto javaStateClass = env->FindClass(
-                    "ru/neurotech/neurodevices/connection/DeviceGattInfo");
-            auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
-            auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
-            state = parseBleDeviceState(stateCode);
-        } else {
-            state = BleDeviceState::ERROR;
-            __android_log_print(ANDROID_LOG_ERROR, "BleDeviceJni", "State is null");
-        }
-
-        if (resCode == 1) jni::detach_thread();
-        return state;
+            return state;
+        });
     }
 
     void BleDeviceJni::onConnected() {
-        onDeviceStateChanged(BleDeviceState::CONNECTED, BleDeviceError::NO_ERROR);
+        deviceStateChangedCallback(BleDeviceState::CONNECTED, BleDeviceError::NO_ERROR);
     }
 
     void BleDeviceJni::onDisconnected() {
-        onDeviceStateChanged(BleDeviceState::DISCONNECTED, BleDeviceError::NO_ERROR);
+        deviceStateChangedCallback(BleDeviceState::DISCONNECTED, BleDeviceError::NO_ERROR);
     }
 
     void BleDeviceJni::onError(BleDeviceError error) {
-        onDeviceStateChanged(BleDeviceState::ERROR, error);
+        deviceStateChangedCallback(BleDeviceState::ERROR, error);
     }
 
     void BleDeviceJni::onDataReceived(const std::vector<Byte> &data) {
-        BleDevice::onDataReceived(data);
+        dataReceivedCallback(data);
     }
 
     void BleDeviceJni::onStatusReceived(const std::vector<Byte> &status) {
-        BleDevice::onStatusReceived(status);
+        statusReceivedCallback(status);
     }
 
 }

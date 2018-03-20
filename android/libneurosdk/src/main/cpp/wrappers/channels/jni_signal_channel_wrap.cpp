@@ -8,7 +8,7 @@ extern "C"
 
 JNIEXPORT jlong JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_create(JNIEnv *env, jclass type,
-                                                          jobject device) {
+                                                         jobject device) {
     return createChannelFromDevice<JniSignalChannelWrap>(env, device);
 }
 
@@ -16,7 +16,7 @@ JNIEXPORT jobject
 JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_info(JNIEnv *env, jobject instance) {
 
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     auto channelInfo = &signalChannelWrap->info();
     jni::java_object<decltype(channelInfo)> nativeChannelInfo(channelInfo);
     return env->NewLocalRef(nativeChannelInfo);
@@ -38,19 +38,19 @@ Java_ru_neurotech_neurosdk_channels_SignalChannel_deleteNative(JNIEnv *env, jobj
 
 JNIEXPORT jobject JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
 
 }
 
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_setSamplingFrequency(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jfloat frequency) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    try{
+                                                                       jobject instance,
+                                                                       jfloat frequency) {
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+    try {
         signalChannelWrap->setSamplingFrequency(frequency);
     }
-    catch (std::runtime_error &e){
+    catch (std::runtime_error &e) {
         auto exceptionClass = env->FindClass("java/lang/UnsupportedOperationException");
         if (exceptionClass == nullptr) {
             return;
@@ -62,30 +62,30 @@ Java_ru_neurotech_neurosdk_channels_SignalChannel_setSamplingFrequency(JNIEnv *e
 
 JNIEXPORT jfloat JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_samplingFrequency(JNIEnv *env,
-                                                                     jobject instance) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+                                                                    jobject instance) {
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     return signalChannelWrap->samplingFrequency();
 }
 
 JNIEXPORT jlong JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     return saturation_cast<jlong>(signalChannelWrap->bufferSize());
 }
 
 JNIEXPORT jlong JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     return saturation_cast<jlong>(signalChannelWrap->totalLength());
 }
 
-JNIEXPORT jintArray JNICALL
+JNIEXPORT jdoubleArray JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_readData(JNIEnv *env, jobject instance,
-                                                            jlong offset, jlong length) {
-    auto& signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+                                                           jlong offset, jlong length) {
+    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     auto data = signalChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                             saturation_cast<Neuro::data_length_t>(length));
-    if (data.size() > std::numeric_limits<jsize>::max()){
+                                            saturation_cast<Neuro::data_length_t>(length));
+    if (data.size() > std::numeric_limits<jsize>::max()) {
         auto exceptionClass = env->FindClass("java/lang/ArrayIndexOutOfBoundsException");
         if (exceptionClass == nullptr) {
             return nullptr;
@@ -94,14 +94,15 @@ Java_ru_neurotech_neurosdk_channels_SignalChannel_readData(JNIEnv *env, jobject 
         return nullptr;
     }
 
-    jintArray dataArray = env->NewIntArray(static_cast<jsize>(data.size()));
+    auto dataArray = env->NewDoubleArray(static_cast<jsize>(data.size()));
     if (dataArray == nullptr)
         return nullptr;
 
-    env->SetIntArrayRegion(dataArray, 0, static_cast<jsize>(data.size()), data.data());
+    env->SetDoubleArrayRegion(dataArray, 0, static_cast<jsize>(data.size()), data.data());
     return dataArray;
 }
 
+}
 
 void JniSignalChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);

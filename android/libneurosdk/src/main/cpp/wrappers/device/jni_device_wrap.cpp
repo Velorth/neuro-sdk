@@ -15,6 +15,7 @@
  */
 
 #include "wrappers/jni_device_wrap.h"
+#include "wrappers/jni_device_param_wrap.h"
 
 extern "C"
 {
@@ -30,7 +31,7 @@ Java_ru_neurotech_neurosdk_Device_init(JNIEnv *env, jobject instance) {
 
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_Device_deleteDevice(JNIEnv *env, jobject instance) {
-    deleteNativeObject(env, instance);
+    deleteNativeObject<JniDeviceWrap>(env, instance);
 }
 
 JNIEXPORT void JNICALL
@@ -63,7 +64,7 @@ Java_ru_neurotech_neurosdk_Device_commands(JNIEnv *env, jobject instance) {
 
     for (auto it = deviceCommands.begin(); it != deviceCommands.end(); ++it) {
 
-        env->SetObjectArrayElement(commandsArray, it - deviceCommands.begin(), commandEnumValue);
+       // env->SetObjectArrayElement(commandsArray, it - deviceCommands.begin(), commandEnumValue);
     }
 
     return commandsArray;

@@ -35,10 +35,10 @@ public:
         }
     }
 
-    data_length_t availableLength() const noexcept {
+    data_length_t bufferSize() const noexcept {
         try {
             auto&& buffer = mDevice->mImpl->signalBuffer();
-            return buffer.availableLength();
+            return buffer.bufferSize();
         }
         catch (std::runtime_error &){
             return 0;
@@ -71,8 +71,8 @@ data_length_t SignalChannel::totalLength() const noexcept {
     return mImpl->totalLength();
 }
 
-data_length_t SignalChannel::availableLength() const noexcept {
-    return mImpl->availableLength();
+data_length_t SignalChannel::bufferSize() const noexcept {
+    return mImpl->bufferSize();
 }
 
 std::weak_ptr<Device> SignalChannel::underlyingDevice() const noexcept {

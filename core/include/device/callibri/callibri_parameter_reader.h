@@ -14,6 +14,7 @@ class CallibriParameterReader : public ParameterReader
 {
 public:
     CallibriParameterReader(std::shared_ptr<BleDevice>,
+                            param_changed_callback_t,
                             std::shared_ptr<CallibriCommonParameters>,
                             std::shared_ptr<CallibriRequestHandler>);
 

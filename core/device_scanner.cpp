@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thread>
 #include "device_scanner.h"
 #include "device/device_factory.h"
 #include "logger.h"

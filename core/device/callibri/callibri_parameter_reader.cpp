@@ -8,9 +8,10 @@
 namespace Neuro {
 
 CallibriParameterReader::CallibriParameterReader(std::shared_ptr<BleDevice> ble_device,
+                                                 param_changed_callback_t callback,
                                                  std::shared_ptr<CallibriCommonParameters> common_params,
                                                  std::shared_ptr<CallibriRequestHandler> request_handler) :
-    ParameterReader(ble_device),
+    ParameterReader(ble_device, callback),
     mCommonParameters(common_params),
     mRequestHandler(request_handler){
 

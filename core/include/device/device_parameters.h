@@ -13,8 +13,7 @@ enum class FirmwareMode {
 
 enum class DeviceState {
     Disconnected,
-    Connected,
-    Working
+    Connected
 };
 
 enum class Command {

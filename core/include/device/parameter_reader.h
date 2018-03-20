@@ -1,16 +1,18 @@
 #ifndef PARAMETER_READER_H
 #define PARAMETER_READER_H
 
+#include <functional>
 #include <memory>
 #include "ble/ble_device.h"
 #include "param_values.h"
-#include "event_observer.h"
 
 namespace Neuro {
 
 class ParameterReader{
 public:
-    ParameterReader(std::shared_ptr<BleDevice>);
+    using param_changed_callback_t = std::function<void(Parameter)>;
+
+    ParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t);
     virtual ~ParameterReader() = default;
 
     typename ParamValue<Parameter::Name>::Type readName() const;
@@ -44,14 +46,13 @@ public:
 private:
     std::shared_ptr<BleDevice> mBleDevice;
     DeviceState mState{DeviceState::Disconnected};
+    param_changed_callback_t parameterChangedCallback;
 
     void subscribeBleDeviceStateChanged();
     void onBleDeviceStateChanged(BleDeviceState, BleDeviceError);
     void onBleConnected();
     void onBleDisconnected(BleDeviceError);
     virtual bool loadDeviceParams() = 0;
-
-    EventHandler(BleDevice, deviceStateChanged) bleDeviceStateHandler;
 };
 
 }

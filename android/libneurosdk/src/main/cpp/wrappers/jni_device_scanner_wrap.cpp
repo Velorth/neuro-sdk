@@ -53,7 +53,7 @@ JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_DeviceScanner_deleteNative(JNIEnv *env,
                                                                         jobject instance,
                                                                         jlong objPtr) {
-    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
+    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
     delete neuroConnection;
 }
 
@@ -61,15 +61,15 @@ JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_DeviceScanner_startScan__JI(JNIEnv *env, jobject instance,
                                                              jlong objPtr, jint timeout) {
     __android_log_print(ANDROID_LOG_VERBOSE, "NeuroConnectionWrap",
-                        "Start scan. DeviceScanner ptr is %lld", objPtr);
-    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
+                        "Start scan. DeviceScanner ptr is %ld", objPtr);
+    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
     neuroConnection->startScan(timeout);
 }
 
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_DeviceScanner_stopScan__J(JNIEnv *env, jobject instance,
                                                            jlong objPtr) {
-    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
+    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
     neuroConnection->stopScan();
 }
 
@@ -79,7 +79,7 @@ Java_ru_neurotech_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobjec
                                                                    jstring address_) {
     const char *address = env->GetStringUTFChars(address_, 0);
 
-    auto neuroConnection = (Neuro::DeviceScanner *) objPtr;
+    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
 
     auto devicePtr = neuroConnection->findDeviceByAddress(address);
     if (!devicePtr) return NULL;

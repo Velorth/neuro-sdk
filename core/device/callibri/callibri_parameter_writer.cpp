@@ -41,19 +41,19 @@ bool CallibriParameterWriter::setADCInputState(typename ParamValue<Parameter::AD
 }
 
 bool CallibriParameterWriter::setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type value){
-
+    throw std::runtime_error("Not implemented exception");
 }
 
 bool CallibriParameterWriter::setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type value){
-
+    throw std::runtime_error("Not implemented exception");
 }
 
 bool CallibriParameterWriter::setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type value){
-
+    throw std::runtime_error("Not implemented exception");
 }
 
 bool CallibriParameterWriter::setMotionAssistantParamPack(typename ParamValue<Parameter::MotionAssistantParamPack>::Type value){
-
+    throw std::runtime_error("Not implemented exception");
 }
 
 }

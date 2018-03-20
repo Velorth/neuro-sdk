@@ -18,12 +18,11 @@
 #define BLE_DEVICE_H
 
 #include <string>
+#include <functional>
 #include "ble_device_info.h"
-#include "event_observer.h"
+#include "common_types.h"
 
 namespace Neuro {
-
-typedef unsigned char Byte;
 
 enum class BleDeviceState : int {
     DISCONNECTED = 0,
@@ -65,10 +64,18 @@ inline BleDeviceError parseBleErrorType(int errorCode){
 class BleDevice
 {
 public:
+    using state_changed_callback_t = std::function<void(BleDeviceState, BleDeviceError)>;
+    using data_received_callback_t = std::function<void(const std::vector<Byte> &)>;
+    using status_received_callback_t = std::function<void(const std::vector<Byte> &)>;
+
     BleDevice(){}
     BleDevice(const BleDevice&) = delete;
     BleDevice& operator=(const BleDevice&) = delete;
-    virtual ~BleDevice(){}
+    virtual ~BleDevice(){
+        deviceStateChangedCallback = nullptr;
+        dataReceivedCallback = nullptr;
+        statusReceivedCallback = nullptr;
+    }
 
     bool operator==(const BleDevice &other){
         return (this->getName() == other.getName()) &&
@@ -83,22 +90,27 @@ public:
     virtual std::string getName() const = 0;
     virtual std::string getNetAddress() const = 0;
 
-    EventObserver<BleDevice, BleDeviceState, BleDeviceError> deviceStateChanged;
-    EventObserver<BleDevice, const std::vector<Byte> &> dataReceived;
-    EventObserver<BleDevice, const std::vector<Byte> &> statusReceived;
+    DeviceType getDeviceType() const {
+        return deviceInfo->getDeviceType();
+    }
 
-    DeviceType getDeviceType() {return deviceInfo->getDeviceType();}
+    void setStateChangedCallback(state_changed_callback_t callback){
+        deviceStateChangedCallback = callback;
+    }
+
+    void setDataReceivedCallback(data_received_callback_t callback){
+        dataReceivedCallback = callback;
+    }
+
+    void setStatusReceivedCallback(status_received_callback_t callback){
+        statusReceivedCallback = callback;
+    }
+
 protected:
     std::unique_ptr<BleDeviceInfo> deviceInfo;
-    void onDeviceStateChanged(BleDeviceState state, BleDeviceError error){
-        deviceStateChanged(*this, state, error);
-    }
-    void onDataReceived(const std::vector<Byte> &data){
-        dataReceived(*this, data);
-    }
-    void onStatusReceived(const std::vector<Byte> &status){
-        statusReceived(*this, status);
-    }
+    state_changed_callback_t deviceStateChangedCallback;
+    data_received_callback_t dataReceivedCallback;
+    status_received_callback_t statusReceivedCallback;
 };
 
 }

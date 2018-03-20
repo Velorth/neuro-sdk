@@ -2,17 +2,15 @@
 #define CALLIBRI_SIGNAL_BUFFER_H
 
 #include "signal/safe_buffer.h"
-#include "callibri_command.h"
 #include "common_types.h"
 
 namespace Neuro {
 
-template<typename> class RequestHandler;
-using CallibriRequestHandler = RequestHandler<CallibriCommandData>;
+class CallibriCommonParameters;
 
 class CallibriSignalBuffer {
 public:
-    CallibriSignalBuffer(std::shared_ptr<CallibriRequestHandler>);
+    CallibriSignalBuffer(std::shared_ptr<CallibriCommonParameters>);
     CallibriSignalBuffer(const CallibriSignalBuffer &) = delete;
     CallibriSignalBuffer& operator=(const CallibriSignalBuffer &) = delete;
 
@@ -20,6 +18,9 @@ public:
     const BaseBuffer<signal_sample_t>& buffer() const;
 
 private:
+    static constexpr std::size_t SignalBufferSize = 120000; //10 minutes for 250 Hz fsam
+
+    std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
 };
 
