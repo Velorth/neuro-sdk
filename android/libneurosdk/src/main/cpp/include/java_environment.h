@@ -61,6 +61,15 @@ namespace jni {
         return func(env.env());
     }
 
+    template <typename Exc>
+    bool java_throw(JNIEnv *env, const char *java_exception, Exc &&native_exception){
+        auto exceptionClass = env->FindClass("java/lang/UnsupportedOperationException");
+        if (exceptionClass == nullptr) {
+            return false;
+        }
+        return !env->ThrowNew(exceptionClass, native_exception.what());
+    }
+
     void delete_global_ref(jobject ref) noexcept;
 
     std::shared_ptr<jobject_t> make_global_ref_ptr(jobject localRef);
@@ -131,6 +140,10 @@ namespace jni {
     template<typename T>
     class java_object {
     public:
+
+        /**
+         * Constructor for built-in types
+         */
         template<typename U = T>
         java_object(const typename std::enable_if<!std::is_pointer<U>::value, U>::type &obj)
                 : nativeObj(obj) {
@@ -142,6 +155,9 @@ namespace jni {
             });
         }
 
+        /**
+         * Constructor for pointers
+         */
         template<typename U = T>
         java_object(const typename std::enable_if<std::is_pointer<U>::value, U>::type &obj)
                 : nativeObj(obj) {

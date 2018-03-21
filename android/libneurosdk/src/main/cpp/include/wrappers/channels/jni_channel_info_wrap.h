@@ -21,6 +21,15 @@
 #include "java_environment.h"
 
 template<>
+constexpr const char *jni::java_class_name<Neuro::ChannelInfo::Type>() {
+    return "ru/neurotech/neurosdk/parameters/ParameterAccess";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::ChannelInfo::Type>::java_object(const Neuro::ChannelInfo::Type &);
+
+template<>
 constexpr const char *jni::java_class_name<Neuro::ChannelInfo *>() {
     return "ru/neurotech/neurosdk/channels/NativeChannelInfo";
 }
@@ -29,5 +38,19 @@ template<>
 constexpr const char *jni::constructor_signature<Neuro::ChannelInfo *>() {
     return "(J)V";
 }
+
+template<>
+constexpr const char *jni::java_class_name<Neuro::ChannelInfo>() {
+    return "ru/neurotech/neurosdk/channels/ManagedChannelInfo";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::ChannelInfo>() {
+    return "(Lru/neurotech/neurosdk/channels/ChannelType;Ljava/lang/String;)V";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::ChannelInfo>::java_object(const Neuro::ChannelInfo &);
 
 #endif //ANDROID_JNI_CHANNEL_INFO_WRAP_H

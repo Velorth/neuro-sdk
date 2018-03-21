@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_JNI_NEURO_DEVICE_WRAP_H
-#define ANDROID_JNI_NEURO_DEVICE_WRAP_H
+#ifndef ANDROID_JNI_PARAM_TYPE_WRAP_H
+#define ANDROID_JNI_PARAM_TYPE_WRAP_H
 
-#include "device/device.h"
-#include "jni_ptr_wrap.h"
+#include "device/device_parameters.h"
+#include "java_environment.h"
 
-class JniDeviceWrap : public JniPtrWrap<Neuro::Device> {
+std::string getParamTypeName(Neuro::Parameter);
+
+class ParameterType{
 public:
-    JniDeviceWrap(object_ptr_t devicePtr) : JniPtrWrap<Neuro::Device>(devicePtr) {}
-
-    void subscribeStateChanged(jobject stateChangedSubscriberRef);
-
+    ParameterType(Neuro::Parameter);
+    std::string name() const;
 private:
-    std::shared_ptr<jni::jobject_t> deviceStateChangedGlobalSubscriberRef;
+    std::string mName;
 };
 
 template<>
-constexpr const char *jni::java_class_name<JniDeviceWrap*>() { return "ru/neurotech/neurosdk/Device"; };
+constexpr const char *jni::java_class_name<ParameterType>() {
+    return "ru/neurotech/neurosdk/parameters/ParameterType";
+}
 
 template<>
-constexpr const char *jni::constructor_signature<JniDeviceWrap*>() { return "(J)V"; };
+template<>
+jni::java_object<ParameterType>::java_object(const ParameterType &);
 
-#endif //ANDROID_JNI_NEURO_DEVICE_WRAP_H
+#endif //ANDROID_JNI_PARAM_TYPE_WRAP_H

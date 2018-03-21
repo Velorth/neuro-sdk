@@ -133,7 +133,7 @@ std::vector<Command> CallibriCommonParameters::availableCommands() const {
     return mAvailableCommands;
 }
 
-std::vector<std::pair<Parameter, ParamAccess>> CallibriCommonParameters::availableParameters() const {
+std::vector<ParamPair> CallibriCommonParameters::availableParameters() const {
     return mAvailableParameters;
 }
 
@@ -154,7 +154,7 @@ bool CallibriCommonParameters::syncParameters(){
         mAvailableCommands.clear();
         mAvailableParameters.clear();
         mAvailableParameters.push_back({Parameter::Name, ParamAccess::Read});
-        mAvailableParameters.push_back({Parameter::State, ParamAccess::Read});
+        mAvailableParameters.push_back({Parameter::State, ParamAccess::ReadNotify});
         mAvailableParameters.push_back({Parameter::Address, ParamAccess::Read});
         mAvailableParameters.push_back({Parameter::SerialNumber, ParamAccess::Read});
         mAvailableParameters.push_back({Parameter::FirmwareMode, ParamAccess::Read});

@@ -1,8 +1,8 @@
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "wrappers/channels/jni_signal_channel_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "wrappers/jni_device_wrap.h"
-#include "wrappers/jni_device_param_wrap.h"
+#include "wrappers/device/jni_device_wrap.h"
+#include "wrappers/device/jni_device_param_wrap.h"
 #include "jni_logger.h"
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {

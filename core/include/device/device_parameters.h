@@ -3,6 +3,7 @@
 
 #include "ma_device_params.h"
 #include "signal_device_params.h"
+#include <utility>
 
 namespace Neuro {
 
@@ -49,12 +50,16 @@ enum class Parameter {
 
 enum class ParamAccess {
     Read,
-    ReadWrite
+    ReadWrite,
+    ReadNotify
 };
 
 template <Parameter>
 struct ParamValue;
 
+using ParamPair = std::pair<Parameter, ParamAccess>;
+
 }
+
 
 #endif // DEVICE_PARAMETERS_H

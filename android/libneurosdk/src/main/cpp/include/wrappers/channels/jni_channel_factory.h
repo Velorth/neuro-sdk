@@ -17,7 +17,7 @@
 #ifndef ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
 #define ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
 
-#include "wrappers/jni_device_wrap.h"
+#include "wrappers/device/jni_device_wrap.h"
 
 template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device){
@@ -28,11 +28,7 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device){
         return reinterpret_cast<jlong>(batteryChannelWrap);
     }
     catch (std::exception &e){
-        auto exceptionClass = env->FindClass("java/lang/IllegalArgumentException");
-        if (exceptionClass == nullptr) {
-            return 0;
-        }
-        env->ThrowNew(exceptionClass, e.what());
+        jni::java_throw(env, "java/lang/IllegalArgumentException", e);
         return 0;
     }
 }

@@ -28,7 +28,7 @@ std::vector<Command> Device::commands() const {
     return mImpl->commands();
 }
 
-std::vector<std::pair<Parameter, ParamAccess>> Device::parameters() const {
+std::vector<ParamPair> Device::parameters() const {
     Expects(mImpl != nullptr);
     return mImpl->parameters();
 }

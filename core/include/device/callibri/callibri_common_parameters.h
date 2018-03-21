@@ -33,13 +33,13 @@ public:
     bool setADCInputState(typename ParamValue<Parameter::ADCInputState>::Type);
     std::vector<ChannelInfo> availableChannels() const;
     std::vector<Command> availableCommands() const;
-    std::vector<std::pair<Parameter, ParamAccess>> availableParameters() const;
+    std::vector<ParamPair> availableParameters() const;
 
 private:
     std::shared_ptr<CallibriRequestHandler> mRequestHandler;
     std::vector<ChannelInfo> mAvailableChannels;
     std::vector<Command> mAvailableCommands;
-    std::vector<std::pair<Parameter, ParamAccess>> mAvailableParameters;
+    std::vector<ParamPair> mAvailableParameters;
     unsigned long mCallibriAddress;
 
     typename ParamValue<Parameter::HardwareFilterState>::Type mHardwareFilterState;

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include "wrappers/jni_device_wrap.h"
-#include "wrappers/jni_device_param_wrap.h"
+#include "wrappers/device/jni_device_wrap.h"
+#include "wrappers/device/jni_device_param_wrap.h"
+#include "wrappers/channels/jni_channel_info_wrap.h"
 
 extern "C"
 {
@@ -49,22 +50,47 @@ Java_ru_neurotech_neurosdk_Device_disconnect(JNIEnv *env, jobject instance) {
 
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_channels(JNIEnv *env, jobject instance) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
+    auto deviceChannels = devicePtr->channels();
+    if (deviceChannels.size() > std::numeric_limits<jsize>::max()) {
+        jni::java_throw(env,
+                        "java/lang/ArrayIndexOutOfBoundsException",
+                        std::runtime_error("Channels array is too big"));
+        return nullptr;
+    }
+    auto commandClass = jni::java_object<Neuro::ChannelInfo>::java_class();
+    auto commandsArray = env->NewObjectArray(static_cast<jsize>(deviceChannels.size()),
+                                             commandClass,
+                                             NULL);
 
-    // TODO
+    for (auto it = deviceChannels.begin(); it != deviceChannels.end(); ++it) {
+        env->SetObjectArrayElement(commandsArray,
+                                   static_cast<jsize>(it - deviceChannels.begin()),
+                                   env->NewLocalRef(jni::java_object<Neuro::ChannelInfo>(*it)));
+    }
 
+    return commandsArray;
 }
 
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_commands(JNIEnv *env, jobject instance) {
-
     auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     auto deviceCommands = devicePtr->commands();
-    auto commandEnum = env->FindClass("ru/neurotech/neurosdk/parameters/Command");
-    auto commandsArray = env->NewObjectArray(deviceCommands.size(), commandEnum, NULL);
+    if (deviceCommands.size() > std::numeric_limits<jsize>::max()) {
+        jni::java_throw(env,
+                        "java/lang/ArrayIndexOutOfBoundsException",
+                        std::runtime_error("Commands array is too big"));
+        return nullptr;
+    }
+    auto commandClass = jni::java_object<Neuro::Command>::java_class();
+    auto commandsArray = env->NewObjectArray(static_cast<jsize>(deviceCommands.size()),
+                                             commandClass,
+                                             NULL);
 
     for (auto it = deviceCommands.begin(); it != deviceCommands.end(); ++it) {
-
-       // env->SetObjectArrayElement(commandsArray, it - deviceCommands.begin(), commandEnumValue);
+       env->SetObjectArrayElement(commandsArray,
+                                  static_cast<jsize>(it - deviceCommands.begin()),
+                                  env->NewLocalRef(jni::java_object<Neuro::Command>(*it)));
     }
 
     return commandsArray;
@@ -94,9 +120,27 @@ Java_ru_neurotech_neurosdk_Device_execute(JNIEnv *env, jobject instance, jobject
 
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_parameters(JNIEnv *env, jobject instance) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
+    auto deviceParams = devicePtr->parameters();
+    if (deviceParams.size() > std::numeric_limits<jsize>::max()) {
+        jni::java_throw(env,
+                        "java/lang/ArrayIndexOutOfBoundsException",
+                        std::runtime_error("Commands array is too big"));
+        return nullptr;
+    }
+    using param_pair = typename decltype(deviceParams)::value_type;
+    auto paramsClass = jni::java_object<param_pair>::java_class();
+    auto paramsArray = env->NewObjectArray(static_cast<jsize>(deviceParams.size()),
+                                             paramsClass,
+                                             NULL);
 
-    // TODO
+    for (auto it = deviceParams.begin(); it != deviceParams.end(); ++it) {
+        env->SetObjectArrayElement(paramsArray,
+                                   static_cast<jsize>(it - deviceParams.begin()),
+                                   env->NewLocalRef(jni::java_object<param_pair>(*it)));
+    }
 
+    return paramsArray;
 }
 
 /*JNIEXPORT jobjectArray JNICALL

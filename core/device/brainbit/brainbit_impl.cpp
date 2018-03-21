@@ -35,10 +35,10 @@ std::vector<Command> BrainbitImpl::commands() const {
                 Command::StopResist };
 }
 
-std::vector<std::pair<Parameter, ParamAccess> > BrainbitImpl::parameters() const {
+std::vector<ParamPair > BrainbitImpl::parameters() const {
     return { { Parameter::Name, ParamAccess::Read },
         { Parameter::Address, ParamAccess::Read },
-        { Parameter::State, ParamAccess::Read },
+        { Parameter::State, ParamAccess::ReadNotify },
         { Parameter::FirmwareMode, ParamAccess::ReadWrite },
         { Parameter::SamplingFrequency, ParamAccess::Read },
         { Parameter::Gain, ParamAccess::Read },

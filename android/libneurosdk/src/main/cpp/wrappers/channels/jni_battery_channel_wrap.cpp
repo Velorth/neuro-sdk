@@ -1,6 +1,6 @@
 #include "saturation_cast.h"
 #include "wrappers/channels/jni_channel_factory.h"
-#include "wrappers/jni_device_wrap.h"
+#include "wrappers/device/jni_device_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "channels/battery_channel.h"
 
@@ -53,11 +53,7 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_setSamplingFrequency(JNIEnv *
         batteryChannelWrap->setSamplingFrequency(frequency);
     }
     catch (std::runtime_error &e) {
-        auto exceptionClass = env->FindClass("java/lang/UnsupportedOperationException");
-        if (exceptionClass == nullptr) {
-            return;
-        }
-        env->ThrowNew(exceptionClass, e.what());
+        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
         return;
     }
 }
@@ -88,11 +84,9 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject
     auto data = batteryChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
                                              saturation_cast<Neuro::data_length_t>(length));
     if (data.size() > std::numeric_limits<jsize>::max()) {
-        auto exceptionClass = env->FindClass("java/lang/ArrayIndexOutOfBoundsException");
-        if (exceptionClass == nullptr) {
-            return nullptr;
-        }
-        env->ThrowNew(exceptionClass, "Requested data array is too big");
+        jni::java_throw(env,
+                        "java/lang/ArrayIndexOutOfBoundsException",
+                        std::runtime_error("Requested data array is too big"));
         return nullptr;
     }
 

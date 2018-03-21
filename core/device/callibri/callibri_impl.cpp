@@ -36,7 +36,7 @@ std::vector<Command> CallibriImpl::commands() const {
     return mCommonParams->availableCommands();
 }
 
-std::vector<std::pair<Parameter, ParamAccess> > CallibriImpl::parameters() const {
+std::vector<ParamPair> CallibriImpl::parameters() const {
     return mCommonParams->availableParameters();
 }
 

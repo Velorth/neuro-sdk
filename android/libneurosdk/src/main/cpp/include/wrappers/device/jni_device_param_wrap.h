@@ -56,4 +56,20 @@ template<>
 template<>
 jni::java_object<Neuro::ParamAccess>::java_object(const Neuro::ParamAccess &);
 
+template<>
+constexpr const char *jni::java_class_name<Neuro::ParamPair>() {
+    return "ru/neurotech/neurosdk/parameters/Parameter";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::ParamPair>() {
+    return "(Lru/neurotech/neurosdk/parameters/ParameterName;"
+            "Lru/neurotech/neurosdk/parameters/ParameterAccess;"
+            "Lru/neurotech/neurosdk/parameters/ParameterType;)V";
+};
+
+template<>
+template<>
+jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &);
+
 #endif //ANDROID_JNI_DEVICE_PARAM_WRAP_H

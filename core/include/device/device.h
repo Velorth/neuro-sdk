@@ -25,7 +25,7 @@ public:
     void disconnect();
     std::vector<ChannelInfo> channels() const;
     std::vector<Command> commands() const;
-    std::vector<std::pair<Parameter, ParamAccess>> parameters() const;
+    std::vector<ParamPair> parameters() const;
     bool execute(Command);
     void setParamChangedCallback(std::function<void(Parameter)>);
 

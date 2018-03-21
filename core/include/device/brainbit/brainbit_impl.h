@@ -15,7 +15,7 @@ public:
 
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;
-    std::vector<std::pair<Parameter, ParamAccess> > parameters() const override;
+    std::vector<std::pair<Parameter, ParamAccess>> parameters() const override;
     void setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
     int batteryChargePercents() override;
