@@ -20,42 +20,81 @@
 #include "device/device_parameters.h"
 #include "java_environment.h"
 
+/**
+ * DeviceState enum
+ */
 template<>
 constexpr const char *jni::java_class_name<Neuro::DeviceState>() {
     return "ru/neurotech/neurosdk/parameters/types/DeviceState";
 }
 
 template<>
-template<>
-jni::java_object<Neuro::DeviceState>::java_object(const Neuro::DeviceState &);
+const std::map<Neuro::DeviceState, std::string>
+jni::enum_name_map<Neuro::DeviceState>::mEnumToNameMap;
 
+template<>
+const std::map<std::string, Neuro::DeviceState>
+jni::enum_name_map<Neuro::DeviceState>::mNameToEnumMap;
+
+
+
+/**
+ * Command enum
+ */
 template<>
 constexpr const char *jni::java_class_name<Neuro::Command>() {
     return "ru/neurotech/neurosdk/parameters/Command";
 }
 
 template<>
-template<>
-jni::java_object<Neuro::Command>::java_object(const Neuro::Command &);
+const std::map<Neuro::Command, std::string>
+jni::enum_name_map<Neuro::Command>::mEnumToNameMap;
 
+template<>
+const std::map<std::string, Neuro::Command>
+jni::enum_name_map<Neuro::Command>::mNameToEnumMap;
+
+
+
+/**
+ * Parameter enum
+ */
 template<>
 constexpr const char *jni::java_class_name<Neuro::Parameter>() {
     return "ru/neurotech/neurosdk/parameters/ParameterName";
 }
 
 template<>
-template<>
-jni::java_object<Neuro::Parameter>::java_object(const Neuro::Parameter &);
+const std::map<Neuro::Parameter, std::string>
+jni::enum_name_map<Neuro::Parameter>::mEnumToNameMap;
 
+template<>
+const std::map<std::string, Neuro::Parameter>
+jni::enum_name_map<Neuro::Parameter>::mNameToEnumMap;
+
+
+
+/**
+ * ParamAccess enum
+ */
 template<>
 constexpr const char *jni::java_class_name<Neuro::ParamAccess>() {
     return "ru/neurotech/neurosdk/parameters/ParameterAccess";
 }
 
 template<>
-template<>
-jni::java_object<Neuro::ParamAccess>::java_object(const Neuro::ParamAccess &);
+const std::map<Neuro::ParamAccess, std::string>
+jni::enum_name_map<Neuro::ParamAccess>::mEnumToNameMap;
 
+template<>
+const std::map<std::string, Neuro::ParamAccess>
+jni::enum_name_map<Neuro::ParamAccess>::mNameToEnumMap;
+
+
+
+/**
+ * Pair of parameter and access
+ */
 template<>
 constexpr const char *jni::java_class_name<Neuro::ParamPair>() {
     return "ru/neurotech/neurosdk/parameters/Parameter";

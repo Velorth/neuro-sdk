@@ -16,6 +16,7 @@
 
 package ru.neurotech.neurosdk;
 
+import ru.neurotech.common.Assert;
 import ru.neurotech.common.SubscribersNotifier;
 import ru.neurotech.neurosdk.channels.ChannelInfo;
 import ru.neurotech.neurosdk.parameters.Command;
@@ -32,6 +33,7 @@ public class Device {
 
     private Device(long nativeObjPtr) {
         mNativeObjPtr = nativeObjPtr;
+        Assert.ensures(mNativeObjPtr != 0, "Device pointer is null");
         init();
     }
 
@@ -46,7 +48,7 @@ public class Device {
     /**
      * Subscribe this event to receive notifications about changes of device parameters
      */
-    public final SubscribersNotifier<DeviceState> parameterChanged = new SubscribersNotifier<>();
+    public final SubscribersNotifier<ParameterName> parameterChanged = new SubscribersNotifier<>();
 
     /**
      * Tries to establish connection with device

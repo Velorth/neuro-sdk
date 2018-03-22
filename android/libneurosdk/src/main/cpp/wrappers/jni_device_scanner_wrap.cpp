@@ -38,13 +38,13 @@ Java_ru_neurotech_neurosdk_DeviceScanner_create(JNIEnv *env,
                 javaOnScanStateChanged(globalSubscriberRef, isScanning);
             });
     neuroConnectionPtr->subscribeDeviceFound(
-            [globalSubscriberRef](std::shared_ptr<Neuro::Device> device) {
+            [globalSubscriberRef](std::unique_ptr<Neuro::Device> device) {
                 //here we have to pass heap allocated shared_ptr to callback function
                 //to be sure that shared_ptr and object, managed by it will be alive
                 //as long as managed code needs
                 auto log = LoggerFactory::getCurrentPlatformLogger();
                 log->debug("[%s] On device found", __FUNCTION__);
-                deviceFoundCallback<JniDeviceWrap>(globalSubscriberRef, device);
+                deviceFoundCallback<JniDeviceWrap>(globalSubscriberRef, std::move(device));
             });
     return reinterpret_cast<jlong>(neuroConnectionPtr);
 }
@@ -60,8 +60,6 @@ Java_ru_neurotech_neurosdk_DeviceScanner_deleteNative(JNIEnv *env,
 JNIEXPORT void JNICALL
 Java_ru_neurotech_neurosdk_DeviceScanner_startScan__JI(JNIEnv *env, jobject instance,
                                                              jlong objPtr, jint timeout) {
-    __android_log_print(ANDROID_LOG_VERBOSE, "NeuroConnectionWrap",
-                        "Start scan. DeviceScanner ptr is %ld", objPtr);
     auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
     neuroConnection->startScan(timeout);
 }
@@ -84,7 +82,7 @@ Java_ru_neurotech_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobjec
     auto devicePtr = neuroConnection->findDeviceByAddress(address);
     if (!devicePtr) return NULL;
 
-    auto device = new JniDeviceWrap(std::shared_ptr<Neuro::Device>(devicePtr.release()));
+    auto device = new JniDeviceWrap(std::move(devicePtr));
     jni::java_object<decltype(device)> deviceWrapObj(device);
     env->ReleaseStringUTFChars(address_, address);
 

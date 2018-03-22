@@ -2,198 +2,120 @@
 #include "wrappers/device/jni_param_types_wrap.h"
 
 template<>
-template<>
-jni::java_object<Neuro::DeviceState>::java_object(const Neuro::DeviceState &state){
-    call_in_attached_thread([=](auto env) {
-        switch (state) {
-            case Neuro::DeviceState::Connected: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::DeviceState>(env, "Connected"));
-                break;
-            }
-            case Neuro::DeviceState::Disconnected: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::DeviceState>(env, "Disconnected"));
-                break;
-            }
-            default:
-                throw std::runtime_error("Unresolved state enum value");
-        }
-    });
-}
+const std::map<Neuro::DeviceState, std::string>
+jni::enum_name_map<Neuro::DeviceState>::mEnumToNameMap = []() {
+    return std::map<Neuro::DeviceState, std::string>{
+            {Neuro::DeviceState::Connected,    "Connected"},
+            {Neuro::DeviceState::Disconnected, "Disconnected"}
+    };
+}();
 
 template<>
-template<>
-jni::java_object<Neuro::Command>::java_object(const Neuro::Command &cmd){
-    call_in_attached_thread([=](auto env) {
-        switch (cmd) {
-            case Neuro::Command::StartSignal: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StartSignal"));
-                break;
-            }
-            case Neuro::Command::StopSignal: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StopSignal"));
-                break;
-            }
-            case Neuro::Command::StartResist: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StartResist"));
-                break;
-            }
-            case Neuro::Command::StopResist: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StopResist"));
-                break;
-            }
-            case Neuro::Command::StartMEMS: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StartMEMS"));
-                break;
-            }
-            case Neuro::Command::StopMEMS: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StopMEMS"));
-                break;
-            }
-            case Neuro::Command::StartRespiration: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StartRespiration"));
-                break;
-            }
-            case Neuro::Command::StopRespiration: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StopRespiration"));
-                break;
-            }
-            case Neuro::Command::StartStimulation: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "StartStimulation"));
-                break;
-            }
-            case Neuro::Command::EnableMotionAssistant: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Command>(env, "EnableMotionAssistant"));
-                break;
-            }
-            default:
-                throw std::runtime_error("Unresolved command enum value");
-        }
-    });
-}
+const std::map<std::string, Neuro::DeviceState>
+jni::enum_name_map<Neuro::DeviceState>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::DeviceState>{
+            {"Connected",    Neuro::DeviceState::Connected},
+            {"Disconnected", Neuro::DeviceState::Disconnected}
+    };
+}();
 
 template<>
-template<>
-jni::java_object<Neuro::Parameter>::java_object(const Neuro::Parameter &param){
-    call_in_attached_thread([=](auto env) {
-        switch (param) {
-            case Neuro::Parameter::State: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "State"));
-                break;
-            }
-            case Neuro::Parameter::Name: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "Name"));
-                break;
-            }
-            case Neuro::Parameter::Address: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "Address"));
-                break;
-            }
-            case Neuro::Parameter::SerialNumber: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "SerialNumber"));
-                break;
-            }
-            case Neuro::Parameter::FirmwareMode: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "FirmwareMode"));
-                break;
-            }
-            case Neuro::Parameter::SamplingFrequency: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "SamplingFrequency"));
-                break;
-            }
-            case Neuro::Parameter::Gain: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "Gain"));
-                break;
-            }
-            case Neuro::Parameter::Offset: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "Offset"));
-                break;
-            }
-            case Neuro::Parameter::HardwareFilterState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "HardwareFilterState"));
-                break;
-            }
-            case Neuro::Parameter::ExternalSwitchState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "ExternalSwitchState"));
-                break;
-            }
-            case Neuro::Parameter::ADCInputState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "ADCInputState"));
-                break;
-            }
-            case Neuro::Parameter::StimulatorState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "StimulatorState"));
-                break;
-            }
-            case Neuro::Parameter::StimulatorParamPack: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "StimulatorParamPack"));
-                break;
-            }
-            case Neuro::Parameter::MotionAssistantState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "MotionAssistantState"));
-                break;
-            }
-            case Neuro::Parameter::MotionAssistantParamPack: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::Parameter>(env, "MotionAssistantParamPack"));
-                break;
-            }
-            default:
-                throw std::runtime_error("Unresolved enum value");
-        }
-    });
-}
+const std::map<Neuro::Command, std::string>
+jni::enum_name_map<Neuro::Command>::mEnumToNameMap = []() {
+    return std::map<Neuro::Command, std::string>{
+            {Neuro::Command::StartSignal,           "StartSignal"},
+            {Neuro::Command::StopSignal,            "StopSignal"},
+            {Neuro::Command::StartResist,           "StartResist"},
+            {Neuro::Command::StopResist,            "StopResist"},
+            {Neuro::Command::StartMEMS,             "StartMEMS"},
+            {Neuro::Command::StopMEMS,              "StopMEMS"},
+            {Neuro::Command::StartRespiration,      "StartRespiration"},
+            {Neuro::Command::StopRespiration,       "StopRespiration"},
+            {Neuro::Command::StartStimulation,      "StartStimulation"},
+            {Neuro::Command::EnableMotionAssistant, "EnableMotionAssistant"}
+    };
+}();
 
 template<>
+const std::map<std::string, Neuro::Command>
+jni::enum_name_map<Neuro::Command>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::Command>{
+            {"StartSignal",           Neuro::Command::StartSignal},
+            {"StopSignal",            Neuro::Command::StopSignal},
+            {"StartResist",           Neuro::Command::StartResist},
+            {"StopResist",            Neuro::Command::StopResist},
+            {"StartMEMS",             Neuro::Command::StartMEMS},
+            {"StopMEMS",              Neuro::Command::StopMEMS},
+            {"StartRespiration",      Neuro::Command::StartRespiration},
+            {"StopRespiration",       Neuro::Command::StopRespiration},
+            {"StartStimulation",      Neuro::Command::StartStimulation},
+            {"EnableMotionAssistant", Neuro::Command::EnableMotionAssistant}
+    };
+}();
+
 template<>
-jni::java_object<Neuro::ParamAccess>::java_object(const Neuro::ParamAccess &access){
-    call_in_attached_thread([=](auto env) {
-        switch (access) {
-            case Neuro::ParamAccess::Read: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::DeviceState>(env, "Read"));
-                break;
-            }
-            case Neuro::ParamAccess::ReadWrite: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::DeviceState>(env, "ReadWrite"));
-                break;
-            }
-            case Neuro::ParamAccess::ReadNotify: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::DeviceState>(env, "ReadNotify"));
-                break;
-            }
-            default:
-                throw std::runtime_error("Unresolved state enum value");
-        }
-    });
-}
+const std::map<Neuro::Parameter, std::string>
+jni::enum_name_map<Neuro::Parameter>::mEnumToNameMap = []() {
+    return std::map<Neuro::Parameter, std::string>{
+            {Neuro::Parameter::State,                    "State"},
+            {Neuro::Parameter::Name,                     "Name"},
+            {Neuro::Parameter::Address,                  "Address"},
+            {Neuro::Parameter::SerialNumber,             "SerialNumber"},
+            {Neuro::Parameter::FirmwareMode,             "FirmwareMode"},
+            {Neuro::Parameter::SamplingFrequency,        "SamplingFrequency"},
+            {Neuro::Parameter::Gain,                     "Gain"},
+            {Neuro::Parameter::Offset,                   "Offset"},
+            {Neuro::Parameter::HardwareFilterState,      "HardwareFilterState"},
+            {Neuro::Parameter::ExternalSwitchState,      "ExternalSwitchState"},
+            {Neuro::Parameter::ADCInputState,            "ADCInputState"},
+            {Neuro::Parameter::StimulatorState,          "StimulatorState"},
+            {Neuro::Parameter::StimulatorParamPack,      "StimulatorParamPack"},
+            {Neuro::Parameter::MotionAssistantState,     "MotionAssistantState"},
+            {Neuro::Parameter::MotionAssistantParamPack, "MotionAssistantParamPack"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::Parameter>
+jni::enum_name_map<Neuro::Parameter>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::Parameter>{
+            {"State",                    Neuro::Parameter::State},
+            {"Name",                     Neuro::Parameter::Name},
+            {"Address",                  Neuro::Parameter::Address},
+            {"SerialNumber",             Neuro::Parameter::SerialNumber},
+            {"FirmwareMode",             Neuro::Parameter::FirmwareMode},
+            {"SamplingFrequency",        Neuro::Parameter::SamplingFrequency},
+            {"Gain",                     Neuro::Parameter::Gain},
+            {"Offset",                   Neuro::Parameter::Offset},
+            {"HardwareFilterState",      Neuro::Parameter::HardwareFilterState},
+            {"ExternalSwitchState",      Neuro::Parameter::ExternalSwitchState},
+            {"ADCInputState",            Neuro::Parameter::ADCInputState},
+            {"StimulatorState",          Neuro::Parameter::StimulatorState},
+            {"StimulatorParamPack",      Neuro::Parameter::StimulatorParamPack},
+            {"MotionAssistantState",     Neuro::Parameter::MotionAssistantState},
+            {"MotionAssistantParamPack", Neuro::Parameter::MotionAssistantParamPack}
+    };
+}();
+
+template<>
+const std::map<Neuro::ParamAccess, std::string>
+jni::enum_name_map<Neuro::ParamAccess>::mEnumToNameMap = []() {
+    return std::map<Neuro::ParamAccess, std::string>{
+            {Neuro::ParamAccess::Read,       "Read"},
+            {Neuro::ParamAccess::ReadWrite,  "ReadWrite"},
+            {Neuro::ParamAccess::ReadNotify, "ReadNotify"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::ParamAccess>
+jni::enum_name_map<Neuro::ParamAccess>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::ParamAccess>{
+            {"Read",       Neuro::ParamAccess::Read},
+            {"ReadWrite",  Neuro::ParamAccess::ReadWrite},
+            {"ReadNotify", Neuro::ParamAccess::ReadNotify}
+    };
+}();
 
 template<>
 template<>
@@ -211,3 +133,4 @@ jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &param_pa
                                                      paramType));
     });
 }
+

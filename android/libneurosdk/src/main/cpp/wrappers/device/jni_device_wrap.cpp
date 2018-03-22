@@ -26,7 +26,7 @@ JNICALL
 Java_ru_neurotech_neurosdk_Device_init(JNIEnv *env, jobject instance) {
 
     auto deviceWrap = extract_pointer<JniDeviceWrap>(env, instance);
-    deviceWrap->subscribeStateChanged(
+    deviceWrap->subscribeParameterChanged(
             find_notifier<decltype(deviceWrap)>(instance, "parameterChanged"));
 }
 
@@ -52,122 +52,52 @@ JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_channels(JNIEnv *env, jobject instance) {
     auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     auto deviceChannels = devicePtr->channels();
-    if (deviceChannels.size() > std::numeric_limits<jsize>::max()) {
-        jni::java_throw(env,
-                        "java/lang/ArrayIndexOutOfBoundsException",
-                        std::runtime_error("Channels array is too big"));
-        return nullptr;
-    }
-    auto commandClass = jni::java_object<Neuro::ChannelInfo>::java_class();
-    auto commandsArray = env->NewObjectArray(static_cast<jsize>(deviceChannels.size()),
-                                             commandClass,
-                                             NULL);
-
-    for (auto it = deviceChannels.begin(); it != deviceChannels.end(); ++it) {
-        env->SetObjectArrayElement(commandsArray,
-                                   static_cast<jsize>(it - deviceChannels.begin()),
-                                   env->NewLocalRef(jni::java_object<Neuro::ChannelInfo>(*it)));
-    }
-
-    return commandsArray;
+    return jni::to_obj_array(env, deviceChannels);
 }
 
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_commands(JNIEnv *env, jobject instance) {
     auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     auto deviceCommands = devicePtr->commands();
-    if (deviceCommands.size() > std::numeric_limits<jsize>::max()) {
-        jni::java_throw(env,
-                        "java/lang/ArrayIndexOutOfBoundsException",
-                        std::runtime_error("Commands array is too big"));
-        return nullptr;
-    }
-    auto commandClass = jni::java_object<Neuro::Command>::java_class();
-    auto commandsArray = env->NewObjectArray(static_cast<jsize>(deviceCommands.size()),
-                                             commandClass,
-                                             NULL);
-
-    for (auto it = deviceCommands.begin(); it != deviceCommands.end(); ++it) {
-       env->SetObjectArrayElement(commandsArray,
-                                  static_cast<jsize>(it - deviceCommands.begin()),
-                                  env->NewLocalRef(jni::java_object<Neuro::Command>(*it)));
-    }
-
-    return commandsArray;
-}
-
-JNIEXPORT jboolean JNICALL
-Java_ru_neurotech_neurosdk_Device_setParam(JNIEnv *env, jobject instance, jobject param,
-                                           jobject value) {
-
-    // TODO
-
-}
-
-JNIEXPORT jobject JNICALL
-Java_ru_neurotech_neurosdk_Device_readParam(JNIEnv *env, jobject instance, jobject param) {
-
-    // TODO
-
-}
-
-JNIEXPORT jboolean JNICALL
-Java_ru_neurotech_neurosdk_Device_execute(JNIEnv *env, jobject instance, jobject cmd) {
-
-    // TODO
-
+    return jni::to_obj_array(env, deviceCommands);
 }
 
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_Device_parameters(JNIEnv *env, jobject instance) {
     auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     auto deviceParams = devicePtr->parameters();
-    if (deviceParams.size() > std::numeric_limits<jsize>::max()) {
-        jni::java_throw(env,
-                        "java/lang/ArrayIndexOutOfBoundsException",
-                        std::runtime_error("Commands array is too big"));
-        return nullptr;
-    }
-    using param_pair = typename decltype(deviceParams)::value_type;
-    auto paramsClass = jni::java_object<param_pair>::java_class();
-    auto paramsArray = env->NewObjectArray(static_cast<jsize>(deviceParams.size()),
-                                             paramsClass,
-                                             NULL);
-
-    for (auto it = deviceParams.begin(); it != deviceParams.end(); ++it) {
-        env->SetObjectArrayElement(paramsArray,
-                                   static_cast<jsize>(it - deviceParams.begin()),
-                                   env->NewLocalRef(jni::java_object<param_pair>(*it)));
-    }
-
-    return paramsArray;
+    return jni::to_obj_array(env, deviceParams);
 }
 
-/*JNIEXPORT jobjectArray JNICALL
-Java_ru_neurotech_neurodevices_NeuroDevice_getFeatures(JNIEnv *env, jobject instance,
-                                                       jlong objPtr) {
-    auto& devicePtr = *reinterpret_cast<JniDeviceWrap *>(objPtr);
-    auto features = devicePtr->getFeatures();
-    auto featureEnum = env->FindClass("ru/neurotech/neurodevices/DeviceFeature");
-    auto getFeatureMethod = env->GetStaticMethodID(featureEnum, "fromIntCode",
-                                                   "(I)Lru/neurotech/neurodevices/DeviceFeature;");
+JNIEXPORT jboolean JNICALL
+Java_ru_neurotech_neurosdk_Device_setParam(JNIEnv *env, jobject instance, jobject param,
+                                           jobject value) {
+    auto paramEnum = jni::enumFromJavaObj<Neuro::Parameter>(env, param);
+}
 
-    jobjectArray featuresArray = env->NewObjectArray(features.size(), featureEnum, NULL);
+JNIEXPORT jobject JNICALL
+Java_ru_neurotech_neurosdk_Device_readParam(JNIEnv *env, jobject instance, jobject param) {
+    auto paramEnum = jni::enumFromJavaObj<Neuro::Parameter>(env, param);
+}
 
-    for (auto it = features.begin(); it != features.end(); ++it) {
-        auto intFeature = static_cast<int>(*it);
-        auto featureObj = env->CallStaticObjectMethod(featureEnum, getFeatureMethod, intFeature);
-        env->SetObjectArrayElement(featuresArray, it - features.begin(), featureObj);
+JNIEXPORT jboolean JNICALL
+Java_ru_neurotech_neurosdk_Device_execute(JNIEnv *env, jobject instance, jobject cmd) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
+    try {
+        auto result = devicePtr->execute(jni::enumFromJavaObj<Neuro::Command>(env, cmd));
+        return static_cast<jboolean>(result);
     }
-
-    return featuresArray;
-}*/
+    catch (std::runtime_error &e){
+        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
+        return JNI_FALSE;
+    }
+}
 
 }
 
-void JniDeviceWrap::subscribeStateChanged(jobject stateChangedSubscriberRef) {
-    deviceStateChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = deviceStateChangedGlobalSubscriberRef;
+void JniDeviceWrap::subscribeParameterChanged(jobject stateChangedSubscriberRef) {
+    parameterChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
+    std::weak_ptr<jni::jobject_t> weakReference = parameterChangedGlobalSubscriberRef;
     this->object->setParamChangedCallback([weakReference](Neuro::Parameter parameter){
         sendNotification<Neuro::Parameter>(weakReference, parameter);
     });

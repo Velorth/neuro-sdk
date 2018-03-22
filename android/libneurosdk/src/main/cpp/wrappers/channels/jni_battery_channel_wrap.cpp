@@ -41,7 +41,13 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_deleteNative(JNIEnv *env, job
 JNIEXPORT jobject JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_underlyingDevice(JNIEnv *env, jobject instance) {
     auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
-
+    auto devicePtr = batteryChannelWrap->underlyingDevice().lock();
+    if (!devicePtr){
+        return nullptr;
+    }
+    auto deviceWrap = new JniDeviceWrap(devicePtr);
+    jni::java_object<decltype(deviceWrap)> deviceWrapObj(deviceWrap);
+    return env->NewLocalRef(deviceWrapObj);
 }
 
 JNIEXPORT void JNICALL
@@ -77,25 +83,13 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_totalLength(JNIEnv *env, jobj
     return saturation_cast<jlong>(batteryChannelWrap->totalLength());
 }
 
-JNIEXPORT jintArray JNICALL
+JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject instance,
                                                             jlong offset, jlong length) {
     auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     auto data = batteryChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
                                              saturation_cast<Neuro::data_length_t>(length));
-    if (data.size() > std::numeric_limits<jsize>::max()) {
-        jni::java_throw(env,
-                        "java/lang/ArrayIndexOutOfBoundsException",
-                        std::runtime_error("Requested data array is too big"));
-        return nullptr;
-    }
-
-    jintArray dataArray = env->NewIntArray(static_cast<jsize>(data.size()));
-    if (dataArray == nullptr)
-        return nullptr;
-
-    env->SetIntArrayRegion(dataArray, 0, static_cast<jsize>(data.size()), data.data());
-    return dataArray;
+    return jni::to_obj_array(env, data);
 }
 
 }

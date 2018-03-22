@@ -24,10 +24,10 @@ class JniDeviceWrap : public JniPtrWrap<Neuro::Device> {
 public:
     JniDeviceWrap(object_ptr_t devicePtr) : JniPtrWrap<Neuro::Device>(devicePtr) {}
 
-    void subscribeStateChanged(jobject stateChangedSubscriberRef);
+    void subscribeParameterChanged(jobject stateChangedSubscriberRef);
 
 private:
-    std::shared_ptr<jni::jobject_t> deviceStateChangedGlobalSubscriberRef;
+    std::shared_ptr<jni::jobject_t> parameterChangedGlobalSubscriberRef;
 };
 
 template<>

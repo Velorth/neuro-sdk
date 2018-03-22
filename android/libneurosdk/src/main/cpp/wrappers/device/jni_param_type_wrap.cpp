@@ -5,29 +5,29 @@ std::string getParamTypeName(Neuro::Parameter param) {
         case Neuro::Parameter::Name:
         case Neuro::Parameter::Address:
         case Neuro::Parameter::SerialNumber:
-            return "java/lang/String";
+            return "String";
         case Neuro::Parameter::HardwareFilterState:
         case Neuro::Parameter::StimulatorState:
         case Neuro::Parameter::MotionAssistantState:
-            return "java/lang/Boolean";
+            return "Boolean";
         case Neuro::Parameter::Offset:
-            return "java/lang/Byte";
+            return "Byte";
         case Neuro::Parameter::ExternalSwitchState:
-            return "ru/neurotech/neurosdk/parameters/types/ExternalSwitchInput";
+            return "ExternalSwitchInput";
         case Neuro::Parameter::State:
-            return "ru/neurotech/neurosdk/parameters/types/DeviceState";
+            return "DeviceState";
         case Neuro::Parameter::FirmwareMode:
-            return "ru/neurotech/neurosdk/parameters/types/FirmwareMode";
+            return "FirmwareMode";
         case Neuro::Parameter::SamplingFrequency:
-            return "ru/neurotech/neurosdk/parameters/types/SamplingFrequency";
+            return "SamplingFrequency";
         case Neuro::Parameter::Gain:
-            return "ru/neurotech/neurosdk/parameters/types/Gain";
+            return "Gain";
         case Neuro::Parameter::ADCInputState:
-            return "ru/neurotech/neurosdk/parameters/types/ADCInput";
+            return "ADCInput";
         case Neuro::Parameter::StimulatorParamPack:
-            return "ru/neurotech/neurosdk/parameters/types/StimulationParams";
+            return "StimulationParams";
         case Neuro::Parameter::MotionAssistantParamPack:
-            return "ru/neurotech/neurosdk/parameters/types/MotionAssistantParams";
+            return "MotionAssistantParams";
     }
 }
 
@@ -44,6 +44,7 @@ template<>
 jni::java_object<ParameterType>::java_object(const ParameterType &param_type):
     nativeObj(param_type){
     call_in_attached_thread([=](auto env){
-
+        javaObj = make_global_ref_ptr(
+                getEnumFieldRef<ParameterType>(env, param_type.name().c_str()));
     });
 }

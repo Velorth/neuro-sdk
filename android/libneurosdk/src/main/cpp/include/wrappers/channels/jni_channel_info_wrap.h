@@ -26,8 +26,14 @@ constexpr const char *jni::java_class_name<Neuro::ChannelInfo::Type>() {
 }
 
 template<>
+const std::map<Neuro::ChannelInfo::Type, std::string>
+jni::enum_name_map<Neuro::ChannelInfo::Type>::mEnumToNameMap;
+
 template<>
-jni::java_object<Neuro::ChannelInfo::Type>::java_object(const Neuro::ChannelInfo::Type &);
+const std::map<std::string, Neuro::ChannelInfo::Type>
+jni::enum_name_map<Neuro::ChannelInfo::Type>::mNameToEnumMap;
+
+
 
 template<>
 constexpr const char *jni::java_class_name<Neuro::ChannelInfo *>() {
@@ -38,6 +44,8 @@ template<>
 constexpr const char *jni::constructor_signature<Neuro::ChannelInfo *>() {
     return "(J)V";
 }
+
+
 
 template<>
 constexpr const char *jni::java_class_name<Neuro::ChannelInfo>() {

@@ -1,66 +1,38 @@
 #include "wrappers/channels/jni_channel_info_wrap.h"
 
+template<>
+const std::map<Neuro::ChannelInfo::Type, std::string>
+jni::enum_name_map<Neuro::ChannelInfo::Type>::mEnumToNameMap = []() {
+    return std::map<Neuro::ChannelInfo::Type, std::string>{
+            {Neuro::ChannelInfo::Type::Signal,          "Signal"},
+            {Neuro::ChannelInfo::Type::Battery,         "Battery"},
+            {Neuro::ChannelInfo::Type::ElectrodesState, "ElectrodesState"},
+            {Neuro::ChannelInfo::Type::Respiration,     "Respiration"},
+            {Neuro::ChannelInfo::Type::MEMS,            "MEMS"},
+            {Neuro::ChannelInfo::Type::Angle,           "Angle"},
+            {Neuro::ChannelInfo::Type::ConnectionStats, "ConnectionStats"},
+            {Neuro::ChannelInfo::Type::Resistance,      "Resistance"},
+            {Neuro::ChannelInfo::Type::Pedometer,       "Pedometer"},
+            {Neuro::ChannelInfo::Type::Custom,          "Custom"}
+    };
+}();
 
 template<>
-template<>
-jni::java_object<Neuro::ChannelInfo::Type>::java_object(const Neuro::ChannelInfo::Type &type) {
-    call_in_attached_thread([=](auto env) {
-        switch (type) {
-            case Neuro::ChannelInfo::Type::Signal: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Signal"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Battery: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Battery"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::ElectrodesState: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "ElectrodesState"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Respiration: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Respiration"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::MEMS: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "MEMS"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Angle: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Angle"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::ConnectionStats: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "ConnectionStats"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Resistance: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Resistance"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Pedometer: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Pedometer"));
-                break;
-            }
-            case Neuro::ChannelInfo::Type::Custom: {
-                javaObj = make_global_ref_ptr(
-                        getEnumFieldRef<Neuro::ChannelInfo::Type>(env, "Custom"));
-                break;
-            }
-            default:
-                throw std::runtime_error("Unresolved state enum value");
-        }
-    });
-}
+const std::map<std::string, Neuro::ChannelInfo::Type>
+jni::enum_name_map<Neuro::ChannelInfo::Type>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::ChannelInfo::Type>{
+            {"Signal",          Neuro::ChannelInfo::Type::Signal},
+            {"Battery",         Neuro::ChannelInfo::Type::Battery},
+            {"ElectrodesState", Neuro::ChannelInfo::Type::ElectrodesState},
+            {"Respiration",     Neuro::ChannelInfo::Type::Respiration},
+            {"MEMS",            Neuro::ChannelInfo::Type::MEMS},
+            {"Angle",           Neuro::ChannelInfo::Type::Angle},
+            {"ConnectionStats", Neuro::ChannelInfo::Type::ConnectionStats},
+            {"Resistance",      Neuro::ChannelInfo::Type::Resistance},
+            {"Pedometer",       Neuro::ChannelInfo::Type::Pedometer},
+            {"Custom",          Neuro::ChannelInfo::Type::Custom}
+    };
+}();
 
 template<>
 template<>
