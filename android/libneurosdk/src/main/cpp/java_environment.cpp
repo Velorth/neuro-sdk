@@ -62,3 +62,11 @@ std::shared_ptr<jni::jobject_t> jni::make_global_ref_ptr(jobject localRef){
         return std::shared_ptr<jni::jobject_t>(globalRef, delete_global_ref);
     });
 }
+
+template<>
+template<>
+jni::java_object<std::string>::java_object(const std::string &str):nativeObj(str){
+    call_in_attached_thread([=](JNIEnv *env){
+        javaObj = make_global_ref_ptr(env->NewStringUTF(str.c_str()));
+    });
+}

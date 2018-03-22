@@ -105,6 +105,12 @@ constexpr const char *java_class_name<bool>() { return "java/lang/Boolean"; };
 template<>
 constexpr const char *constructor_signature<bool>() { return "(Z)V"; };
 
+template<>
+constexpr const char *java_class_name<unsigned char>() { return "java/lang/Byte"; };
+
+template<>
+constexpr const char *constructor_signature<unsigned char>() { return "(B)V"; };
+
 template<typename T>
 class java_object;
 
@@ -261,5 +267,13 @@ private:
 
 template<typename T>
 jclass java_object<T>::object_class = nullptr;
+
+template<>
+constexpr const char *java_class_name<std::string>() { return "java/lang/String"; };
+
+template<>
+template<>
+jni::java_object<std::string>::java_object(const std::string &);
+
 }
 #endif //ANDROID_JAVA_ENVIRONMENT_H

@@ -77,7 +77,9 @@ Java_ru_neurotech_neurosdk_Device_setParam(JNIEnv *env, jobject instance, jobjec
 
 JNIEXPORT jobject JNICALL
 Java_ru_neurotech_neurosdk_Device_readParam(JNIEnv *env, jobject instance, jobject param) {
+    auto& devicePtr = *extract_pointer<JniDeviceWrap>(env, instance);
     auto paramEnum = jni::enumFromJavaObj<Neuro::Parameter>(env, param);
+    return readDeviceParam(env, **devicePtr, paramEnum);
 }
 
 JNIEXPORT jboolean JNICALL

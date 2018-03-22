@@ -1,3 +1,4 @@
+#include "wrappers/device/jni_param_types_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "wrappers/channels/jni_signal_channel_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
@@ -14,6 +15,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<long>(env);
     jni::initJavaObjClass<double>(env);
     jni::initJavaObjClass<bool>(env);
+    jni::initJavaObjClass<unsigned char>(env);
+    jni::initJavaObjClass<std::string>(env);
     jni::initJavaObjClass<JniDeviceWrap *>(env);
     jni::initJavaObjClass<JniBatteryChannelWrap *>(env);
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);
@@ -22,6 +25,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::Command>(env);
     jni::initJavaObjClass<Neuro::Parameter>(env);
     jni::initJavaObjClass<Neuro::ParamAccess>(env);
+    jni::initJavaObjClass<Neuro::ParamPair>(env);
+    jni::initJavaObjClass<ParameterType>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());

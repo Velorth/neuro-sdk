@@ -17,6 +17,7 @@
 #ifndef ANDROID_JNI_DEVICE_PARAM_WRAP_H
 #define ANDROID_JNI_DEVICE_PARAM_WRAP_H
 
+#include "device/device.h"
 #include "device/device_parameters.h"
 #include "java_environment.h"
 
@@ -110,5 +111,7 @@ constexpr const char *jni::constructor_signature<Neuro::ParamPair>() {
 template<>
 template<>
 jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &);
+
+jobject readDeviceParam(JNIEnv *, const Neuro::Device &, Neuro::Parameter);
 
 #endif //ANDROID_JNI_DEVICE_PARAM_WRAP_H

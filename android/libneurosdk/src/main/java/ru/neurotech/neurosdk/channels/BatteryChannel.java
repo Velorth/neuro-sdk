@@ -13,7 +13,7 @@ public class BatteryChannel extends BaseChannel<Integer> {
 
     protected long mNativeObjPtr = 0;
 
-    private BatteryChannel(Device device) {
+    public BatteryChannel(Device device) {
         mNativeObjPtr = create(device);
         Assert.ensures(mNativeObjPtr != 0,
                 "Battery channel native object is null");

@@ -14,7 +14,7 @@ public class SignalChannel extends BaseChannel<Double> {
 
     protected long mNativeObjPtr = 0;
 
-    private SignalChannel(Device device) {
+    public SignalChannel(Device device) {
         mNativeObjPtr = create(device);
         Assert.ensures(mNativeObjPtr != 0,
                 "Signal channel native object is null");

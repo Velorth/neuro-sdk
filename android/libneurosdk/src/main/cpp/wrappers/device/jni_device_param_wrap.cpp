@@ -1,5 +1,6 @@
 #include "wrappers/device/jni_device_param_wrap.h"
 #include "wrappers/device/jni_param_types_wrap.h"
+#include "device/param_values.h"
 
 template<>
 const std::map<Neuro::DeviceState, std::string>
@@ -132,5 +133,74 @@ jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &param_pa
                                                      paramAccess,
                                                      paramType));
     });
+}
+
+template <Neuro::Parameter Param>
+static jobject readParam(JNIEnv *env, const Neuro::Device &device){
+    auto paramValue = device.readParam<Param>();
+    jni::java_object<typename Neuro::ParamValue<Param>::Type> deviceStateObj(paramValue);
+    return env->NewLocalRef(deviceStateObj);
+}
+
+jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Parameter parameter) {
+    try {
+        switch (parameter) {
+            case Neuro::Parameter::State: {
+                return readParam<Neuro::Parameter::State>(env, device);
+            }
+            case Neuro::Parameter::Name: {
+                return readParam<Neuro::Parameter::Name>(env, device);
+            }
+            case Neuro::Parameter::Address: {
+                return readParam<Neuro::Parameter::Address>(env, device);
+            }
+            /*case Neuro::Parameter::SerialNumber: {
+                return readParam<Neuro::Parameter::SerialNumber>(env, device);
+            }
+            case Neuro::Parameter::FirmwareMode: {
+                return readParam<Neuro::Parameter::FirmwareMode>(env, device);
+            }
+            case Neuro::Parameter::SamplingFrequency: {
+                return readParam<Neuro::Parameter::SamplingFrequency>(env, device);
+            }
+            case Neuro::Parameter::Gain: {
+                return readParam<Neuro::Parameter::Gain>(env, device);
+            }
+            case Neuro::Parameter::Offset: {
+                return readParam<Neuro::Parameter::Offset>(env, device);
+            }
+            case Neuro::Parameter::HardwareFilterState: {
+                return readParam<Neuro::Parameter::HardwareFilterState>(env, device);
+            }
+            case Neuro::Parameter::ExternalSwitchState: {
+                return readParam<Neuro::Parameter::ExternalSwitchState>(env, device);
+            }
+            case Neuro::Parameter::ADCInputState: {
+                return readParam<Neuro::Parameter::ADCInputState>(env, device);
+            }
+            case Neuro::Parameter::StimulatorState: {
+                return readParam<Neuro::Parameter::StimulatorState>(env, device);
+            }
+            case Neuro::Parameter::StimulatorParamPack: {
+                return readParam<Neuro::Parameter::StimulatorParamPack>(env, device);
+            }
+            case Neuro::Parameter::MotionAssistantState: {
+                return readParam<Neuro::Parameter::MotionAssistantState>(env, device);
+            }
+            case Neuro::Parameter::MotionAssistantParamPack: {
+                return readParam<Neuro::Parameter::MotionAssistantParamPack>(env, device);
+            }*/
+            default: {
+                jni::java_throw(env,
+                                "java/lang/UnsupportedOperationException",
+                                std::runtime_error("Parameter not found"));
+                return nullptr;
+            }
+        }
+    }
+    catch (std::runtime_error &e){
+        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
+        return nullptr;
+    }
 }
 
