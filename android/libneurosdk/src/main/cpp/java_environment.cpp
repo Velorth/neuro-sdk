@@ -15,6 +15,7 @@
  */
 
 #include <android/log.h>
+#include <java_environment.h>
 #include "java_environment.h"
 
 JavaVM *jni::java_machine;
@@ -61,6 +62,94 @@ std::shared_ptr<jni::jobject_t> jni::make_global_ref_ptr(jobject localRef){
         auto globalRef = env->NewGlobalRef(localRef);
         return std::shared_ptr<jni::jobject_t>(globalRef, delete_global_ref);
     });
+}
+
+template<>
+std::string jni::get_java_obj_value<std::string>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<std::string>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not a string"));
+        return nullptr;
+    }
+    auto str = static_cast<jstring>(obj);
+    auto chars = env->GetStringUTFChars(str, 0);
+    std::string result(chars);
+    env->ReleaseStringUTFChars(str, chars);
+    return result;
+}
+
+template<>
+int jni::get_java_obj_value<int>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<int>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not of int type"));
+        return 0;
+    }
+    auto getIntMethodID = env->GetMethodID(jni::java_object<int>::java_class(), "intValue", "()I");
+    auto intValue = env->CallIntMethod(obj, getIntMethodID);
+    return intValue;
+}
+
+template<>
+long jni::get_java_obj_value<long>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<long>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not of long type"));
+        return 0;
+    }
+    auto getLongMethodID = env->GetMethodID(jni::java_object<long>::java_class(), "longValue", "()J");
+    auto longValue = env->CallLongMethod(obj, getLongMethodID);
+    return longValue;
+}
+
+template<>
+double jni::get_java_obj_value<double>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<double>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not of double type"));
+        return 0.0;
+    }
+    auto getDoubleMethodID = env->GetMethodID(jni::java_object<double>::java_class(),
+                                            "doubleValue", "()D");
+    auto doubleValue = env->CallDoubleMethod(obj, getDoubleMethodID);
+    return doubleValue;
+}
+
+template<>
+bool jni::get_java_obj_value<bool>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<bool>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not of boolean type"));
+        return false;
+    }
+    auto getBoolMethodID = env->GetMethodID(jni::java_object<bool>::java_class(),
+                                            "booleanValue", "()Z");
+    auto boolValue = env->CallBooleanMethod(obj, getBoolMethodID);
+    return boolValue;
+}
+
+template<>
+unsigned char jni::get_java_obj_value<unsigned char>(JNIEnv *env, jobject obj){
+    if(env->IsInstanceOf(obj, jni::java_object<unsigned char>::java_class()) == JNI_FALSE) {
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("Parameter is not of byte type"));
+        return 0;
+    }
+    auto getByteMethodID = env->GetMethodID(jni::java_object<unsigned char>::java_class(),
+                                            "byteValue", "()B");
+    auto byteValue = env->CallByteMethod(obj, getByteMethodID);
+    return static_cast<unsigned char>(byteValue);
+}
+
+template<>
+std::size_t jni::get_java_obj_value<std::size_t>(JNIEnv *env, jobject size){
+    return static_cast<std::size_t>(get_java_obj_value<long>(env, size));
 }
 
 template<>

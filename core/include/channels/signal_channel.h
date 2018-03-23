@@ -14,6 +14,7 @@ public:
     SignalChannel(std::shared_ptr<Device>);
     ~SignalChannel();
 
+    void setLengthChangedCallback(length_changed_callback_t) noexcept override ;
     data_container readData(data_offset_t, data_length_t) const override;
     data_length_t totalLength() const noexcept override;
     data_length_t bufferSize() const noexcept override;

@@ -19,7 +19,7 @@
 extern "C"
 {
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_DeviceFoundCallback_notifyDeviceFound(JNIEnv *env,
+Java_ru_neurotech_bleconnection_device_DeviceFoundCallback_notifyDeviceFound(JNIEnv *env,
                                                                                 jobject instance,
                                                                                 jlong subscriberPtr,
                                                                                 jobject foundDevice) {

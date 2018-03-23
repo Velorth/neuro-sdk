@@ -19,21 +19,21 @@
 extern "C"
 {
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onConnected__J(JNIEnv *env, jobject instance,
+Java_ru_neurotech_bleconnection_device_BleDeviceCallback_onConnected__J(JNIEnv *env, jobject instance,
                                                                   jlong callbackPtr) {
     auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onConnected();
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onDisconnected__J(JNIEnv *env, jobject instance,
+Java_ru_neurotech_bleconnection_device_BleDeviceCallback_onDisconnected__J(JNIEnv *env, jobject instance,
                                                                   jlong callbackPtr) {
     auto bleDevice = (Neuro::BleDeviceJni *) callbackPtr;
     bleDevice->onDisconnected();
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onBluetoothDeviceError__JI(JNIEnv *env,
+Java_ru_neurotech_bleconnection_device_BleDeviceCallback_onBluetoothDeviceError__JI(JNIEnv *env,
                                                                           jobject instance,
                                                                           jlong callbackPtr,
                                                                           jint error) {
@@ -42,7 +42,7 @@ Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onBluetoothDeviceErr
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onDataReceived(JNIEnv *env, jobject instance,
+Java_ru_neurotech_bleconnection_device_BleDeviceCallback_onDataReceived(JNIEnv *env, jobject instance,
                                                                   jlong callbackPtr,
                                                                   jbyteArray data_, jint length) {
     if (length <= 0) return;
@@ -56,7 +56,7 @@ Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onDataReceived(JNIEn
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurodevices_connection_BleDeviceCallback_onStatusReceived(JNIEnv *env, jobject instance,
+Java_ru_neurotech_bleconnection_device_BleDeviceCallback_onStatusReceived(JNIEnv *env, jobject instance,
                                                                     jlong callbackPtr,
                                                                     jbyteArray statusData_,
                                                                     jint length) {

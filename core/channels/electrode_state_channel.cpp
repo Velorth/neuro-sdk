@@ -83,6 +83,10 @@ public:
         }
     }
 
+    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+
+    }
+
     ElectrodeStateChannel::data_container readData(data_offset_t offset, data_length_t length) const {
         return mBuffer.readFill(offset, length, ElectrodeState::Attached);
     }
@@ -117,6 +121,10 @@ ElectrodeStateChannel::ElectrodeStateChannel(std::shared_ptr<Device> device):
 }
 
 ElectrodeStateChannel::~ElectrodeStateChannel(){}
+
+void ElectrodeStateChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+    mImpl->setLengthChangedCallback(callback);
+}
 
 ElectrodeStateChannel::data_container ElectrodeStateChannel::readData(data_offset_t offset, data_length_t length) const {
     return mImpl->readData(offset, length);

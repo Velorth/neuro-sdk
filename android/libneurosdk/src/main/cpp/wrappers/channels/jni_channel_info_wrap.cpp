@@ -1,4 +1,35 @@
+#include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
+
+extern "C"
+{
+
+JNIEXPORT jstring JNICALL
+Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_getName(JNIEnv *env, jobject instance) {
+    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
+    jni::java_object<std::string> nameObj(infoPtr->getName());
+    return static_cast<jstring>(env->NewLocalRef(nameObj));
+}
+
+JNIEXPORT jobject JNICALL
+Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_getType(JNIEnv *env, jobject instance) {
+    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
+    jni::java_object<Neuro::ChannelInfo::Type> nameObj(infoPtr->getType());
+    return env->NewLocalRef(nameObj);
+}
+
+JNIEXPORT void JNICALL
+Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_setName(JNIEnv *env, jobject instance,
+                                                              jstring name_) {
+    const char *name = env->GetStringUTFChars(name_, 0);
+
+    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
+    infoPtr->setName(name);
+
+    env->ReleaseStringUTFChars(name_, name);
+}
+
+}
 
 template<>
 const std::map<Neuro::ChannelInfo::Type, std::string>

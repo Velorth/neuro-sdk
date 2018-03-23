@@ -64,6 +64,26 @@ BleDeviceInfo::BleDeviceInfo()
                                                                                   DeviceType::Callibri,
                                                                                   DeviceGattType::COLIBRI_WHITE)));
     nameToTypeMap.insert(
+            std::pair<std::string, std::pair<DeviceType, DeviceGattType>>("Callibri_Red",
+                                                                          std::pair<DeviceType, DeviceGattType>(
+                                                                                  DeviceType::Callibri,
+                                                                                  DeviceGattType::COLIBRI_RED)));
+    nameToTypeMap.insert(
+            std::pair<std::string, std::pair<DeviceType, DeviceGattType>>("Callibri_Blue",
+                                                                          std::pair<DeviceType, DeviceGattType>(
+                                                                                  DeviceType::Callibri,
+                                                                                  DeviceGattType::COLIBRI_BLUE)));
+    nameToTypeMap.insert(
+            std::pair<std::string, std::pair<DeviceType, DeviceGattType>>("Callibri_Yellow",
+                                                                          std::pair<DeviceType, DeviceGattType>(
+                                                                                  DeviceType::Callibri,
+                                                                                  DeviceGattType::COLIBRI_YELLOW)));
+    nameToTypeMap.insert(
+            std::pair<std::string, std::pair<DeviceType, DeviceGattType>>("Callibri_White",
+                                                                          std::pair<DeviceType, DeviceGattType>(
+                                                                                  DeviceType::Callibri,
+                                                                                  DeviceGattType::COLIBRI_WHITE)));
+    nameToTypeMap.insert(
             std::pair<std::string, std::pair<DeviceType, DeviceGattType>>("NeuroBLE",
                                                                           std::pair<DeviceType, DeviceGattType>(
                                                                                   DeviceType::Brainbit,

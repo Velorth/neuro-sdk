@@ -21,30 +21,30 @@ namespace Neuro {
 
 enum class MotionAssistantLimb: unsigned char{
 
-    RIGHT_LEG = 0,
-    LEFT_LEG = 1,
-    RIGHT_ARM = 2,
-    LEFT_ARM = 3
+    RightLeg = 0,
+    LeftLeg = 1,
+    RightArm = 2,
+    LeftArm = 3
 };
 
 inline bool parseLimbCode(unsigned char limbByte, MotionAssistantLimb &limb){
 
     switch (limbByte){
 
-        case static_cast<unsigned char>(MotionAssistantLimb::LEFT_ARM):{
-            limb = MotionAssistantLimb::LEFT_ARM;
+        case static_cast<unsigned char>(MotionAssistantLimb::LeftArm):{
+            limb = MotionAssistantLimb::LeftArm;
             return true;
         }
-        case static_cast<unsigned char>(MotionAssistantLimb::LEFT_LEG):{
-            limb = MotionAssistantLimb::LEFT_LEG;
+        case static_cast<unsigned char>(MotionAssistantLimb::LeftLeg):{
+            limb = MotionAssistantLimb::LeftLeg;
             return true;
         }
-        case static_cast<unsigned char>(MotionAssistantLimb::RIGHT_ARM):{
-            limb = MotionAssistantLimb::RIGHT_ARM;
+        case static_cast<unsigned char>(MotionAssistantLimb::RightArm):{
+            limb = MotionAssistantLimb::RightArm;
             return true;
         }
-        case static_cast<unsigned char>(MotionAssistantLimb::RIGHT_LEG):{
-            limb = MotionAssistantLimb::RIGHT_LEG;
+        case static_cast<unsigned char>(MotionAssistantLimb::RightLeg):{
+            limb = MotionAssistantLimb::RightLeg;
             return true;
         }
         default:

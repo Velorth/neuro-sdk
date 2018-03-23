@@ -25,10 +25,7 @@ public:
         return mInfo;
     }
 
-    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-        mLengthChangedCallback = callback;
-    }
-
+    virtual void setLengthChangedCallback(length_changed_callback_t callback) noexcept = 0;
     virtual data_container readData(data_offset_t, data_length_t) const = 0;
     virtual data_length_t totalLength() const noexcept = 0;
     virtual data_length_t bufferSize() const noexcept = 0;
@@ -38,7 +35,6 @@ public:
 
 protected:
     ChannelInfo mInfo;
-    length_changed_callback_t mLengthChangedCallback;
 };
 
 }

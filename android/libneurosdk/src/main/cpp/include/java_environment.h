@@ -166,8 +166,39 @@ Enum enumFromJavaObj(JNIEnv *env, jobject enum_obj){
     auto nameMethodID = env->GetMethodID(commandEnumClass, "name", "()Ljava/lang/String;");
     auto nameString = static_cast<jstring>(env->CallObjectMethod(enum_obj, nameMethodID));
     auto enumName = env->GetStringUTFChars(nameString, nullptr);
-    return jni::enum_name_map<Enum>::value(enumName);
+    auto enumVal = jni::enum_name_map<Enum>::value(enumName);
+    env->ReleaseStringUTFChars(nameString, enumName);
+    return enumVal;
 }
+
+template <typename T>
+std::enable_if_t<!std::is_enum<T>::value, T> get_java_obj_value(JNIEnv *, jobject);
+
+template<typename T>
+std::enable_if_t<std::is_enum<T>::value, T> get_java_obj_value(JNIEnv *env, jobject obj){
+    return enumFromJavaObj<T>(env, obj);
+};
+
+template<>
+std::string get_java_obj_value<std::string>(JNIEnv *, jobject);
+
+template<>
+int get_java_obj_value<int>(JNIEnv *, jobject);
+
+template<>
+long get_java_obj_value<long>(JNIEnv *, jobject);
+
+template<>
+double get_java_obj_value<double>(JNIEnv *, jobject);
+
+template<>
+bool get_java_obj_value<bool>(JNIEnv *, jobject);
+
+template<>
+unsigned char get_java_obj_value<unsigned char>(JNIEnv *, jobject);
+
+template<>
+std::size_t get_java_obj_value<std::size_t>(JNIEnv *, jobject);
 
 template<typename Container>
 jobjectArray to_obj_array(JNIEnv *env, Container container) {

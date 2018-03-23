@@ -29,6 +29,7 @@ public class DeviceFoundCallback {
     }
 
     public void onDeviceFound(BluetoothDevice device) {
+        Log.v("DeviceFoundCallback", String.format("Device found: %s [%s]", device.getName(), device.getAddress()));
         notifyDeviceFound(mNativeObjectPtr, device);
     }
 

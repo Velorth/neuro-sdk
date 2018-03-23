@@ -20,6 +20,10 @@ public:
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
     }
 
+    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+
+    }
+
     SignalChannel::data_container readData(data_offset_t offset, data_length_t length) const {
         auto&& buffer = mDevice->mImpl->signalBuffer();
         return buffer.readFill(offset, length, 0.0);
@@ -61,6 +65,10 @@ SignalChannel::SignalChannel(std::shared_ptr<Device> device) :
 }
 
 SignalChannel::~SignalChannel(){
+}
+
+void SignalChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+    mImpl->setLengthChangedCallback(callback);
 }
 
 SignalChannel::data_container SignalChannel::readData(data_offset_t offset, data_length_t length) const {

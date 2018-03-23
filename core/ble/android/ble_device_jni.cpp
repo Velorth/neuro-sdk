@@ -44,15 +44,15 @@ namespace Neuro {
             //class constructor
             auto gattInfo = deviceInfo->getGattInfo();
             auto gattInfoWrapClass = env->FindClass(
-                    "ru/neurotech/neurodevices/connection/DeviceGattInfo");
+                    "ru/neurotech/bleconnection/device/DeviceGattInfo");
             auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");
             auto gattInfoWrapper = env->NewObject(gattInfoWrapClass,
                                                   gattInfoWrapConstructor,
                                                   (jlong) gattInfo.get());
 
-            auto bleDeviceClass = env->FindClass("ru/neurotech/neurodevices/connection/BleDevice");
+            auto bleDeviceClass = env->FindClass("ru/neurotech/bleconnection/device/BleDevice");
             auto bleDeviceConstructor = env->GetMethodID(bleDeviceClass, "<init>",
-                                                         "(Landroid/bluetooth/BluetoothDevice;Lru/neurotech/neurodevices/connection/DeviceGattInfo;)V");
+                                                         "(Landroid/bluetooth/BluetoothDevice;Lru/neurotech/bleconnection/device/DeviceGattInfo;)V");
             auto bleDevice = env->NewObject(bleDeviceClass, bleDeviceConstructor,
                                             bluetoothDevice, gattInfoWrapper);
 
@@ -60,7 +60,7 @@ namespace Neuro {
 
             //Instantiate callback class
             auto deviceCallbackWrapClass = env->FindClass(
-                    "ru/neurotech/neurodevices/connection/BleDeviceCallback");
+                    "ru/neurotech/bleconnection/device/BleDeviceCallback");
             auto deviceCallbackWrapConstructor = env->GetMethodID(deviceCallbackWrapClass, "<init>",
                                                                   "(J)V");
             auto deviceCallbackWrapper = env->NewObject(deviceCallbackWrapClass,
@@ -69,7 +69,7 @@ namespace Neuro {
 
             //And pass it to BleDevice
             auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                    "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
+                                                    "(Lru/neurotech/bleconnection/device/BleDeviceCallback;)V");
             env->CallVoidMethod(javaBleDevice, subscribeMethod, deviceCallbackWrapper);
         });
     }
@@ -80,7 +80,7 @@ namespace Neuro {
                 __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor");
                 auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
                 auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                        "(Lru/neurotech/neurodevices/connection/BleDeviceCallback;)V");
+                                                        "(Lru/neurotech/bleconnection/device/BleDeviceCallback;)V");
                 env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
                 env->DeleteGlobalRef(javaBleDevice);
                 env->DeleteGlobalRef(appContext);
@@ -196,13 +196,13 @@ namespace Neuro {
         return jni::call_in_attached_thread([=](auto env) {
             auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
             auto getStateMethod = env->GetMethodID(bleDeviceClass, "state",
-                                                   "()Lru/neurotech/neurodevices/connection/BleDeviceState;");
+                                                   "()Lru/neurotech/bleconnection/device/BleDeviceState;");
             auto javaState = env->CallObjectMethod(javaBleDevice, getStateMethod);
 
             BleDeviceState state;
             if (javaState != NULL) {
                 auto javaStateClass = env->FindClass(
-                        "ru/neurotech/neurodevices/connection/DeviceGattInfo");
+                        "ru/neurotech/bleconnection/device/DeviceGattInfo");
                 auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
                 auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
                 state = parseBleDeviceState(stateCode);

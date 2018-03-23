@@ -21,6 +21,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniBatteryChannelWrap *>(env);
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
+    jni::initJavaObjClass<Neuro::ChannelInfo>(env);
+    jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);
     jni::initJavaObjClass<Neuro::DeviceState>(env);
     jni::initJavaObjClass<Neuro::Command>(env);
     jni::initJavaObjClass<Neuro::Parameter>(env);

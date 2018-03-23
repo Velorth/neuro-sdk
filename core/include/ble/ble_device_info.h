@@ -69,7 +69,9 @@ public:
     std::string rxCharacteristicUUID(){return "3D2F0003-D6B9-11E4-88CF-0002A5D5C51B";}
     std::string txCharacteristicUUID(){return "3D2F0002-D6B9-11E4-88CF-0002A5D5C51B";}
     std::string statusCharacteristicUUID(){return "";}
-    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_R", "Neurotech_Callibri_R"};}
+    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_R",
+                                                       "Neurotech_Callibri_R",
+                                                       "Callibri_Red"};}
 };
 
 class ColibriBlueGattInfo:public DeviceGattInfo
@@ -81,7 +83,9 @@ public:
     std::string rxCharacteristicUUID(){return "67CF0003-FA71-11E5-80B7-0002A5D5C51B";}
     std::string txCharacteristicUUID(){return "67CF0002-FA71-11E5-80B7-0002A5D5C51B";}
     std::string statusCharacteristicUUID(){return "";}
-    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_B", "Neurotech_Callibri_B"};}
+    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_B",
+                                                       "Neurotech_Callibri_B",
+                                                       "Callibri_Blue"};}
 };
 
 class ColibriYellowGattInfo:public DeviceGattInfo
@@ -93,7 +97,9 @@ public:
     std::string rxCharacteristicUUID(){return "77FF0003-FA66-11E5-B501-0002A5D5C51B";}
     std::string txCharacteristicUUID(){return "77FF0002-FA66-11E5-B501-0002A5D5C51B";}
     std::string statusCharacteristicUUID(){return "";}
-    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_Y", "Neurotech_Callibri_Y"};}
+    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_Y",
+                                                       "Neurotech_Callibri_Y",
+                                                       "Callibri_Yellow"};}
 };
 
 class ColibriWhiteGattInfo:public DeviceGattInfo
@@ -105,7 +111,9 @@ public:
     std::string rxCharacteristicUUID(){return "B9390003-FA71-11E5-A787-0002A5D5C51B";}
     std::string txCharacteristicUUID(){return "B9390002-FA71-11E5-A787-0002A5D5C51B";}
     std::string statusCharacteristicUUID(){return "";}
-    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_W", "Neurotech_Callibri_W"};}
+    std::vector<std::string> getValidBtNames(){return {"Neurotech_Colibri_W",
+                                                       "Neurotech_Callibri_W",
+                                                       "Callibri_White"};}
 };
 
 class DeviceGattInfoCreator

@@ -17,17 +17,21 @@
 #ifndef ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
 #define ANDROID_JNI_CHANNEL_FACTORY_WRAP_H
 
+#include <android/log.h>
 #include "wrappers/device/jni_device_wrap.h"
+#include "device/param_values.h"
 
 template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device){
     auto& deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
     try {
-        auto batteryChannel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr);
-        auto batteryChannelWrap = new ChannelWrap(batteryChannel);
-        return reinterpret_cast<jlong>(batteryChannelWrap);
+        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr);
+        auto channelWrap = new ChannelWrap(channel);
+        return reinterpret_cast<jlong>(channelWrap);
     }
     catch (std::exception &e){
+        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromDevice",
+                            "Error creating channel: %s", e.what());
         jni::java_throw(env, "java/lang/IllegalArgumentException", e);
         return 0;
     }

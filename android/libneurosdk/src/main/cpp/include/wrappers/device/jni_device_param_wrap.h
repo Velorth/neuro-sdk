@@ -114,4 +114,6 @@ jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &);
 
 jobject readDeviceParam(JNIEnv *, const Neuro::Device &, Neuro::Parameter);
 
+jboolean setDeviceParam(JNIEnv *, Neuro::Device &, Neuro::Parameter, jobject);
+
 #endif //ANDROID_JNI_DEVICE_PARAM_WRAP_H

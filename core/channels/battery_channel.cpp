@@ -67,6 +67,10 @@ public:
         }
     }
 
+    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+
+    }
+
     BatteryChannel::data_container readData(data_offset_t offset, data_length_t length) const {
         return mBuffer.readFill(offset, length, 0);
     }
@@ -99,6 +103,11 @@ BatteryChannel::BatteryChannel(std::shared_ptr<Device> device) :
     mImpl(std::make_unique<Impl>(device)){}
 
 BatteryChannel::~BatteryChannel(){}
+
+
+void BatteryChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+    mImpl->setLengthChangedCallback(callback);
+}
 
 auto BatteryChannel::readData(data_offset_t offset, data_length_t length) const -> data_container{
     return mImpl->readData(offset, length);

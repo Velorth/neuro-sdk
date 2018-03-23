@@ -20,6 +20,113 @@
 #include "device/device_parameters.h"
 #include "java_environment.h"
 
+/**
+ * ADCInput enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::ADCInput>() {
+    return "ru/neurotech/neurosdk/parameters/types/ADCInput";
+}
+
+template<>
+const std::map<Neuro::ADCInput, std::string>
+        jni::enum_name_map<Neuro::ADCInput>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::ADCInput>
+        jni::enum_name_map<Neuro::ADCInput>::mNameToEnumMap;
+
+
+
+/**
+ * ExternalSwitchInput enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::ExternalSwitchInput>() {
+    return "ru/neurotech/neurosdk/parameters/types/ExternalSwitchInput";
+}
+
+template<>
+const std::map<Neuro::ExternalSwitchInput, std::string>
+        jni::enum_name_map<Neuro::ExternalSwitchInput>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::ExternalSwitchInput>
+        jni::enum_name_map<Neuro::ExternalSwitchInput>::mNameToEnumMap;
+
+
+
+/**
+ * FirmwareMode enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::FirmwareMode>() {
+    return "ru/neurotech/neurosdk/parameters/types/FirmwareMode";
+}
+
+template<>
+const std::map<Neuro::FirmwareMode, std::string>
+        jni::enum_name_map<Neuro::FirmwareMode>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::FirmwareMode>
+        jni::enum_name_map<Neuro::FirmwareMode>::mNameToEnumMap;
+
+
+
+/**
+ * Gain enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::Gain>() {
+    return "ru/neurotech/neurosdk/parameters/types/Gain";
+}
+
+template<>
+const std::map<Neuro::Gain, std::string>
+        jni::enum_name_map<Neuro::Gain>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::Gain>
+        jni::enum_name_map<Neuro::Gain>::mNameToEnumMap;
+
+
+
+/**
+ * MotionAssistantLimb enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::MotionAssistantLimb>() {
+    return "ru/neurotech/neurosdk/parameters/types/MotionAssistantLimb";
+}
+
+template<>
+const std::map<Neuro::MotionAssistantLimb, std::string>
+        jni::enum_name_map<Neuro::MotionAssistantLimb>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::MotionAssistantLimb>
+        jni::enum_name_map<Neuro::MotionAssistantLimb>::mNameToEnumMap;
+
+
+
+/**
+ * SamplingFrequency enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::SamplingFrequency>() {
+    return "ru/neurotech/neurosdk/parameters/types/SamplingFrequency";
+}
+
+template<>
+const std::map<Neuro::SamplingFrequency, std::string>
+        jni::enum_name_map<Neuro::SamplingFrequency>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::SamplingFrequency>
+        jni::enum_name_map<Neuro::SamplingFrequency>::mNameToEnumMap;
+
+
 std::string getParamTypeName(Neuro::Parameter);
 
 class ParameterType{

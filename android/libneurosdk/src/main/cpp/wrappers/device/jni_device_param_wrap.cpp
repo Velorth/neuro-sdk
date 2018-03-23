@@ -154,7 +154,7 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
             case Neuro::Parameter::Address: {
                 return readParam<Neuro::Parameter::Address>(env, device);
             }
-            /*case Neuro::Parameter::SerialNumber: {
+            case Neuro::Parameter::SerialNumber: {
                 return readParam<Neuro::Parameter::SerialNumber>(env, device);
             }
             case Neuro::Parameter::FirmwareMode: {
@@ -181,13 +181,13 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
             case Neuro::Parameter::StimulatorState: {
                 return readParam<Neuro::Parameter::StimulatorState>(env, device);
             }
-            case Neuro::Parameter::StimulatorParamPack: {
+            /*case Neuro::Parameter::StimulatorParamPack: {
                 return readParam<Neuro::Parameter::StimulatorParamPack>(env, device);
-            }
+            }*/
             case Neuro::Parameter::MotionAssistantState: {
                 return readParam<Neuro::Parameter::MotionAssistantState>(env, device);
             }
-            case Neuro::Parameter::MotionAssistantParamPack: {
+            /*case Neuro::Parameter::MotionAssistantParamPack: {
                 return readParam<Neuro::Parameter::MotionAssistantParamPack>(env, device);
             }*/
             default: {
@@ -201,6 +201,84 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
     catch (std::runtime_error &e){
         jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
         return nullptr;
+    }
+}
+
+template <Neuro::Parameter Param>
+static
+jboolean
+setParam(JNIEnv *env, Neuro::Device &device, jobject valueObj){
+    try {
+        using param_value_t = typename Neuro::ParamValue<Param>::Type;
+        auto value = jni::get_java_obj_value<param_value_t>(env, valueObj);
+        return static_cast<jboolean>(device.setParam<Param>(value));
+    }
+    catch (std::runtime_error &e){
+        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
+        return JNI_FALSE;
+    }
+}
+
+jboolean
+setDeviceParam(JNIEnv *env, Neuro::Device &device, Neuro::Parameter param, jobject valueObj){
+    try {
+        switch (param) {
+            case Neuro::Parameter::State: {
+                return setParam<Neuro::Parameter::State>(env, device, valueObj);
+            }
+            case Neuro::Parameter::Name: {
+                return setParam<Neuro::Parameter::Name>(env, device, valueObj);
+            }
+            case Neuro::Parameter::Address: {
+                return setParam<Neuro::Parameter::Address>(env, device, valueObj);
+            }
+            case Neuro::Parameter::SerialNumber: {
+                return setParam<Neuro::Parameter::SerialNumber>(env, device, valueObj);
+            }
+            case Neuro::Parameter::FirmwareMode: {
+                return setParam<Neuro::Parameter::FirmwareMode>(env, device, valueObj);
+            }
+            case Neuro::Parameter::SamplingFrequency: {
+                return setParam<Neuro::Parameter::SamplingFrequency>(env, device, valueObj);
+            }
+            case Neuro::Parameter::Gain: {
+                return setParam<Neuro::Parameter::Gain>(env, device, valueObj);
+            }
+            case Neuro::Parameter::Offset: {
+                return setParam<Neuro::Parameter::Offset>(env, device, valueObj);
+            }
+            case Neuro::Parameter::HardwareFilterState: {
+                return setParam<Neuro::Parameter::HardwareFilterState>(env, device, valueObj);
+            }
+            case Neuro::Parameter::ExternalSwitchState: {
+                return setParam<Neuro::Parameter::ExternalSwitchState>(env, device, valueObj);
+            }
+            case Neuro::Parameter::ADCInputState: {
+                return setParam<Neuro::Parameter::ADCInputState>(env, device, valueObj);
+            }
+            case Neuro::Parameter::StimulatorState: {
+                return setParam<Neuro::Parameter::StimulatorState>(env, device, valueObj);
+            }
+                /*case Neuro::Parameter::StimulatorParamPack: {
+                    return setParam<Neuro::Parameter::StimulatorParamPack>(env, device, valueObj);
+                }*/
+            case Neuro::Parameter::MotionAssistantState: {
+                return setParam<Neuro::Parameter::MotionAssistantState>(env, device, valueObj);
+            }
+                /*case Neuro::Parameter::MotionAssistantParamPack: {
+                    return setParam<Neuro::Parameter::MotionAssistantParamPack>(env, device, valueObj);
+                }*/
+            default: {
+                jni::java_throw(env,
+                                "java/lang/UnsupportedOperationException",
+                                std::runtime_error("Parameter not found"));
+                return JNI_FALSE;
+            }
+        }
+    }
+    catch (std::runtime_error &e){
+        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
+        return JNI_FALSE;
     }
 }
 

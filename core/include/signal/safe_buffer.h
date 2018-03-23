@@ -117,6 +117,7 @@ private:
     CircularBuffer<SampleType, BufferSize> mBuffer;
     std::size_t mAvailableLength{0};
     std::size_t mTotalLength{0};
+    //std::function<>
 };
 
 }
