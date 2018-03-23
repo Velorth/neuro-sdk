@@ -18,7 +18,7 @@ private:
     SafeBuffer<int, BufferSize> mBuffer;
     sampling_frequency_t mSamplingFrequency{DefaultFrequency};
     std::mutex mWaitBatteryMutex;
-    std::mutex mBufferMutex;
+    mutable std::mutex mBufferMutex;
     std::condition_variable mWaitBatteryCondition;
     std::thread mReadBatteryThread;
 
@@ -55,10 +55,11 @@ public:
     }
 
     ~Impl(){
-        std::unique_lock<std::mutex> waitBatteryThreadLock(mWaitBatteryMutex);
+        //std::unique_lock<std::mutex> waitBatteryThreadLock(mWaitBatteryMutex);
         mWaitBatteryCondition.notify_all();
         try{
-            mReadBatteryThread.join();
+            if (mReadBatteryThread.joinable())
+                mReadBatteryThread.join();
         }
         catch (std::system_error &){
 #ifndef NDEBUG
@@ -72,10 +73,12 @@ public:
     }
 
     BatteryChannel::data_container readData(data_offset_t offset, data_length_t length) const {
+        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.readFill(offset, length, 0);
     }
 
     data_length_t totalLength() const noexcept {
+        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.totalLength();
     }
 

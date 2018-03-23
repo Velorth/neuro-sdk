@@ -51,28 +51,28 @@ bool CallibriImpl::execute(Command command){
     }
     switch (command){
     case Command::StartSignal:{
-
+        return false;
     }
     case Command::StopSignal:{
-
+        return false;
     }
     case Command::StartMEMS:{
-
+        return false;
     }
     case Command::StopMEMS:{
-
+        return false;
     }
     case Command::StartRespiration:{
-
+        return false;
     }
     case Command::StopRespiration:{
-
+        return false;
     }
     case Command::EnableMotionAssistant:{
-
+        return false;
     }
     case Command::StartStimulation:{
-
+        return false;
     }
     default:
         throw std::runtime_error("Unsupported command");

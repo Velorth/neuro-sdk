@@ -29,6 +29,12 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::ParamAccess>(env);
     jni::initJavaObjClass<Neuro::ParamPair>(env);
     jni::initJavaObjClass<ParameterType>(env);
+    jni::initJavaObjClass<Neuro::ADCInput>(env);
+    jni::initJavaObjClass<Neuro::ExternalSwitchInput >(env);
+    jni::initJavaObjClass<Neuro::FirmwareMode>(env);
+    jni::initJavaObjClass<Neuro::Gain>(env);
+    jni::initJavaObjClass<Neuro::MotionAssistantLimb>(env);
+    jni::initJavaObjClass<Neuro::SamplingFrequency>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());
