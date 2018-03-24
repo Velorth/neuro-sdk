@@ -173,7 +173,9 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
     }
     //Spirometry data received
     else if (marker.value == COLIBRI_SPIRO_DATA_MARKER){
-        //onSpyrometryDataReceived(data, length);
+        mRespirationBuffer.onSignalReceived(marker.value,
+                                            ByteBuffer(data.begin() + COLIBRI_SIGNAL_DATA_START_POS,
+                                                       data.end()));
     }
     //MEMS data received
     else if (marker.value == COLIBRI_MEMS_DATA_MARKER){

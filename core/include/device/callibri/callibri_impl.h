@@ -32,7 +32,6 @@ public:
     const BaseBuffer<signal_sample_t> &respirationBuffer() const override;
 
 private:
-    static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 1kHz fsam
     std::shared_ptr<CallibriRequestHandler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
     CallibriSignalBuffer mSignalBuffer;
