@@ -39,9 +39,10 @@ public:
     void reset();
 
 private:
-    std::array<SampleType, BufferSize> mBufferArray;
-    typename decltype(mBufferArray)::iterator mHead;
-    typename decltype(mBufferArray)::iterator mTail;    
+    using BufferType = std::array<SampleType, BufferSize>;
+    BufferType mBufferArray;
+    typename BufferType::iterator mHead;
+    typename BufferType::iterator mTail;
     static constexpr std::size_t mBufferSize = BufferSize;
     std::size_t mDataLength{0};
 };

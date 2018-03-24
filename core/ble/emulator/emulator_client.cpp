@@ -2,6 +2,8 @@
 #include "ble/emulator/emulated_device.h"
 #include "socket.h"
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <algorithm>
 #include <iostream>
 #include <cassert>

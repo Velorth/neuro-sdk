@@ -2,6 +2,7 @@
 #define DEVICE_IMPL_H
 
 #include <memory>
+#include <functional>
 #include <vector>
 #include "common_types.h"
 #include "ble/ble_device.h"
@@ -31,6 +32,7 @@ public:
     virtual int batteryChargePercents() = 0;
     virtual bool isElectrodesAttached() = 0;
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
+    virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;

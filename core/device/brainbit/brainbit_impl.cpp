@@ -76,6 +76,10 @@ const BaseBuffer<signal_sample_t> &BrainbitImpl::signalBuffer() const {
     return mSignalBuffer;
 }
 
+const BaseBuffer<resp_sample_t> &BrainbitImpl::respirationBuffer() const {
+    throw std::runtime_error("Device does not have respiration buffer");
+}
+
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     auto log = LoggerFactory::getCurrentPlatformLogger();
     if (data.size() != BRAINBIT_PACKET_SIZE){

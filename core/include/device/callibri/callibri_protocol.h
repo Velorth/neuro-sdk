@@ -19,9 +19,6 @@
 
 #include <initializer_list>
 
-#define COLIBRI_SORT_MAP_SIZE 250
-#define COLIBRI_BUFFER_DURATION 60
-
 #define COLIBRI_PACKET_SIZE 20u
 
 #define COLIBRI_HEADER_CMD_POSITION 3

@@ -40,6 +40,7 @@ private:
     friend class BatteryChannel;
     friend class ElectrodeStateChannel;
     friend class SignalChannel;
+    friend class RespirationChannel;
     Device(std::unique_ptr<DeviceImpl>);
 };
 

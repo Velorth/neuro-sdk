@@ -2,6 +2,9 @@
 #include "socket.h"
 #include <cassert>
 #include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace Neuro {
 

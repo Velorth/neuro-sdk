@@ -4,6 +4,7 @@
 #include "device/device_impl.h"
 #include "callibri_command.h"
 #include "callibri_signal_buffer.h"
+#include "callibri_respiration_buffer.h"
 
 namespace Neuro {
 
@@ -27,13 +28,15 @@ public:
     bool execute(Command) override;
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;
-    const BaseBuffer<signal_sample_t> &signalBuffer() const override;
+    const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
+    const BaseBuffer<signal_sample_t> &respirationBuffer() const override;
 
 private:
     static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 1kHz fsam
     std::shared_ptr<CallibriRequestHandler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
     CallibriSignalBuffer mSignalBuffer;
+    CallibriRespirationBuffer mRespirationBuffer;
     param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;

@@ -21,6 +21,7 @@ public:
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;    
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;
+    const BaseBuffer<signal_sample_t> &respirationBuffer() const override;
 
 private:
     using BrainbitRequestHandler = RequestHandler<BrainbitCommandData>;

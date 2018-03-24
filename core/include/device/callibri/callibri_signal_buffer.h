@@ -1,6 +1,7 @@
 #ifndef CALLIBRI_SIGNAL_BUFFER_H
 #define CALLIBRI_SIGNAL_BUFFER_H
 
+#include <memory>
 #include "signal/safe_buffer.h"
 #include "common_types.h"
 
