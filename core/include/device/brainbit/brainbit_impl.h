@@ -3,7 +3,7 @@
 
 #include "device/device_impl.h"
 #include "device/request_handler.h"
-#include "brainbit_command.h"
+#include "brainbit_protocol.h"
 #include "signal/safe_buffer.h"
 
 namespace Neuro {
@@ -21,11 +21,13 @@ public:
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;    
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;
-    const BaseBuffer<signal_sample_t> &respirationBuffer() const override;
+    const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
+    const BaseBuffer<MEMS> &memsBuffer() const override;
 
 private:
     using BrainbitRequestHandler = RequestHandler<BrainbitCommandData>;
 
+    static constexpr const char *class_name = "BrainbitImpl";
     static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 250 Hz fsam and 4 channels
 
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;

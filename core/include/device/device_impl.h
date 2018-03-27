@@ -17,6 +17,7 @@ class ParameterReader;
 class ParameterWriter;
 template <typename>
 class BaseBuffer;
+struct MEMS;
 
 class DeviceImpl {
 public:
@@ -33,6 +34,7 @@ public:
     virtual bool isElectrodesAttached() = 0;
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
     virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
+    virtual const BaseBuffer<MEMS> &memsBuffer() const = 0;
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;

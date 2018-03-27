@@ -1,10 +1,12 @@
 #ifndef CALLIBRI_IMPL_H
 #define CALLIBRI_IMPL_H
 
-#include "device/device_impl.h"
+#include "callibri_protocol.h"
 #include "callibri_command.h"
-#include "callibri_signal_buffer.h"
-#include "callibri_respiration_buffer.h"
+#include "device/device_impl.h"
+#include "device/handler_chain.h"
+#include "device/handler.h"
+#include "device/packet.h"
 
 namespace Neuro {
 
@@ -29,13 +31,17 @@ public:
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
-    const BaseBuffer<signal_sample_t> &respirationBuffer() const override;
+    const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
+    const BaseBuffer<MEMS> &memsBuffer() const override;
 
 private:
+    using CallibriPacketHandler = Handler<Packet<CallibriPacketType>>;
+
+    static constexpr const char *class_name = "CallibriImpl";
+
     std::shared_ptr<CallibriRequestHandler> mRequestHandler;
+    std::shared_ptr<HandlerChain<CallibriPacketHandler>> mPacketHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
-    CallibriSignalBuffer mSignalBuffer;
-    CallibriRespirationBuffer mRespirationBuffer;
     param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;

@@ -14,34 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef COLIBRI_PROTOCOL_H
-#define COLIBRI_PROTOCOL_H
+#ifndef CALLIBRI_PROTOCOL_H
+#define CALLIBRI_PROTOCOL_H
 
-#include <initializer_list>
-
-#define COLIBRI_PACKET_SIZE 20u
-
-#define COLIBRI_HEADER_CMD_POSITION 3
-#define COLIBRI_HEADER_ADDR_POSITION 4
-#define COLIBRI_HEADER_CS_POSITION 7
-#define COLIBRI_CMD_HDR_DATA_START_POS 8
-#define COLIBRI_SIGNAL_DATA_START_POS 2
-#define COLIBRI_MEMS_DATA_START_POS 4
-#define COLIBRI_SPIRO_DATA_START_POS 4
-
-#define COLIBRI_ADC_CAPACITY 8388607
-#define COLIBRI_ADC_REF_VOLTAGE 2.42
-
-#define COLIBRI_COMMAND_MARKER 0xFFDF
-#define COLIBRI_MEMS_DATA_MARKER 0xFFDD
-#define COLIBRI_SPIRO_DATA_MARKER 0xFFDE
-#define COLIBRI_DATA_MAX_PACKET_NMB 0xFFDC
-
-//changing address length to bigger values may cause
-//errors with its representation as integral type values
-//see usages of this macro
-#define COLIBRI_ADDRESS_LENGTH 3
-#define COLIBRI_HOST_ADDRESS 0xA5B6C7L
+#include "common_types.h"
+#include "device/device_parameters.h"
 
 #define COLIBRI_SENSOR_PARAMS_DATA_LENGTH 8
 #define COLIBRI_STIM_PARAMS_DATA_LENGTH 6
@@ -61,157 +38,129 @@
 #define COLIBRI_SH_STATE_STOPED 1
 #define COLIBRI_SH_STATE_UNDEFINED 0
 
-enum class ColibriSamplingFreq: unsigned char
-{
-    DATA_RATE_125SPS = 0x00,
-    DATA_RATE_250SPS = 0x01,
-    DATA_RATE_500SPS = 0x02,
-    DATA_RATE_1kSPS = 0x03,
-    DATA_RATE_2kSPS = 0x04,
-    DATA_RATE_4kSPS = 0x05,
-    DATA_RATE_8kSPS = 0x06,
-    UNSUPPORTED = 0xFF
+namespace Neuro {
+
+using callibri_marker_t = unsigned short;
+
+namespace {
+constexpr callibri_marker_t CallibriCommandMarker = 65503;
+constexpr callibri_marker_t CallibriMemsMarker = 65501;
+constexpr callibri_marker_t CallibriRespirationMarker = 65502;
+constexpr callibri_marker_t CallibriAngleMarker = 65505;
+}
+
+constexpr callibri_marker_t CallibriMaxPacketNumber = 65500;
+constexpr std::size_t CallibriPacketSize = 20;
+constexpr std::size_t CallibriMarkerPosition = 0;
+constexpr std::size_t CallibriMarkerLength = 2;
+
+enum class CallibriPacketType {
+    Command,
+    Signal,
+    MEMS,
+    Respiration,
+    Angle
 };
 
-enum class ColibriGain: unsigned char{
-
-    GAIN_1 = 0x01,
-    GAIN_2 = 0x02,
-    GAIN_3 = 0x03,
-    GAIN_4 = 0x04,
-    GAIN_6 = 0x00,
-    GAIN_8 = 0x05,
-    GAIN_12 = 0x06,
-    UNSUPPORTED = 0xFF
-};
-
-enum class ColibriAdcInputMode: unsigned char{
-    ELECTRODES = 0,
-    SHORT = 1,
-    ADC_TEST = 2,
-    RESIST = 3
-};
-
-enum class ColibriExtSwitchState: unsigned char{
-    RESPUSB_MIOELECTRODES = 0,
-    RESPNONE_MIOELECTRODES = 1,
-    RESPNONE_MIOUSB = 2,
-    RESPUSB_MIONONE = 3
-};
-
-inline int colibriSamplingFreqToInt(ColibriSamplingFreq samplingFreq)
-{
-    switch (samplingFreq)
-    {
-        case ColibriSamplingFreq::DATA_RATE_125SPS:
-            return 125;
-        case ColibriSamplingFreq::DATA_RATE_250SPS:
-            return 250;
-        case ColibriSamplingFreq::DATA_RATE_500SPS:
-            return 500;
-        case ColibriSamplingFreq::DATA_RATE_1kSPS:
-            return 1000;
-        case ColibriSamplingFreq::DATA_RATE_2kSPS:
-            return 2000;
-        case ColibriSamplingFreq::DATA_RATE_4kSPS:
-            return 4000;
-        case ColibriSamplingFreq::DATA_RATE_8kSPS:
-            return 8000;
-        default:
-            return 0;
+inline CallibriPacketType fromMarker(callibri_marker_t marker){
+    if (marker <= CallibriMaxPacketNumber){
+        return CallibriPacketType::Signal;
+    }
+    switch (marker){
+    case CallibriCommandMarker:
+        return CallibriPacketType::Command;
+    case CallibriMemsMarker:
+        return CallibriPacketType::MEMS;
+    case CallibriAngleMarker:
+        return CallibriPacketType::Angle;
+    case CallibriRespirationMarker:
+        return CallibriPacketType::Respiration;
+    default:
+        throw std::runtime_error("Unresolved marker value");
     }
 }
 
-inline ColibriSamplingFreq colibriSamplingFrequencyFromInt(int frequency)
-{
-    switch (frequency)
-    {
-        case 125:
-            return ColibriSamplingFreq::DATA_RATE_125SPS;
-        case 250:
-            return ColibriSamplingFreq::DATA_RATE_250SPS;
-        case 500:
-            return ColibriSamplingFreq::DATA_RATE_500SPS;
-        case 1000:
-            return ColibriSamplingFreq::DATA_RATE_1kSPS;
-        case 2000:
-            return ColibriSamplingFreq::DATA_RATE_2kSPS;
-        case 4000:
-            return ColibriSamplingFreq::DATA_RATE_4kSPS;
-        case 8000:
-            return ColibriSamplingFreq::DATA_RATE_8kSPS;
-        default:
-            return ColibriSamplingFreq::UNSUPPORTED;
+template <typename T>
+Byte byteCode(T value);
+
+template<>
+inline Byte byteCode<Gain>(Gain value){
+    switch (value){
+    case Gain::Gain1:
+        return Byte{0x01};
+    case Gain::Gain2:
+        return Byte{0x02};
+    case Gain::Gain3:
+        return Byte{0x03};
+    case Gain::Gain4:
+        return Byte{0x04};
+    case Gain::Gain6:
+        return Byte{0x00};//(sic!)
+    case Gain::Gain8:
+        return Byte{0x05};
+    case Gain::Gain12:
+        return Byte{0x06};
+    default:
+        throw std::runtime_error("Unsupported gain value");
     }
 }
 
-inline int colibriGainToInt(ColibriGain gain)
-{
-    switch (gain)
+template<>
+inline Byte byteCode<SamplingFrequency>(SamplingFrequency value){
+    switch (value)
     {
-        case ColibriGain::GAIN_1:
-            return 1;
-        case ColibriGain::GAIN_2:
-            return 2;
-        case ColibriGain::GAIN_3:
-            return 3;
-        case ColibriGain::GAIN_4:
-            return 4;
-        case ColibriGain::GAIN_6:
-            return 6;
-        case ColibriGain::GAIN_8:
-            return 8;
-        case ColibriGain::GAIN_12:
-            return 12;
-        default:
-            return 0;
+    case SamplingFrequency::Hz125:
+        return Byte{0x00};
+    case SamplingFrequency::Hz250:
+        return Byte{0x01};;
+    case SamplingFrequency::Hz500:
+        return Byte{0x02};
+    case SamplingFrequency::Hz1000:
+        return Byte{0x03};
+    case SamplingFrequency::Hz2000:
+        return Byte{0x04};
+    case SamplingFrequency::Hz4000:
+        return Byte{0x05};
+    case SamplingFrequency::Hz8000:
+        return Byte{0x06};
+    default:
+        throw std::runtime_error("Unsupported sampling frequency value");
     }
 }
 
-inline ColibriGain colibriGainFromInt(int gain)
-{
-    switch (gain)
+template<>
+inline Byte byteCode<ADCInput>(ADCInput value){
+    switch (value)
     {
-        case 1:
-            return ColibriGain::GAIN_1;
-        case 2:
-            return ColibriGain::GAIN_2;
-        case 3:
-            return ColibriGain::GAIN_3;
-        case 4:
-            return ColibriGain::GAIN_4;
-        case 6:
-            return ColibriGain::GAIN_6;
-        case 8:
-            return ColibriGain::GAIN_8;
-        case 12:
-            return ColibriGain::GAIN_12;
-        default:
-            return ColibriGain::UNSUPPORTED;
+    case ADCInput::Electrodes:
+        return Byte{0x00};
+    case ADCInput::Short:
+        return Byte{0x01};;
+    case ADCInput::Test:
+        return Byte{0x02};
+    case ADCInput::Resistance:
+        return Byte{0x03};
+    default:
+        throw std::runtime_error("Unsupported ADC input value");
     }
 }
 
-inline std::initializer_list<int> colibriSupportedFrequencies()
-{
-    return {125, 250, 500, 1000, 2000, 4000, 8000};
+template<>
+inline Byte byteCode<ExternalSwitchInput>(ExternalSwitchInput value){
+    switch (value)
+    {
+    case ExternalSwitchInput::MioElectrodesRespUSB:
+        return Byte{0x00};
+    case ExternalSwitchInput::MioElectrodes:
+        return Byte{0x01};;
+    case ExternalSwitchInput::MioUSB:
+        return Byte{0x02};
+    case ExternalSwitchInput::RespUSB:
+        return Byte{0x03};
+    default:
+        throw std::runtime_error("Unsupported external switch input value");
+    }
 }
 
-typedef union
-{
-    unsigned short value;
-    unsigned char bytes[sizeof(unsigned short)];
-}ColibriUShort;
-
-typedef union
-{
-    short value;
-    unsigned char bytes[sizeof(short)];
-}ColibriShort;
-
-typedef union
-{
-    long value;
-    unsigned char bytes[sizeof(long)];
-}ColibriLong;
-
+}
 #endif //COLIBRI_PROTOCOL_H

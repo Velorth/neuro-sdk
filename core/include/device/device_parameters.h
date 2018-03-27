@@ -2,6 +2,7 @@
 #define DEVICE_PARAMETERS_H
 
 #include "ma_device_params.h"
+#include "mems_device_params.h"
 #include "signal_device_params.h"
 #include <utility>
 
@@ -27,7 +28,8 @@ enum class Command {
     StartRespiration,
     StopRespiration,
     StartStimulation,
-    EnableMotionAssistant
+    EnableMotionAssistant,
+    FindMe
 };
 
 enum class Parameter {
@@ -42,6 +44,8 @@ enum class Parameter {
     Offset,
     ExternalSwitchState,
     ADCInputState,
+    AccelerometerSens,
+    GyroscopeSens,
     StimulatorState,
     MotionAssistantState,
     StimulatorParamPack,

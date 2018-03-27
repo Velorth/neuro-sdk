@@ -19,7 +19,7 @@ CallibriParameterReader::CallibriParameterReader(std::shared_ptr<BleDevice> ble_
 
 typename ParamValue<Parameter::SerialNumber>::Type
 CallibriParameterReader::readSerialNumber() const {
-    return std::to_string(mCommonParameters->callibriAddress());
+    return std::to_string(mCommonParameters->serialNumber());
 }
 
 typename ParamValue<Parameter::HardwareFilterState>::Type
@@ -84,7 +84,7 @@ bool CallibriParameterReader::loadDeviceParams(){
     if (!initAddress())
         return false;
 
-    log->debug("[%s: %s] Address: %ld", "CallibriParameterReader", __FUNCTION__, mCommonParameters->callibriAddress());
+    log->debug("[%s: %s] Address: %ld", "CallibriParameterReader", __FUNCTION__, mCommonParameters->serialNumber());
 
     if (!initEcho())
         return false;
@@ -102,14 +102,14 @@ bool CallibriParameterReader::loadDeviceParams(){
 }
 
 void CallibriParameterReader::sendEcho(){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::ECHO);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::ECHO);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     auto log = LoggerFactory::getCurrentPlatformLogger();
     log->trace("[%s: %s] ECHO received", "CallibriParameterReader", __FUNCTION__);
 
-    if (cmdData->getError()!=ColibriCommandError::NO_ERROR) {
+    if (cmdData->getError()!=CallibriError::NO_ERROR) {
         throw std::runtime_error("Callibri protocol error");
     }
     auto responseLength = cmdData->getResponseLength();
@@ -121,15 +121,15 @@ void CallibriParameterReader::sendEcho(){
     mFirmwareMode = (responseData[0] & 0x80) ? FirmwareMode::Bootloader : FirmwareMode::Application;
 }
 
-void CallibriParameterReader::requestAddress(){
-   mCommonParameters->setCallibriAddress(0);
+void CallibriParameterReader::requestSerialNumber(){
+   mCommonParameters->setSerialNumber(0);
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::GET_ADDR);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_ADDR);
     log->debug("[%s: %s] Sending address request...", "CallibriParameterReader", __FUNCTION__);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError()!=ColibriCommandError::NO_ERROR) {
+    if (cmdData->getError()!=CallibriError::NO_ERROR) {
         log->error("[%s: %s] Failed to receive address", "CallibriParameterReader", __FUNCTION__);
         throw std::runtime_error("Callibri protocol error");
     }
@@ -145,24 +145,24 @@ void CallibriParameterReader::requestAddress(){
     address.value = 0;
     std::copy(responseData.begin(), responseData.begin()+COLIBRI_ADDRESS_LENGTH, address.bytes);
     log->debug("[%s: %s] Address is %ld", "CallibriParameterReader", __FUNCTION__, address.value);
-    mCommonParameters->setCallibriAddress(address.value);
+    mCommonParameters->setSerialNumber(address.value);
 }
 
 bool CallibriParameterReader::activateApplication(){
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::ACTIVATE_APP);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::ACTIVATE_APP);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
     log->debug("[%s: %s] Activate application response received", "CallibriParameterReader", __FUNCTION__);
 
-    return cmdData->getError() == ColibriCommandError::NO_ERROR;
+    return cmdData->getError() == CallibriError::NO_ERROR;
 }
 
 bool CallibriParameterReader::initAddress(){
     auto attemptsAddrLeft = 3;
     while (attemptsAddrLeft--){
         try{
-            requestAddress();
+            requestSerialNumber();
             return true;
         }
         catch (std::runtime_error &e){

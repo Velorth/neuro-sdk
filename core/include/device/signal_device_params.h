@@ -4,80 +4,87 @@
 namespace Neuro {
 
 enum class SamplingFrequency {
-    Hz125 = 0,
-    Hz250 = 1,
-    Hz500 = 2,
-    Hz1000 = 3,
-    Hz2000 = 4,
-    Hz4000 = 5,
-    Hz8000 = 6
+    Hz125,
+    Hz250,
+    Hz500,
+    Hz1000,
+    Hz2000,
+    Hz4000,
+    Hz8000
 };
-
-inline unsigned getSamplingFrequencyValue(SamplingFrequency code){
-    switch(code){
-    case SamplingFrequency::Hz125:
-        return 125;
-    case SamplingFrequency::Hz250:
-        return 250;
-    case SamplingFrequency::Hz500:
-        return 500;
-    case SamplingFrequency::Hz1000:
-        return 1000;
-    case SamplingFrequency::Hz2000:
-        return 2000;
-    case SamplingFrequency::Hz4000:
-        return 4000;
-    case SamplingFrequency::Hz8000:
-        return 8000;
-    default:
-        return 0;
-    }
-}
 
 enum class Gain {
-    Gain1 = 0,
-    Gain2 = 1,
-    Gain3 = 2,
-    Gain4 = 3,
-    Gain6 = 4,
-    Gain8 = 5,
-    Gain12 = 6
+    Gain1,
+    Gain2,
+    Gain3,
+    Gain4,
+    Gain6,
+    Gain8,
+    Gain12
 };
 
-inline unsigned getGainValue(Gain code){
-    switch(code){
-    case Gain::Gain1:
-        return 1;
-    case Gain::Gain2:
-        return 2;
-    case Gain::Gain3:
-        return 3;
-    case Gain::Gain4:
-        return 4;
-    case Gain::Gain6:
-        return 6;
-    case Gain::Gain8:
-        return 8;
-    case Gain::Gain12:
-        return 12;
-    default:
-        return 0;
-    }
-}
-
 enum class ExternalSwitchInput {
-    MioElectrodesRespUSB = 0,
-    MioElectrodes = 1,
-    MioUSB = 2,
-    RespUSB = 3
+    MioElectrodesRespUSB,
+    MioElectrodes,
+    MioUSB,
+    RespUSB
 };
 
 enum class ADCInput {
-    Electrodes = 0,
-    Short = 1,
-    Test = 2,
-    Resistance = 3
+    Electrodes,
+    Short,
+    Test,
+    Resistance
 };
+
+template <typename T>
+int intValue(T value);
+
+template <>
+inline int intValue<Gain>(Gain value){
+    switch (value)
+    {
+        case Gain::Gain1:
+            return 1;
+        case Gain::Gain2:
+            return 2;
+        case Gain::Gain3:
+            return 3;
+        case Gain::Gain4:
+            return 4;
+        case Gain::Gain6:
+            return 6;
+        case Gain::Gain8:
+            return 8;
+        case Gain::Gain12:
+            return 12;
+        default:
+            throw std::runtime_error("Unsupported gain value");
+    }
+}
+
+template <>
+inline int intValue<SamplingFrequency>(SamplingFrequency value){
+    switch (value)
+    {
+        case SamplingFrequency::Hz125:
+            return 125;
+        case SamplingFrequency::Hz250:
+            return 250;
+        case SamplingFrequency::Hz500:
+            return 500;
+        case SamplingFrequency::Hz1000:
+            return 1000;
+        case SamplingFrequency::Hz2000:
+            return 2000;
+        case SamplingFrequency::Hz4000:
+            return 4000;
+        case SamplingFrequency::Hz8000:
+            return 8000;
+        default:
+            throw std::runtime_error("Unsupported sampling frequency value");
+    }
+}
 
 }
 

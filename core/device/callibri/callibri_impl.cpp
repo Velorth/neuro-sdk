@@ -1,4 +1,3 @@
-#include <device/callibri/callibri_protocol.h>
 #include "channels/channel_info.h"
 #include "device/device_parameters.h"
 #include "device/callibri/callibri_impl.h"
@@ -6,8 +5,8 @@
 #include "device/callibri/callibri_parameter_writer.h"
 #include "device/callibri/callibri_common_parameters.h"
 #include "device/callibri/callibri_protocol.h"
+#include "device/packet.h"
 #include "device/request_handler.h"
-#include "signal/circular_buffer.h"
 
 namespace Neuro {
 
@@ -23,8 +22,7 @@ CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                                                          request_handler),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
-    mCommonParams(common_params),
-    mSignalBuffer(mCommonParams){
+    mCommonParams(common_params){
     mRequestHandler->setSendFunction([=](std::shared_ptr<CallibriCommandData> cmd_data){this->sendCommandPacket(cmd_data);});
 }
 
@@ -86,13 +84,13 @@ int CallibriImpl::batteryChargePercents(){
 
 bool CallibriImpl::isElectrodesAttached(){
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::GET_ELECTRODE_STATE);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_ELECTRODE_STATE);
     log->debug("[%s: %s] Sending electrode state request", "CallibriImpl", __FUNCTION__);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     auto error = cmdData->getError();
-    if (error != ColibriCommandError::NO_ERROR) {
+    if (error != CallibriError::NO_ERROR) {
         log->warn("[%s: %s] Failed get electrode state. Error code: %d", "CallibriImpl",
                   __FUNCTION__, error);
         throw std::runtime_error("Unable get electrodes state due to connection error");
@@ -118,91 +116,52 @@ bool CallibriImpl::isElectrodesAttached(){
 }
 
 const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {
-    return mSignalBuffer.buffer();
+    /*auto bufferPtr = mSignalBuffer.lock();
+    if (bufferPtr == nullptr){
+        throw std::runtime_error("Device does not have signal buffer");
+    }
+    return *bufferPtr;*/
 }
 
-const BaseBuffer<signal_sample_t> &CallibriImpl::respirationBuffer() const {
-    return mRespirationBuffer.buffer();
+const BaseBuffer<resp_sample_t> &CallibriImpl::respirationBuffer() const {
+    /*auto bufferPtr = mRespirationBuffer.lock();
+    if (bufferPtr == nullptr){
+        throw std::runtime_error("Device does not have respiration buffer");
+    }
+    return *bufferPtr;*/
+}
+
+const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
+   /* auto bufferPtr = mMemsBuffer.lock();
+    if (bufferPtr == nullptr){
+        throw std::runtime_error("Device does not have MEMS buffer");
+    }
+    return *bufferPtr;*/
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
+    LOG_TRACE_V("Data received. Length: %zd", data.size());
+    if (data.size() < CallibriPacketSize)
+        return;
 
-    log->trace("[%s: %s] Data received. Length: %zd", "CallibriImpl", __FUNCTION__, data.size());
-    if (data.size() < COLIBRI_PACKET_SIZE) return;
+    static_assert(sizeof(callibri_marker_t) >= CallibriMarkerLength,
+                  "Callibri marker does not fit into callibri_marker_t");
 
-    ColibriUShort marker;
+    ByteInterpreter<callibri_marker_t> marker;
     marker.bytes[0] = data[0];
     marker.bytes[1] = data[1];
-
-    log->trace("[%s: %s] Marker: %d", "CallibriImpl", __FUNCTION__, marker.value);
-
-    //Signal data received
-    if (marker.value <= COLIBRI_DATA_MAX_PACKET_NMB){
-        mSignalBuffer.onSignalReceived(marker.value,
-                                         ByteBuffer(data.begin() + COLIBRI_SIGNAL_DATA_START_POS,
-                                                    data.end()));
+    LOG_TRACE_V("Marker value: %d", marker.value);
+    auto packetType = fromMarker(marker.value);
+    Packet<CallibriPacketType> packet(packetType, data);
+    if (!mPacketHandler->process(packet)){
+        LOG_ERROR("Failed to process packet");
     }
-    //Colibri command response received
-    else if (marker.value == COLIBRI_COMMAND_MARKER){
-        log->debug("[%s: %s] Command marker", "CallibriImpl", __FUNCTION__);
-        char checksum = 0;
-        for (auto headerByte = data.data();
-             headerByte != data.data() + COLIBRI_CMD_HDR_DATA_START_POS; checksum += *headerByte++);
-
-        log->debug("[%s: %s] Checksum: %d", "CallibriImpl", __FUNCTION__,checksum);
-
-        //if checksum is not 0 discard packet
-        if (checksum) {
-            log->warn("[%s: %s] Checksum isn't equals to zero. Discarding packet.", "CallibriImpl", __FUNCTION__);
-            return;
-        }
-
-        ColibriLong hostAddress;
-        hostAddress.value = 0;
-        std::copy(data.data() + COLIBRI_HEADER_ADDR_POSITION,
-             data.data() + COLIBRI_HEADER_ADDR_POSITION + COLIBRI_ADDRESS_LENGTH, hostAddress.bytes);
-
-        //if host address is not valid discard packet
-        if (hostAddress.value!=COLIBRI_HOST_ADDRESS){
-            log->error("[%s: %s] Host address is not valid: %ld. Must be %ld", "CallibriImpl", __FUNCTION__, hostAddress.value, COLIBRI_HOST_ADDRESS);
-            return;
-        }
-
-        onCommandPacketReceived(data.data(), data.size());
-    }
-    //Spirometry data received
-    else if (marker.value == COLIBRI_SPIRO_DATA_MARKER){
-        mRespirationBuffer.onSignalReceived(marker.value,
-                                            ByteBuffer(data.begin() + COLIBRI_SIGNAL_DATA_START_POS,
-                                                       data.end()));
-    }
-    //MEMS data received
-    else if (marker.value == COLIBRI_MEMS_DATA_MARKER){
-        //onMemsDataReceived(data,length);
-    }
-}
-
-void CallibriImpl::onCommandPacketReceived(const unsigned char *const command_packet, size_t length){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Command response received", "CallibriImpl", __FUNCTION__);
-    ColibriCommand command;
-    if (!parseCommand(command_packet[COLIBRI_HEADER_CMD_POSITION], &command))
-    {
-        log->debug("[%s: %s] Command parsing failed for command code %d", "CallibriImpl", __FUNCTION__,command_packet[COLIBRI_HEADER_CMD_POSITION]);
-        return;
-    }
-
-    log->debug("[%s: %s] Processing response", "CallibriImpl", __FUNCTION__);
-    mRequestHandler->onCommandResponse(command,
-                                       command_packet + COLIBRI_CMD_HDR_DATA_START_POS,
-                                       length - COLIBRI_CMD_HDR_DATA_START_POS);
 }
 
 void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> commandData){
     std::vector<Byte> packet(COLIBRI_PACKET_SIZE);
 
-    ColibriUShort commandMarker;
+    ByteInterpreter<unsigned short> commandMarker;
     commandMarker.value = COLIBRI_COMMAND_MARKER;
 
     auto log = LoggerFactory::getCurrentPlatformLogger();
@@ -212,11 +171,11 @@ void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> comman
     packet[1] = commandMarker.bytes[1];
     packet[COLIBRI_HEADER_CMD_POSITION] = static_cast<unsigned char>(commandData->getCommand());
 
-    ColibriLong address;
-    address.value = mCommonParams->callibriAddress();
-    packet[COLIBRI_HEADER_ADDR_POSITION] = address.bytes[0];
-    packet[COLIBRI_HEADER_ADDR_POSITION + 1] = address.bytes[1];
-    packet[COLIBRI_HEADER_ADDR_POSITION + 2] = address.bytes[2];
+    ByteInterpreter<long> serial;
+    serial.value = mCommonParams->serialNumber();
+    packet[COLIBRI_HEADER_ADDR_POSITION] = serial.bytes[0];
+    packet[COLIBRI_HEADER_ADDR_POSITION + 1] = serial.bytes[1];
+    packet[COLIBRI_HEADER_ADDR_POSITION + 2] = serial.bytes[2];
 
     unsigned char checksum = 0;
     for (auto packetByte = &packet[0];
@@ -244,13 +203,13 @@ void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> comman
 
 int CallibriImpl::requestBattryVoltage(){
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::GET_BATTERY_V);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_BATTERY_V);
     log->debug("[%s: %s] Sending battery level request", "CallibriImpl", __FUNCTION__);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     auto error = cmdData->getError();
-    if (error != ColibriCommandError::NO_ERROR) {
+    if (error != CallibriError::NO_ERROR) {
         log->warn("[%s: %s] Failed get battery voltage. Error code: %d", "CallibriImpl", __FUNCTION__, error);
         throw std::runtime_error("Unable receive battery charge value due to communication error");
     }

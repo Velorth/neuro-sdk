@@ -15,7 +15,7 @@ public:
     CallibriCommonParameters(const CallibriCommonParameters &) = delete;
     CallibriCommonParameters& operator=(const CallibriCommonParameters &) = delete;
 
-    unsigned long callibriAddress() const noexcept;
+    unsigned long serialNumber() const noexcept;
     typename ParamValue<Parameter::HardwareFilterState>::Type hardwareFilterState() const;
     typename ParamValue<Parameter::SamplingFrequency>::Type samplingFrequency() const;
     typename ParamValue<Parameter::Gain>::Type gain() const;
@@ -24,7 +24,7 @@ public:
     typename ParamValue<Parameter::ADCInputState>::Type ADCInputState() const;
 
     bool syncParameters();
-    void setCallibriAddress(unsigned long) noexcept;
+    void setSerialNumber(unsigned long) noexcept;
     bool setHardwareFilterState(typename ParamValue<Parameter::HardwareFilterState>::Type);
     bool setSamplingFrequency(typename ParamValue<Parameter::SamplingFrequency>::Type);
     bool setGain(typename ParamValue<Parameter::Gain>::Type);
@@ -40,7 +40,7 @@ private:
     std::vector<ChannelInfo> mAvailableChannels;
     std::vector<Command> mAvailableCommands;
     std::vector<ParamPair> mAvailableParameters;
-    unsigned long mCallibriAddress;
+    unsigned long mSerialNumber;
 
     typename ParamValue<Parameter::HardwareFilterState>::Type mHardwareFilterState;
     typename ParamValue<Parameter::SamplingFrequency>::Type mSamplingFrequency;

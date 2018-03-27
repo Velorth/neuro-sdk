@@ -10,8 +10,8 @@ CallibriCommonParameters::CallibriCommonParameters(std::shared_ptr<CallibriReque
     mRequestHandler(request_handler){
 }
 
-unsigned long CallibriCommonParameters::callibriAddress() const noexcept {
-    return mCallibriAddress;
+unsigned long CallibriCommonParameters::serialNumber() const noexcept {
+    return mSerialNumber;
 }
 
 typename ParamValue<Parameter::HardwareFilterState>::Type CallibriCommonParameters::hardwareFilterState() const {
@@ -40,13 +40,13 @@ typename ParamValue<Parameter::ADCInputState>::Type CallibriCommonParameters::AD
 
 
 bool CallibriCommonParameters::setHardwareFilterState(typename ParamValue<Parameter::HardwareFilterState>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SWITCH_FILTER_STATE);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SWITCH_FILTER_STATE);
     std::vector<unsigned char> filterState = { static_cast<unsigned char>(value) };
     cmdData->setRequestData(filterState);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -55,13 +55,13 @@ bool CallibriCommonParameters::setHardwareFilterState(typename ParamValue<Parame
 
 
 bool CallibriCommonParameters::setSamplingFrequency(typename ParamValue<Parameter::SamplingFrequency>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SET_FSAM);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SET_FSAM);
     std::vector<unsigned char> frequencyCode = { static_cast<unsigned char>( value ) };
     cmdData->setRequestData(frequencyCode);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -69,13 +69,13 @@ bool CallibriCommonParameters::setSamplingFrequency(typename ParamValue<Paramete
 }
 
 bool CallibriCommonParameters::setGain(typename ParamValue<Parameter::Gain>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SET_PGA_GAIN);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SET_PGA_GAIN);
     std::vector<unsigned char> gainBytes = { static_cast<unsigned char>(value) };
     cmdData->setRequestData(gainBytes);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -83,14 +83,13 @@ bool CallibriCommonParameters::setGain(typename ParamValue<Parameter::Gain>::Typ
 }
 
 bool CallibriCommonParameters::setOffset(typename ParamValue<Parameter::Offset>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SET_DATA_OFFSET);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SET_DATA_OFFSET);
     std::vector<unsigned char> offsetBytes = { static_cast<unsigned char>(value) };
     cmdData->setRequestData(offsetBytes);
-    //log->debug("[%s: %s] Sending set offset request", "CallibriCommonParameters", __FUNCTION__);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -98,13 +97,13 @@ bool CallibriCommonParameters::setOffset(typename ParamValue<Parameter::Offset>:
 }
 
 bool CallibriCommonParameters::setExternalSwitchState(typename ParamValue<Parameter::ExternalSwitchState>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SWITCH_EXT_COM_INPUTS);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SWITCH_EXT_COM_INPUTS);
     std::vector<unsigned char> adcState = { static_cast<unsigned char>(value) };
     cmdData->setRequestData(adcState);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -112,13 +111,13 @@ bool CallibriCommonParameters::setExternalSwitchState(typename ParamValue<Parame
 }
 
 bool CallibriCommonParameters::setADCInputState(typename ParamValue<Parameter::ADCInputState>::Type value){
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::SWITCH_ADC_INP);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SWITCH_ADC_INP);
     std::vector<unsigned char> adcState = { static_cast<unsigned char>(value) };
     cmdData->setRequestData(adcState);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR){
+    if (cmdData->getError() != CallibriError::NO_ERROR){
         return false;
     }
     syncParameters();
@@ -139,12 +138,12 @@ std::vector<ParamPair> CallibriCommonParameters::availableParameters() const {
 
 bool CallibriCommonParameters::syncParameters(){
     auto log = LoggerFactory::getCurrentPlatformLogger();
-    auto cmdData = std::make_shared<CallibriCommandData>(ColibriCommand::GET_SENSOR_PARAM);
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_SENSOR_PARAM);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
     log->debug("[%s: %s] Sensor params received", "CallibriCommonParameters", __FUNCTION__);
 
-    if (cmdData->getError() != ColibriCommandError::NO_ERROR) return false;
+    if (cmdData->getError() != CallibriError::NO_ERROR) return false;
 
     auto responseDataLength = cmdData->getResponseLength();
     log->debug("[%s: %s] Response length: %zd", "CallibriCommonParameters", __FUNCTION__, responseDataLength);
@@ -200,7 +199,7 @@ bool CallibriCommonParameters::syncParameters(){
 
         mSamplingFrequency = static_cast<SamplingFrequency>(responseData[1]);
         mAvailableParameters.push_back({Parameter::SamplingFrequency, ParamAccess::ReadWrite});
-        log->debug("[%s: %s] Sampling frequency: %d Hz", "CallibriCommonParameters", __FUNCTION__, colibriSamplingFreqToInt(static_cast<ColibriSamplingFreq>(mSamplingFrequency)));
+        log->debug("[%s: %s] Sampling frequency: %d Hz", "CallibriCommonParameters", __FUNCTION__, intValue(mSamplingFrequency));
 
         mADCInputState = static_cast<ADCInput>(responseData[COLIBRI_ADC_INPUT_MODE_BYTE_POS]);
         mAvailableParameters.push_back({Parameter::ADCInputState, ParamAccess::ReadWrite});
@@ -218,7 +217,7 @@ bool CallibriCommonParameters::syncParameters(){
 
         mAvailableParameters.push_back({Parameter::Gain, ParamAccess::ReadWrite});
         mGain = static_cast<Gain>(responseData[COLIBRI_GAIN_BYTE_POS]);
-        log->debug("[%s: %s] Signal gain: %d", "CallibriCommonParameters", __FUNCTION__, colibriGainToInt(static_cast<ColibriGain>(mGain)));
+        log->debug("[%s: %s] Signal gain: %d", "CallibriCommonParameters", __FUNCTION__, intValue(mGain));
 
         mAvailableParameters.push_back({Parameter::Offset, ParamAccess::ReadWrite});
         mOffset = responseData[COLIBRI_DATA_OFFSET_BYTE_POS];
@@ -228,8 +227,8 @@ bool CallibriCommonParameters::syncParameters(){
     return false;
 }
 
-void CallibriCommonParameters::setCallibriAddress(unsigned long address) noexcept {
-    mCallibriAddress = address;
+void CallibriCommonParameters::setSerialNumber(unsigned long address) noexcept {
+    mSerialNumber = address;
 }
 
 

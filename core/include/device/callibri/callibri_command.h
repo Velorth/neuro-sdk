@@ -9,8 +9,7 @@
 
 namespace Neuro {
 
-enum class ColibriCommand: unsigned char
-{
+enum class CallibriCommand: unsigned char {
     ERROR = 0x00,
     ECHO = 0xA0,
     GET_ADDR = 0xA1,
@@ -38,8 +37,7 @@ enum class ColibriCommand: unsigned char
     SWITCH_EXT_COM_INPUTS = 0x23
 };
 
-enum class ColibriCommandError: unsigned char
-{
+enum class CallibriError: unsigned char {
     NO_ERROR = 0x00,
     ERR_NO_CMD = 0x21,
     ERR_WRONG_PARAM	= 0x25,
@@ -50,118 +48,113 @@ enum class ColibriCommandError: unsigned char
 };
 
 
-typedef CommandData<ColibriCommand, ColibriCommandError, COLIBRI_CMD_MAX_LIFETIME_MS, COLIBRI_CMD_SEND_TIMEOUT_MS> CallibriCommandData;
+typedef CommandData<CallibriCommand, CallibriError, COLIBRI_CMD_MAX_LIFETIME_MS, COLIBRI_CMD_SEND_TIMEOUT_MS> CallibriCommandData;
 
 
-enum class ColibriMode
-{
+enum class ColibriMode {
     ERROR,
     BOOTLOADER,
     APPLICATION
 };
 
-inline bool parseCommand(unsigned char commandByte, ColibriCommand* outCommand)
-{
-    switch (commandByte)
-    {
-        case static_cast<unsigned char>(ColibriCommand::ERROR):
-            *outCommand = ColibriCommand::ERROR;
+inline bool parseCommand(unsigned char commandByte, CallibriCommand* outCommand) {
+    switch (commandByte) {
+        case static_cast<unsigned char>(CallibriCommand::ERROR):
+            *outCommand = CallibriCommand::ERROR;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::ECHO):
-            *outCommand = ColibriCommand::ECHO;
+        case static_cast<unsigned char>(CallibriCommand::ECHO):
+            *outCommand = CallibriCommand::ECHO;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_ADDR):
-            *outCommand = ColibriCommand::GET_ADDR;
+        case static_cast<unsigned char>(CallibriCommand::GET_ADDR):
+            *outCommand = CallibriCommand::GET_ADDR;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_BATTERY_V):
-            *outCommand = ColibriCommand::GET_BATTERY_V;
+        case static_cast<unsigned char>(CallibriCommand::GET_BATTERY_V):
+            *outCommand = CallibriCommand::GET_BATTERY_V;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::ACTIVATE_APP):
-            *outCommand = ColibriCommand::ACTIVATE_APP;
+        case static_cast<unsigned char>(CallibriCommand::ACTIVATE_APP):
+            *outCommand = CallibriCommand::ACTIVATE_APP;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_SENSOR_PARAM):
-            *outCommand = ColibriCommand::GET_SENSOR_PARAM;
+        case static_cast<unsigned char>(CallibriCommand::GET_SENSOR_PARAM):
+            *outCommand = CallibriCommand::GET_SENSOR_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SWITCH_FILTER_STATE):
-            *outCommand = ColibriCommand::SWITCH_FILTER_STATE;
+        case static_cast<unsigned char>(CallibriCommand::SWITCH_FILTER_STATE):
+            *outCommand = CallibriCommand::SWITCH_FILTER_STATE;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::START_ADC_DATA_THROW):
-            *outCommand = ColibriCommand::START_ADC_DATA_THROW;
+        case static_cast<unsigned char>(CallibriCommand::START_ADC_DATA_THROW):
+            *outCommand = CallibriCommand::START_ADC_DATA_THROW;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::STOP_ADC_DATA_THROW):
-            *outCommand = ColibriCommand::STOP_ADC_DATA_THROW;
+        case static_cast<unsigned char>(CallibriCommand::STOP_ADC_DATA_THROW):
+            *outCommand = CallibriCommand::STOP_ADC_DATA_THROW;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SET_FSAM):
-            *outCommand = ColibriCommand::SET_FSAM;
+        case static_cast<unsigned char>(CallibriCommand::SET_FSAM):
+            *outCommand = CallibriCommand::SET_FSAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SET_DATA_OFFSET):
-            *outCommand = ColibriCommand::SET_DATA_OFFSET;
+        case static_cast<unsigned char>(CallibriCommand::SET_DATA_OFFSET):
+            *outCommand = CallibriCommand::SET_DATA_OFFSET;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SET_PGA_GAIN):
-            *outCommand = ColibriCommand::SET_PGA_GAIN;
+        case static_cast<unsigned char>(CallibriCommand::SET_PGA_GAIN):
+            *outCommand = CallibriCommand::SET_PGA_GAIN;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::START_STIM):
-            *outCommand = ColibriCommand::START_STIM;
+        case static_cast<unsigned char>(CallibriCommand::START_STIM):
+            *outCommand = CallibriCommand::START_STIM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::STOP_STIM):
-            *outCommand = ColibriCommand::STOP_STIM;
+        case static_cast<unsigned char>(CallibriCommand::STOP_STIM):
+            *outCommand = CallibriCommand::STOP_STIM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SET_STIM_PARAM):
-            *outCommand = ColibriCommand::SET_STIM_PARAM;
+        case static_cast<unsigned char>(CallibriCommand::SET_STIM_PARAM):
+            *outCommand = CallibriCommand::SET_STIM_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_STIM_PARAM):
-            *outCommand = ColibriCommand::GET_STIM_PARAM;
+        case static_cast<unsigned char>(CallibriCommand::GET_STIM_PARAM):
+            *outCommand = CallibriCommand::GET_STIM_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SH_START):
-            *outCommand = ColibriCommand::SH_START;
+        case static_cast<unsigned char>(CallibriCommand::SH_START):
+            *outCommand = CallibriCommand::SH_START;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SH_STOP):
-            *outCommand = ColibriCommand::SH_STOP;
+        case static_cast<unsigned char>(CallibriCommand::SH_STOP):
+            *outCommand = CallibriCommand::SH_STOP;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SET_SH_PARAM):
-            *outCommand = ColibriCommand::SET_SH_PARAM;
+        case static_cast<unsigned char>(CallibriCommand::SET_SH_PARAM):
+            *outCommand = CallibriCommand::SET_SH_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_SH_PARAM):
-            *outCommand = ColibriCommand::GET_SH_PARAM;
+        case static_cast<unsigned char>(CallibriCommand::GET_SH_PARAM):
+            *outCommand = CallibriCommand::GET_SH_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_SH_AND_STIM_STATE):
-            *outCommand = ColibriCommand::GET_SH_AND_STIM_STATE;
+        case static_cast<unsigned char>(CallibriCommand::GET_SH_AND_STIM_STATE):
+            *outCommand = CallibriCommand::GET_SH_AND_STIM_STATE;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::DO_CALIBRATION):
-            *outCommand = ColibriCommand::DO_CALIBRATION;
+        case static_cast<unsigned char>(CallibriCommand::DO_CALIBRATION):
+            *outCommand = CallibriCommand::DO_CALIBRATION;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::GET_ELECTRODE_STATE):
-            *outCommand = ColibriCommand::GET_ELECTRODE_STATE;
+        case static_cast<unsigned char>(CallibriCommand::GET_ELECTRODE_STATE):
+            *outCommand = CallibriCommand::GET_ELECTRODE_STATE;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SWITCH_ADC_INP):
-            *outCommand = ColibriCommand::SWITCH_ADC_INP;
+        case static_cast<unsigned char>(CallibriCommand::SWITCH_ADC_INP):
+            *outCommand = CallibriCommand::SWITCH_ADC_INP;
             return true;
-        case static_cast<unsigned char>(ColibriCommand::SWITCH_EXT_COM_INPUTS):
-            *outCommand = ColibriCommand::SWITCH_EXT_COM_INPUTS;
+        case static_cast<unsigned char>(CallibriCommand::SWITCH_EXT_COM_INPUTS):
+            *outCommand = CallibriCommand::SWITCH_EXT_COM_INPUTS;
             return true;
         default:
             return false;
     }
 }
 
-inline bool parseError(unsigned char errorByte, ColibriCommandError* outError)
-{
-    switch (errorByte)
-    {
-        case static_cast<unsigned char>(ColibriCommandError::NO_ERROR):
-            *outError = ColibriCommandError ::NO_ERROR;
+inline bool parseError(unsigned char errorByte, CallibriError* outError) {
+    switch (errorByte) {
+        case static_cast<unsigned char>(CallibriError::NO_ERROR):
+            *outError = CallibriError::NO_ERROR;
             return true;
-        case static_cast<unsigned char>(ColibriCommandError::ERR_NO_CMD):
-            *outError = ColibriCommandError::ERR_NO_CMD;
+        case static_cast<unsigned char>(CallibriError::ERR_NO_CMD):
+            *outError = CallibriError::ERR_NO_CMD;
             return true;
-        case static_cast<unsigned char>(ColibriCommandError::ERR_WRONG_PARAM):
-            *outError = ColibriCommandError::ERR_WRONG_PARAM;
+        case static_cast<unsigned char>(CallibriError::ERR_WRONG_PARAM):
+            *outError = CallibriError::ERR_WRONG_PARAM;
             return true;
-        case static_cast<unsigned char>(ColibriCommandError::ERR_CS):
-            *outError = ColibriCommandError::ERR_CS;
+        case static_cast<unsigned char>(CallibriError::ERR_CS):
+            *outError = CallibriError::ERR_CS;
             return true;
-        case static_cast<unsigned char>(ColibriCommandError::ADC_TIMEOUT_ERROR):
-            *outError = ColibriCommandError::ADC_TIMEOUT_ERROR;
+        case static_cast<unsigned char>(CallibriError::ADC_TIMEOUT_ERROR):
+            *outError = CallibriError::ADC_TIMEOUT_ERROR;
             return true;
         default:
             return false;

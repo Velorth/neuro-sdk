@@ -38,7 +38,7 @@ private:
 
     bool loadDeviceParams() override;
     void sendEcho();
-    void requestAddress();
+    void requestSerialNumber();
     bool activateApplication();
     bool initAddress();
     bool initEcho();

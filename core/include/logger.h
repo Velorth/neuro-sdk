@@ -71,6 +71,15 @@ private:
 
 #define LOG_ERROR(MESSAGE) LoggerFactory::getCurrentPlatformLogger()->error("[%s: %s] " MESSAGE, class_name, __FUNCTION__);
 #define LOG_WARN(MESSAGE) LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] " MESSAGE, class_name, __FUNCTION__);
+#define LOG_INFO(MESSAGE) LoggerFactory::getCurrentPlatformLogger()->info("[%s: %s] " MESSAGE, class_name, __FUNCTION__);
+#define LOG_DEBUG(MESSAGE) LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] " MESSAGE, class_name, __FUNCTION__);
+#define LOG_TRACE(MESSAGE) LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] " MESSAGE, class_name, __FUNCTION__);
+
+#define LOG_ERROR_V(MESSAGE, ...) LoggerFactory::getCurrentPlatformLogger()->error("[%s: %s] " MESSAGE, class_name, __FUNCTION__, __VA_ARGS__);
+#define LOG_WARN_V(MESSAGE, ...) LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] " MESSAGE, class_name, __FUNCTION__, __VA_ARGS__);
+#define LOG_INFO_V(MESSAGE, ...) LoggerFactory::getCurrentPlatformLogger()->info("[%s: %s] " MESSAGE, class_name, __FUNCTION__, __VA_ARGS__);
+#define LOG_DEBUG_V(MESSAGE, ...) LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] " MESSAGE, class_name, __FUNCTION__, __VA_ARGS__);
+#define LOG_TRACE_V(MESSAGE, ...) LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] " MESSAGE, class_name, __FUNCTION__, __VA_ARGS__);
 
 #endif // LOGGER_H
 

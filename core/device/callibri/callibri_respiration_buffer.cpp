@@ -1,4 +1,3 @@
-#include "device/callibri/callibri_protocol.h"
 #include "device/callibri/callibri_respiration_buffer.h"
 #include "device/callibri/callibri_common_parameters.h"
 

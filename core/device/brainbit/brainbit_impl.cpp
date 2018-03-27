@@ -3,7 +3,6 @@
 #include "device/device_parameters.h"
 #include "device/brainbit/brainbit_parameter_reader.h"
 #include "device/brainbit/brainbit_parameter_writer.h"
-#include "device/brainbit/brainbit_command.h"
 #include "device/brainbit/brainbit_protocol.h"
 #include "signal/circular_buffer.h"
 
@@ -80,17 +79,20 @@ const BaseBuffer<resp_sample_t> &BrainbitImpl::respirationBuffer() const {
     throw std::runtime_error("Device does not have respiration buffer");
 }
 
+const BaseBuffer<MEMS> &BrainbitImpl::memsBuffer() const {
+    throw std::runtime_error("Device does not have MEMS buffer");
+}
+
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
     if (data.size() != BRAINBIT_PACKET_SIZE){
-        log->error("[%s: %s] Wrong data packet size: %d, expected: %d", "BrainbitImpl", __FUNCTION__, data.size(), BRAINBIT_PACKET_SIZE);
+        LOG_WARN_V("Wrong data packet size: %d, expected: %d", data.size(), BRAINBIT_PACKET_SIZE);
         return;
     }
 
     if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
         auto packetNumber = static_cast<Byte>(data[0]) << 3 | static_cast<Byte>(data[1]) >> 5;
         auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
-        log->trace("[%s: %s] Signal packet received: %d, button state changed: %d", "BrainbitImpl", __FUNCTION__, packetNumber, static_cast<int>(buttonStateChanged));
+        LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
 
         constexpr static double K = 2.4 / (0xFFFFF * 6);
 

@@ -15,11 +15,13 @@ public:
     CallibriSignalBuffer(const CallibriSignalBuffer &) = delete;
     CallibriSignalBuffer& operator=(const CallibriSignalBuffer &) = delete;
 
-    void onSignalReceived(packet_number_t, const ByteBuffer &);
+    void onDataReceived(packet_number_t, const ByteBuffer &);
     const BaseBuffer<signal_sample_t>& buffer() const;
 
 private:
-    static constexpr std::size_t SignalBufferSize = 120000; //10 minutes for 250 Hz fsam
+    static constexpr std::size_t SignalBufferSize = 150000; //10 minutes for 250 Hz fsam
+    static constexpr int AdcCapacity = 8388607;
+    static constexpr double ReferenceVoltage = 2.42;
 
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;

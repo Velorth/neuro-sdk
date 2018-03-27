@@ -61,6 +61,16 @@ struct ParamValue<Parameter::ADCInputState>{
 };
 
 template<>
+struct ParamValue<Parameter::AccelerometerSens>{
+    using Type = AccelerometerSensitivity;
+};
+
+template<>
+struct ParamValue<Parameter::GyroscopeSens>{
+    using Type = GyroscopeSensitivity;
+};
+
+template<>
 struct ParamValue<Parameter::StimulatorState>{
     using Type = bool;
 };
