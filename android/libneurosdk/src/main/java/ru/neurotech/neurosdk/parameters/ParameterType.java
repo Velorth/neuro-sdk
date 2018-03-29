@@ -9,6 +9,8 @@ public enum ParameterType {
     Byte,
     ExternalSwitchInput,
     ADCInput,
+    AccelerometerSensitivity,
+    GyroscopeSensitivity,
     Boolean,
     StimulationParams,
     MotionAssistantParams

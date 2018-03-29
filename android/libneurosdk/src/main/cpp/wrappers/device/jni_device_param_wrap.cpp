@@ -69,6 +69,8 @@ jni::enum_name_map<Neuro::Parameter>::mEnumToNameMap = []() {
             {Neuro::Parameter::HardwareFilterState,      "HardwareFilterState"},
             {Neuro::Parameter::ExternalSwitchState,      "ExternalSwitchState"},
             {Neuro::Parameter::ADCInputState,            "ADCInputState"},
+            {Neuro::Parameter::GyroscopeSens,            "GyroscopeSens"},
+            {Neuro::Parameter::AccelerometerSens,        "AccelerometerSens"},
             {Neuro::Parameter::StimulatorState,          "StimulatorState"},
             {Neuro::Parameter::StimulatorParamPack,      "StimulatorParamPack"},
             {Neuro::Parameter::MotionAssistantState,     "MotionAssistantState"},
@@ -91,6 +93,8 @@ jni::enum_name_map<Neuro::Parameter>::mNameToEnumMap = []() {
             {"HardwareFilterState",      Neuro::Parameter::HardwareFilterState},
             {"ExternalSwitchState",      Neuro::Parameter::ExternalSwitchState},
             {"ADCInputState",            Neuro::Parameter::ADCInputState},
+            {"GyroscopeSens",            Neuro::Parameter::GyroscopeSens},
+            {"AccelerometerSens",        Neuro::Parameter::AccelerometerSens},
             {"StimulatorState",          Neuro::Parameter::StimulatorState},
             {"StimulatorParamPack",      Neuro::Parameter::StimulatorParamPack},
             {"MotionAssistantState",     Neuro::Parameter::MotionAssistantState},
@@ -178,6 +182,12 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
             case Neuro::Parameter::ADCInputState: {
                 return readParam<Neuro::Parameter::ADCInputState>(env, device);
             }
+            case Neuro::Parameter::AccelerometerSens: {
+                return readParam<Neuro::Parameter::AccelerometerSens>(env, device);
+            }
+            case Neuro::Parameter::GyroscopeSens: {
+                return readParam<Neuro::Parameter::GyroscopeSens>(env, device);
+            }
             case Neuro::Parameter::StimulatorState: {
                 return readParam<Neuro::Parameter::StimulatorState>(env, device);
             }
@@ -255,6 +265,12 @@ setDeviceParam(JNIEnv *env, Neuro::Device &device, Neuro::Parameter param, jobje
             }
             case Neuro::Parameter::ADCInputState: {
                 return setParam<Neuro::Parameter::ADCInputState>(env, device, valueObj);
+            }
+            case Neuro::Parameter::GyroscopeSens: {
+                return setParam<Neuro::Parameter::GyroscopeSens>(env, device, valueObj);
+            }
+            case Neuro::Parameter::AccelerometerSens: {
+                return setParam<Neuro::Parameter::AccelerometerSens>(env, device, valueObj);
             }
             case Neuro::Parameter::StimulatorState: {
                 return setParam<Neuro::Parameter::StimulatorState>(env, device, valueObj);

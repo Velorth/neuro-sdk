@@ -4,7 +4,7 @@
 #include "ble/ble_device.h"
 #include "device/callibri/callibri_impl.h"
 #include "device/brainbit/brainbit_impl.h"
-#include "device/request_handler.h"
+#include "device/request_scheduler.h"
 #include "device/callibri/callibri_common_parameters.h"
 #include "channels/channel_info.h"
 
@@ -21,7 +21,7 @@ std::unique_ptr<Device> DeviceFactory::createFromImpl(std::unique_ptr<DeviceImpl
 std::unique_ptr<Device> CallibriDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
     Expects(ble_device != nullptr);
     auto sharedDevice = std::shared_ptr<BleDevice>(ble_device.release());
-    auto requestHandler = std::make_shared<CallibriRequestHandler>();
+    auto requestHandler = std::make_shared<CallibriRequestScheduler>();
     auto commonParams = std::make_shared<CallibriCommonParameters>(requestHandler);
     auto callibriImpl = std::make_unique<CallibriImpl>(sharedDevice, requestHandler, commonParams);
     auto device = createFromImpl(std::move(callibriImpl));

@@ -39,6 +39,42 @@ const std::map<std::string, Neuro::ADCInput>
 
 
 /**
+ * Accelerometer sens enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::AccelerometerSensitivity>() {
+    return "ru/neurotech/neurosdk/parameters/types/AccelerometerSesitivity";
+}
+
+template<>
+const std::map<Neuro::AccelerometerSensitivity , std::string>
+        jni::enum_name_map<Neuro::AccelerometerSensitivity>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::AccelerometerSensitivity >
+        jni::enum_name_map<Neuro::AccelerometerSensitivity>::mNameToEnumMap;
+
+
+
+/**
+ * Gyro sens enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::GyroscopeSensitivity>() {
+    return "ru/neurotech/neurosdk/parameters/types/GyroscopeSesitivity";
+}
+
+template<>
+const std::map<Neuro::GyroscopeSensitivity , std::string>
+        jni::enum_name_map<Neuro::GyroscopeSensitivity>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::GyroscopeSensitivity >
+        jni::enum_name_map<Neuro::GyroscopeSensitivity>::mNameToEnumMap;
+
+
+
+/**
  * ExternalSwitchInput enum
  */
 template<>

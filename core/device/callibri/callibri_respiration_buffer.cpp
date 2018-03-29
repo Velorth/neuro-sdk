@@ -3,7 +3,7 @@
 
 namespace Neuro {
 
-void CallibriRespirationBuffer::onSignalReceived(packet_number_t, const ByteBuffer &data) {
+void CallibriRespirationBuffer::onDataReceived(packet_number_t, const ByteBuffer &data) {
     if (data.size() < RespirationDataLength)
         return;
 

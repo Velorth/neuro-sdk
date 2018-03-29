@@ -18,17 +18,12 @@
 #define CALLIBRI_PROTOCOL_H
 
 #include "common_types.h"
+#include "callibri_command.h"
 #include "device/device_parameters.h"
 
-#define COLIBRI_SENSOR_PARAMS_DATA_LENGTH 8
 #define COLIBRI_STIM_PARAMS_DATA_LENGTH 6
 #define COLIBRI_STIM_STATE_PARAMS_DATA_LENGTH 2
 #define COLIBRI_SH_PARAMS_DATA_LENGTH 5
-#define COLIBRI_ADC_INPUT_MODE_BYTE_POS 2
-#define COLIBRI_FILTER_STATE_BYTE_POS 3
-#define COLIBRI_GAIN_BYTE_POS 4
-#define COLIBRI_DATA_OFFSET_BYTE_POS 5
-#define COLIBRI_EXT_SWITCH_STATE_BYTE_POS 6
 
 #define COLIBRI_STIMULATOR_STATE_ACTIVE 2
 #define COLIBRI_STIMULATOR_STATE_STOPED 1
@@ -53,6 +48,45 @@ constexpr callibri_marker_t CallibriMaxPacketNumber = 65500;
 constexpr std::size_t CallibriPacketSize = 20;
 constexpr std::size_t CallibriMarkerPosition = 0;
 constexpr std::size_t CallibriMarkerLength = 2;
+
+//Parameters section
+static constexpr std::size_t CallibriParamsDataLength = 10;
+static constexpr std::size_t CallibriSamplFreqBytePos = 1;
+static constexpr std::size_t CallibriAdcInputBytePos = 2;
+static constexpr std::size_t CallibriFilterStateBytePos = 3;
+static constexpr std::size_t CallibriGainBytePos = 4;
+static constexpr std::size_t CallibriOffsetBytePos = 5;
+static constexpr std::size_t CallibriExtSwithBytePos = 6;
+static constexpr std::size_t CallibriAccelSensBytePos = 8;
+static constexpr std::size_t CallibriGyroSensBytePos = 9;
+
+//Command handler section
+static constexpr std::size_t CallibriCmdCodePos = 3;
+static constexpr std::size_t CallibriAddressPos = 4;
+static constexpr std::size_t CallibriChecksumPos = 7;
+static constexpr std::size_t CallibriDataStartPos = 8;
+static constexpr std::size_t CallibriAddressLength = 3;
+static constexpr long CallibriHostAddress = 0xA5B6C7L;
+
+//Signal section
+static constexpr std::size_t SignalPacketNumberPos = 0;
+static constexpr std::size_t SignalDataShift = 2;
+
+//Mems section
+static constexpr std::size_t MemsPacketNumberPos = 2;
+static constexpr std::size_t MemsDataShift = 4;
+
+//Respiration section
+static constexpr std::size_t RespPacketNumberPos = 2;
+static constexpr std::size_t RespDataShift = 4;
+
+
+enum class CallibriModule {
+    Signal,
+    MEMS,
+    Stimulator,
+    Respiration
+};
 
 enum class CallibriPacketType {
     Command,
@@ -81,7 +115,12 @@ inline CallibriPacketType fromMarker(callibri_marker_t marker){
 }
 
 template <typename T>
-Byte byteCode(T value);
+Byte byteCode(T value){
+    return static_cast<Byte>(value);
+}
+
+template <typename T>
+T fromByteCode(Byte code);
 
 template<>
 inline Byte byteCode<Gain>(Gain value){
@@ -106,13 +145,34 @@ inline Byte byteCode<Gain>(Gain value){
 }
 
 template<>
+inline Gain fromByteCode<Gain>(Byte code){
+    switch (code){
+    case 0x01:
+        return Gain::Gain1;
+    case 0x02:
+        return Gain::Gain2;
+    case 0x03:
+        return Gain::Gain3;
+    case 0x04:
+        return Gain::Gain4;
+    case 0x00:
+        return Gain::Gain6;
+    case 0x05:
+        return Gain::Gain8;
+    case 0x06:
+        return Gain::Gain12;
+    default:
+        throw std::runtime_error("Unsupported gain byte code");
+    }
+}
+
+template<>
 inline Byte byteCode<SamplingFrequency>(SamplingFrequency value){
-    switch (value)
-    {
+    switch (value){
     case SamplingFrequency::Hz125:
         return Byte{0x00};
     case SamplingFrequency::Hz250:
-        return Byte{0x01};;
+        return Byte{0x01};
     case SamplingFrequency::Hz500:
         return Byte{0x02};
     case SamplingFrequency::Hz1000:
@@ -129,13 +189,34 @@ inline Byte byteCode<SamplingFrequency>(SamplingFrequency value){
 }
 
 template<>
+inline SamplingFrequency fromByteCode<SamplingFrequency>(Byte code){
+    switch (code){
+    case 0x00:
+        return SamplingFrequency::Hz125;
+    case 0x01:
+        return SamplingFrequency::Hz250;
+    case 0x02:
+        return SamplingFrequency::Hz500;
+    case 0x03:
+        return SamplingFrequency::Hz1000;
+    case 0x04:
+        return SamplingFrequency::Hz2000;
+    case 0x05:
+        return SamplingFrequency::Hz4000;
+    case 0x06:
+        return SamplingFrequency::Hz8000;
+    default:
+        throw std::runtime_error("Unsupported sampling frequency byte code");
+    }
+}
+
+template<>
 inline Byte byteCode<ADCInput>(ADCInput value){
-    switch (value)
-    {
+    switch (value){
     case ADCInput::Electrodes:
         return Byte{0x00};
     case ADCInput::Short:
-        return Byte{0x01};;
+        return Byte{0x01};
     case ADCInput::Test:
         return Byte{0x02};
     case ADCInput::Resistance:
@@ -146,19 +227,146 @@ inline Byte byteCode<ADCInput>(ADCInput value){
 }
 
 template<>
+inline ADCInput fromByteCode<ADCInput>(Byte code){
+    switch (code){
+    case 0x00:
+        return ADCInput::Electrodes;
+    case 0x01:
+        return ADCInput::Short;
+    case 0x02:
+        return ADCInput::Test;
+    case 0x03:
+        return ADCInput::Resistance;
+    default:
+        throw std::runtime_error("Unsupported ADC input byte code");
+    }
+}
+
+template<>
 inline Byte byteCode<ExternalSwitchInput>(ExternalSwitchInput value){
-    switch (value)
-    {
+    switch (value){
     case ExternalSwitchInput::MioElectrodesRespUSB:
         return Byte{0x00};
     case ExternalSwitchInput::MioElectrodes:
-        return Byte{0x01};;
+        return Byte{0x01};
     case ExternalSwitchInput::MioUSB:
         return Byte{0x02};
     case ExternalSwitchInput::RespUSB:
         return Byte{0x03};
     default:
         throw std::runtime_error("Unsupported external switch input value");
+    }
+}
+
+template<>
+inline ExternalSwitchInput fromByteCode<ExternalSwitchInput>(Byte code){
+    switch (code){
+    case 0x00:
+        return ExternalSwitchInput::MioElectrodesRespUSB;
+    case 0x01:
+        return ExternalSwitchInput::MioElectrodes;
+    case 0x02:
+        return ExternalSwitchInput::MioUSB;
+    case 0x03:
+        return ExternalSwitchInput::RespUSB;
+    default:
+        throw std::runtime_error("Unsupported external switch input byte code");
+    }
+}
+
+template<>
+inline Byte byteCode<AccelerometerSensitivity>(AccelerometerSensitivity value){
+    switch (value){
+    case AccelerometerSensitivity::Sens2g:
+        return Byte{0x00};
+    case AccelerometerSensitivity::Sens4g:
+        return Byte{0x01};
+    case AccelerometerSensitivity::Sens8g:
+        return Byte{0x02};
+    case AccelerometerSensitivity::Sens16g:
+        return Byte{0x03};
+    default:
+        throw std::runtime_error("Unsupported accelerometer sens input value");
+    }
+}
+
+template<>
+inline AccelerometerSensitivity fromByteCode<AccelerometerSensitivity>(Byte code){
+    switch (code){
+    case 0x00:
+        return AccelerometerSensitivity::Sens2g;
+    case 0x01:
+        return AccelerometerSensitivity::Sens4g;
+    case 0x02:
+        return AccelerometerSensitivity::Sens8g;
+    case 0x03:
+        return AccelerometerSensitivity::Sens16g;
+    default:
+        throw std::runtime_error("Unsupported accelerometer sens input byte code");
+    }
+}
+
+template<>
+inline Byte byteCode<GyroscopeSensitivity>(GyroscopeSensitivity value){
+    switch (value){
+    case GyroscopeSensitivity::Sens250Grad:
+        return Byte{0x00};
+    case GyroscopeSensitivity::Sens500Grad:
+        return Byte{0x01};
+    case GyroscopeSensitivity::Sens1000Grad:
+        return Byte{0x02};
+    case GyroscopeSensitivity::Sens2000Grad:
+        return Byte{0x03};
+    default:
+        throw std::runtime_error("Unsupported gyroscope sens input value");
+    }
+}
+
+template<>
+inline GyroscopeSensitivity fromByteCode<GyroscopeSensitivity>(Byte code){
+    switch (code){
+    case 0x00:
+        return GyroscopeSensitivity::Sens250Grad;
+    case 0x01:
+        return GyroscopeSensitivity::Sens500Grad;
+    case 0x02:
+        return GyroscopeSensitivity::Sens1000Grad;
+    case 0x03:
+        return GyroscopeSensitivity::Sens2000Grad;
+    default:
+        throw std::runtime_error("Unsupported gyroscope sens input value");
+    }
+}
+
+template <Parameter Param>
+CallibriCommand toCallibriCommand(){
+    switch(Param){
+    case Parameter::HardwareFilterState:{
+        return CallibriCommand::SWITCH_FILTER_STATE;
+    }
+    case Parameter::SamplingFrequency:{
+        return CallibriCommand::SET_FSAM;
+    }
+    case Parameter::Gain:{
+        return CallibriCommand::SET_PGA_GAIN;
+    }
+    case Parameter::Offset:{
+        return CallibriCommand::SET_DATA_OFFSET;
+    }
+    case Parameter::ExternalSwitchState:{
+        return CallibriCommand::SWITCH_EXT_COM_INPUTS;
+    }
+    case Parameter::ADCInputState:{
+        return CallibriCommand::SWITCH_ADC_INP;
+    }
+    case Parameter::GyroscopeSens:{
+        return CallibriCommand::SET_GYRO_SENS;
+    }
+    case Parameter::AccelerometerSens:{
+        return CallibriCommand::SET_ACCEL_SENS;
+    }
+    default:
+        throw std::runtime_error("Unsupported command type");
     }
 }
 

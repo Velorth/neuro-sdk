@@ -19,6 +19,8 @@ public:
     bool setOffset(typename ParamValue<Parameter::Offset>::Type) override;
     bool setExternalSwitchState(typename ParamValue<Parameter::ExternalSwitchState>::Type) override;
     bool setADCInputState(typename ParamValue<Parameter::ADCInputState>::Type) override;
+    bool setAccelerometerSens(typename ParamValue<Parameter::AccelerometerSens>::Type) override;
+    bool setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type) override;
     bool setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type) override;
     bool setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type) override;
     bool setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type) override;

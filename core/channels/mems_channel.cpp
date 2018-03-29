@@ -93,7 +93,7 @@ sampling_frequency_t MemsChannel::samplingFrequency() const noexcept {
 }
 
 void MemsChannel::setSamplingFrequency(sampling_frequency_t) {
-    throw std::runtime_error("Unable set dampling frequency for signal channel. It must be set for device.");
+    throw std::runtime_error("Unable set sampling frequency for MEMS channel");
 }
 
 }

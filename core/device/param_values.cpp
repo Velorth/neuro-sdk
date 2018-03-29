@@ -87,6 +87,20 @@ typename ParamValue<Parameter::ADCInputState>::Type Device::readParam<Parameter:
 }
 
 template<>
+typename ParamValue<Parameter::GyroscopeSens>::Type Device::readParam<Parameter::GyroscopeSens>() const {
+    Expects(mImpl != nullptr);
+    Expects(mImpl->mParamReader != nullptr);
+    return mImpl->mParamReader->readGyroscopeSens();
+}
+
+template<>
+typename ParamValue<Parameter::AccelerometerSens>::Type Device::readParam<Parameter::AccelerometerSens>() const {
+    Expects(mImpl != nullptr);
+    Expects(mImpl->mParamReader != nullptr);
+    return mImpl->mParamReader->readAccelerometerSens();
+}
+
+template<>
 typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const {
     Expects(mImpl != nullptr);
     Expects(mImpl->mParamReader != nullptr);
@@ -192,6 +206,20 @@ bool Device::setParam<Parameter::ADCInputState>(typename ParamValue<Parameter::A
     Expects(mImpl != nullptr);
     Expects(mImpl->mParamWriter != nullptr);
     return mImpl->mParamWriter->setADCInputState(value);
+}
+
+template<>
+bool Device::setParam<Parameter::GyroscopeSens>(typename ParamValue<Parameter::GyroscopeSens>::Type value){
+    Expects(mImpl != nullptr);
+    Expects(mImpl->mParamWriter != nullptr);
+    return mImpl->mParamWriter->setGyroscopeSens(value);
+}
+
+template<>
+bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Parameter::AccelerometerSens>::Type value){
+    Expects(mImpl != nullptr);
+    Expects(mImpl->mParamWriter != nullptr);
+    return mImpl->mParamWriter->setAccelerometerSens(value);
 }
 
 template<>

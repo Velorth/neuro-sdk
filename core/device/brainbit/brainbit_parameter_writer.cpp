@@ -34,6 +34,14 @@ bool BrainbitParameterWriter::setADCInputState(typename ParamValue<Parameter::AD
     throw std::runtime_error("Device parameter not found");
 }
 
+bool BrainbitParameterWriter::setAccelerometerSens(typename ParamValue<Parameter::AccelerometerSens>::Type){
+    throw std::runtime_error("Device parameter not found");
+}
+
+bool BrainbitParameterWriter::setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type){
+    throw std::runtime_error("Device parameter not found");
+}
+
 bool BrainbitParameterWriter::setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type){
     throw std::runtime_error("Device parameter not found");
 }

@@ -2,16 +2,16 @@
 #define CALLIBRI_COMMON_PARAMETERS_H
 
 #include "device/param_values.h"
-#include "callibri_command.h"
+#include "device/request_scheduler.h"
+#include "callibri_protocol.h"
 
 namespace Neuro {
 
-template<typename> class RequestHandler;
-using CallibriRequestHandler = RequestHandler<CallibriCommandData>;
+using CallibriRequestScheduler = RequestScheduler<CallibriCommandData>;
 
 class CallibriCommonParameters{
 public:
-    CallibriCommonParameters(std::shared_ptr<CallibriRequestHandler>);
+    CallibriCommonParameters(std::shared_ptr<CallibriRequestScheduler>);
     CallibriCommonParameters(const CallibriCommonParameters &) = delete;
     CallibriCommonParameters& operator=(const CallibriCommonParameters &) = delete;
 
@@ -22,6 +22,8 @@ public:
     typename ParamValue<Parameter::Offset>::Type offset() const;
     typename ParamValue<Parameter::ExternalSwitchState>::Type externalSwitchState() const;
     typename ParamValue<Parameter::ADCInputState>::Type ADCInputState() const;
+    typename ParamValue<Parameter::AccelerometerSens>::Type accelerometerSens() const;
+    typename ParamValue<Parameter::GyroscopeSens>::Type gyroscopeSens() const;
 
     bool syncParameters();
     void setSerialNumber(unsigned long) noexcept;
@@ -31,12 +33,16 @@ public:
     bool setOffset(typename ParamValue<Parameter::Offset>::Type);
     bool setExternalSwitchState(typename ParamValue<Parameter::ExternalSwitchState>::Type);
     bool setADCInputState(typename ParamValue<Parameter::ADCInputState>::Type);
+    bool setAccelerometerSens(typename ParamValue<Parameter::AccelerometerSens>::Type);
+    bool setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type);
     std::vector<ChannelInfo> availableChannels() const;
     std::vector<Command> availableCommands() const;
     std::vector<ParamPair> availableParameters() const;
 
 private:
-    std::shared_ptr<CallibriRequestHandler> mRequestHandler;
+    static constexpr const char *class_name = "CallibriCommonParameters";
+
+    std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::vector<ChannelInfo> mAvailableChannels;
     std::vector<Command> mAvailableCommands;
     std::vector<ParamPair> mAvailableParameters;
@@ -48,6 +54,18 @@ private:
     typename ParamValue<Parameter::Offset>::Type mOffset;
     typename ParamValue<Parameter::ExternalSwitchState>::Type mExternalSwitchState;
     typename ParamValue<Parameter::ADCInputState>::Type mADCInputState;
+    typename ParamValue<Parameter::AccelerometerSens>::Type mAccelerometerSens;
+    typename ParamValue<Parameter::GyroscopeSens>::Type mGyroscopeSens;
+
+    template <Parameter Param>
+    bool sendSetParamCommand(typename ParamValue<Param>::Type value){
+        auto cmdData = std::make_shared<CallibriCommandData>(toCallibriCommand<Param>());
+        cmdData->setRequestData({byteCode(value)});
+        mRequestHandler->sendRequest(cmdData);
+        cmdData->wait();
+
+        return cmdData->getError() == CallibriError::NO_ERROR;
+    }
 };
 
 }

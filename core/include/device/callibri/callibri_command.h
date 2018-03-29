@@ -34,7 +34,9 @@ enum class CallibriCommand: unsigned char {
     DO_CALIBRATION = 0x16,
     GET_ELECTRODE_STATE = 0x46,
     SWITCH_ADC_INP = 0x0A,
-    SWITCH_EXT_COM_INPUTS = 0x23
+    SWITCH_EXT_COM_INPUTS = 0x23,
+    SET_ACCEL_SENS = 0x25,
+    SET_GYRO_SENS = 0x26
 };
 
 enum class CallibriError: unsigned char {

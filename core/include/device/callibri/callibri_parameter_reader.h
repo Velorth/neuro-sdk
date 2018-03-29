@@ -7,8 +7,8 @@
 namespace Neuro {
 
 class CallibriCommonParameters;
-template<typename> class RequestHandler;
-using CallibriRequestHandler = RequestHandler<CallibriCommandData>;
+template<typename> class RequestScheduler;
+using CallibriRequestScheduler = RequestScheduler<CallibriCommandData>;
 
 class CallibriParameterReader : public ParameterReader
 {
@@ -16,7 +16,7 @@ public:
     CallibriParameterReader(std::shared_ptr<BleDevice>,
                             param_changed_callback_t,
                             std::shared_ptr<CallibriCommonParameters>,
-                            std::shared_ptr<CallibriRequestHandler>);
+                            std::shared_ptr<CallibriRequestScheduler>);
 
     typename ParamValue<Parameter::SerialNumber>::Type readSerialNumber() const override;
     typename ParamValue<Parameter::HardwareFilterState>::Type readHardwareFilterState() const override;
@@ -26,6 +26,8 @@ public:
     typename ParamValue<Parameter::Offset>::Type readOffset() const override;
     typename ParamValue<Parameter::ExternalSwitchState>::Type readExternalSwitchState() const override;
     typename ParamValue<Parameter::ADCInputState>::Type readADCInputState() const override;
+    typename ParamValue<Parameter::AccelerometerSens>::Type readAccelerometerSens() const override;
+    typename ParamValue<Parameter::GyroscopeSens>::Type readGyroscopeSens() const override;
     typename ParamValue<Parameter::StimulatorState>::Type readStimulatorState() const override;
     typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const override;
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const override;
@@ -33,7 +35,7 @@ public:
 
 private:
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
-    std::shared_ptr<CallibriRequestHandler> mRequestHandler;
+    std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     FirmwareMode mFirmwareMode;
 
     bool loadDeviceParams() override;

@@ -12,6 +12,8 @@ public enum ParameterName {
     Offset,
     ExternalSwitchState,
     ADCInputState,
+    AccelerometerSens,
+    GyroscopeSens,
     StimulatorState,
     MotionAssistantState,
     StimulatorParamPack,

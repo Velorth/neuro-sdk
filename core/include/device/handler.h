@@ -42,6 +42,8 @@ public:
 private:
     friend class HandlerChain<Handler<Element>>;
 
+    static constexpr const char *class_name = "Handler";
+
     std::weak_ptr<Handler> mNextResponsible;
 
     virtual bool isResponsible(const element_type &) const noexcept = 0;

@@ -23,6 +23,50 @@ const std::map<std::string, Neuro::ADCInput>
 }();
 
 template<>
+const std::map<Neuro::AccelerometerSensitivity, std::string>
+        jni::enum_name_map<Neuro::AccelerometerSensitivity>::mEnumToNameMap = []() {
+    return std::map<Neuro::AccelerometerSensitivity, std::string>{
+            {Neuro::AccelerometerSensitivity::Sens2g,  "Sens2g"},
+            {Neuro::AccelerometerSensitivity::Sens4g,  "Sens4g"},
+            {Neuro::AccelerometerSensitivity::Sens8g,  "Sens8g"},
+            {Neuro::AccelerometerSensitivity::Sens16g, "Sens16g"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::AccelerometerSensitivity>
+        jni::enum_name_map<Neuro::AccelerometerSensitivity>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::AccelerometerSensitivity>{
+            {"Sens2g",  Neuro::AccelerometerSensitivity::Sens2g},
+            {"Sens4g",  Neuro::AccelerometerSensitivity::Sens4g},
+            {"Sens8g",  Neuro::AccelerometerSensitivity::Sens8g},
+            {"Sens16g", Neuro::AccelerometerSensitivity::Sens16g}
+    };
+}();
+
+template<>
+const std::map<Neuro::GyroscopeSensitivity, std::string>
+        jni::enum_name_map<Neuro::GyroscopeSensitivity>::mEnumToNameMap = []() {
+    return std::map<Neuro::GyroscopeSensitivity, std::string>{
+            {Neuro::GyroscopeSensitivity::Sens250Grad,  "Sens250Grad"},
+            {Neuro::GyroscopeSensitivity::Sens500Grad,  "Sens500Grad"},
+            {Neuro::GyroscopeSensitivity::Sens1000Grad, "Sens1000Grad"},
+            {Neuro::GyroscopeSensitivity::Sens2000Grad, "Sens2000Grad"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::GyroscopeSensitivity>
+        jni::enum_name_map<Neuro::GyroscopeSensitivity>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::GyroscopeSensitivity>{
+            {"Sens250Grad",  Neuro::GyroscopeSensitivity::Sens250Grad},
+            {"Sens500Grad",  Neuro::GyroscopeSensitivity::Sens500Grad},
+            {"Sens1000Grad", Neuro::GyroscopeSensitivity::Sens1000Grad},
+            {"Sens2000Grad", Neuro::GyroscopeSensitivity::Sens2000Grad}
+    };
+}();
+
+template<>
 const std::map<Neuro::ExternalSwitchInput, std::string>
         jni::enum_name_map<Neuro::ExternalSwitchInput>::mEnumToNameMap = []() {
     return std::map<Neuro::ExternalSwitchInput, std::string>{
@@ -164,6 +208,10 @@ std::string getParamTypeName(Neuro::Parameter param) {
             return "Gain";
         case Neuro::Parameter::ADCInputState:
             return "ADCInput";
+        case Neuro::Parameter::AccelerometerSens:
+            return "AccelerometerSensitivity";
+        case Neuro::Parameter::GyroscopeSens:
+            return "GyroscopeSensitivity";
         case Neuro::Parameter::StimulatorParamPack:
             return "StimulationParams";
         case Neuro::Parameter::MotionAssistantParamPack:

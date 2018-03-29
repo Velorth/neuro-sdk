@@ -5,10 +5,10 @@
 #include <functional>
 #include <vector>
 #include "common_types.h"
-#include "ble/ble_device.h"
 
 namespace Neuro {
 
+class BleDevice;
 class ChannelInfo;
 enum class Command;
 enum class Parameter;

@@ -22,6 +22,14 @@
 /**
  * BrainBit configuration values and constants
  */
+#define CMD_STOP_DATA_LENGTH 0
+#define CMD_SIGNAL_DATA_LENGTH 4
+#define CMD_RESIST_DATA_LENGTH 7
+#define CMD_BOOTLOADER_DATA_LENGTH 0
+#define BRAINBIT_MAX_CMD_LENGTH 7
+#define STATUS_CHARGE_BYTE_POS 2
+#define BRAINBIT_ADC_CAPACITY 8388607
+
 #define BRAINBIT_PACKET_SIZE 20
 #define BRAINBIT_MAX_PACKET_DELAY 10000
 #define BRAINBIT_SORT_MAP_SIZE 50 //matches 200 ms delay in output buffers

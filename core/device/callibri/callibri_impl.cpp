@@ -6,12 +6,12 @@
 #include "device/callibri/callibri_common_parameters.h"
 #include "device/callibri/callibri_protocol.h"
 #include "device/packet.h"
-#include "device/request_handler.h"
+#include "device/request_scheduler.h"
 
 namespace Neuro {
 
 CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
-                           std::shared_ptr<CallibriRequestHandler> request_handler,
+                           std::shared_ptr<CallibriRequestScheduler> request_handler,
                            std::shared_ptr<CallibriCommonParameters> common_params) :
     DeviceImpl(ble_device,
                std::make_unique<CallibriParameterReader>(ble_device,
@@ -116,27 +116,24 @@ bool CallibriImpl::isElectrodesAttached(){
 }
 
 const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {
-    /*auto bufferPtr = mSignalBuffer.lock();
-    if (bufferPtr == nullptr){
+    if (mSignalBuffer == nullptr){
         throw std::runtime_error("Device does not have signal buffer");
     }
-    return *bufferPtr;*/
+    return mSignalBuffer->buffer();
 }
 
 const BaseBuffer<resp_sample_t> &CallibriImpl::respirationBuffer() const {
-    /*auto bufferPtr = mRespirationBuffer.lock();
-    if (bufferPtr == nullptr){
+    if (mRespirationBuffer == nullptr){
         throw std::runtime_error("Device does not have respiration buffer");
     }
-    return *bufferPtr;*/
+    return mRespirationBuffer->buffer();
 }
 
 const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
-   /* auto bufferPtr = mMemsBuffer.lock();
-    if (bufferPtr == nullptr){
+    if (mMemsBuffer == nullptr){
         throw std::runtime_error("Device does not have MEMS buffer");
     }
-    return *bufferPtr;*/
+    return mMemsBuffer->buffer();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -151,54 +148,26 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
     marker.bytes[0] = data[0];
     marker.bytes[1] = data[1];
     LOG_TRACE_V("Marker value: %d", marker.value);
+
     auto packetType = fromMarker(marker.value);
-    Packet<CallibriPacketType> packet(packetType, data);
-    if (!mPacketHandler->process(packet)){
-        LOG_ERROR("Failed to process packet");
+    switch (packetType){
+    case CallibriPacketType::Command:{
+        onCommandResponse(data);
+        break;
     }
-}
-
-void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> commandData){
-    std::vector<Byte> packet(COLIBRI_PACKET_SIZE);
-
-    ByteInterpreter<unsigned short> commandMarker;
-    commandMarker.value = COLIBRI_COMMAND_MARKER;
-
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Sending command packet for command %d", "CallibriImpl", __FUNCTION__, commandData->getCommand());
-
-    packet[0] = commandMarker.bytes[0];
-    packet[1] = commandMarker.bytes[1];
-    packet[COLIBRI_HEADER_CMD_POSITION] = static_cast<unsigned char>(commandData->getCommand());
-
-    ByteInterpreter<long> serial;
-    serial.value = mCommonParams->serialNumber();
-    packet[COLIBRI_HEADER_ADDR_POSITION] = serial.bytes[0];
-    packet[COLIBRI_HEADER_ADDR_POSITION + 1] = serial.bytes[1];
-    packet[COLIBRI_HEADER_ADDR_POSITION + 2] = serial.bytes[2];
-
-    unsigned char checksum = 0;
-    for (auto packetByte = &packet[0];
-         packetByte != &packet[0] + COLIBRI_HEADER_CS_POSITION; checksum -= *packetByte++);
-    packet[COLIBRI_HEADER_CS_POSITION] = checksum;
-
-    if (auto dataLength = commandData->getRequestLength())
-    {
-        if (COLIBRI_CMD_HDR_DATA_START_POS + dataLength > COLIBRI_PACKET_SIZE)
-            return;
-
-        auto requestData = commandData->getRequestData();
-        if (requestData.size() > COLIBRI_PACKET_SIZE + COLIBRI_CMD_HDR_DATA_START_POS)
-        {
-            log->warn("[%s: %s] Packet data array too big!", "CallibriImpl", __FUNCTION__);
-            return;
-        }
-
-        std::copy(requestData.begin(), requestData.end(), packet.begin()+COLIBRI_CMD_HDR_DATA_START_POS);
+    case CallibriPacketType::Signal:{
+        onSignalReceived(data);
+        break;
     }
-
-    mBleDevice->sendCommand(packet);
-    log->debug("[%s: %s] Command been sent", "CallibriImpl", __FUNCTION__);
+    case CallibriPacketType::MEMS:{
+        onMemsReceived(data);
+        break;
+    }
+    case CallibriPacketType::Respiration:{
+        onRespReceived(data);
+        break;
+    }
+    }
 }
 
 int CallibriImpl::requestBattryVoltage(){
@@ -260,10 +229,122 @@ void CallibriImpl::onStatusDataReceived(const ByteBuffer &){
     throw std::logic_error("Status data is not suitable for Callibri device");
 }
 
+void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
+    char checksum = 0;
+    for (auto headerByte = packetBytes.data();
+         headerByte != packetBytes.data() + CallibriDataStartPos; checksum += *headerByte++);
+
+    LOG_DEBUG_V("Checksum: %d", checksum);
+
+    if (checksum) {
+        LOG_WARN("Checksum isn't equals to zero. Discarding packet.");
+        return;
+    }
+
+    ByteInterpreter<long> hostAddress;
+    hostAddress.value = 0;
+    std::copy(packetBytes.data() + CallibriAddressPos,
+              packetBytes.data() + CallibriAddressPos + CallibriAddressLength, hostAddress.bytes);
+
+    if (hostAddress.value!=CallibriHostAddress){
+        LOG_ERROR_V("Host address is not valid: %ld. Must be %ld", hostAddress.value, CallibriHostAddress);
+        return;
+    }
+
+    LOG_DEBUG("Command response received");
+    CallibriCommand command;
+    if (!parseCommand(packetBytes[CallibriCmdCodePos], &command))
+    {
+        LOG_DEBUG_V("Command parsing failed for command code %d", packetBytes[CallibriCmdCodePos]);
+        return;
+    }
+
+    LOG_DEBUG("Processing response");
+    mRequestHandler->onCommandResponse(command,
+                                       packetBytes.data() + CallibriDataStartPos,
+                                       packetBytes.size() - CallibriDataStartPos);
+}
+
+void CallibriImpl::onSignalReceived(const ByteBuffer &data){
+    auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
+    ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
+    if (mSignalBuffer == nullptr){
+        mSignalBuffer = std::make_unique<CallibriSignalBuffer>(mCommonParams);
+    }
+    mSignalBuffer->onDataReceived(packetNumber, signalData);
+}
+
+void CallibriImpl::onMemsReceived(const ByteBuffer &data){
+    auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
+    ByteBuffer memsData(data.begin() + MemsDataShift, data.end());
+    if (mMemsBuffer == nullptr){
+        mMemsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParams);
+    }
+    mMemsBuffer->onDataReceived(packetNumber, memsData);
+}
+
+void CallibriImpl::onRespReceived(const ByteBuffer &data){
+    auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
+    ByteBuffer respData(data.begin() + RespDataShift, data.end());
+    if (mRespirationBuffer == nullptr){
+        mRespirationBuffer = std::make_unique<CallibriRespirationBuffer>();
+    }
+    mRespirationBuffer->onDataReceived(packetNumber, respData);
+}
+
+packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){
+    ByteInterpreter<packet_number_t> packetNumber;
+    packetNumber.bytes[0] = packet[number_pos];
+    packetNumber.bytes[1] = packet[number_pos + 1];
+    return packetNumber.value;
+}
+
 void CallibriImpl::onParameterChanged(Parameter param) {
     if (parameterChangedCallback){
         parameterChangedCallback(param);
     }
+}
+
+void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> commandData){
+    std::vector<Byte> packet(CallibriPacketSize);
+
+    ByteInterpreter<unsigned short> commandMarker;
+    commandMarker.value = CallibriCommandMarker;
+
+    LOG_DEBUG_V("Sending command packet for command %d", commandData->getCommand());
+
+    packet[0] = commandMarker.bytes[0];
+    packet[1] = commandMarker.bytes[1];
+    packet[CallibriCmdCodePos] = static_cast<unsigned char>(commandData->getCommand());
+
+    ByteInterpreter<long> serial;
+    serial.value = mCommonParams->serialNumber();
+    packet[CallibriAddressPos] = serial.bytes[0];
+    packet[CallibriAddressPos + 1] = serial.bytes[1];
+    packet[CallibriAddressPos + 2] = serial.bytes[2];
+
+    unsigned char checksum = 0;
+    for (auto packetByte = &packet[0];
+         packetByte != &packet[0] + CallibriChecksumPos; checksum -= *packetByte++);
+    packet[CallibriChecksumPos] = checksum;
+
+    if (auto dataLength = commandData->getRequestLength())
+    {
+        if (CallibriDataStartPos + dataLength > CallibriPacketSize)
+            return;
+
+        auto requestData = commandData->getRequestData();
+        if (requestData.size() > CallibriPacketSize - CallibriDataStartPos)
+        {
+            LOG_WARN("Packet data array too big!");
+            return;
+        }
+
+        std::copy(requestData.begin(), requestData.end(), packet.begin()+CallibriDataStartPos);
+    }
+
+    mBleDevice->sendCommand(packet);
+    LOG_DEBUG("Command been sent");
 }
 
 }

@@ -1,3 +1,5 @@
+#include "wrappers/channels/jni_respiration_channel_wrap.h"
+#include "wrappers/channels/jni_mems_channel_wrap.h"
 #include "wrappers/device/jni_param_types_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "wrappers/channels/jni_signal_channel_wrap.h"
@@ -20,6 +22,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniDeviceWrap *>(env);
     jni::initJavaObjClass<JniBatteryChannelWrap *>(env);
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);
+    jni::initJavaObjClass<JniRespirationChannelWrap *>(env);
+    jni::initJavaObjClass<JniMEMSChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);
@@ -30,11 +34,14 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::ParamPair>(env);
     jni::initJavaObjClass<ParameterType>(env);
     jni::initJavaObjClass<Neuro::ADCInput>(env);
-    jni::initJavaObjClass<Neuro::ExternalSwitchInput >(env);
+    jni::initJavaObjClass<Neuro::AccelerometerSensitivity >(env);
+    jni::initJavaObjClass<Neuro::GyroscopeSensitivity>(env);
+    jni::initJavaObjClass<Neuro::ExternalSwitchInput>(env);
     jni::initJavaObjClass<Neuro::FirmwareMode>(env);
     jni::initJavaObjClass<Neuro::Gain>(env);
     jni::initJavaObjClass<Neuro::MotionAssistantLimb>(env);
     jni::initJavaObjClass<Neuro::SamplingFrequency>(env);
+    jni::initJavaObjClass<Neuro::MEMS>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());

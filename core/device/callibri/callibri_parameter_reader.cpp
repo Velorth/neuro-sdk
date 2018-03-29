@@ -2,7 +2,7 @@
 #include "device/callibri/callibri_common_parameters.h"
 #include "device/callibri/callibri_command.h"
 #include "device/callibri/callibri_protocol.h"
-#include "device/request_handler.h"
+#include "device/request_scheduler.h"
 #include "common_types.h"
 
 namespace Neuro {
@@ -10,7 +10,7 @@ namespace Neuro {
 CallibriParameterReader::CallibriParameterReader(std::shared_ptr<BleDevice> ble_device,
                                                  param_changed_callback_t callback,
                                                  std::shared_ptr<CallibriCommonParameters> common_params,
-                                                 std::shared_ptr<CallibriRequestHandler> request_handler) :
+                                                 std::shared_ptr<CallibriRequestScheduler> request_handler) :
     ParameterReader(ble_device, callback),
     mCommonParameters(common_params),
     mRequestHandler(request_handler){
@@ -55,6 +55,16 @@ CallibriParameterReader::readExternalSwitchState() const {
 typename ParamValue<Parameter::ADCInputState>::Type
 CallibriParameterReader::readADCInputState() const {
     return mCommonParameters->ADCInputState();
+}
+
+typename ParamValue<Parameter::AccelerometerSens>::Type
+CallibriParameterReader::readAccelerometerSens() const {
+    return mCommonParameters->accelerometerSens();
+}
+
+typename ParamValue<Parameter::GyroscopeSens>::Type
+CallibriParameterReader::readGyroscopeSens() const {
+    return mCommonParameters->gyroscopeSens();
 }
 
 typename ParamValue<Parameter::StimulatorState>::Type
@@ -136,14 +146,14 @@ void CallibriParameterReader::requestSerialNumber(){
 
     auto responseLength = cmdData->getResponseLength();
     log->debug("[%s: %s] Response length: %zd", "CallibriParameterReader", __FUNCTION__, responseLength);
-    if (responseLength < COLIBRI_ADDRESS_LENGTH){
+    /*if (responseLength < COLIBRI_ADDRESS_LENGTH){
         throw std::runtime_error("Callibri protocol error");
-    }
+    }*/
 
     auto responseData = cmdData->getResponseData();
     ByteInterpreter<unsigned long> address;
     address.value = 0;
-    std::copy(responseData.begin(), responseData.begin()+COLIBRI_ADDRESS_LENGTH, address.bytes);
+    //std::copy(responseData.begin(), responseData.begin()+COLIBRI_ADDRESS_LENGTH, address.bytes);
     log->debug("[%s: %s] Address is %ld", "CallibriParameterReader", __FUNCTION__, address.value);
     mCommonParameters->setSerialNumber(address.value);
 }

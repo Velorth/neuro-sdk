@@ -17,7 +17,7 @@ public:
                       "Packet identificator must be of enum type");
     }
 
-    ByteBuffer packetBytes() const {
+    const ByteBuffer& packetBytes() const {
         return mPacketBytes;
     }
 

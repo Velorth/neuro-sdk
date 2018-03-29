@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef REQUESTHANDLER_H
-#define REQUESTHANDLER_H
+#ifndef REQUEST_SCHEDULER_H
+#define REQUEST_SCHEDULER_H
 
 #include <functional>
 #include <mutex>
@@ -28,15 +28,15 @@
 namespace Neuro {
 
 template <class CommandData>
-class RequestHandler
+class RequestScheduler
 {
 public:
     typedef typename CommandData::cmd_type CommandType;
 
-    RequestHandler(std::function<void (std::shared_ptr<CommandData>)> = std::function<void(std::shared_ptr<CommandData>)>());
-    RequestHandler(const RequestHandler&) = delete;
-    RequestHandler& operator=(const RequestHandler&) = delete;
-    ~RequestHandler();
+    RequestScheduler(std::function<void (std::shared_ptr<CommandData>)> = std::function<void(std::shared_ptr<CommandData>)>());
+    RequestScheduler(const RequestScheduler&) = delete;
+    RequestScheduler& operator=(const RequestScheduler&) = delete;
+    ~RequestScheduler();
 
     void setSendFunction(std::function<void(std::shared_ptr<CommandData>)>);
     void sendRequest(std::shared_ptr<CommandData>);
@@ -55,7 +55,7 @@ private:
 };
 
 template <class CommandData>
-RequestHandler<CommandData>::RequestHandler(std::function<void (std::shared_ptr<CommandData>)> func)
+RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_ptr<CommandData>)> func)
 {
     sendCommandFunc = func;
     threadStop.store(false);
@@ -115,7 +115,7 @@ RequestHandler<CommandData>::RequestHandler(std::function<void (std::shared_ptr<
 }
 
 template <class CommandData>
-RequestHandler<CommandData>::~RequestHandler()
+RequestScheduler<CommandData>::~RequestScheduler()
 {
     auto log = LoggerFactory::getCurrentPlatformLogger();
     log->debug("[%s: %s] Request handler destructor", "Request handler", __FUNCTION__);
@@ -133,12 +133,12 @@ RequestHandler<CommandData>::~RequestHandler()
 }
 
 template<class CommandData>
-void RequestHandler<CommandData>::setSendFunction(std::function<void (std::shared_ptr<CommandData>)> func){
+void RequestScheduler<CommandData>::setSendFunction(std::function<void (std::shared_ptr<CommandData>)> func){
     sendCommandFunc = func;
 }
 
 template <class CommandData>
-void RequestHandler<CommandData>::sendRequest(std::shared_ptr<CommandData> requestData)
+void RequestScheduler<CommandData>::sendRequest(std::shared_ptr<CommandData> requestData)
 {
     std::unique_lock<std::mutex> queueLock(queueMutex);
 
@@ -151,7 +151,7 @@ void RequestHandler<CommandData>::sendRequest(std::shared_ptr<CommandData> reque
 }
 
 template <class CommandData>
-void RequestHandler<CommandData>::onCommandResponse(CommandType cmd, const unsigned char* data, size_t data_length)
+void RequestScheduler<CommandData>::onCommandResponse(CommandType cmd, const unsigned char* data, size_t data_length)
 {
     std::unique_lock<std::mutex> requestLock(requestMutex);
     std::unique_lock<std::mutex> queueChangeLock(queueMutex);
@@ -195,4 +195,4 @@ void RequestHandler<CommandData>::onCommandResponse(CommandType cmd, const unsig
 
 }
 
-#endif //REQUESTHANDLER_H
+#endif //REQUEST_SCHEDULER_H

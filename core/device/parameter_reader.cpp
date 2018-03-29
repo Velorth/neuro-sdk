@@ -44,33 +44,36 @@ void ParameterReader::onBleDeviceStateChanged(BleDeviceState state, BleDeviceErr
 }
 
 void ParameterReader::onBleConnected(){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Ble device connected. Device %s, address: %s. Initializing...", "ParameterReader", __FUNCTION__,
-               mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
+    LOG_DEBUG_V("Ble device connected. Device %s, address: %s. Initializing...",
+                mBleDevice->getName().c_str(),
+                mBleDevice->getNetAddress().c_str());
     if (loadDeviceParams()) {
         mState = DeviceState::Connected;
         parameterChangedCallback(Parameter::State);
-        log->debug("[%s: %s] Neuro device connected. Device %s, address: %s", "ParameterReader", __FUNCTION__,
-                   mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
+        LOG_DEBUG_V("Neuro device connected. Device %s, address: %s",
+                    mBleDevice->getName().c_str(),
+                    mBleDevice->getNetAddress().c_str());
     }
     else{
-        log->error("[%s: %s] Neuro device protocol error. Device %s, address: %s", "ParameterReader", __FUNCTION__,
-                   mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
+        LOG_ERROR_V("Neuro device protocol error. Device %s, address: %s",
+                    mBleDevice->getName().c_str(),
+                    mBleDevice->getNetAddress().c_str());
         mBleDevice->disconnect();
     }
 }
 
 void ParameterReader::onBleDisconnected(BleDeviceError error){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
     mState = DeviceState::Disconnected;
     parameterChangedCallback(Parameter::State);
     if (error != BleDeviceError::NO_ERROR){
-        log->error("[%s: %s] Neuro device bluetooth error. Device %s, address: %s", "ParameterReader", __FUNCTION__,
-                   mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
+        LOG_ERROR_V("Neuro device bluetooth error. Device %s, address: %s",
+                    mBleDevice->getName().c_str(),
+                    mBleDevice->getNetAddress().c_str());
     }
     else{
-        log->debug("[%s: %s] Ble device disconnected. Device %s, address: %s", "ParameterReader", __FUNCTION__,
-                   mBleDevice->getName().c_str(), mBleDevice->getNetAddress().c_str());
+        LOG_DEBUG_V("Ble device disconnected. Device %s, address: %s",
+                    mBleDevice->getName().c_str(),
+                    mBleDevice->getNetAddress().c_str());
     }
 }
 

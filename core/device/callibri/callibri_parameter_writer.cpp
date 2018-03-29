@@ -40,6 +40,14 @@ bool CallibriParameterWriter::setADCInputState(typename ParamValue<Parameter::AD
     return mCommonParameters->setADCInputState(value);
 }
 
+bool CallibriParameterWriter::setAccelerometerSens(typename ParamValue<Parameter::AccelerometerSens>::Type value){
+    return mCommonParameters->setAccelerometerSens(value);
+}
+
+bool CallibriParameterWriter::setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type value){
+    return mCommonParameters->setGyroscopeSens(value);
+}
+
 bool CallibriParameterWriter::setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type value){
     throw std::runtime_error("Not implemented exception");
 }

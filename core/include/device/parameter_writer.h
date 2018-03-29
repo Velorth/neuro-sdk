@@ -29,6 +29,10 @@ public:
     virtual
     bool setADCInputState(typename ParamValue<Parameter::ADCInputState>::Type) = 0;
     virtual
+    bool setAccelerometerSens(typename ParamValue<Parameter::AccelerometerSens>::Type) = 0;
+    virtual
+    bool setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type) = 0;
+    virtual
     bool setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type) = 0;
     virtual
     bool setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type) = 0;

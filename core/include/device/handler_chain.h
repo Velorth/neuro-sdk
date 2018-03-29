@@ -19,16 +19,20 @@ public:
     void addHandler(handler_ptr handler){
         if (mHandlerContainer.size() > 0){
             auto& lastHandlerPtr = mHandlerContainer.back();
-            lastHandlerPtr->setNext(handelr);
+            lastHandlerPtr->setNext(handler);
         }
         mHandlerContainer.push_back(handler);
     }
 
+    void reset(){
+        mHandlerContainer.clear();
+    }
+
     bool process(const typename Handler::element_type &element) noexcept {
-        if (mResponseContainer.size() == 0)
+        if (mHandlerContainer.size() == 0)
             return false;
 
-        auto first = *mResponseContainer.begin();
+        auto first = *mHandlerContainer.begin();
         return first->process(element);
     }
 

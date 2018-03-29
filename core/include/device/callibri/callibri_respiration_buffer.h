@@ -12,7 +12,7 @@ public:
     CallibriRespirationBuffer(const CallibriRespirationBuffer &) = delete;
     CallibriRespirationBuffer& operator=(const CallibriRespirationBuffer &) = delete;
 
-    void onSignalReceived(packet_number_t, const ByteBuffer &);
+    void onDataReceived(packet_number_t, const ByteBuffer &);
     const BaseBuffer<resp_sample_t>& buffer() const;
 
 private:

@@ -2,7 +2,7 @@
 #define BRAINBIT_IMPL_H
 
 #include "device/device_impl.h"
-#include "device/request_handler.h"
+#include "device/request_scheduler.h"
 #include "brainbit_protocol.h"
 #include "signal/safe_buffer.h"
 
@@ -25,7 +25,7 @@ public:
     const BaseBuffer<MEMS> &memsBuffer() const override;
 
 private:
-    using BrainbitRequestHandler = RequestHandler<BrainbitCommandData>;
+    using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;
 
     static constexpr const char *class_name = "BrainbitImpl";
     static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 250 Hz fsam and 4 channels

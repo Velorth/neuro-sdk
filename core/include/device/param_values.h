@@ -116,6 +116,10 @@ typename ParamValue<Parameter::ExternalSwitchState>::Type Device::readParam<Para
 template<>
 typename ParamValue<Parameter::ADCInputState>::Type Device::readParam<Parameter::ADCInputState>() const;
 template<>
+typename ParamValue<Parameter::AccelerometerSens>::Type Device::readParam<Parameter::AccelerometerSens>() const;
+template<>
+typename ParamValue<Parameter::GyroscopeSens>::Type Device::readParam<Parameter::GyroscopeSens>() const;
+template<>
 typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const;
 template<>
 typename ParamValue<Parameter::MotionAssistantState>::Type Device::readParam<Parameter::MotionAssistantState>() const;
@@ -149,6 +153,10 @@ template<>
 bool Device::setParam<Parameter::ExternalSwitchState>(typename ParamValue<Parameter::ExternalSwitchState>::Type);
 template<>
 bool Device::setParam<Parameter::ADCInputState>(typename ParamValue<Parameter::ADCInputState>::Type);
+template<>
+bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Parameter::AccelerometerSens>::Type);
+template<>
+bool Device::setParam<Parameter::GyroscopeSens>(typename ParamValue<Parameter::GyroscopeSens>::Type);
 template<>
 bool Device::setParam<Parameter::StimulatorState>(typename ParamValue<Parameter::StimulatorState>::Type);
 template<>

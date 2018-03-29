@@ -35,6 +35,10 @@ public:
     virtual
     typename ParamValue<Parameter::ADCInputState>::Type readADCInputState() const = 0;
     virtual
+    typename ParamValue<Parameter::AccelerometerSens>::Type readAccelerometerSens() const = 0;
+    virtual
+    typename ParamValue<Parameter::GyroscopeSens>::Type readGyroscopeSens() const = 0;
+    virtual
     typename ParamValue<Parameter::StimulatorState>::Type readStimulatorState() const = 0;
     virtual
     typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const = 0;
@@ -44,6 +48,8 @@ public:
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const = 0;
 
 private:
+    static constexpr const char *class_name = "ParameterReader";
+
     std::shared_ptr<BleDevice> mBleDevice;
     DeviceState mState{DeviceState::Disconnected};
     param_changed_callback_t parameterChangedCallback;

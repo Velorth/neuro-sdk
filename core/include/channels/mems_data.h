@@ -5,15 +5,15 @@ namespace Neuro {
 
 struct MEMS{
     struct Accelerometer{
-        short X;
-        short Y;
-        short Z;
+        double X;
+        double Y;
+        double Z;
     } accelerometer;
 
     struct Gyroscope{
-        short X;
-        short Y;
-        short Z;
+        double X;
+        double Y;
+        double Z;
     } gyroscope;
 };
 
