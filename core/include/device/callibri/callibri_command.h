@@ -141,6 +141,27 @@ inline bool parseCommand(unsigned char commandByte, CallibriCommand* outCommand)
         case static_cast<unsigned char>(CallibriCommand::SWITCH_EXT_COM_INPUTS):
             *outCommand = CallibriCommand::SWITCH_EXT_COM_INPUTS;
             return true;
+        case static_cast<unsigned char>(CallibriCommand::START_RESP_DATA_THROW):
+            *outCommand = CallibriCommand::START_RESP_DATA_THROW;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::STOP_RESP_DATA_THROW):
+            *outCommand = CallibriCommand::STOP_RESP_DATA_THROW;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::START_MEMS_DATA_THROW):
+            *outCommand = CallibriCommand::START_MEMS_DATA_THROW;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::STOP_MEMS_DATA_THROW):
+            *outCommand = CallibriCommand::STOP_MEMS_DATA_THROW;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::SET_ACCEL_SENS):
+            *outCommand = CallibriCommand::SET_ACCEL_SENS;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::SET_GYRO_SENS):
+            *outCommand = CallibriCommand::SET_GYRO_SENS;
+            return true;
+        case static_cast<unsigned char>(CallibriCommand::FIND_ME):
+            *outCommand = CallibriCommand::FIND_ME;
+            return true;
         default:
             return false;
     }

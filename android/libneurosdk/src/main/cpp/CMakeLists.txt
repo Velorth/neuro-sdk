@@ -29,7 +29,7 @@ include_directories(${SRC_DIR_NET})
 include_directories(${SRC_DIR_ANDROID}/include)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti")
 add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)
 add_library(neurosdk SHARED  ${SOURCE_FILES_CORE_COMMON}
                                 ${SOURCE_FILES_CORE_CHANNELS}

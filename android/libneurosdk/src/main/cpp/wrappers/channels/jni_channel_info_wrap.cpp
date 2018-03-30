@@ -7,15 +7,14 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_getName(JNIEnv *env, jobject instance) {
     auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
-    jni::java_object<std::string> nameObj(infoPtr->getName());
-    return static_cast<jstring>(env->NewLocalRef(nameObj));
+    jobject nameObj = jni::java_object<std::string>(infoPtr->getName());
+    return static_cast<jstring>(nameObj);
 }
 
 JNIEXPORT jobject JNICALL
 Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_getType(JNIEnv *env, jobject instance) {
     auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
-    jni::java_object<Neuro::ChannelInfo::Type> nameObj(infoPtr->getType());
-    return env->NewLocalRef(nameObj);
+    return jni::java_object<Neuro::ChannelInfo::Type>(infoPtr->getType());;
 }
 
 JNIEXPORT void JNICALL
@@ -73,8 +72,7 @@ jni::java_object<Neuro::ChannelInfo>::java_object(const Neuro::ChannelInfo &chan
         auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
                                                        constructor_signature<Neuro::ChannelInfo>());
         auto channelName = env->NewStringUTF(channelInfo.getName().c_str());
-        jni::java_object<Neuro::ChannelInfo::Type> typeObject(channelInfo.getType());
-        auto channelType = env->NewLocalRef(typeObject);
+        auto channelType = static_cast<jobject>(jni::java_object<Neuro::ChannelInfo::Type>(channelInfo.getType()));
         javaObj = make_global_ref_ptr(
                 env->NewObject(object_class, objectClassConstructor, channelType,channelName));
     });

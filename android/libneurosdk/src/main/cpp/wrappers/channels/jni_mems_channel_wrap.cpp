@@ -18,8 +18,7 @@ Java_ru_neurotech_neurosdk_channels_MEMSChannel_info(JNIEnv *env, jobject instan
 
     auto &memsChannelWrap = *extract_pointer<JniMEMSChannelWrap>(env, instance);
     auto channelInfo = &memsChannelWrap->info();
-    jni::java_object<decltype(channelInfo)> nativeChannelInfo(channelInfo);
-    return env->NewLocalRef(nativeChannelInfo);
+    return jni::java_object<decltype(channelInfo)>(channelInfo);
 }
 
 JNIEXPORT void
@@ -44,8 +43,7 @@ Java_ru_neurotech_neurosdk_channels_MEMSChannel_underlyingDevice(JNIEnv *env, jo
         return nullptr;
     }
     auto deviceWrap = new JniDeviceWrap(devicePtr);
-    jni::java_object<decltype(deviceWrap)> deviceWrapObj(deviceWrap);
-    return env->NewLocalRef(deviceWrapObj);
+    return jni::java_object<decltype(deviceWrap)>(deviceWrap);
 }
 
 JNIEXPORT void JNICALL
@@ -84,10 +82,16 @@ Java_ru_neurotech_neurosdk_channels_MEMSChannel_totalLength(JNIEnv *env, jobject
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_channels_MEMSChannel_readData(JNIEnv *env, jobject instance,
                                                            jlong offset, jlong length) {
-    auto &memsChannelWrap = *extract_pointer<JniMEMSChannelWrap>(env, instance);
-    auto data = memsChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                            saturation_cast<Neuro::data_length_t>(length));
-    return jni::to_obj_array(env, data);
+    try {
+        auto &memsChannelWrap = *extract_pointer<JniMEMSChannelWrap>(env, instance);
+        auto data = memsChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
+                                              saturation_cast<Neuro::data_length_t>(length));
+        return jni::to_obj_array(env, data);
+    }
+    catch (std::exception &e){
+        jni::java_throw(env, "UnsupportedOperationException", e);
+        return nullptr;
+    }
 }
 
 }

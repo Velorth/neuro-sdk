@@ -10,5 +10,6 @@ public enum Command {
     StartRespiration,
     StopRespiration,
     StartStimulation,
-    EnableMotionAssistant
+    EnableMotionAssistant,
+    FindMe
 }

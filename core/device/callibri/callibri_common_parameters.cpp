@@ -146,6 +146,7 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     mAvailableParameters.push_back({Parameter::Address, ParamAccess::Read});
     mAvailableParameters.push_back({Parameter::SerialNumber, ParamAccess::Read});
     mAvailableParameters.push_back({Parameter::FirmwareMode, ParamAccess::Read});
+    mAvailableCommands.push_back(Command::FindMe);
 
     LOG_DEBUG("Getting module info");
     auto responseData = cmdData->getResponseData();

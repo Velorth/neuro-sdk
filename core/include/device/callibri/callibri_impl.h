@@ -7,10 +7,10 @@
 #include "device/handler_chain.h"
 #include "device/handler.h"
 #include "device/packet.h"
+#include "device/request_scheduler.h"
 
 namespace Neuro {
 
-template<typename> class RequestScheduler;
 using CallibriRequestScheduler = RequestScheduler<CallibriCommandData>;
 class CallibriPacketHandler;
 class CallibriCommonParameters;

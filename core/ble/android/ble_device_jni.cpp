@@ -38,6 +38,7 @@ namespace Neuro {
             auto btDeviceName = env->GetStringUTFChars(btDeviceNameObj, NULL);
             deviceInfo = BleDeviceInfo::fromDeviceName(btDeviceName);
             env->ReleaseStringUTFChars(btDeviceNameObj, btDeviceName);
+            env->DeleteLocalRef(btDeviceNameObj);
 
             //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
             //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
@@ -161,6 +162,7 @@ namespace Neuro {
                 auto cName = env->GetStringUTFChars(javaStringName, NULL);
                 stringName = cName;
                 env->ReleaseStringUTFChars(javaStringName, cName);
+                env->DeleteLocalRef(javaStringName);
             } else {
                 stringName = "NULL";
                 __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
@@ -183,6 +185,7 @@ namespace Neuro {
                 auto cName = env->GetStringUTFChars(javaStringAddress, NULL);
                 stringAddress = cName;
                 env->ReleaseStringUTFChars(javaStringAddress, cName);
+                env->DeleteLocalRef(javaStringAddress);
             } else {
                 stringAddress = "NULL";
                 __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
@@ -206,6 +209,7 @@ namespace Neuro {
                 auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
                 auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
                 state = parseBleDeviceState(stateCode);
+                env->DeleteLocalRef(javaState);
             } else {
                 state = BleDeviceState::ERROR;
                 __android_log_print(ANDROID_LOG_ERROR, "BleDeviceJni", "State is null");

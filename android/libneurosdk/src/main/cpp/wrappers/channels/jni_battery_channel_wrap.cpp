@@ -20,8 +20,7 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_info(JNIEnv *env, jobject ins
 
     auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
     auto channelInfo = &batteryChannelWrap->info();
-    jni::java_object<decltype(channelInfo)> nativeChannelInfo(channelInfo);
-    return env->NewLocalRef(nativeChannelInfo);
+    return jni::java_object<decltype(channelInfo)>(channelInfo);
 }
 
 JNIEXPORT void
@@ -46,8 +45,7 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_underlyingDevice(JNIEnv *env,
         return nullptr;
     }
     auto deviceWrap = new JniDeviceWrap(devicePtr);
-    jni::java_object<decltype(deviceWrap)> deviceWrapObj(deviceWrap);
-    return env->NewLocalRef(deviceWrapObj);
+    return jni::java_object<decltype(deviceWrap)>(deviceWrap);;
 }
 
 JNIEXPORT void JNICALL
@@ -86,10 +84,16 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_totalLength(JNIEnv *env, jobj
 JNIEXPORT jobjectArray JNICALL
 Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject instance,
                                                             jlong offset, jlong length) {
-    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
-    auto data = batteryChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                             saturation_cast<Neuro::data_length_t>(length));
-    return jni::to_obj_array(env, data);
+    try {
+        auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
+        auto data = batteryChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
+                                                 saturation_cast<Neuro::data_length_t>(length));
+        return jni::to_obj_array(env, data);
+    }
+    catch (std::exception &e){
+        jni::java_throw(env, "UnsupportedOperationException", e);
+        return nullptr;
+    }
 }
 
 }

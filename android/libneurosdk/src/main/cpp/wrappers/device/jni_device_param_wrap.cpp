@@ -33,7 +33,8 @@ jni::enum_name_map<Neuro::Command>::mEnumToNameMap = []() {
             {Neuro::Command::StartRespiration,      "StartRespiration"},
             {Neuro::Command::StopRespiration,       "StopRespiration"},
             {Neuro::Command::StartStimulation,      "StartStimulation"},
-            {Neuro::Command::EnableMotionAssistant, "EnableMotionAssistant"}
+            {Neuro::Command::EnableMotionAssistant, "EnableMotionAssistant"},
+            {Neuro::Command::FindMe,                "FindMe"}
     };
 }();
 
@@ -50,7 +51,8 @@ jni::enum_name_map<Neuro::Command>::mNameToEnumMap = []() {
             {"StartRespiration",      Neuro::Command::StartRespiration},
             {"StopRespiration",       Neuro::Command::StopRespiration},
             {"StartStimulation",      Neuro::Command::StartStimulation},
-            {"EnableMotionAssistant", Neuro::Command::EnableMotionAssistant}
+            {"EnableMotionAssistant", Neuro::Command::EnableMotionAssistant},
+            {"FindMe",                Neuro::Command::FindMe}
     };
 }();
 
@@ -126,9 +128,9 @@ template<>
 template<>
 jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &param_pair){
     call_in_attached_thread([=](JNIEnv *env){
-        auto paramName = env->NewLocalRef(java_object<Neuro::Parameter>(param_pair.first));
-        auto paramAccess = env->NewLocalRef(java_object<Neuro::ParamAccess>(param_pair.second));
-        auto paramType = env->NewLocalRef(java_object<ParameterType>(param_pair.first));
+        auto paramName  = static_cast<jobject>(java_object<Neuro::Parameter>(param_pair.first));
+        auto paramAccess = static_cast<jobject>(java_object<Neuro::ParamAccess>(param_pair.second));
+        auto paramType = static_cast<jobject>(java_object<ParameterType>(param_pair.first));
         auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
                                                        constructor_signature<Neuro::ParamPair>());
         javaObj = make_global_ref_ptr(env->NewObject(object_class,
@@ -136,14 +138,16 @@ jni::java_object<Neuro::ParamPair>::java_object(const Neuro::ParamPair &param_pa
                                                      paramName,
                                                      paramAccess,
                                                      paramType));
+        env->DeleteLocalRef(paramName);
+        env->DeleteLocalRef(paramAccess);
+        env->DeleteLocalRef(paramType);
     });
 }
 
 template <Neuro::Parameter Param>
 static jobject readParam(JNIEnv *env, const Neuro::Device &device){
     auto paramValue = device.readParam<Param>();
-    jni::java_object<typename Neuro::ParamValue<Param>::Type> deviceStateObj(paramValue);
-    return env->NewLocalRef(deviceStateObj);
+    return jni::java_object<typename Neuro::ParamValue<Param>::Type>(paramValue);
 }
 
 jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Parameter parameter) {

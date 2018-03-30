@@ -99,6 +99,8 @@ namespace Neuro {
                                     "Failed get device by address: %s", error.what());
             }
 
+            env->DeleteLocalRef(bluetoothDevice);
+
             return bleDevice;
         });
     }

@@ -18,6 +18,7 @@
 #define ANDROID_JAVA_ENVIRONMENT_H
 
 #include <jni.h>
+#include <android/log.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -129,6 +130,7 @@ inline std::string getClassName(JNIEnv *env, jclass clazz) {
     std::string res(str);
 
     env->ReleaseStringUTFChars(strObj, str);
+    env->DeleteLocalRef(strObj);
 
     return res;
 }
@@ -168,6 +170,7 @@ Enum enumFromJavaObj(JNIEnv *env, jobject enum_obj){
     auto enumName = env->GetStringUTFChars(nameString, nullptr);
     auto enumVal = jni::enum_name_map<Enum>::value(enumName);
     env->ReleaseStringUTFChars(nameString, enumName);
+    env->DeleteLocalRef(nameString);
     return enumVal;
 }
 
@@ -201,25 +204,28 @@ template<>
 std::size_t get_java_obj_value<std::size_t>(JNIEnv *, jobject);
 
 template<typename Container>
-jobjectArray to_obj_array(JNIEnv *env, Container container) {
+inline jobjectArray to_obj_array(JNIEnv *env, Container container) {
     if (container.size() > std::numeric_limits<jsize>::max()) {
         jni::java_throw(env,
                         "java/lang/ArrayIndexOutOfBoundsException",
                         std::runtime_error("Commands array is too big"));
         return nullptr;
     }
+
+    __android_log_print(ANDROID_LOG_DEBUG, "ToObjArray", "Object array size is %zd", container.size());
     using container_value_t = typename decltype(container)::value_type;
     auto objClass = jni::java_object<container_value_t>::java_class();
     auto objArray = env->NewObjectArray(static_cast<jsize>(container.size()),
                                         objClass,
-                                        NULL);
+                                        nullptr);
 
     for (auto it = container.begin(); it != container.end(); ++it) {
+        auto objLocalRef = static_cast<jobject>(jni::java_object<container_value_t>(*it));
         env->SetObjectArrayElement(objArray,
                                    static_cast<jsize>(it - container.begin()),
-                                   env->NewLocalRef(jni::java_object<container_value_t>(*it)));
+                                   objLocalRef);
+        env->DeleteLocalRef(objLocalRef);
     }
-
     return objArray;
 }
 
@@ -277,7 +283,9 @@ public:
     java_object &operator=(java_object rhs) = delete;
 
     operator jobject() {
-        return javaObj.get();
+        return call_in_attached_thread([=](auto env){
+            return env->NewLocalRef(javaObj.get());
+        });
     }
 
     T nativeObject() {

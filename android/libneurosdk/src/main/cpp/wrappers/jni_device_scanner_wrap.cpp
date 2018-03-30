@@ -86,7 +86,7 @@ Java_ru_neurotech_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobjec
     jni::java_object<decltype(device)> deviceWrapObj(device);
     env->ReleaseStringUTFChars(address_, address);
 
-    return env->NewLocalRef(deviceWrapObj);
+    return deviceWrapObj;
 }
 
 }
