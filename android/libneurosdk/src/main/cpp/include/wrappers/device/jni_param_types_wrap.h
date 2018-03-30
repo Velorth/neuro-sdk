@@ -43,7 +43,7 @@ const std::map<std::string, Neuro::ADCInput>
  */
 template<>
 constexpr const char *jni::java_class_name<Neuro::AccelerometerSensitivity>() {
-    return "ru/neurotech/neurosdk/parameters/types/AccelerometerSesitivity";
+    return "ru/neurotech/neurosdk/parameters/types/AccelerometerSensitivity";
 }
 
 template<>
@@ -61,7 +61,7 @@ const std::map<std::string, Neuro::AccelerometerSensitivity >
  */
 template<>
 constexpr const char *jni::java_class_name<Neuro::GyroscopeSensitivity>() {
-    return "ru/neurotech/neurosdk/parameters/types/GyroscopeSesitivity";
+    return "ru/neurotech/neurosdk/parameters/types/GyroscopeSensitivity";
 }
 
 template<>

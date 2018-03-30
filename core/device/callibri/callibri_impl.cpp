@@ -1,5 +1,6 @@
 #include "channels/channel_info.h"
 #include "device/device_parameters.h"
+#include "device/callibri/callibri_buffer_collection.h"
 #include "device/callibri/callibri_impl.h"
 #include "device/callibri/callibri_parameter_reader.h"
 #include "device/callibri/callibri_parameter_writer.h"
@@ -12,17 +13,20 @@ namespace Neuro {
 
 CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                            std::shared_ptr<CallibriRequestScheduler> request_handler,
-                           std::shared_ptr<CallibriCommonParameters> common_params) :
+                           std::shared_ptr<CallibriCommonParameters> common_params,
+                           std::shared_ptr<CallibriBufferCollection> buffer_collection) :
     DeviceImpl(ble_device,
                std::make_unique<CallibriParameterReader>(ble_device,
                                                          [=](Parameter param){
                                                              onParameterChanged(param);
                                                          },
                                                          common_params,
-                                                         request_handler),
+                                                         request_handler,
+                                                         buffer_collection),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
-    mCommonParams(common_params){
+    mCommonParams(common_params),
+    mBufferCollection(buffer_collection){
     mRequestHandler->setSendFunction([=](std::shared_ptr<CallibriCommandData> cmd_data){this->sendCommandPacket(cmd_data);});
 }
 
@@ -49,28 +53,31 @@ bool CallibriImpl::execute(Command command){
     }
     switch (command){
     case Command::StartSignal:{
-        return false;
+        return sendSimpleCommand<Command::StartSignal>();
     }
     case Command::StopSignal:{
-        return false;
+        return sendSimpleCommand<Command::StopSignal>();
     }
     case Command::StartMEMS:{
-        return false;
+        return sendSimpleCommand<Command::StartMEMS>();
     }
     case Command::StopMEMS:{
-        return false;
+        return sendSimpleCommand<Command::StopMEMS>();
     }
     case Command::StartRespiration:{
-        return false;
+        return sendSimpleCommand<Command::StartRespiration>();
     }
     case Command::StopRespiration:{
-        return false;
+        return sendSimpleCommand<Command::StopRespiration>();
     }
     case Command::EnableMotionAssistant:{
-        return false;
+        return sendSimpleCommand<Command::EnableMotionAssistant>();
     }
     case Command::StartStimulation:{
-        return false;
+        return sendSimpleCommand<Command::StartStimulation>();
+    }
+    case Command::FindMe:{
+        return sendSimpleCommand<Command::FindMe>();
     }
     default:
         throw std::runtime_error("Unsupported command");
@@ -115,25 +122,20 @@ bool CallibriImpl::isElectrodesAttached(){
     }
 }
 
-const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {
-    if (mSignalBuffer == nullptr){
-        throw std::runtime_error("Device does not have signal buffer");
-    }
-    return mSignalBuffer->buffer();
+const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {    
+    return mBufferCollection->signalBuffer().buffer();
 }
 
-const BaseBuffer<resp_sample_t> &CallibriImpl::respirationBuffer() const {
-    if (mRespirationBuffer == nullptr){
-        throw std::runtime_error("Device does not have respiration buffer");
-    }
-    return mRespirationBuffer->buffer();
+const BaseBuffer<resp_sample_t> &CallibriImpl::respirationBuffer() const {    
+    return mBufferCollection->respirationBuffer().buffer();
 }
 
-const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
-    if (mMemsBuffer == nullptr){
-        throw std::runtime_error("Device does not have MEMS buffer");
-    }
-    return mMemsBuffer->buffer();
+const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {    
+    return mBufferCollection->memsBuffer().buffer();
+}
+
+const BaseBuffer<Quaternion> &CallibriImpl::angleBuffer() const {
+    return mBufferCollection->angleBuffer().buffer();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -149,24 +151,29 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
     marker.bytes[1] = data[1];
     LOG_TRACE_V("Marker value: %d", marker.value);
 
-    auto packetType = fromMarker(marker.value);
-    switch (packetType){
-    case CallibriPacketType::Command:{
-        onCommandResponse(data);
-        break;
+    try {
+        auto packetType = fromMarker(marker.value);
+        switch (packetType) {
+            case CallibriPacketType::Command: {
+                onCommandResponse(data);
+                break;
+            }
+            case CallibriPacketType::Signal: {
+                onSignalReceived(data);
+                break;
+            }
+            case CallibriPacketType::MEMS: {
+                onMemsReceived(data);
+                break;
+            }
+            case CallibriPacketType::Respiration: {
+                onRespReceived(data);
+                break;
+            }
+        }
     }
-    case CallibriPacketType::Signal:{
-        onSignalReceived(data);
-        break;
-    }
-    case CallibriPacketType::MEMS:{
-        onMemsReceived(data);
-        break;
-    }
-    case CallibriPacketType::Respiration:{
-        onRespReceived(data);
-        break;
-    }
+    catch (std::runtime_error &e){
+        LOG_ERROR_V("Unable to parse packet: %s", e.what());
     }
 }
 
@@ -255,7 +262,7 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
     CallibriCommand command;
     if (!parseCommand(packetBytes[CallibriCmdCodePos], &command))
     {
-        LOG_DEBUG_V("Command parsing failed for command code %d", packetBytes[CallibriCmdCodePos]);
+        LOG_ERROR_V("Command parsing failed for command code %d", packetBytes[CallibriCmdCodePos]);
         return;
     }
 
@@ -268,28 +275,19 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
 void CallibriImpl::onSignalReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
     ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
-    if (mSignalBuffer == nullptr){
-        mSignalBuffer = std::make_unique<CallibriSignalBuffer>(mCommonParams);
-    }
-    mSignalBuffer->onDataReceived(packetNumber, signalData);
+    mBufferCollection->signalBuffer().onDataReceived(packetNumber, signalData);
 }
 
 void CallibriImpl::onMemsReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
     ByteBuffer memsData(data.begin() + MemsDataShift, data.end());
-    if (mMemsBuffer == nullptr){
-        mMemsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParams);
-    }
-    mMemsBuffer->onDataReceived(packetNumber, memsData);
+    mBufferCollection->memsBuffer().onDataReceived(packetNumber, memsData);
 }
 
 void CallibriImpl::onRespReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
     ByteBuffer respData(data.begin() + RespDataShift, data.end());
-    if (mRespirationBuffer == nullptr){
-        mRespirationBuffer = std::make_unique<CallibriRespirationBuffer>();
-    }
-    mRespirationBuffer->onDataReceived(packetNumber, respData);
+   mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
 }
 
 packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){

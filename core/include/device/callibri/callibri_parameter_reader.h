@@ -1,8 +1,9 @@
 #ifndef CALLIBRI_PARAMETER_READER_H
 #define CALLIBRI_PARAMETER_READER_H
 
+#include "callibri_protocol.h"
+#include "callibri_buffer_collection.h"
 #include "device/parameter_reader.h"
-#include "callibri_command.h"
 
 namespace Neuro {
 
@@ -16,7 +17,8 @@ public:
     CallibriParameterReader(std::shared_ptr<BleDevice>,
                             param_changed_callback_t,
                             std::shared_ptr<CallibriCommonParameters>,
-                            std::shared_ptr<CallibriRequestScheduler>);
+                            std::shared_ptr<CallibriRequestScheduler>,
+                            std::weak_ptr<CallibriBufferCollection>);
 
     typename ParamValue<Parameter::SerialNumber>::Type readSerialNumber() const override;
     typename ParamValue<Parameter::HardwareFilterState>::Type readHardwareFilterState() const override;
@@ -34,8 +36,11 @@ public:
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const override;
 
 private:
+    static constexpr const char *class_name = "CallibriParameterReader";
+
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
+    std::weak_ptr<CallibriBufferCollection> mBufferCollection;
     FirmwareMode mFirmwareMode;
 
     bool loadDeviceParams() override;
@@ -44,6 +49,7 @@ private:
     bool activateApplication();
     bool initAddress();
     bool initEcho();
+    void createBuffers(std::vector<CallibriModule>);
 };
 
 }

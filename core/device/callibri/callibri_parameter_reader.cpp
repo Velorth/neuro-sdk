@@ -10,10 +10,12 @@ namespace Neuro {
 CallibriParameterReader::CallibriParameterReader(std::shared_ptr<BleDevice> ble_device,
                                                  param_changed_callback_t callback,
                                                  std::shared_ptr<CallibriCommonParameters> common_params,
-                                                 std::shared_ptr<CallibriRequestScheduler> request_handler) :
+                                                 std::shared_ptr<CallibriRequestScheduler> request_handler,
+                                                 std::weak_ptr<CallibriBufferCollection> buffer_collection) :
     ParameterReader(ble_device, callback),
     mCommonParameters(common_params),
-    mRequestHandler(request_handler){
+    mRequestHandler(request_handler),
+    mBufferCollection(buffer_collection){
 
 }
 
@@ -88,27 +90,29 @@ CallibriParameterReader::readMotionAssistantParamPack() const {
 }
 
 bool CallibriParameterReader::loadDeviceParams(){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Start init", "CallibriParameterReader", __FUNCTION__);
-
+    LOG_DEBUG("Start init");
     if (!initAddress())
         return false;
 
-    log->debug("[%s: %s] Address: %ld", "CallibriParameterReader", __FUNCTION__, mCommonParameters->serialNumber());
-
+    LOG_DEBUG_V("Address: %ld", mCommonParameters->serialNumber());
     if (!initEcho())
         return false;
 
-    log->debug("[%s: %s] Echo received", "CallibriParameterReader", __FUNCTION__);
-
+    LOG_DEBUG("Echo received");
     if (mFirmwareMode == FirmwareMode::Bootloader){
-        log->debug("[%s: %s] Bootloader", "CallibriParameterReader", __FUNCTION__);
+        LOG_DEBUG("Bootloader");
         activateApplication();
     }
-
-    log->debug("[%s: %s] Requesting params", "CallibriParameterReader", __FUNCTION__);
-
-    return mCommonParameters->syncParameters();
+    LOG_DEBUG("Requesting params");
+    try {
+        auto modules = mCommonParameters->syncParameters();
+        createBuffers(modules);
+        return true;
+    }
+    catch(std::runtime_error &e){
+        LOG_ERROR_V("Unable sync device params: %s", e.what());
+        return false;
+    }
 }
 
 void CallibriParameterReader::sendEcho(){
@@ -116,8 +120,7 @@ void CallibriParameterReader::sendEcho(){
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->trace("[%s: %s] ECHO received", "CallibriParameterReader", __FUNCTION__);
+    LOG_DEBUG("ECHO received");
 
     if (cmdData->getError()!=CallibriError::NO_ERROR) {
         throw std::runtime_error("Callibri protocol error");
@@ -132,38 +135,37 @@ void CallibriParameterReader::sendEcho(){
 }
 
 void CallibriParameterReader::requestSerialNumber(){
-   mCommonParameters->setSerialNumber(0);
-    auto log = LoggerFactory::getCurrentPlatformLogger();
+    mCommonParameters->setSerialNumber(0);
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_ADDR);
-    log->debug("[%s: %s] Sending address request...", "CallibriParameterReader", __FUNCTION__);
+    LOG_DEBUG("Sending address request...");
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     if (cmdData->getError()!=CallibriError::NO_ERROR) {
-        log->error("[%s: %s] Failed to receive address", "CallibriParameterReader", __FUNCTION__);
+        LOG_ERROR("Failed to receive address");
         throw std::runtime_error("Callibri protocol error");
     }
 
     auto responseLength = cmdData->getResponseLength();
-    log->debug("[%s: %s] Response length: %zd", "CallibriParameterReader", __FUNCTION__, responseLength);
-    /*if (responseLength < COLIBRI_ADDRESS_LENGTH){
+    LOG_DEBUG_V("Response length: %zd", responseLength);
+    if (responseLength < CallibriAddressLength){
         throw std::runtime_error("Callibri protocol error");
-    }*/
+    }
 
     auto responseData = cmdData->getResponseData();
     ByteInterpreter<unsigned long> address;
     address.value = 0;
-    //std::copy(responseData.begin(), responseData.begin()+COLIBRI_ADDRESS_LENGTH, address.bytes);
-    log->debug("[%s: %s] Address is %ld", "CallibriParameterReader", __FUNCTION__, address.value);
+    std::copy(responseData.begin(), responseData.begin()+CallibriAddressLength, address.bytes);
+    LOG_DEBUG_V("Address is %ld", address.value);
     mCommonParameters->setSerialNumber(address.value);
 }
 
 bool CallibriParameterReader::activateApplication(){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
+
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::ACTIVATE_APP);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
-    log->debug("[%s: %s] Activate application response received", "CallibriParameterReader", __FUNCTION__);
+    LOG_DEBUG("Activate application response received");
 
     return cmdData->getError() == CallibriError::NO_ERROR;
 }
@@ -176,12 +178,11 @@ bool CallibriParameterReader::initAddress(){
             return true;
         }
         catch (std::runtime_error &e){
-            auto log = LoggerFactory::getCurrentPlatformLogger();
-            log->warn("[%s: %s] Unable receive address: %s", "CallibriParameterReader", __FUNCTION__, e.what());
+            LOG_WARN_V("Unable receive address: %s", e.what());
         }
     }
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->error("[%s: %s] Unable load device params: address", "CallibriParameterReader", __FUNCTION__);
+
+    LOG_ERROR("Unable load device params: serial number");
     return false;
 }
 
@@ -193,14 +194,37 @@ bool CallibriParameterReader::initEcho(){
             return true;
         }
         catch (std::runtime_error &e){
-            auto log = LoggerFactory::getCurrentPlatformLogger();
-            log->warn("[%s: %s] Unable receive echo response: %s", "CallibriParameterReader", __FUNCTION__, e.what());
+            LOG_WARN_V("Unable receive echo response: %s", e.what());
         }
     }
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->error("[%s: %s] Unable load device params: firmware mode", "CallibriParameterReader", __FUNCTION__);
+
+    LOG_ERROR("Unable load device params: firmware mode");
     return false;
 
+}
+
+void CallibriParameterReader::createBuffers(std::vector<CallibriModule> modules){
+    auto bufferCollectionPtr = mBufferCollection.lock();
+    if (!bufferCollectionPtr){
+        throw std::runtime_error("Unable create buffers. Collection ptr is null");
+    }
+
+    if (std::find(modules.begin(), modules.end(), CallibriModule::Signal) != modules.end()){
+        auto signalBuffer = std::make_unique<CallibriSignalBuffer>(mCommonParameters);
+        bufferCollectionPtr->setSignalBuffer(std::move(signalBuffer));
+    }
+
+    if (std::find(modules.begin(), modules.end(), CallibriModule::Respiration) != modules.end()){
+        auto respBuffer = std::make_unique<CallibriRespirationBuffer>();
+        bufferCollectionPtr->setRespirationBuffer(std::move(respBuffer));
+    }
+
+    if (std::find(modules.begin(), modules.end(), CallibriModule::MEMS) != modules.end()){
+        auto memsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParameters);
+        bufferCollectionPtr->setMemsBuffer(std::move(memsBuffer));
+        auto angleBuffer = std::make_unique<CallibriAngleBuffer>();
+        bufferCollectionPtr->setAngleBuffer(std::move(angleBuffer));
+    }
 }
 
 }

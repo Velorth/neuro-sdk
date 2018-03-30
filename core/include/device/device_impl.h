@@ -18,6 +18,7 @@ class ParameterWriter;
 template <typename>
 class BaseBuffer;
 struct MEMS;
+struct Quaternion;
 
 class DeviceImpl {
 public:
@@ -35,6 +36,7 @@ public:
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
     virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
     virtual const BaseBuffer<MEMS> &memsBuffer() const = 0;
+    virtual const BaseBuffer<Quaternion> &angleBuffer() const = 0;
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;

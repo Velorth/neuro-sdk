@@ -25,7 +25,7 @@ public:
     typename ParamValue<Parameter::AccelerometerSens>::Type accelerometerSens() const;
     typename ParamValue<Parameter::GyroscopeSens>::Type gyroscopeSens() const;
 
-    bool syncParameters();
+    std::vector<CallibriModule> syncParameters();
     void setSerialNumber(unsigned long) noexcept;
     bool setHardwareFilterState(typename ParamValue<Parameter::HardwareFilterState>::Type);
     bool setSamplingFrequency(typename ParamValue<Parameter::SamplingFrequency>::Type);

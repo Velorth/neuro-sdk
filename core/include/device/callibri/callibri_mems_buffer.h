@@ -21,7 +21,6 @@ public:
 
 private:
     static constexpr std::size_t MemsBufferSize = 60000; //10 minutes for 100 Hz fsam
-    static constexpr std::size_t DataShift = 4;
 
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     SafeBuffer<MEMS, MemsBufferSize> mMemsBuffer;

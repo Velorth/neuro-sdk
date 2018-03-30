@@ -23,6 +23,7 @@ public:
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;
+    const BaseBuffer<Quaternion> &angleBuffer() const override;
 
 private:
     using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;

@@ -370,5 +370,40 @@ CallibriCommand toCallibriCommand(){
     }
 }
 
+template <Command Cmd>
+CallibriCommand toCallibriCommand(){
+    switch(Cmd){
+    case Command::StartSignal:{
+        return CallibriCommand::START_ADC_DATA_THROW;
+    }
+    case Command::StopSignal:{
+        return CallibriCommand::STOP_ADC_DATA_THROW;
+    }
+    case Command::StartMEMS:{
+        return CallibriCommand::START_MEMS_DATA_THROW;
+    }
+    case Command::StopMEMS:{
+        return CallibriCommand::STOP_MEMS_DATA_THROW;
+    }
+    case Command::StartRespiration:{
+        return CallibriCommand::START_RESP_DATA_THROW;
+    }
+    case Command::StopRespiration:{
+        return CallibriCommand::STOP_RESP_DATA_THROW;
+    }
+    case Command::StartStimulation:{
+        return CallibriCommand::START_STIM;
+    }
+    case Command::EnableMotionAssistant:{
+        return CallibriCommand::SH_START;
+    }
+    case Command::FindMe:{
+        return CallibriCommand::FIND_ME;
+    }
+    default:
+        throw std::runtime_error("Unsupported command type");
+    }
+}
+
 }
 #endif //COLIBRI_PROTOCOL_H

@@ -83,6 +83,10 @@ const BaseBuffer<MEMS> &BrainbitImpl::memsBuffer() const {
     throw std::runtime_error("Device does not have MEMS buffer");
 }
 
+const BaseBuffer<Quaternion> &BrainbitImpl::angleBuffer() const {
+    throw std::runtime_error("Device does not have angle buffer");
+}
+
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     if (data.size() != BRAINBIT_PACKET_SIZE){
         LOG_WARN_V("Wrong data packet size: %d, expected: %d", data.size(), BRAINBIT_PACKET_SIZE);

@@ -122,99 +122,105 @@ std::vector<ParamPair> CallibriCommonParameters::availableParameters() const {
     return mAvailableParameters;
 }
 
-bool CallibriCommonParameters::syncParameters(){
+std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_SENSOR_PARAM);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
     LOG_DEBUG("Sensor params received");
 
-    if (cmdData->getError() != CallibriError::NO_ERROR)
-        return false;
+    if (cmdData->getError() != CallibriError::NO_ERROR){
+        throw std::runtime_error("Get device parameter request failed");
+    }
 
     auto responseDataLength = cmdData->getResponseLength();
+    std::vector<CallibriModule> modules;
     LOG_DEBUG_V("Response length: %zd", responseDataLength);
-    if (responseDataLength >= CallibriParamsDataLength){
-        mAvailableChannels.clear();
-        mAvailableCommands.clear();
-        mAvailableParameters.clear();
-        mAvailableParameters.push_back({Parameter::Name, ParamAccess::Read});
-        mAvailableParameters.push_back({Parameter::State, ParamAccess::ReadNotify});
-        mAvailableParameters.push_back({Parameter::Address, ParamAccess::Read});
-        mAvailableParameters.push_back({Parameter::SerialNumber, ParamAccess::Read});
-        mAvailableParameters.push_back({Parameter::FirmwareMode, ParamAccess::Read});
-
-        LOG_DEBUG("Getting features");
-        auto responseData = cmdData->getResponseData();
-        auto featuresFlags = responseData[0];
-        if (featuresFlags&0x01){
-            mAvailableChannels.push_back(ChannelInfo::Signal);
-            mAvailableChannels.push_back(ChannelInfo::ElectrodesState);
-            mAvailableCommands.push_back(Command::StartSignal);
-            mAvailableCommands.push_back(Command::StopSignal);
-            LOG_DEBUG("Has signal feature");
-        }
-        if (featuresFlags&0x02){
-            mAvailableChannels.push_back(ChannelInfo::MEMS);
-            mAvailableChannels.push_back(ChannelInfo::Angle);
-            mAvailableCommands.push_back(Command::StartMEMS);
-            mAvailableCommands.push_back(Command::StopMEMS);
-            LOG_DEBUG("Has MEMS feature");
-        }
-        if (featuresFlags&0x04){
-            mAvailableCommands.push_back(Command::EnableMotionAssistant);
-            mAvailableCommands.push_back(Command::StartStimulation);
-            mAvailableParameters.push_back({Parameter::MotionAssistantState, ParamAccess::Read});
-            mAvailableParameters.push_back({Parameter::StimulatorState, ParamAccess::Read});
-            mAvailableParameters.push_back({Parameter::MotionAssistantParamPack, ParamAccess::ReadWrite});
-            mAvailableParameters.push_back({Parameter::StimulatorParamPack, ParamAccess::ReadWrite});            
-            LOG_DEBUG("Has stimulation feature");
-        }
-        if (featuresFlags&0x08){
-            mAvailableChannels.push_back(ChannelInfo::Respiration);
-            mAvailableCommands.push_back(Command::StartRespiration);
-            mAvailableCommands.push_back(Command::StopRespiration);
-            LOG_DEBUG("Has spyrometry feature");
-        }
-
-        mAvailableChannels.push_back(ChannelInfo::ConnectionStats);
-        mAvailableChannels.push_back(ChannelInfo::Battery);
-
-        mSamplingFrequency = fromByteCode<SamplingFrequency>(responseData[CallibriSamplFreqBytePos]);
-        mAvailableParameters.push_back({Parameter::SamplingFrequency, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Sampling frequency: %d Hz", intValue(mSamplingFrequency));
-
-        mADCInputState = fromByteCode<ADCInput>(responseData[CallibriAdcInputBytePos]);
-        mAvailableParameters.push_back({Parameter::ADCInputState, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("ADC input mode: %d", static_cast<int>(mADCInputState));
-
-        mExternalSwitchState = fromByteCode<ExternalSwitchInput>(responseData[CallibriExtSwithBytePos]);
-        mAvailableParameters.push_back({Parameter::ExternalSwitchState, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("External switch state: %d", static_cast<int>(mExternalSwitchState));
-
-        mHardwareFilterState = static_cast<bool>(responseData[CallibriFilterStateBytePos]);
-        mAvailableParameters.push_back({Parameter::HardwareFilterState, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Hign pass filter %s", mHardwareFilterState?"enabled":"disabled");
-
-
-        mGain = fromByteCode<Gain>(responseData[CallibriGainBytePos]);
-        mAvailableParameters.push_back({Parameter::Gain, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Signal gain: %d", intValue(mGain));
-
-        mOffset = responseData[CallibriOffsetBytePos];
-        mAvailableParameters.push_back({Parameter::Offset, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Data offset: %d", mOffset);
-
-        mAccelerometerSens = fromByteCode<AccelerometerSensitivity>(responseData[CallibriAccelSensBytePos]);
-        mAvailableParameters.push_back({Parameter::AccelerometerSens, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Accelerometer sens: %d", responseData[CallibriAccelSensBytePos]);
-
-        mGyroscopeSens = fromByteCode<GyroscopeSensitivity>(responseData[CallibriGyroSensBytePos]);
-        mAvailableParameters.push_back({Parameter::GyroscopeSens, ParamAccess::ReadWrite});
-        LOG_DEBUG_V("Gyroscope sens: %d", responseData[CallibriGyroSensBytePos]);
-
-        return true;
+    if (responseDataLength < CallibriParamsDataLength){
+        throw std::runtime_error("Parameter packet has wrong size");
     }
-    return false;
+    mAvailableChannels.clear();
+    mAvailableCommands.clear();
+    mAvailableParameters.clear();
+    mAvailableParameters.push_back({Parameter::Name, ParamAccess::Read});
+    mAvailableParameters.push_back({Parameter::State, ParamAccess::ReadNotify});
+    mAvailableParameters.push_back({Parameter::Address, ParamAccess::Read});
+    mAvailableParameters.push_back({Parameter::SerialNumber, ParamAccess::Read});
+    mAvailableParameters.push_back({Parameter::FirmwareMode, ParamAccess::Read});
+
+    LOG_DEBUG("Getting module info");
+    auto responseData = cmdData->getResponseData();
+    auto featuresFlags = responseData[0];
+    if (featuresFlags&0x01){
+        mAvailableChannels.push_back(ChannelInfo::Signal);
+        mAvailableChannels.push_back(ChannelInfo::ElectrodesState);
+        mAvailableCommands.push_back(Command::StartSignal);
+        mAvailableCommands.push_back(Command::StopSignal);
+        modules.push_back(CallibriModule::Signal);
+        LOG_DEBUG("Has signal module");
+    }
+    if (featuresFlags&0x02){
+        mAvailableChannels.push_back(ChannelInfo::MEMS);
+        mAvailableChannels.push_back(ChannelInfo::Angle);
+        mAvailableCommands.push_back(Command::StartMEMS);
+        mAvailableCommands.push_back(Command::StopMEMS);
+        modules.push_back(CallibriModule::MEMS);
+        LOG_DEBUG("Has MEMS module");
+    }
+    if (featuresFlags&0x04){
+        mAvailableCommands.push_back(Command::EnableMotionAssistant);
+        mAvailableCommands.push_back(Command::StartStimulation);
+        mAvailableParameters.push_back({Parameter::MotionAssistantState, ParamAccess::Read});
+        mAvailableParameters.push_back({Parameter::StimulatorState, ParamAccess::Read});
+        mAvailableParameters.push_back({Parameter::MotionAssistantParamPack, ParamAccess::ReadWrite});
+        mAvailableParameters.push_back({Parameter::StimulatorParamPack, ParamAccess::ReadWrite});
+        modules.push_back(CallibriModule::Stimulator);
+        LOG_DEBUG("Has stimulation module");
+    }
+    if (featuresFlags&0x08){
+        mAvailableChannels.push_back(ChannelInfo::Respiration);
+        mAvailableCommands.push_back(Command::StartRespiration);
+        mAvailableCommands.push_back(Command::StopRespiration);
+        modules.push_back(CallibriModule::Respiration);
+        LOG_DEBUG("Has spyrometry module");
+    }
+
+    mAvailableChannels.push_back(ChannelInfo::ConnectionStats);
+    mAvailableChannels.push_back(ChannelInfo::Battery);
+
+    mSamplingFrequency = fromByteCode<SamplingFrequency>(responseData[CallibriSamplFreqBytePos]);
+    mAvailableParameters.push_back({Parameter::SamplingFrequency, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Sampling frequency: %d Hz", intValue(mSamplingFrequency));
+
+    mADCInputState = fromByteCode<ADCInput>(responseData[CallibriAdcInputBytePos]);
+    mAvailableParameters.push_back({Parameter::ADCInputState, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("ADC input mode: %d", static_cast<int>(mADCInputState));
+
+    mExternalSwitchState = fromByteCode<ExternalSwitchInput>(responseData[CallibriExtSwithBytePos]);
+    mAvailableParameters.push_back({Parameter::ExternalSwitchState, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("External switch state: %d", static_cast<int>(mExternalSwitchState));
+
+    mHardwareFilterState = static_cast<bool>(responseData[CallibriFilterStateBytePos]);
+    mAvailableParameters.push_back({Parameter::HardwareFilterState, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Hign pass filter %s", mHardwareFilterState?"enabled":"disabled");
+
+
+    mGain = fromByteCode<Gain>(responseData[CallibriGainBytePos]);
+    mAvailableParameters.push_back({Parameter::Gain, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Signal gain: %d", intValue(mGain));
+
+    mOffset = responseData[CallibriOffsetBytePos];
+    mAvailableParameters.push_back({Parameter::Offset, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Data offset: %d", mOffset);
+
+    mAccelerometerSens = fromByteCode<AccelerometerSensitivity>(responseData[CallibriAccelSensBytePos]);
+    mAvailableParameters.push_back({Parameter::AccelerometerSens, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Accelerometer sens: %d", responseData[CallibriAccelSensBytePos]);
+
+    mGyroscopeSens = fromByteCode<GyroscopeSensitivity>(responseData[CallibriGyroSensBytePos]);
+    mAvailableParameters.push_back({Parameter::GyroscopeSens, ParamAccess::ReadWrite});
+    LOG_DEBUG_V("Gyroscope sens: %d", responseData[CallibriGyroSensBytePos]);
+
+    return modules;
 }
 
 void CallibriCommonParameters::setSerialNumber(unsigned long address) noexcept {

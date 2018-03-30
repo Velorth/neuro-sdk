@@ -3,9 +3,6 @@
 
 #include "callibri_protocol.h"
 #include "callibri_command.h"
-#include "callibri_signal_buffer.h"
-#include "callibri_respiration_buffer.h"
-#include "callibri_mems_buffer.h"
 #include "device/device_impl.h"
 #include "device/handler_chain.h"
 #include "device/handler.h"
@@ -17,6 +14,7 @@ template<typename> class RequestScheduler;
 using CallibriRequestScheduler = RequestScheduler<CallibriCommandData>;
 class CallibriPacketHandler;
 class CallibriCommonParameters;
+class CallibriBufferCollection;
 
 class CallibriImpl : public DeviceImpl {
 public:
@@ -24,7 +22,8 @@ public:
 
     CallibriImpl(std::shared_ptr<BleDevice>,
                  std::shared_ptr<CallibriRequestScheduler>,
-                 std::shared_ptr<CallibriCommonParameters>);
+                 std::shared_ptr<CallibriCommonParameters>,
+                 std::shared_ptr<CallibriBufferCollection>);
 
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;
@@ -35,16 +34,15 @@ public:
     bool isElectrodesAttached() override;
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
-    const BaseBuffer<MEMS> &memsBuffer() const override;
+    const BaseBuffer<MEMS> &memsBuffer() const override;    
+    const BaseBuffer<Quaternion> &angleBuffer() const override;
 
 private:
     static constexpr const char *class_name = "CallibriImpl";
 
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
-    std::unique_ptr<CallibriSignalBuffer> mSignalBuffer;
-    std::unique_ptr<CallibriRespirationBuffer> mRespirationBuffer;
-    std::unique_ptr<CallibriMemsBuffer> mMemsBuffer;
+    std::shared_ptr<CallibriBufferCollection> mBufferCollection;
     param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;
@@ -58,6 +56,15 @@ private:
     void sendCommandPacket(std::shared_ptr<CallibriCommandData>);
     int convertVoltageToPercents(int);
     int requestBattryVoltage();
+
+    template <Command Cmd>
+    bool sendSimpleCommand(){
+        auto cmdData = std::make_shared<CallibriCommandData>(toCallibriCommand<Cmd>());
+        mRequestHandler->sendRequest(cmdData);
+        cmdData->wait();
+
+        return cmdData->getError() == CallibriError::NO_ERROR;
+    }
 };
 
 }

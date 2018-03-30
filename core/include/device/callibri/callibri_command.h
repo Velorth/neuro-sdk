@@ -35,8 +35,13 @@ enum class CallibriCommand: unsigned char {
     GET_ELECTRODE_STATE = 0x46,
     SWITCH_ADC_INP = 0x0A,
     SWITCH_EXT_COM_INPUTS = 0x23,
+    START_RESP_DATA_THROW = 0x44,
+    STOP_RESP_DATA_THROW = 0x45,
+    START_MEMS_DATA_THROW = 0x42,
+    STOP_MEMS_DATA_THROW = 0x43,
     SET_ACCEL_SENS = 0x25,
-    SET_GYRO_SENS = 0x26
+    SET_GYRO_SENS = 0x26,
+    FIND_ME = 0xA7
 };
 
 enum class CallibriError: unsigned char {
