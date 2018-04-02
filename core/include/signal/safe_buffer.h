@@ -32,9 +32,9 @@ public:
             return std::vector<SampleType>();
         }
 
-        auto bufferOffset = static_cast<long long>(mTotalLength)
-                - static_cast<long long>(global_offset)
-                + static_cast<long long>(mAvailableLength);
+        auto bufferOffset = static_cast<long long>(global_offset)
+                            - static_cast<long long>(mTotalLength)
+                            + static_cast<long long>(mAvailableLength);
 
         if (bufferOffset < 0) {
             bufferOffset = 0;
@@ -50,7 +50,8 @@ public:
         return mBuffer.read(bufferOffset, readLength);
     }
 
-    std::vector<SampleType> readFill(std::size_t global_offset, std::size_t length, SampleType fill_value) const override {
+    std::vector<SampleType>
+    readFill(std::size_t global_offset, std::size_t length, SampleType fill_value) const override {
         if (length == 0){
             return std::vector<SampleType>();
         }
@@ -67,9 +68,9 @@ public:
             return std::vector<SampleType>(length, fill_value);
         }
 
-        auto bufferOffset = static_cast<long long>(mTotalLength)
-                - static_cast<long long>(global_offset)
-                + static_cast<long long>(mAvailableLength);
+        auto bufferOffset = static_cast<long long>(global_offset)
+                            - static_cast<long long>(mTotalLength)
+                            + static_cast<long long>(mAvailableLength);
         decltype(bufferOffset) leadingZerosCount{0};
         if (bufferOffset < 0) {
             leadingZerosCount = -bufferOffset;
@@ -114,6 +115,8 @@ public:
     }
 
 private:
+    static constexpr const char *class_name = "SafeBuffer";
+
     CircularBuffer<SampleType, BufferSize> mBuffer;
     std::size_t mAvailableLength{0};
     std::size_t mTotalLength{0};

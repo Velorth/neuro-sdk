@@ -220,11 +220,12 @@ inline jobjectArray to_obj_array(JNIEnv *env, Container container) {
                                         nullptr);
 
     for (auto it = container.begin(); it != container.end(); ++it) {
+        env->PushLocalFrame(1);
         auto objLocalRef = static_cast<jobject>(jni::java_object<container_value_t>(*it));
         env->SetObjectArrayElement(objArray,
                                    static_cast<jsize>(it - container.begin()),
                                    objLocalRef);
-        env->DeleteLocalRef(objLocalRef);
+        env->PopLocalFrame(nullptr);
     }
     return objArray;
 }

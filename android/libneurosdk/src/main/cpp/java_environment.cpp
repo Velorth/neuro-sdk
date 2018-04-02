@@ -31,8 +31,6 @@ int jni::get_env(JNIEnv **g_env) {
         }
         return 1; //Attached. Need detach
     }
-    __android_log_print(ANDROID_LOG_VERBOSE, "GetEnvironmentRoutine",
-                        "Thread already attached to JVM");
     return 0;//Already attached
 }
 
