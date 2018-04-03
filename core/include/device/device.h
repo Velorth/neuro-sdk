@@ -42,6 +42,7 @@ private:
     friend class SignalChannel;
     friend class RespirationChannel;
     friend class MemsChannel;
+    friend class AngleChannel;
     Device(std::unique_ptr<DeviceImpl>);
 };
 

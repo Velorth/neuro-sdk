@@ -1,3 +1,4 @@
+#include "wrappers/channels/jni_angle_channel_wrap.h"
 #include "wrappers/channels/jni_respiration_channel_wrap.h"
 #include "wrappers/channels/jni_mems_channel_wrap.h"
 #include "wrappers/device/jni_param_types_wrap.h"
@@ -24,6 +25,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);
     jni::initJavaObjClass<JniRespirationChannelWrap *>(env);
     jni::initJavaObjClass<JniMEMSChannelWrap *>(env);
+    jni::initJavaObjClass<JniAngleChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);
@@ -42,6 +44,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::MotionAssistantLimb>(env);
     jni::initJavaObjClass<Neuro::SamplingFrequency>(env);
     jni::initJavaObjClass<Neuro::MEMS>(env);
+    jni::initJavaObjClass<Neuro::Quaternion>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());
