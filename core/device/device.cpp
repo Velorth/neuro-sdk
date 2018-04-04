@@ -2,7 +2,6 @@
 #include "gsl/gsl_assert"
 #include "device/device.h"
 #include "device/device_impl.h"
-#include "channels/channel_info.h"
 
 namespace Neuro {
 
@@ -65,6 +64,15 @@ bool checkHasParameter(const Device &device, Parameter param){
                      [param](const auto& param_pair){
                         return param_pair.first == param;
                      }) != parameters.end();
+}
+
+std::size_t countChannelsWithType(const Device &device, ChannelInfo::Type type){
+    auto channels = device.channels();
+    return std::count_if(channels.begin(),
+                        channels.end(),
+                        [type](const auto& channel){
+                            return channel.getType() == type;
+                        });
 }
 
 ParamAccess getParameterAccess(const Device &device, Parameter param){

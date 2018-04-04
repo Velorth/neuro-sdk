@@ -11,7 +11,7 @@ private:
     std::unique_ptr<Impl> mImpl;
 
 public:
-    SignalChannel(std::shared_ptr<Device>);
+    SignalChannel(std::shared_ptr<Device>, const ChannelInfo & = ChannelInfo::Signal);
     ~SignalChannel();
 
     void setLengthChangedCallback(length_changed_callback_t) noexcept override ;

@@ -37,4 +37,29 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device){
     }
 }
 
+template <typename ChannelWrap>
+jlong createChannelFromDevice(JNIEnv *env, jobject device, jobject info){
+    auto& deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
+    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, info);
+    if (infoPtr == nullptr){
+        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromDevice",
+                            "Error creating channel: ChannelInfo object does not have native pointer");
+        jni::java_throw(env,
+                        "java/lang/IllegalArgumentException",
+                        std::runtime_error("ChannelInfo object does not have native pointer"));
+        return 0;
+    }
+    try {
+        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, *infoPtr);
+        auto channelWrap = new ChannelWrap(channel);
+        return reinterpret_cast<jlong>(channelWrap);
+    }
+    catch (std::exception &e){
+        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromDevice",
+                            "Error creating channel: %s", e.what());
+        jni::java_throw(env, "java/lang/IllegalArgumentException", e);
+        return 0;
+    }
+}
+
 #endif //ANDROID_JNI_CHANNEL_FACTORY_WRAP_H

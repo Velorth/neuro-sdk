@@ -14,17 +14,20 @@ const ChannelInfo ChannelInfo::Pedometer = ChannelInfo(Type::Pedometer);
 
 ChannelInfo::ChannelInfo(ChannelInfo::Type type):
     mType(type),
-    mName(typeToName(mType)){
+    mName(typeToName(mType)),
+    mIndex(0){
 }
 
-ChannelInfo::ChannelInfo(Type type, std::string &&name) noexcept :
+ChannelInfo::ChannelInfo(Type type, std::string &&name, std::size_t index) noexcept :
     mType(type),
-    mName(std::move(name)){
+    mName(std::move(name)),
+    mIndex(index){
 }
 
-ChannelInfo::ChannelInfo(Type type, const std::string &name):
+ChannelInfo::ChannelInfo(Type type, const std::string &name, std::size_t index):
     mType(type),
-    mName(name){
+    mName(name),
+    mIndex(index){
 }
 
 std::string ChannelInfo::getName() const {

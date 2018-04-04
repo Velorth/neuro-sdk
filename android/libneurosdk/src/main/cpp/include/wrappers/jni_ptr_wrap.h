@@ -72,6 +72,10 @@ T*
 extract_pointer(JNIEnv *env, jobject object, const char *pointer_field_name = "mNativeObjPtr"){
     auto objectClass = env->GetObjectClass(object);
     auto pointerFieldID = env->GetFieldID(objectClass, pointer_field_name, "J");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        return nullptr;
+    }
     auto longPtr = env->GetLongField(object, pointerFieldID);
     return reinterpret_cast<T*>(longPtr);
 }

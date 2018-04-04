@@ -11,12 +11,16 @@ namespace Neuro {
 class SignalChannel::Impl {
 private:
     std::shared_ptr<Device> mDevice;
+    const ChannelInfo mInfo;
+    const std::size_t mChannelsCount;
 
 public:
-    Impl(std::shared_ptr<Device> device) :
-        mDevice(device){
+    Impl(std::shared_ptr<Device> device, const ChannelInfo &info) :
+        mDevice(device),
+        mInfo(info),
+        mChannelsCount(countChannelsWithType(*device, mInfo.getType())){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Signal));
+        Expects(checkHasChannel(*device, info));
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
     }
 
@@ -26,15 +30,26 @@ public:
 
     SignalChannel::data_container readData(data_offset_t offset, data_length_t length) const {
         auto&& buffer = mDevice->mImpl->signalBuffer();
-        return buffer.readFill(offset, length, 0.0);
+        if (mChannelsCount == 0){
+            return buffer.readFill(offset, length, 0.0);
+        }
+        else {
+            auto realOffset = offset * mChannelsCount + mInfo.mIndex;
+            auto realLength = length * mChannelsCount;
+            return buffer.readFill(realOffset, realLength, 0.0);
+        }
     }
 
     data_length_t totalLength() const noexcept {
         try {
             auto&& buffer = mDevice->mImpl->signalBuffer();
-            return buffer.totalLength();
+            auto totalLength = buffer.totalLength();
+            auto realLength = totalLength / mChannelsCount;
+            auto remainder = totalLength % mChannelsCount;
+            Expects(remainder == 0);
+            return realLength;
         }
-        catch (std::runtime_error &){
+        catch (std::exception &){
             return 0;
         }
     }
@@ -42,9 +57,13 @@ public:
     data_length_t bufferSize() const noexcept {
         try {
             auto&& buffer = mDevice->mImpl->signalBuffer();
-            return buffer.bufferSize();
+            auto bufferSize = buffer.bufferSize();
+            auto realSize = bufferSize / mChannelsCount;
+            auto remainder = bufferSize % mChannelsCount;
+            Expects(remainder == 0);
+            return realSize;
         }
-        catch (std::runtime_error &){
+        catch (std::exception &){
             return 0;
         }
     }
@@ -64,9 +83,9 @@ public:
     }
 };
 
-SignalChannel::SignalChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::Signal),
-    mImpl(std::make_unique<Impl>(device)){
+SignalChannel::SignalChannel(std::shared_ptr<Device> device, const ChannelInfo &channel_info) :
+    BaseChannel(channel_info),
+    mImpl(std::make_unique<Impl>(device, channel_info)){
 
 }
 

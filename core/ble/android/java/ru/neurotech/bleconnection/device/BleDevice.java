@@ -365,6 +365,8 @@ public class BleDevice {
         mWriteDescriptorLock.lock();
         boolean chSet = mDeviceGatt.setCharacteristicNotification(characteristic, enabled);
         BluetoothGattDescriptor descriptor = characteristic.getDescriptor(mGattInfo.CCCD());
+        if (descriptor == null)
+            return false;
         descriptor.setValue(enabled ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
         mWriteDescriptorCondition.close();
         boolean descWritten = mDeviceGatt.writeDescriptor(descriptor);

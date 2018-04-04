@@ -46,8 +46,8 @@ public:
     static const ChannelInfo Pedometer;
 
     ChannelInfo(Type);
-    ChannelInfo(Type, std::string &&) noexcept;
-    ChannelInfo(Type, const std::string &);
+    ChannelInfo(Type, std::string &&, std::size_t = 0) noexcept;
+    ChannelInfo(Type, const std::string &, std::size_t = 0);
     ChannelInfo(const ChannelInfo &) = default;
     ChannelInfo& operator=(const ChannelInfo &) = default;
     ChannelInfo(ChannelInfo &&) = default;
@@ -64,6 +64,9 @@ public:
 private:
     Type mType;
     std::string mName;
+
+    friend class SignalChannel;
+    const std::size_t mIndex;
 };
 
 }

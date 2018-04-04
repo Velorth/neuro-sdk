@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include "channels/channel_info.h"
 #include "device_parameters.h"
 
 namespace Neuro {
 
-class ChannelInfo;
 class DeviceImpl;
 
 template <Parameter>
@@ -49,6 +49,7 @@ private:
 bool checkHasChannel(const Device &, const ChannelInfo &);
 bool checkHasCommand(const Device &, Command);
 bool checkHasParameter(const Device &, Parameter);
+std::size_t countChannelsWithType(const Device &, ChannelInfo::Type);
 ParamAccess getParameterAccess(const Device &, Parameter);
 
 }

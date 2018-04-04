@@ -12,13 +12,19 @@ Java_ru_neurotech_neurosdk_channels_SignalChannel_create(JNIEnv *env, jclass typ
     return createChannelFromDevice<JniSignalChannelWrap>(env, device);
 }
 
+JNIEXPORT jlong JNICALL
+Java_ru_neurotech_neurosdk_channels_SignalChannel_createWithInfo(JNIEnv *env, jclass type,
+                                                         jobject device, jobject info) {
+    return createChannelFromDevice<JniSignalChannelWrap>(env, device, info);
+}
+
 JNIEXPORT jobject
 JNICALL
 Java_ru_neurotech_neurosdk_channels_SignalChannel_info(JNIEnv *env, jobject instance) {
 
     auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
     auto channelInfo = &signalChannelWrap->info();
-    return jni::java_object<decltype(channelInfo)>(channelInfo);;
+    return jni::java_object<decltype(channelInfo)>(channelInfo);
 }
 
 JNIEXPORT void
