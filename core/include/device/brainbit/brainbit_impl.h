@@ -20,6 +20,8 @@ public:
     bool execute(Command) override;
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;    
+    std::size_t packetsLost();
+    std::size_t packetsReceived();
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;
@@ -33,7 +35,9 @@ private:
 
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;
-    int mBatteryPercents;    
+    int mBatteryPercents;
+    std::size_t mPacketsReceived;
+    std::size_t mPacketsLost;
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
     param_changed_callback_t parameterChangedCallback;
 

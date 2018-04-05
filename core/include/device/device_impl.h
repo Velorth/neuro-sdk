@@ -33,6 +33,8 @@ public:
     virtual bool execute(Command) = 0;
     virtual int batteryChargePercents() = 0;
     virtual bool isElectrodesAttached() = 0;
+    virtual std::size_t packetsLost() = 0;
+    virtual std::size_t packetsReceived() = 0;
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
     virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
     virtual const BaseBuffer<MEMS> &memsBuffer() const = 0;

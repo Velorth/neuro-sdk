@@ -59,8 +59,7 @@ HEADERS += $$files(../../../core/include/ble/ios/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
 }
 
-SOURCES += $$files(../../../core/*.cpp) \
-    ../../../core/channels/angle_channel.cpp
+SOURCES += $$files(../../../core/*.cpp)
 SOURCES += $$files(../../../core/ble/*.cpp)
 SOURCES += $$files(../../../core/ble/emulator/*.cpp)
 SOURCES += $$files(../../../core/channels/*.cpp)

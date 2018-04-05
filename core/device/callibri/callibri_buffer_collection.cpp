@@ -47,5 +47,19 @@ void CallibriBufferCollection::setAngleBuffer(std::unique_ptr<CallibriAngleBuffe
     mAngleBuffer = std::move(buffer);
 }
 
+std::size_t CallibriBufferCollection::packetsLost(){
+    return mSignalBuffer->packetsLost() +
+        mRespirationBuffer->packetsLost() +
+        mMemsBuffer->packetsLost() +
+        mAngleBuffer->packetsLost();
+}
+
+std::size_t CallibriBufferCollection::packetsReceived(){
+    return mSignalBuffer->packetsReceived() +
+        mRespirationBuffer->packetsReceived() +
+        mMemsBuffer->packetsReceived() +
+        mAngleBuffer->packetsReceived();
+}
+
 
 }

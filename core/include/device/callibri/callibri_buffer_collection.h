@@ -21,6 +21,9 @@ public:
     void setMemsBuffer(std::unique_ptr<CallibriMemsBuffer>&&);
     void setAngleBuffer(std::unique_ptr<CallibriAngleBuffer>&&);
 
+    std::size_t packetsLost();
+    std::size_t packetsReceived();
+
 private:
     std::unique_ptr<CallibriSignalBuffer> mSignalBuffer;
     std::unique_ptr<CallibriRespirationBuffer> mRespirationBuffer;

@@ -78,6 +78,14 @@ bool BrainbitImpl::isElectrodesAttached(){
     throw std::runtime_error("Device does not support electrodes state request");
 }
 
+std::size_t BrainbitImpl::packetsLost() {
+    return mPacketsLost;
+}
+
+std::size_t BrainbitImpl::packetsReceived() {
+    return mPacketsReceived;
+}
+
 const BaseBuffer<signal_sample_t> &BrainbitImpl::signalBuffer() const {
     return mSignalBuffer;
 }
@@ -101,7 +109,7 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     }
 
     if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
-        auto packetNumber = static_cast<Byte>(data[0]) << 3 | static_cast<Byte>(data[1]) >> 5;
+        auto packetNumber = static_cast<unsigned short>(data[0]) << 3 | static_cast<unsigned short>(data[1]) >> 5;
         auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
         LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
 

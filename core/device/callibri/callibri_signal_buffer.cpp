@@ -8,7 +8,7 @@ CallibriSignalBuffer::CallibriSignalBuffer(std::shared_ptr<CallibriCommonParamet
         mCommonParameters(common_params) {
 }
 
-void CallibriSignalBuffer::onDataReceived(packet_number_t, const ByteBuffer &data) {
+void CallibriSignalBuffer::onDataReceived(packet_number_t number, const ByteBuffer &data) {
     std::vector<signal_sample_t> samples;
     for (auto sample = data.begin(); sample!=data.end(); sample += 2) {
         ByteInterpreter<short> shortSample;

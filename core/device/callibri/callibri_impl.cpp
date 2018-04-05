@@ -122,6 +122,14 @@ bool CallibriImpl::isElectrodesAttached(){
     }
 }
 
+std::size_t CallibriImpl::packetsLost(){
+    return mBufferCollection->packetsLost();
+}
+
+std::size_t CallibriImpl::packetsReceived(){
+    return mBufferCollection->packetsReceived();
+}
+
 const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {    
     return mBufferCollection->signalBuffer().buffer();
 }

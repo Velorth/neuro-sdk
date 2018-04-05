@@ -32,6 +32,8 @@ public:
     bool execute(Command) override;
     int batteryChargePercents() override;
     bool isElectrodesAttached() override;
+    std::size_t packetsLost() override;
+    std::size_t packetsReceived() override;
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;    
