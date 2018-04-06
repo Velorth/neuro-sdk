@@ -53,6 +53,7 @@ private:
     void onSignalReceived(const ByteBuffer &);
     void onMemsReceived(const ByteBuffer &);
     void onRespReceived(const ByteBuffer &);
+    void onAngleReceived(const ByteBuffer &);
     packet_number_t extractPacketNumber(const ByteBuffer &, std::size_t);
     void onParameterChanged(Parameter);
     void sendCommandPacket(std::shared_ptr<CallibriCommandData>);

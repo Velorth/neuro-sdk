@@ -41,7 +41,7 @@ private:
     }
 
     ElectrodeState getLastElectrodeState(){
-        if (mBuffer.availableLength()>0){
+        if (mBuffer.totalLength()>0){
             auto lastState = mBuffer.readFill(mBuffer.totalLength()-1, 1, ElectrodeState::Attached);
             return lastState[0];
         }

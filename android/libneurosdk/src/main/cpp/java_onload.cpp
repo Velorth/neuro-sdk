@@ -1,3 +1,4 @@
+#include "wrappers/channels/jni_connection_stats_channel_wrap.h"
 #include "wrappers/channels/jni_angle_channel_wrap.h"
 #include "wrappers/channels/jni_respiration_channel_wrap.h"
 #include "wrappers/channels/jni_mems_channel_wrap.h"
@@ -26,6 +27,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniRespirationChannelWrap *>(env);
     jni::initJavaObjClass<JniMEMSChannelWrap *>(env);
     jni::initJavaObjClass<JniAngleChannelWrap *>(env);
+    jni::initJavaObjClass<JniConnectionStatsChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);

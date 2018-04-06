@@ -3,7 +3,7 @@
 
 namespace Neuro {
 
-void CallibriAngleBuffer::onDataReceived(packet_number_t, const ByteBuffer &data) {
+void CallibriAngleBuffer::onDataReceived(packet_number_t number, const ByteBuffer &data) {
     if (data.size() < AngleDataLength)
         return;
 
@@ -42,6 +42,12 @@ void CallibriAngleBuffer::onDataReceived(packet_number_t, const ByteBuffer &data
         z.bytes[2] = data[14];
         z.bytes[3] = data[15];
         quat.Z = z.value;
+    }
+
+    auto packetsLost = mPacketSequence.onNewPacket(number);
+    if (packetsLost > 0){
+        std::vector<Quaternion> zeroSamples(packetsLost, Quaternion{});
+        mAngleBuffer.append(zeroSamples);
     }
 
     mAngleBuffer.append({quat});

@@ -7,11 +7,13 @@
 #include "device/device.h"
 #include "device/device_impl.h"
 #include "signal/safe_buffer.h"
+#include "logger.h"
 
 namespace Neuro {
 
 class BatteryChannel::Impl {
 private:
+    static constexpr const char *class_name = "BatteryChannel";
     static constexpr std::size_t BufferSize = 360; //1 hour for 0.1 Hz sampling frequency
     static constexpr sampling_frequency_t DefaultFrequency = 0.1f;
     std::shared_ptr<Device> mDevice;
@@ -34,11 +36,13 @@ private:
             }
             std::unique_lock<std::mutex> bufferLock(mBufferMutex);
             mBuffer.append({batteryPercents});
+            bufferLock.unlock();
+
         }while(mWaitBatteryCondition.wait_for(waitBatteryLock, std::chrono::duration<sampling_frequency_t>(1.f/mSamplingFrequency)) == std::cv_status::timeout);
     }
 
     int getLastBatteryValue(){
-        if (mBuffer.availableLength()>0){
+        if (mBuffer.totalLength()>0){
             auto lastCharge = mBuffer.readFill(mBuffer.totalLength()-1, 1, 0);
             return lastCharge[0];
         }
@@ -55,16 +59,14 @@ public:
     }
 
     ~Impl(){
-        //std::unique_lock<std::mutex> waitBatteryThreadLock(mWaitBatteryMutex);
+        std::unique_lock<std::mutex> waitBatteryThreadLock(mWaitBatteryMutex);
         mWaitBatteryCondition.notify_all();
         try{
             if (mReadBatteryThread.joinable())
                 mReadBatteryThread.join();
         }
-        catch (std::system_error &){
-#ifndef NDEBUG
-            Ensures(false);
-#endif
+        catch (std::system_error &e){
+            LOG_ERROR_V("Thread destruction error: %s", e.what());
         }
     }
 

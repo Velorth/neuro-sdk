@@ -19,7 +19,8 @@ public:
     void onDataReceived(packet_number_t, const ByteBuffer &);
     const BaseBuffer<signal_sample_t>& buffer() const;
 
-private:
+private:    
+    static constexpr std::size_t SignalDataLength = 18;
     static constexpr std::size_t SignalBufferSize = 150000; //10 minutes for 250 Hz fsam
     static constexpr int AdcCapacity = 8388607;
     static constexpr double ReferenceVoltage = 2.42;

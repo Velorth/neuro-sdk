@@ -20,7 +20,7 @@ public:
         mInfo(info),
         mChannelsCount(countChannelsWithType(*device, mInfo.getType())){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, info));
+        Expects(mChannelsCount > 0);
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
     }
 

@@ -21,6 +21,7 @@ public:
     const BaseBuffer<MEMS>& buffer() const;
 
 private:
+    static constexpr std::size_t MemsDataLength = 16;
     static constexpr std::size_t MemsBufferSize = 60000; //10 minutes for 100 Hz fsam
 
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;

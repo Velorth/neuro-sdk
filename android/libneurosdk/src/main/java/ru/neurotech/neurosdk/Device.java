@@ -87,6 +87,7 @@ public class Device {
      * device does not support specified command. To get supported commands call commands() method
      * @param cmd Command to execute
      * @return Operation success indicator
+     * @throws UnsupportedOperationException
      */
     public native boolean execute(Command cmd);
 
@@ -96,6 +97,7 @@ public class Device {
      * method. It returns Parameter object which consists of parameter name, type and access mode
      * @param param ParameterName to read
      * @return Parameter value
+     * @throws UnsupportedOperationException
      */
     public native Object readParam(ParameterName param);
 
@@ -107,6 +109,7 @@ public class Device {
      * @param param Name of parameter to set
      * @param value Parameter value
      * @return Operation success
+     * @throws UnsupportedOperationException
      */
     public native boolean setParam(ParameterName param, Object value);
 

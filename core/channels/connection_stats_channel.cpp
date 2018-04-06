@@ -18,13 +18,21 @@ private:
     SafeBuffer<int, BufferSize> mBuffer;
     sampling_frequency_t mSamplingFrequency{DefaultFrequency};
     std::mutex mWaitConnectionStatsMutex;
-    mutable std::mutex mDeviceMutex;
+    mutable std::mutex mBufferMutex;
     std::condition_variable mWaitConnectionStatsCondition;
     std::thread mReadConnectionStatsThread;
 
     void readConnectionStatsFunc(){
         for (;;){
             std::unique_lock<std::mutex> waitConnectionStatsLock(mWaitConnectionStatsMutex);
+
+            auto packetsLost = static_cast<double>(mDevice->mImpl->packetsLost());
+            auto packetsReceived = static_cast<double>(mDevice->mImpl->packetsReceived());
+            auto percents = packetsReceived / (packetsLost + packetsReceived) * 100.0;
+
+            std::unique_lock<std::mutex> bufferLock(mBufferMutex);
+            mBuffer.append({static_cast<int>(percents)});
+            bufferLock.unlock();
 
             auto waitTime = std::chrono::duration<sampling_frequency_t>(1.f/mSamplingFrequency);
             auto waitResult = mWaitConnectionStatsCondition.wait_for(waitConnectionStatsLock,
@@ -45,7 +53,7 @@ public:
     }
 
     ~Impl(){
-        //std::unique_lock<std::mutex> waitConnectionStatsThreadLock(mWaitConnectionStatsMutex);
+        std::unique_lock<std::mutex> waitConnectionStatsThreadLock(mWaitConnectionStatsMutex);
         mWaitConnectionStatsCondition.notify_all();
         try{
             if (mReadConnectionStatsThread.joinable())
@@ -63,12 +71,12 @@ public:
     }
 
     ConnectionStatsChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        std::unique_lock<std::mutex> bufferLock(mDeviceMutex);
+        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.readFill(offset, length, 0);
     }
 
     data_length_t totalLength() const noexcept {
-        std::unique_lock<std::mutex> bufferLock(mDeviceMutex);
+        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.totalLength();
     }
 
@@ -85,7 +93,7 @@ public:
     }
 
     void setSamplingFrequency(sampling_frequency_t frequency) {
-        std::unique_lock<std::mutex> bufferLock(mDeviceMutex);
+        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         mSamplingFrequency = frequency;
         mBuffer.reset();
     }

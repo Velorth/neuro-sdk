@@ -80,6 +80,10 @@ static constexpr std::size_t MemsDataShift = 4;
 static constexpr std::size_t RespPacketNumberPos = 2;
 static constexpr std::size_t RespDataShift = 4;
 
+//Angle section
+static constexpr std::size_t AnglePacketNumberPos = 2;
+static constexpr std::size_t AngleDataShift = 4;
+
 
 enum class CallibriModule {
     Signal,

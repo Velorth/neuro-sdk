@@ -178,6 +178,10 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
                 onRespReceived(data);
                 break;
             }
+            case CallibriPacketType::Angle: {
+                onAngleReceived(data);
+                break;
+            }
         }
     }
     catch (std::runtime_error &e){
@@ -295,7 +299,13 @@ void CallibriImpl::onMemsReceived(const ByteBuffer &data){
 void CallibriImpl::onRespReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
     ByteBuffer respData(data.begin() + RespDataShift, data.end());
-   mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
+    mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
+}
+
+void CallibriImpl::onAngleReceived(const ByteBuffer &data){
+    auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
+    ByteBuffer angleData(data.begin() + AngleDataShift, data.end());
+    mBufferCollection->angleBuffer().onDataReceived(packetNumber, angleData);
 }
 
 packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){

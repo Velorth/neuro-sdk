@@ -79,11 +79,11 @@ bool BrainbitImpl::isElectrodesAttached(){
 }
 
 std::size_t BrainbitImpl::packetsLost() {
-    return mPacketsLost;
+    return mPacketCounter.packetsLost();
 }
 
 std::size_t BrainbitImpl::packetsReceived() {
-    return mPacketsReceived;
+    return mPacketCounter.packetsReceived();
 }
 
 const BaseBuffer<signal_sample_t> &BrainbitImpl::signalBuffer() const {
@@ -140,6 +140,13 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
         std::vector<double> signalData(8);
         for (auto i = 0; i < 8; ++i){
             signalData[i] = rawData[i]*K;
+        }
+
+        auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
+        if (packetsLost > 0){
+            static constexpr std::size_t samplesInPacket = 8;
+            std::vector<double> zeroBuffer(packetsLost * samplesInPacket, 0.0);
+            mSignalBuffer.append(zeroBuffer);
         }
 
         mSignalBuffer.append(signalData);

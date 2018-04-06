@@ -7,7 +7,10 @@ CallibriMemsBuffer::CallibriMemsBuffer(std::shared_ptr<CallibriCommonParameters>
         mCommonParameters(common_params) {
 }
 
-void CallibriMemsBuffer::onDataReceived(packet_number_t, const ByteBuffer &data) {
+void CallibriMemsBuffer::onDataReceived(packet_number_t number, const ByteBuffer &data) {
+    if (data.size() < MemsDataLength)
+        return;
+
     ByteInterpreter<short> accelX;
     accelX.bytes[0] = data[0];
     accelX.bytes[1] = data[1];
@@ -37,6 +40,12 @@ void CallibriMemsBuffer::onDataReceived(packet_number_t, const ByteBuffer &data)
     gyroZ.bytes[0] = data[10];
     gyroZ.bytes[1] = data[11];
     auto gyroZValue = gyroZ.value * doubleValue(mCommonParameters->gyroscopeSens()) / 32767;
+
+    auto packetsLost = mPacketSequence.onNewPacket(number);
+    if (packetsLost > 0){
+        std::vector<MEMS> zeroSamples(packetsLost, MEMS{});
+        mMemsBuffer.append(zeroSamples);
+    }
 
     mMemsBuffer.append({MEMS{
                             {accelXValue, accelYValue, accelZValue},
