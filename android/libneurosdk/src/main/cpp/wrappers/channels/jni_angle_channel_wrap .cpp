@@ -7,37 +7,37 @@ extern "C"
 {
 
 JNIEXPORT jlong JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_create(JNIEnv *env, jclass type,
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_create(JNIEnv *env, jclass type,
                                                          jobject device) {
-    return createChannelFromDevice<JniAngleChannelWrap>(env, device);
+    return createChannelFromDevice<JniOrientationChannelWrap>(env, device);
 }
 
 JNIEXPORT jobject
 JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_info(JNIEnv *env, jobject instance) {
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_info(JNIEnv *env, jobject instance) {
 
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     auto channelInfo = &angleChannelWrap->info();
     return jni::java_object<decltype(channelInfo)>(channelInfo);;
 }
 
 JNIEXPORT void
 JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_init(JNIEnv *env, jobject instance) {
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_init(JNIEnv *env, jobject instance) {
 
-    auto angleChannelWrap = extract_pointer<JniAngleChannelWrap>(env, instance);
+    auto angleChannelWrap = extract_pointer<JniOrientationChannelWrap>(env, instance);
     angleChannelWrap->subscribeLengthChanged(
             find_notifier<decltype(angleChannelWrap)>(instance, "dataLengthChanged"));
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_deleteNative(JNIEnv *env, jobject instance) {
-    deleteNativeObject<JniAngleChannelWrap>(env, instance);
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_deleteNative(JNIEnv *env, jobject instance) {
+    deleteNativeObject<JniOrientationChannelWrap>(env, instance);
 }
 
 JNIEXPORT jobject JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_underlyingDevice(JNIEnv *env, jobject instance) {
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     auto devicePtr = angleChannelWrap->underlyingDevice().lock();
     if (!devicePtr){
         return nullptr;
@@ -47,10 +47,10 @@ Java_ru_neurotech_neurosdk_channels_AngleChannel_underlyingDevice(JNIEnv *env, j
 }
 
 JNIEXPORT void JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_setSamplingFrequency(JNIEnv *env,
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_setSamplingFrequency(JNIEnv *env,
                                                                        jobject instance,
                                                                        jfloat frequency) {
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     try {
         angleChannelWrap->setSamplingFrequency(frequency);
     }
@@ -61,29 +61,29 @@ Java_ru_neurotech_neurosdk_channels_AngleChannel_setSamplingFrequency(JNIEnv *en
 }
 
 JNIEXPORT jfloat JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_samplingFrequency(JNIEnv *env,
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_samplingFrequency(JNIEnv *env,
                                                                     jobject instance) {
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     return angleChannelWrap->samplingFrequency();
 }
 
 JNIEXPORT jlong JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_bufferSize(JNIEnv *env, jobject instance) {
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     return saturation_cast<jlong>(angleChannelWrap->bufferSize());
 }
 
 JNIEXPORT jlong JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_totalLength(JNIEnv *env, jobject instance) {
+    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
     return saturation_cast<jlong>(angleChannelWrap->totalLength());
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_ru_neurotech_neurosdk_channels_AngleChannel_readData(JNIEnv *env, jobject instance,
+Java_ru_neurotech_neurosdk_channels_OrientationChannel_readData(JNIEnv *env, jobject instance,
                                                            jlong offset, jlong length) {
     try {
-        auto &angleChannelWrap = *extract_pointer<JniAngleChannelWrap>(env, instance);
+        auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
         auto data = angleChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
                                                 saturation_cast<Neuro::data_length_t>(length));
         return jni::to_obj_array(env, data);
@@ -96,7 +96,7 @@ Java_ru_neurotech_neurosdk_channels_AngleChannel_readData(JNIEnv *env, jobject i
 
 }
 
-void JniAngleChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
+void JniOrientationChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
     this->object->setLengthChangedCallback([weakReference](auto length){

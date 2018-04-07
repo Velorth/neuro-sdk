@@ -9,7 +9,7 @@ public enum ChannelType {
     ElectrodesState,
     Respiration,
     MEMS,
-    Angle,
+    Orientation,
     ConnectionStats,
     Resistance,
     Pedometer,

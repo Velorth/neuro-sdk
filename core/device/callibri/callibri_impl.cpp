@@ -142,8 +142,8 @@ const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
     return mBufferCollection->memsBuffer().buffer();
 }
 
-const BaseBuffer<Quaternion> &CallibriImpl::angleBuffer() const {
-    return mBufferCollection->angleBuffer().buffer();
+const BaseBuffer<Quaternion> &CallibriImpl::orientationBuffer() const {
+    return mBufferCollection->orientationBuffer().buffer();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -178,8 +178,8 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
                 onRespReceived(data);
                 break;
             }
-            case CallibriPacketType::Angle: {
-                onAngleReceived(data);
+            case CallibriPacketType::Orientation: {
+                onOrientationReceived(data);
                 break;
             }
         }
@@ -302,10 +302,10 @@ void CallibriImpl::onRespReceived(const ByteBuffer &data){
     mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
 }
 
-void CallibriImpl::onAngleReceived(const ByteBuffer &data){
+void CallibriImpl::onOrientationReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
-    ByteBuffer angleData(data.begin() + AngleDataShift, data.end());
-    mBufferCollection->angleBuffer().onDataReceived(packetNumber, angleData);
+    ByteBuffer orientationData(data.begin() + OrientationDataShift, data.end());
+    mBufferCollection->orientationBuffer().onDataReceived(packetNumber, orientationData);
 }
 
 packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){

@@ -1,9 +1,9 @@
-#include "device/callibri/callibri_angle_buffer.h"
+#include "device/callibri/callibri_orientation_buffer.h"
 #include "device/callibri/callibri_common_parameters.h"
 
 namespace Neuro {
 
-void CallibriAngleBuffer::onDataReceived(packet_number_t number, const ByteBuffer &data) {
+void CallibriOrientationBuffer::onDataReceived(packet_number_t number, const ByteBuffer &data) {
     if (data.size() < AngleDataLength)
         return;
 
@@ -47,14 +47,14 @@ void CallibriAngleBuffer::onDataReceived(packet_number_t number, const ByteBuffe
     auto packetsLost = mPacketSequence.onNewPacket(number);
     if (packetsLost > 0){
         std::vector<Quaternion> zeroSamples(packetsLost, Quaternion{});
-        mAngleBuffer.append(zeroSamples);
+        mOrientationBuffer.append(zeroSamples);
     }
 
-    mAngleBuffer.append({quat});
+    mOrientationBuffer.append({quat});
 }
 
-const BaseBuffer<Quaternion> &CallibriAngleBuffer ::buffer() const {
-    return mAngleBuffer;
+const BaseBuffer<Quaternion> &CallibriOrientationBuffer ::buffer() const {
+    return mOrientationBuffer;
 }
 
 }

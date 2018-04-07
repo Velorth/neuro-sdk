@@ -41,7 +41,7 @@ namespace {
 constexpr callibri_marker_t CallibriCommandMarker = 65503;
 constexpr callibri_marker_t CallibriMemsMarker = 65501;
 constexpr callibri_marker_t CallibriRespirationMarker = 65502;
-constexpr callibri_marker_t CallibriAngleMarker = 65505;
+constexpr callibri_marker_t CallibriOrientationMarker = 65505;
 }
 
 constexpr callibri_marker_t CallibriMaxPacketNumber = 65500;
@@ -82,7 +82,7 @@ static constexpr std::size_t RespDataShift = 4;
 
 //Angle section
 static constexpr std::size_t AnglePacketNumberPos = 2;
-static constexpr std::size_t AngleDataShift = 4;
+static constexpr std::size_t OrientationDataShift = 4;
 
 
 enum class CallibriModule {
@@ -97,7 +97,7 @@ enum class CallibriPacketType {
     Signal,
     MEMS,
     Respiration,
-    Angle
+    Orientation
 };
 
 inline CallibriPacketType fromMarker(callibri_marker_t marker){
@@ -109,8 +109,8 @@ inline CallibriPacketType fromMarker(callibri_marker_t marker){
         return CallibriPacketType::Command;
     case CallibriMemsMarker:
         return CallibriPacketType::MEMS;
-    case CallibriAngleMarker:
-        return CallibriPacketType::Angle;
+    case CallibriOrientationMarker:
+        return CallibriPacketType::Orientation;
     case CallibriRespirationMarker:
         return CallibriPacketType::Respiration;
     default:

@@ -6,14 +6,14 @@
 
 namespace Neuro {
 
-class AngleChannel final : public BaseChannel<Quaternion> {
+class OrientationChannel final : public BaseChannel<Quaternion> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
 
 public:
-    AngleChannel(std::shared_ptr<Device>);
-    ~AngleChannel();
+    OrientationChannel(std::shared_ptr<Device>);
+    ~OrientationChannel();
 
     void setLengthChangedCallback(length_changed_callback_t) noexcept override ;
     data_container readData(data_offset_t, data_length_t) const override;

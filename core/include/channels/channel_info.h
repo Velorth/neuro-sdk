@@ -13,7 +13,7 @@ public:
         ElectrodesState,
         Respiration,
         MEMS,
-        Angle,
+        Orientation,
         ConnectionStats,
         Resistance,
         Pedometer,
@@ -27,7 +27,7 @@ public:
         case Type::ElectrodesState: return "ElectrodesState";
         case Type::Respiration: return "Respiration";
         case Type::MEMS: return "MEMS";
-        case Type::Angle: return "Angle";
+        case Type::Orientation: return "Orientation";
         case Type::ConnectionStats: return "ConnectionStats";
         case Type::Resistance: return "Resistance";
         case Type::Pedometer: return "Pedometer";
@@ -40,7 +40,7 @@ public:
     static const ChannelInfo ElectrodesState;
     static const ChannelInfo Respiration;
     static const ChannelInfo MEMS;
-    static const ChannelInfo Angle;
+    static const ChannelInfo Orientation;
     static const ChannelInfo ConnectionStats;
     static const ChannelInfo Resistance;
     static const ChannelInfo Pedometer;

@@ -8,20 +8,20 @@
 
 namespace Neuro {
 
-class CallibriAngleBuffer : public CallibriBuffer<65500> {
+class CallibriOrientationBuffer : public CallibriBuffer<65500> {
 public:
-    CallibriAngleBuffer() = default;
-    CallibriAngleBuffer(const CallibriAngleBuffer &) = delete;
-    CallibriAngleBuffer& operator=(const CallibriAngleBuffer &) = delete;
+    CallibriOrientationBuffer() = default;
+    CallibriOrientationBuffer(const CallibriOrientationBuffer &) = delete;
+    CallibriOrientationBuffer& operator=(const CallibriOrientationBuffer &) = delete;
 
     void onDataReceived(packet_number_t, const ByteBuffer &);
     const BaseBuffer<Quaternion>& buffer() const;
 
 private:
     static constexpr std::size_t AngleDataLength = 16;
-    static constexpr std::size_t AngleBufferSize = 60000; //10 minutes for 100 Hz fsam
+    static constexpr std::size_t OrientationBufferSize = 60000; //10 minutes for 100 Hz fsam
 
-    SafeBuffer<Quaternion, AngleBufferSize> mAngleBuffer;
+    SafeBuffer<Quaternion, OrientationBufferSize> mOrientationBuffer;
 };
 
 }

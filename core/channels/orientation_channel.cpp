@@ -1,6 +1,6 @@
 #include "gsl/gsl_assert"
 #include "channels/channel_info.h"
-#include "channels/angle_channel.h"
+#include "channels/orientation_channel.h"
 #include "device/device.h"
 #include "device/device_impl.h"
 #include "device/param_values.h"
@@ -8,7 +8,7 @@
 
 namespace Neuro {
 
-class AngleChannel::Impl {
+class OrientationChannel::Impl {
 private:
     static constexpr sampling_frequency_t AngleSampligFrequency = 100.f;
 
@@ -18,21 +18,21 @@ public:
     Impl(std::shared_ptr<Device> device) :
         mDevice(device){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Angle));
+        Expects(checkHasChannel(*device, ChannelInfo::Orientation));
     }
 
     void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
 
     }
 
-    AngleChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        auto&& buffer = mDevice->mImpl->angleBuffer();
+    OrientationChannel::data_container readData(data_offset_t offset, data_length_t length) const {
+        auto&& buffer = mDevice->mImpl->orientationBuffer();
         return buffer.readFill(offset, length, Quaternion{});
     }
 
     data_length_t totalLength() const noexcept {
         try {
-            auto&& buffer = mDevice->mImpl->angleBuffer();
+            auto&& buffer = mDevice->mImpl->orientationBuffer();
             return buffer.totalLength();
         }
         catch (std::runtime_error &){
@@ -42,7 +42,7 @@ public:
 
     data_length_t bufferSize() const noexcept {
         try {
-            auto&& buffer = mDevice->mImpl->angleBuffer();
+            auto&& buffer = mDevice->mImpl->orientationBuffer();
             return buffer.bufferSize();
         }
         catch (std::runtime_error &){
@@ -59,40 +59,40 @@ public:
     }
 };
 
-AngleChannel::AngleChannel(std::shared_ptr<Device> device) :
+OrientationChannel::OrientationChannel(std::shared_ptr<Device> device) :
     BaseChannel(ChannelInfo::Signal),
     mImpl(std::make_unique<Impl>(device)){
 
 }
 
-AngleChannel::~AngleChannel(){
+OrientationChannel::~OrientationChannel(){
 }
 
-void AngleChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
+void OrientationChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
     mImpl->setLengthChangedCallback(callback);
 }
 
-AngleChannel::data_container AngleChannel::readData(data_offset_t offset, data_length_t length) const {
+OrientationChannel::data_container OrientationChannel::readData(data_offset_t offset, data_length_t length) const {
     return mImpl->readData(offset, length);
 }
 
-data_length_t AngleChannel::totalLength() const noexcept {
+data_length_t OrientationChannel::totalLength() const noexcept {
     return mImpl->totalLength();
 }
 
-data_length_t AngleChannel::bufferSize() const noexcept {
+data_length_t OrientationChannel::bufferSize() const noexcept {
     return mImpl->bufferSize();
 }
 
-std::weak_ptr<Device> AngleChannel::underlyingDevice() const noexcept {
+std::weak_ptr<Device> OrientationChannel::underlyingDevice() const noexcept {
     return mImpl->underlyingDevice();
 }
 
-sampling_frequency_t AngleChannel::samplingFrequency() const noexcept {
+sampling_frequency_t OrientationChannel::samplingFrequency() const noexcept {
     return mImpl->samplingFrequency();
 }
 
-void AngleChannel::setSamplingFrequency(sampling_frequency_t) {
+void OrientationChannel::setSamplingFrequency(sampling_frequency_t) {
     throw std::runtime_error("Unable set sampling frequency for angle channel");
 }
 

@@ -26,7 +26,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);
     jni::initJavaObjClass<JniRespirationChannelWrap *>(env);
     jni::initJavaObjClass<JniMEMSChannelWrap *>(env);
-    jni::initJavaObjClass<JniAngleChannelWrap *>(env);
+    jni::initJavaObjClass<JniOrientationChannelWrap *>(env);
     jni::initJavaObjClass<JniConnectionStatsChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);

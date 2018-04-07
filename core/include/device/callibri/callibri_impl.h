@@ -37,7 +37,7 @@ public:
     const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;    
-    const BaseBuffer<Quaternion> &angleBuffer() const override;
+    const BaseBuffer<Quaternion> &orientationBuffer() const override;
 
 private:
     static constexpr const char *class_name = "CallibriImpl";
@@ -53,7 +53,7 @@ private:
     void onSignalReceived(const ByteBuffer &);
     void onMemsReceived(const ByteBuffer &);
     void onRespReceived(const ByteBuffer &);
-    void onAngleReceived(const ByteBuffer &);
+    void onOrientationReceived(const ByteBuffer &);
     packet_number_t extractPacketNumber(const ByteBuffer &, std::size_t);
     void onParameterChanged(Parameter);
     void sendCommandPacket(std::shared_ptr<CallibriCommandData>);

@@ -98,7 +98,7 @@ const BaseBuffer<MEMS> &BrainbitImpl::memsBuffer() const {
     throw std::runtime_error("Device does not have MEMS buffer");
 }
 
-const BaseBuffer<Quaternion> &BrainbitImpl::angleBuffer() const {
+const BaseBuffer<Quaternion> &BrainbitImpl::orientationBuffer() const {
     throw std::runtime_error("Device does not have angle buffer");
 }
 

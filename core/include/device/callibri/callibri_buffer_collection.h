@@ -5,7 +5,7 @@
 #include "callibri_signal_buffer.h"
 #include "callibri_respiration_buffer.h"
 #include "callibri_mems_buffer.h"
-#include "callibri_angle_buffer.h"
+#include "callibri_orientation_buffer.h"
 
 namespace Neuro {
 
@@ -14,12 +14,12 @@ public:
     CallibriSignalBuffer &signalBuffer();
     CallibriRespirationBuffer &respirationBuffer();
     CallibriMemsBuffer &memsBuffer();
-    CallibriAngleBuffer &angleBuffer();
+    CallibriOrientationBuffer &orientationBuffer();
 
     void setSignalBuffer(std::unique_ptr<CallibriSignalBuffer>&&);
     void setRespirationBuffer(std::unique_ptr<CallibriRespirationBuffer>&&);
     void setMemsBuffer(std::unique_ptr<CallibriMemsBuffer>&&);
-    void setAngleBuffer(std::unique_ptr<CallibriAngleBuffer>&&);
+    void setOrientationBuffer(std::unique_ptr<CallibriOrientationBuffer>&&);
 
     std::size_t packetsLost();
     std::size_t packetsReceived();
@@ -28,7 +28,7 @@ private:
     std::unique_ptr<CallibriSignalBuffer> mSignalBuffer;
     std::unique_ptr<CallibriRespirationBuffer> mRespirationBuffer;
     std::unique_ptr<CallibriMemsBuffer> mMemsBuffer;
-    std::unique_ptr<CallibriAngleBuffer> mAngleBuffer;
+    std::unique_ptr<CallibriOrientationBuffer> mOrientationBuffer;
 };
 
 }

@@ -222,8 +222,8 @@ void CallibriParameterReader::createBuffers(std::vector<CallibriModule> modules)
     if (std::find(modules.begin(), modules.end(), CallibriModule::MEMS) != modules.end()){
         auto memsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParameters);
         bufferCollectionPtr->setMemsBuffer(std::move(memsBuffer));
-        auto angleBuffer = std::make_unique<CallibriAngleBuffer>();
-        bufferCollectionPtr->setAngleBuffer(std::move(angleBuffer));
+        auto angleBuffer = std::make_unique<CallibriOrientationBuffer>();
+        bufferCollectionPtr->setOrientationBuffer(std::move(angleBuffer));
     }
 }
 

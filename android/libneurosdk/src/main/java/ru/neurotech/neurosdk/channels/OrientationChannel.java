@@ -3,17 +3,17 @@ package ru.neurotech.neurosdk.channels;
 import ru.neurotech.common.Assert;
 import ru.neurotech.neurosdk.Device;
 
-public class AngleChannel extends BaseChannel<Quaternion>{
+public class OrientationChannel extends BaseChannel<Quaternion>{
     static {
         System.loadLibrary("neurosdk");
     }
 
     protected long mNativeObjPtr = 0;
 
-    public AngleChannel(Device device) {
+    public OrientationChannel(Device device) {
         mNativeObjPtr = create(device);
         Assert.ensures(mNativeObjPtr != 0,
-                "Angle channel native object is null");
+                "Orientation channel native object is null");
         init();
     }
 

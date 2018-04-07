@@ -24,11 +24,11 @@ CallibriMemsBuffer &CallibriBufferCollection::memsBuffer(){
 }
 
 
-CallibriAngleBuffer &CallibriBufferCollection::angleBuffer(){
-    if (mAngleBuffer == nullptr){
+CallibriOrientationBuffer &CallibriBufferCollection::orientationBuffer(){
+    if (mOrientationBuffer == nullptr){
         throw std::runtime_error("Device does not have angle buffer");
     }
-    return *mAngleBuffer;
+    return *mOrientationBuffer;
 }
 
 void CallibriBufferCollection::setSignalBuffer(std::unique_ptr<CallibriSignalBuffer> &&buffer){
@@ -43,22 +43,22 @@ void CallibriBufferCollection::setMemsBuffer(std::unique_ptr<CallibriMemsBuffer>
     mMemsBuffer = std::move(buffer);
 }
 
-void CallibriBufferCollection::setAngleBuffer(std::unique_ptr<CallibriAngleBuffer> &&buffer){
-    mAngleBuffer = std::move(buffer);
+void CallibriBufferCollection::setOrientationBuffer(std::unique_ptr<CallibriOrientationBuffer> &&buffer){
+    mOrientationBuffer = std::move(buffer);
 }
 
 std::size_t CallibriBufferCollection::packetsLost(){
     return mSignalBuffer->packetsLost() +
         mRespirationBuffer->packetsLost() +
         mMemsBuffer->packetsLost() +
-        mAngleBuffer->packetsLost();
+        mOrientationBuffer->packetsLost();
 }
 
 std::size_t CallibriBufferCollection::packetsReceived(){
     return mSignalBuffer->packetsReceived() +
         mRespirationBuffer->packetsReceived() +
         mMemsBuffer->packetsReceived() +
-        mAngleBuffer->packetsReceived();
+        mOrientationBuffer->packetsReceived();
 }
 
 

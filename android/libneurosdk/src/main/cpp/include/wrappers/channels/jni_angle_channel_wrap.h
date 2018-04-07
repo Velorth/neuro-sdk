@@ -19,25 +19,25 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/angle_channel.h"
+#include "channels/orientation_channel.h"
 
-class JniAngleChannelWrap : public JniPtrWrap<Neuro::AngleChannel> {
+class JniOrientationChannelWrap : public JniPtrWrap<Neuro::OrientationChannel> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:
-    JniAngleChannelWrap(object_ptr_t devicePtr) :
+    JniOrientationChannelWrap(object_ptr_t devicePtr) :
             JniPtrWrap(devicePtr) {}
 private:
     std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
 };
 
 template<>
-constexpr const char *jni::java_class_name<JniAngleChannelWrap *>() {
-    return "ru/neurotech/neurosdk/channels/AngleChannel";
+constexpr const char *jni::java_class_name<JniOrientationChannelWrap *>() {
+    return "ru/neurotech/neurosdk/channels/OrientationChannel";
 }
 
 template<>
-constexpr const char *jni::constructor_signature<JniAngleChannelWrap *>() {
+constexpr const char *jni::constructor_signature<JniOrientationChannelWrap *>() {
     return "(J)V";
 }
 

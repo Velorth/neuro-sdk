@@ -161,7 +161,7 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     }
     if (featuresFlags&0x02){
         mAvailableChannels.push_back(ChannelInfo::MEMS);
-        mAvailableChannels.push_back(ChannelInfo::Angle);
+        mAvailableChannels.push_back(ChannelInfo::Orientation);
         mAvailableCommands.push_back(Command::StartMEMS);
         mAvailableCommands.push_back(Command::StopMEMS);
         modules.push_back(CallibriModule::MEMS);
