@@ -79,7 +79,7 @@ SOURCES += $$files(../../../utils/network/posix/*.cpp)
 }
 
 ios: macx:{
-SOURCES+=$$files(../../../core/ble/ios/*.cpp)
+SOURCES+=$$files(../../../core/ble/ios/*.mm)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
 }
 

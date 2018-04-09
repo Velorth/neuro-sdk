@@ -17,7 +17,24 @@
 #include <thread>
 #include "device_scanner.h"
 #include "device/device_factory.h"
+#include "ble/ble_scanner.h"
 #include "logger.h"
+
+#ifdef __ANDROID__
+    #include "ble/android/bluetooth_scanner.h"
+    using CurrentPlatformScanner = Neuro::BluetoothScannerJni;
+#elif __linux__
+    #include "device_scanner_z.h"
+    using CurrentPlatformScanner = Neuro::DeviceScannerZ;
+#elif _WIN32
+    #include "ble/win/ble_scanner_win.h"
+    using CurrentPlatformScanner = Neuro::BleScannerWin;
+#elif __APPLE__
+    #include "ble/ios/ble_scanner_objc.h"
+    using CurrentPlatformScanner = Neuro::NCBleScanner;
+#else
+    #error "Unsupported platform"
+#endif
 
 using std::function;
 using std::shared_ptr;
@@ -153,6 +170,19 @@ void DeviceScanner::releaseDevice(std::string name, std::string address) {
     scanner->releaseDevice(name, address);
 }
 
+#ifdef __ANDROID__
+std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context){
+    auto bleScanner = std::make_unique<CurrentPlatformScanner>(context);
+    auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
+    return deviceScanner;
+}
+#else
+std::unique_ptr<DeviceScanner> createDeviceScanner(){
+    auto bleScanner = std::make_unique<CurrentPlatformScanner>();
+    auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
+    return deviceScanner;
+}
+#endif
 
 }
 

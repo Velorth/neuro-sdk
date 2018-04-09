@@ -99,7 +99,7 @@ public class Device {
      * @return Parameter value
      * @throws UnsupportedOperationException
      */
-    public native Object readParam(ParameterName param);
+    public native <ParamType> ParamType readParam(ParameterName param);
 
     /**
      * Sets value for specified parameter and returns value indicating success of operation. Will
