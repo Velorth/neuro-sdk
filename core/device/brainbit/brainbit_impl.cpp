@@ -142,11 +142,16 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
             signalData[i] = rawData[i]*K;
         }
 
-        auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
-        if (packetsLost > 0){
-            static constexpr std::size_t samplesInPacket = 8;
-            std::vector<double> zeroBuffer(packetsLost * samplesInPacket, 0.0);
-            mSignalBuffer.append(zeroBuffer);
+        try{
+            auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
+            if (packetsLost > 0){
+                static constexpr std::size_t samplesInPacket = 8;
+                std::vector<double> zeroBuffer(packetsLost * samplesInPacket, 0.0);
+                mSignalBuffer.append(zeroBuffer);
+            }
+        }
+        catch (std::runtime_error &e){
+            LOG_ERROR_V("Unable to count lost packets: %s. Packet number: %zd", e.what(), packetNumber);
         }
 
         mSignalBuffer.append(signalData);

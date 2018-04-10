@@ -12,7 +12,7 @@ public:
         auto totalPackets = mPacketsReceived + mPacketsLost;
         auto totalModMax = totalPackets % Max;
 
-        if (packet_number <= totalModMax){
+        if (packet_number >= totalModMax){
             throw std::runtime_error("Packet sequence flow violation");
         }
 

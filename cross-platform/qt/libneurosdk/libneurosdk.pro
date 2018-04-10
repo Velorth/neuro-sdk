@@ -2,6 +2,7 @@ QT -= core gui
 
 TARGET = neurosdk
 TEMPLATE = lib
+CONFIG += staticlib
 
 DEFINES += LIBNEUROSDK_LIBRARY
 DEFINES += GSL_THROW_ON_CONTRACT_VIOLATION
@@ -22,11 +23,15 @@ CONFIG += c++14
 !msvc:QMAKE_CXXFLAGS += -Wall -pedantic-errors
 
 linux:!android {
-    target.path = /usr/lib
-    INSTALLS += target
+    neurosdk.path = /usr/lib
+    INSTALLS += neurosdk
     LIBS += -lbluetooth -lgattlib
 }
-win32:LIBS += -lws2_32
+win32 {
+    neurosdk.path = $$(NEUROSDK)
+    INSTALLS += neurosdk
+    LIBS += -lws2_32
+}
 
 HEADERS += $$files(../../../core/include/*.h)
 HEADERS += $$files(../../../core/include/ble/*.h)
