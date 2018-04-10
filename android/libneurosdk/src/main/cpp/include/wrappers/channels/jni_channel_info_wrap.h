@@ -22,7 +22,7 @@
 
 template<>
 constexpr const char *jni::java_class_name<Neuro::ChannelInfo::Type>() {
-    return "ru/neurotech/neurosdk/parameters/ParameterAccess";
+    return "ru/neurotech/neurosdk/channels/ChannelType";
 }
 
 template<>
