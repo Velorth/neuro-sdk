@@ -11,7 +11,9 @@ set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/network)
 set(SRC_DIR_ANDROID ${CMAKE_CURRENT_SOURCE_DIR})
 
 # copy out the lib binary... need to leave the static lib around to pass gradle check
-set(distribution_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+set(DISTRIBUTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../lib/${ANDROID_ABI}")
+file(MAKE_DIRECTORY ${DISTRIBUTION_DIR})
+message(STATUS ${DISTRIBUTION_DIR})
 
 message(STATUS ${SRC_DIR_CORE})
 message(STATUS ${SRC_DIR_ANDROID})
@@ -42,5 +44,4 @@ add_library(neurosdk SHARED  ${SOURCE_FILES_CORE_COMMON}
 target_link_libraries(neurosdk log android)
 set_target_properties(neurosdk
                       PROPERTIES
-                      ARCHIVE_OUTPUT_DIRECTORY
-                      "${distribution_DIR}/lib/${ANDROID_ABI}")
+                      RUNTIME_OUTPUT_DIRECTORY ${DISTRIBUTION_DIR})
