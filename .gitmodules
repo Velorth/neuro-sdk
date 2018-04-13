@@ -1,0 +1,9 @@
+[submodule "utils/gsl"]
+	path = utils/gsl
+	url = https://github.com/NeurotechMRC/GSL.git
+[submodule "utils/network"]
+	path = utils/network
+	url = https://github.com/NeurotechMRC/networking.git
+[submodule "utils/dsp"]
+	path = utils/dsp
+	url = https://github.com/NeurotechMRC/dsp.git
