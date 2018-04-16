@@ -8,8 +8,13 @@
 namespace Neuro {
 
 template <typename SampleType, std::size_t BufferSize>
-class SafeBuffer : public BaseBuffer<SampleType> {
+class SafeBuffer final : public BaseBuffer<SampleType> {
 public:
+
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) const noexcept override{
+        return mBuffer.subscribeLengthChanged(callback);
+    }
+
     void append(const std::vector<SampleType> &data) override {
         std::unique_lock<std::mutex> readLock(mReadMutex, std::defer_lock);
         std::unique_lock<std::mutex> writeLock(mWriteMutex, std::defer_lock);

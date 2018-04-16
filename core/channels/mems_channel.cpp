@@ -21,8 +21,14 @@ public:
         Expects(checkHasChannel(*device, ChannelInfo::MEMS));
     }
 
-    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+        try{
+            auto&& buffer = mDevice->mImpl->memsBuffer();
+            return buffer.subscribeLengthChanged(callback);
+        }
+        catch(...){
+            return nullptr;
+        }
     }
 
     MemsChannel::data_container readData(data_offset_t offset, data_length_t length) const {
@@ -68,8 +74,9 @@ MemsChannel::MemsChannel(std::shared_ptr<Device> device) :
 MemsChannel::~MemsChannel(){
 }
 
-void MemsChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-    mImpl->setLengthChangedCallback(callback);
+MemsChannel::length_listener_ptr
+MemsChannel::subscribeLengthChanged(length_callback_t callback) noexcept {
+    return mImpl->subscribeLengthChanged(callback);
 }
 
 MemsChannel::data_container MemsChannel::readData(data_offset_t offset, data_length_t length) const {

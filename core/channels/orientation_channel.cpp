@@ -21,8 +21,14 @@ public:
         Expects(checkHasChannel(*device, ChannelInfo::Orientation));
     }
 
-    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+        try{
+            auto&& buffer = mDevice->mImpl->orientationBuffer();
+            return buffer.subscribeLengthChanged(callback);
+        }
+        catch(...){
+            return nullptr;
+        }
     }
 
     OrientationChannel::data_container readData(data_offset_t offset, data_length_t length) const {
@@ -68,8 +74,9 @@ OrientationChannel::OrientationChannel(std::shared_ptr<Device> device) :
 OrientationChannel::~OrientationChannel(){
 }
 
-void OrientationChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-    mImpl->setLengthChangedCallback(callback);
+OrientationChannel::length_listener_ptr
+OrientationChannel::subscribeLengthChanged(length_callback_t callback) noexcept {
+    return mImpl->subscribeLengthChanged(callback);
 }
 
 OrientationChannel::data_container OrientationChannel::readData(data_offset_t offset, data_length_t length) const {

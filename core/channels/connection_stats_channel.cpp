@@ -66,8 +66,13 @@ public:
         }
     }
 
-    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+        try{
+            return mBuffer.subscribeLengthChanged(callback);
+        }
+        catch(...){
+            return nullptr;
+        }
     }
 
     ConnectionStatsChannel::data_container readData(data_offset_t offset, data_length_t length) const {
@@ -106,8 +111,9 @@ ConnectionStatsChannel::ConnectionStatsChannel(std::shared_ptr<Device> device) :
 ConnectionStatsChannel::~ConnectionStatsChannel(){}
 
 
-void ConnectionStatsChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-    mImpl->setLengthChangedCallback(callback);
+ConnectionStatsChannel::length_listener_ptr
+ConnectionStatsChannel::subscribeLengthChanged(length_callback_t callback) noexcept {
+    return mImpl->subscribeLengthChanged(callback);
 }
 
 auto ConnectionStatsChannel::readData(data_offset_t offset, data_length_t length) const -> data_container{

@@ -20,8 +20,14 @@ public:
         Expects(checkHasChannel(*device, ChannelInfo::Respiration));
     }
 
-    void setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+        try{
+            auto&& buffer = mDevice->mImpl->respirationBuffer();
+            return buffer.subscribeLengthChanged(callback);
+        }
+        catch(...){
+            return nullptr;
+        }
     }
 
     RespirationChannel::data_container readData(data_offset_t offset, data_length_t length) const {
@@ -67,8 +73,9 @@ RespirationChannel::RespirationChannel(std::shared_ptr<Device> device) :
 RespirationChannel::~RespirationChannel(){
 }
 
-void RespirationChannel::setLengthChangedCallback(length_changed_callback_t callback) noexcept {
-    mImpl->setLengthChangedCallback(callback);
+RespirationChannel::length_listener_ptr
+RespirationChannel::subscribeLengthChanged(length_callback_t callback) noexcept {
+    return mImpl->subscribeLengthChanged(callback);
 }
 
 RespirationChannel::data_container RespirationChannel::readData(data_offset_t offset, data_length_t length) const {

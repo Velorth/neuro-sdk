@@ -3,16 +3,23 @@
 
 #include "base_buffer.h"
 #include "circular_buffer.h"
+#include "event_notifier.h"
 
 namespace Neuro {
 
 template <typename SampleType, std::size_t BufferSize>
-class UnboundedBuffer : public BaseBuffer<SampleType> {
+class UnboundedBuffer final : public BaseBuffer<SampleType> {
 public:
+
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) const noexcept override{
+        return mLengthNotifier.addListener(callback);
+    }
+
     void append(const std::vector<SampleType> &data) override {
         mBuffer.append(data);
         mTotalLength += data.size();
         mAvailableLength = mBuffer.dataLength();
+        mLengthNotifier.notifyAll(mTotalLength);
     }
 
     std::vector<SampleType> readAvailable(std::size_t global_offset, std::size_t length) const override {
@@ -114,9 +121,9 @@ private:
     static constexpr const char *class_name = "UnboundedBuffer";
 
     CircularBuffer<SampleType, BufferSize> mBuffer;
+    mutable Notifier<void, data_length_t> mLengthNotifier;
     std::size_t mAvailableLength{0};
     std::size_t mTotalLength{0};
-    //std::function<>
 };
 
 }
