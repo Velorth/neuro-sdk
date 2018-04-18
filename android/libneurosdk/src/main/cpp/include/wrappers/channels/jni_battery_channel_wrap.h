@@ -28,7 +28,9 @@ public:
     JniBatteryChannelWrap(object_ptr_t devicePtr) :
             JniPtrWrap(devicePtr) {}
 private:
+    static constexpr const char *class_name = "JniBatteryChannelWrap";
     std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
+    Neuro::ListenerPtr<void, Neuro::data_length_t> mListener;
 };
 
 template<>

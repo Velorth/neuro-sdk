@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <memory>
+#include <future>
 
 namespace Neuro {
 
@@ -22,8 +23,8 @@ public:
 private:
     template <typename, typename... > friend class Notifier;
     std::function<R(Args...)> mFunc;
-    auto notify(Args... args){
-        return mFunc(args...);
+    void notify(Args... args){
+        std::thread(mFunc, args...).detach();
     }
 };
 

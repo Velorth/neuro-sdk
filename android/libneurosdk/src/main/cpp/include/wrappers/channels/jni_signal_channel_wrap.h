@@ -29,6 +29,7 @@ public:
             JniPtrWrap(devicePtr) {}
 private:
     std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
+    Neuro::ListenerPtr<void, Neuro::data_length_t> mListener;
 };
 
 template<>

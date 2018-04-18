@@ -2,6 +2,7 @@
 #define SAFE_BUFFER_H
 
 #include <mutex>
+#include "gsl/gsl_assert"
 #include "base_buffer.h"
 #include "unbounded_buffer.h"
 
@@ -10,16 +11,23 @@ namespace Neuro {
 template <typename SampleType, std::size_t BufferSize>
 class SafeBuffer final : public BaseBuffer<SampleType> {
 public:
+    using length_callback_t = std::function<void(data_length_t)>;
+    using length_listener_ptr = ListenerPtr<void, data_length_t>;
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) const noexcept override{
         return mBuffer.subscribeLengthChanged(callback);
     }
 
     void append(const std::vector<SampleType> &data) override {
-        std::unique_lock<std::mutex> readLock(mReadMutex, std::defer_lock);
-        std::unique_lock<std::mutex> writeLock(mWriteMutex, std::defer_lock);
-        std::lock(readLock, writeLock);
+        std::unique_lock<std::mutex> readLock(mReadMutex);
+#ifndef NDEBUG
+        auto totalLengthBefore = mBuffer.totalLength();
+        auto expectedTotalLength = totalLengthBefore + data.size();
+#endif
         mBuffer.append(data);
+#ifndef NDEBUG
+        Ensures(mBuffer.totalLength() == expectedTotalLength);
+#endif
     }
 
     std::vector<SampleType> readAvailable(std::size_t global_offset, std::size_t length) const override {
@@ -48,9 +56,7 @@ public:
     }
 
     void reset() override {        
-        std::unique_lock<std::mutex> readLock(mReadMutex, std::defer_lock);
-        std::unique_lock<std::mutex> writeLock(mWriteMutex, std::defer_lock);
-        std::lock(readLock, writeLock);
+        std::unique_lock<std::mutex> readLock(mReadMutex);
         mBuffer.reset();
     }
 
@@ -59,7 +65,6 @@ private:
 
     UnboundedBuffer<SampleType, BufferSize> mBuffer;
     mutable std::mutex mReadMutex;
-    std::mutex mWriteMutex;
 };
 
 }

@@ -44,6 +44,8 @@ public:
 private:
     typedef typename CommandData::error_type ErrorType;
 
+    static constexpr const char *class_name = "RequestScheduler";
+
     std::queue<std::pair<std::chrono::steady_clock::time_point, std::shared_ptr<CommandData>>> requestQueue;
     std::atomic<bool> threadStop;
     std::mutex queueMutex;
@@ -61,7 +63,6 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
     threadStop.store(false);
     requestWorker = std::thread([=]()
                            {
-                               auto log = LoggerFactory::getCurrentPlatformLogger();
                                while (!threadStop.load())
                                {
                                    std::unique_lock<std::mutex> queueCheckLock(queueMutex);
@@ -88,7 +89,7 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
                                        if (requestCommandData->isResponseReceived()) break;
 
                                        //trying to send request to a beacon until deadline reached
-                                       log->debug("[%s] Sending command %d. Requests left: %zd", __FUNCTION__, requestCommandData->getCommand(), requestQueue.size());
+                                       LOG_TRACE_V("Sending command %d. Requests left: %zd", requestCommandData->getCommand(), requestQueue.size());
                                        if (sendCommandFunc) sendCommandFunc(requestCommandData);
                                        auto status = responseReceivedCondition.wait_for(requestLock,
                                                                                         std::chrono::milliseconds(
@@ -108,7 +109,7 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
                                    }
 
                                    std::unique_lock<std::mutex> queueChangeLock(queueMutex);
-                                   log->debug("[%s] Pop command record", __FUNCTION__);
+                                   LOG_TRACE("Pop command record");
                                    requestQueue.pop();
                                }
                            });
@@ -117,8 +118,7 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
 template <class CommandData>
 RequestScheduler<CommandData>::~RequestScheduler()
 {
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Request handler destructor", "Request handler", __FUNCTION__);
+    LOG_TRACE("Request handler destructor");
     threadStop.store(true);
     queueEmptyCondition.notify_all();
     responseReceivedCondition.notify_all();
@@ -129,7 +129,7 @@ RequestScheduler<CommandData>::~RequestScheduler()
     }
     catch(std::system_error&)
     {}
-    log->debug("[%s: %s] Request handler destructor EXIT", "Request handler", __FUNCTION__);
+    LOG_TRACE("Request handler destructor EXIT");
 }
 
 template<class CommandData>
@@ -141,9 +141,7 @@ template <class CommandData>
 void RequestScheduler<CommandData>::sendRequest(std::shared_ptr<CommandData> requestData)
 {
     std::unique_lock<std::mutex> queueLock(queueMutex);
-
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s] Send request. Command %d", __FUNCTION__, requestData->getCommand());
+    LOG_TRACE_V("Send request. Command %d", requestData->getCommand());
     requestQueue.emplace(
             std::pair<std::chrono::steady_clock::time_point, std::shared_ptr<CommandData>>(std::chrono::steady_clock::now(),
                                                                requestData));
@@ -156,37 +154,33 @@ void RequestScheduler<CommandData>::onCommandResponse(CommandType cmd, const uns
     std::unique_lock<std::mutex> requestLock(requestMutex);
     std::unique_lock<std::mutex> queueChangeLock(queueMutex);
 
-        auto log = LoggerFactory::getCurrentPlatformLogger();
-
     if (requestQueue.size() == 0)
     {
-        log->warn("[%s] Response queue is empty. Command %d", __FUNCTION__, cmd);
+        LOG_WARN_V("Response queue is empty. Command %d", cmd);
         return;
     }
 
-
-
-    log->debug("[%s] Response received. Command %d", __FUNCTION__, cmd);
+    LOG_TRACE_V("Response received. Command %d", cmd);
     auto requestData = requestQueue.front().second;
     if (requestData->commandEquals(cmd))
     {
-        log->debug("[%s] Command equals. Command %d", __FUNCTION__, cmd);
+        LOG_TRACE_V("Command equals. Command %d", cmd);
         requestData->onResponseReceived(data, data_length);
         responseReceivedCondition.notify_all();
     }
     else if (cmd == CommandType::ERROR)
     {
-        log->debug("[%s] Command error. Command %d", __FUNCTION__, cmd);
+        LOG_TRACE_V("Command error. Command %d", cmd);
 
         if (data_length > 0) {
             ErrorType error;
             if (!parseError(data[0], &error)) {
-                log->error("[%s] Unable to parse error with code %d", __FUNCTION__, data[0]);
+                LOG_ERROR_V("Unable to parse error with code %d", data[0]);
             }
             requestData->onErrorResponse(error);
         }
         else{
-            log->error("[%s] Unable to parse error: no error code received", __FUNCTION__);
+            LOG_ERROR("Unable to parse error: no error code received");
         }
 
         responseReceivedCondition.notify_all();

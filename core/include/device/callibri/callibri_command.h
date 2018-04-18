@@ -44,6 +44,8 @@ enum class CallibriCommand: unsigned char {
     FIND_ME = 0xA7
 };
 
+
+
 enum class CallibriError: unsigned char {
     NO_ERROR = 0x00,
     ERR_NO_CMD = 0x21,

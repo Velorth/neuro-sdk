@@ -81,6 +81,8 @@ void
 CircularBuffer<SampleType, BufferSize>::append(const std::vector<SampleType> &dataContainer){
     const SampleType *data = dataContainer.data();
     auto length = dataContainer.size();
+    if (length == 0)
+        return;
 
     //if data length is greater than buffer maximum size
     //we should shift start position of data to write
@@ -92,14 +94,14 @@ CircularBuffer<SampleType, BufferSize>::append(const std::vector<SampleType> &da
     }
 
     auto newHead = mHead;
-    auto newTail = mTail != mHead ? mTail + length : mTail + length - 1;
+    auto newTail = mDataLength > 0 ? mTail + length : mTail + length - 1;
 
     //Situation where appended data don't exceed buffer at end
     //Tail still is to the left from the end
     //Just adding data from old tail to new
     if (newTail < mBufferArray.end())
     {
-        std::copy(data, data+length, mTail != mHead ? mTail + 1 : mTail);
+        std::copy(data, data+length, mDataLength > 0 ? mTail + 1 : mTail);
 
         //Now we must check were is old head relative to old tail
         //If head to the right from the tail it means that tail is

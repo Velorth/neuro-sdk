@@ -30,19 +30,19 @@ jobject find_notifier(jobject java_obj, const char *notifier_name) {
     });
 }
 
-void callJavaSendNotification(jobject subscriberNotifier, jobject param);
+void callJavaSendNotification(JNIEnv *, jobject subscriberNotifier, jobject param);
 
 template <typename T>
-void sendNotification(std::weak_ptr<jni::jobject_t> subscriberRefPtr, T param){
+void sendNotification(JNIEnv *env, std::weak_ptr<jni::jobject_t> subscriberRefPtr, T param){
     auto subscriberRef = subscriberRefPtr.lock();
     if (!subscriberRef)
         return;
 
-    jni::java_object<T> jObj(param);
-    callJavaSendNotification(subscriberRef.get(), jObj);
+    auto jObj = static_cast<jobject>(jni::java_object<T>(param));
+    callJavaSendNotification(env, subscriberRef.get(), jObj);
 }
 
-void sendNotification(std::weak_ptr<jni::jobject_t> subscriberRefPtr);
+void sendNotification(JNIEnv *, std::weak_ptr<jni::jobject_t> subscriberRefPtr);
 
 template <class Obj>
 class JniPtrWrap {

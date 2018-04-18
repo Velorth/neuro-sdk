@@ -212,7 +212,6 @@ inline jobjectArray to_obj_array(JNIEnv *env, Container container) {
         return nullptr;
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ToObjArray", "Object array size is %zd", container.size());
     using container_value_t = typename decltype(container)::value_type;
     auto objClass = jni::java_object<container_value_t>::java_class();
     auto objArray = env->NewObjectArray(static_cast<jsize>(container.size()),
@@ -228,6 +227,26 @@ inline jobjectArray to_obj_array(JNIEnv *env, Container container) {
         env->PopLocalFrame(nullptr);
     }
     return objArray;
+}
+
+template <typename T>
+inline void log_value(T value){
+    __android_log_print(ANDROID_LOG_DEBUG, "log_value", "value");
+}
+
+template <>
+inline void log_value<long>(long value){
+    __android_log_print(ANDROID_LOG_DEBUG, "log_value", "value is %ld", value);
+}
+
+template <>
+inline void log_value<int>(int value){
+    __android_log_print(ANDROID_LOG_DEBUG, "log_value", "value is %d", value);
+}
+
+template <>
+inline void log_value<double>(double value){
+    __android_log_print(ANDROID_LOG_DEBUG, "log_value", "value is %f", value);
 }
 
 template<typename T>

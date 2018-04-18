@@ -1,6 +1,7 @@
 #ifndef UNBOUNDED_BUFFER_H
 #define UNBOUNDED_BUFFER_H
 
+#include "logger.h"
 #include "base_buffer.h"
 #include "circular_buffer.h"
 #include "event_notifier.h"
@@ -10,13 +11,27 @@ namespace Neuro {
 template <typename SampleType, std::size_t BufferSize>
 class UnboundedBuffer final : public BaseBuffer<SampleType> {
 public:
+    using length_callback_t = std::function<void(data_length_t)>;
+    using length_listener_ptr = ListenerPtr<void, data_length_t>;
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) const noexcept override{
         return mLengthNotifier.addListener(callback);
     }
 
     void append(const std::vector<SampleType> &data) override {
+#ifndef NDEBUG
+        auto dataLengthBefore = mBuffer.dataLength();
+        Expects(dataLengthBefore <= mBuffer.bufferSize());
+        auto expectedDataLength = dataLengthBefore < mBuffer.bufferSize() ?
+                                   dataLengthBefore + data.size() :
+                                   mBuffer.bufferSize();
+        if (expectedDataLength > mBuffer.bufferSize())
+            expectedDataLength = mBuffer.bufferSize();
+#endif
         mBuffer.append(data);
+#ifndef NDEBUG
+        Ensures(mBuffer.dataLength() == expectedDataLength);
+#endif
         mTotalLength += data.size();
         mAvailableLength = mBuffer.dataLength();
         mLengthNotifier.notifyAll(mTotalLength);
@@ -59,19 +74,24 @@ public:
 
     std::vector<SampleType>
     readFill(std::size_t global_offset, std::size_t length, SampleType fill_value) const override {
+        LOG_TRACE_V("Requested offset: %zd, length: %zd. Real length: %zd", global_offset, length, mBuffer.dataLength());
         if (length == 0){
+            LOG_WARN("Requested zero-length data array");
             return std::vector<SampleType>();
         }
 
         if (mTotalLength == 0 || mAvailableLength == 0){
+            LOG_WARN("Buffer is empty");
             return std::vector<SampleType>(length, fill_value);
         }
 
         if (global_offset + length <= mTotalLength - mAvailableLength){
+            LOG_DEBUG("Requested data been pushed out of buffer");
             return std::vector<SampleType>(length, fill_value);
         }
 
         if (global_offset >= mTotalLength) {
+            LOG_WARN("Requested data offset is greater than buffer length");
             return std::vector<SampleType>(length, fill_value);
         }
 

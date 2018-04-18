@@ -1,6 +1,3 @@
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include "gsl/gsl_assert"
 #include "channels/channel_info.h"
 #include "channels/electrode_state_channel.h"
@@ -8,44 +5,39 @@
 #include "device/device_impl.h"
 #include "device/param_values.h"
 #include "signal/safe_buffer.h"
+#include "loop.h"
 
 namespace Neuro {
 
 class ElectrodeStateChannel::Impl{
 private:
+    static constexpr const char *class_name = "ElectrodeStateChannel";
     static constexpr std::size_t BufferSize = 600; //10 minutes for 1 Hz sampling frequency
     static constexpr sampling_frequency_t DefaultFrequency = 1.f;
     std::shared_ptr<Device> mDevice;
     SafeBuffer<ElectrodeState, BufferSize> mBuffer;
     sampling_frequency_t mSamplingFrequency{DefaultFrequency};
-    std::mutex mWaitElectrodeMutex;
-    std::mutex mBufferMutex;
-    std::condition_variable mWaitElectrodeCondition;
-    std::thread mReadElectrodeThread;
+    Loop<void(Impl*)> mLoop;
 
     void readElectrodeFunc(){
-        std::unique_lock<std::mutex> waitElectrodeLock(mWaitElectrodeMutex);
-        do {
-            auto electrodeState = ElectrodeState::Attached;
-            try {
-                electrodeState = mDevice->mImpl->isElectrodesAttached() ?
-                            ElectrodeState::Attached :
-                            ElectrodeState::Detached;
-            }
-            catch (std::runtime_error &) {
-                electrodeState = getLastElectrodeState();
-            }
-            std::unique_lock<std::mutex> bufferLock(mBufferMutex);
-            mBuffer.append({electrodeState});
-        }while(mWaitElectrodeCondition.wait_for(waitElectrodeLock, std::chrono::duration<sampling_frequency_t>(1.f/mSamplingFrequency)) == std::cv_status::timeout);
+        auto electrodeState = ElectrodeState::Normal;
+        try {
+            electrodeState = mDevice->mImpl->isElectrodesAttached() ?
+                        ElectrodeState::Normal :
+                        ElectrodeState::Detached;
+        }
+        catch (std::runtime_error &) {
+            electrodeState = getLastElectrodeState();
+        }
+        mBuffer.append({electrodeState});
     }
 
     ElectrodeState getLastElectrodeState(){
         if (mBuffer.totalLength()>0){
-            auto lastState = mBuffer.readFill(mBuffer.totalLength()-1, 1, ElectrodeState::Attached);
+            auto lastState = mBuffer.readFill(mBuffer.totalLength()-1, 1, ElectrodeState::Normal);
             return lastState[0];
         }
-        return ElectrodeState::Attached;
+        return ElectrodeState::Normal;
     }
 
     void checkAdcInput(){
@@ -62,25 +54,11 @@ private:
 
 public:
     Impl(std::shared_ptr<Device> device) :
-        mDevice(device){
+        mDevice(device),
+        mLoop(&Impl::readElectrodeFunc, std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency), this){
         Expects(mDevice != nullptr);
         Expects(checkHasChannel(*device, ChannelInfo::ElectrodesState));
         checkAdcInput();
-        mReadElectrodeThread = std::thread([=](){ readElectrodeFunc(); });
-        Ensures(mReadElectrodeThread.joinable());
-    }
-
-    ~Impl(){
-        std::unique_lock<std::mutex> waitElectrodeThreadLock(mWaitElectrodeMutex);
-        mWaitElectrodeCondition.notify_all();
-        try{
-            mReadElectrodeThread.join();
-        }
-        catch (std::system_error &){
-#ifndef NDEBUG
-            Ensures(false);
-#endif
-        }
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -93,7 +71,7 @@ public:
     }
 
     ElectrodeStateChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        return mBuffer.readFill(offset, length, ElectrodeState::Attached);
+        return mBuffer.readFill(offset, length, ElectrodeState::Normal);
     }
 
     data_length_t totalLength() const noexcept {
@@ -113,8 +91,8 @@ public:
     }
 
     void setSamplingFrequency(sampling_frequency_t frequency) {
-        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         mSamplingFrequency = frequency;
+        mLoop.setDelay(std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency));
         mBuffer.reset();
     }
 };

@@ -6,7 +6,8 @@
 namespace Neuro {
 
 enum class ElectrodeState {
-    Attached,
+    Normal,
+    HighResistance,
     Detached
 };
 

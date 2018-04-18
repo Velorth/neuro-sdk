@@ -101,8 +101,10 @@ Java_ru_neurotech_neurosdk_channels_ConnectionStatsChannel_readData(JNIEnv *env,
 void JniConnectionStatsChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    this->object->setLengthChangedCallback([weakReference](auto length){
-        sendNotification<long>(weakReference, length);
+    mListener = this->object->subscribeLengthChanged([weakReference](auto length){
+        jni::call_in_attached_thread([&weakReference, &length](auto env){
+            sendNotification<long>(env, weakReference, length);
+        });
     });
 }
 

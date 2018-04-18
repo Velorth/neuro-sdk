@@ -103,6 +103,8 @@ void JniDeviceWrap::subscribeParameterChanged(jobject stateChangedSubscriberRef)
     parameterChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = parameterChangedGlobalSubscriberRef;
     this->object->setParamChangedCallback([weakReference](Neuro::Parameter parameter){
-        sendNotification<Neuro::Parameter>(weakReference, parameter);
+        jni::call_in_attached_thread([&weakReference, &parameter](auto env){
+            sendNotification<Neuro::Parameter >(env, weakReference, parameter);
+        });
     });
 }

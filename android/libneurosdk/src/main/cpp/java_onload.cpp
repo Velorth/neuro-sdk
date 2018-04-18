@@ -1,3 +1,5 @@
+#include <channels/electrode_state_channel.h>
+#include <wrappers/channels/jni_electrodes_state_channel_wrap.h>
 #include "wrappers/channels/jni_connection_stats_channel_wrap.h"
 #include "wrappers/channels/jni_angle_channel_wrap.h"
 #include "wrappers/channels/jni_respiration_channel_wrap.h"
@@ -28,6 +30,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniMEMSChannelWrap *>(env);
     jni::initJavaObjClass<JniOrientationChannelWrap *>(env);
     jni::initJavaObjClass<JniConnectionStatsChannelWrap *>(env);
+    jni::initJavaObjClass<JniElectrodesStateChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);
@@ -47,9 +50,14 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::SamplingFrequency>(env);
     jni::initJavaObjClass<Neuro::MEMS>(env);
     jni::initJavaObjClass<Neuro::Quaternion>(env);
+    jni::initJavaObjClass<Neuro::ElectrodeState>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());
-    logFactory->setLogLevel(LogLevel::Debug);
+#ifdef NDEBUG
+    logFactory->setLogLevel(LogLevel::Trace);
+#else
+    logFactory->setLogLevel(LogLevel::Trace);
+#endif
     return JNI_VERSION_1_6;
 }

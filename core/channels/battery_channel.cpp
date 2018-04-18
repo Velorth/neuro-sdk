@@ -1,7 +1,5 @@
-#include <thread>
-#include <condition_variable>
-#include <mutex>
 #include "gsl/gsl_assert"
+#include "loop.h"
 #include "channels/channel_info.h"
 #include "channels/battery_channel.h"
 #include "device/device.h"
@@ -19,26 +17,19 @@ private:
     std::shared_ptr<Device> mDevice;
     SafeBuffer<int, BufferSize> mBuffer;
     sampling_frequency_t mSamplingFrequency{DefaultFrequency};
-    std::mutex mWaitBatteryMutex;
-    mutable std::mutex mBufferMutex;
-    std::condition_variable mWaitBatteryCondition;
-    std::thread mReadBatteryThread;
+    Loop<void(Impl*)> mLoop;
 
     void readBatteryFunc(){
-        std::unique_lock<std::mutex> waitBatteryLock(mWaitBatteryMutex);
-        do {
-            auto batteryPercents = 0;
-            try {
-                batteryPercents = mDevice->mImpl->batteryChargePercents();
-            }
-            catch (std::runtime_error &) {
-                batteryPercents = getLastBatteryValue();
-            }
-            std::unique_lock<std::mutex> bufferLock(mBufferMutex);
-            mBuffer.append({batteryPercents});
-            bufferLock.unlock();
-
-        }while(mWaitBatteryCondition.wait_for(waitBatteryLock, std::chrono::duration<sampling_frequency_t>(1.f/mSamplingFrequency)) == std::cv_status::timeout);
+        auto batteryPercents = 0;
+        LOG_DEBUG("Receiving battery charge");
+        try {
+            batteryPercents = mDevice->mImpl->batteryChargePercents();
+        }
+        catch (std::runtime_error &) {
+            batteryPercents = getLastBatteryValue();
+        }
+        LOG_DEBUG_V("New battery charge value %d", batteryPercents);
+        mBuffer.append({batteryPercents});
     }
 
     int getLastBatteryValue(){
@@ -51,23 +42,10 @@ private:
 
 public:
     Impl(std::shared_ptr<Device> device) :
-        mDevice(device){
+        mDevice(device),
+        mLoop(&Impl::readBatteryFunc, std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency), this){
         Expects(mDevice != nullptr);
         Expects(checkHasChannel(*device, ChannelInfo::Battery));
-        mReadBatteryThread = std::thread([=](){ readBatteryFunc(); });
-        Ensures(mReadBatteryThread.joinable());
-    }
-
-    ~Impl(){
-        std::unique_lock<std::mutex> waitBatteryThreadLock(mWaitBatteryMutex);
-        mWaitBatteryCondition.notify_all();
-        try{
-            if (mReadBatteryThread.joinable())
-                mReadBatteryThread.join();
-        }
-        catch (std::system_error &e){
-            LOG_ERROR_V("Thread destruction error: %s", e.what());
-        }
     }
 
     length_listener_ptr setLengthChangedCallback(length_callback_t callback) noexcept {
@@ -80,12 +58,10 @@ public:
     }
 
     BatteryChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.readFill(offset, length, 0);
     }
 
     data_length_t totalLength() const noexcept {
-        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         return mBuffer.totalLength();
     }
 
@@ -102,8 +78,8 @@ public:
     }
 
     void setSamplingFrequency(sampling_frequency_t frequency) {
-        std::unique_lock<std::mutex> bufferLock(mBufferMutex);
         mSamplingFrequency = frequency;
+        mLoop.setDelay(std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency));
         mBuffer.reset();
     }
 };

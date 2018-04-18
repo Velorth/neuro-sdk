@@ -3,7 +3,7 @@
 #include "wrappers/device/jni_device_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
 #include "channels/battery_channel.h"
-
+#include "logger.h"
 
 extern "C"
 {
@@ -101,8 +101,10 @@ Java_ru_neurotech_neurosdk_channels_BatteryChannel_readData(JNIEnv *env, jobject
 void JniBatteryChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    this->object->setLengthChangedCallback([weakReference](auto length){
-        sendNotification<long>(weakReference, length);
+    mListener = this->object->subscribeLengthChanged([weakReference](auto length){
+        jni::call_in_attached_thread([&weakReference, &length](auto env){
+            sendNotification<long>(env, weakReference, length);
+        });
     });
 }
 

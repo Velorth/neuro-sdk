@@ -14,46 +14,46 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_JNI_MEMS_CHANNEL_WRAP_H
-#define ANDROID_JNI_MEMS_CHANNEL_WRAP_H
+#ifndef ANDROID_JNI_ELECTRODES_STATE_CHANNEL_WRAP_H
+#define ANDROID_JNI_ELECTRODES_STATE_CHANNEL_WRAP_H
 
-#include "channels/mems_channel.h"
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
+#include "channels/electrode_state_channel.h"
 
-class JniMEMSChannelWrap : public JniPtrWrap<Neuro::MemsChannel> {
+class JniElectrodesStateChannelWrap : public JniPtrWrap<Neuro::ElectrodeStateChannel> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:
-    JniMEMSChannelWrap(object_ptr_t devicePtr) :
+    JniElectrodesStateChannelWrap(object_ptr_t devicePtr) :
             JniPtrWrap(devicePtr) {}
 private:
+    static constexpr const char *class_name = "JniElectrodesStateChannelWrap";
     std::shared_ptr<jni::jobject_t> lengthChangedGlobalSubscriberRef;
     Neuro::ListenerPtr<void, Neuro::data_length_t> mListener;
 };
 
 template<>
-constexpr const char *jni::java_class_name<JniMEMSChannelWrap *>() {
-    return "ru/neurotech/neurosdk/channels/MEMSChannel";
+constexpr const char *jni::java_class_name<JniElectrodesStateChannelWrap *>() {
+    return "ru/neurotech/neurosdk/channels/ElectrodesStateChannel";
 }
 
 template<>
-constexpr const char *jni::constructor_signature<JniMEMSChannelWrap *>() {
+constexpr const char *jni::constructor_signature<JniElectrodesStateChannelWrap *>(){
     return "(J)V";
 }
 
 template<>
-constexpr const char *jni::java_class_name<Neuro::MEMS>() {
-    return "ru/neurotech/neurosdk/channels/MEMS";
+constexpr const char *jni::java_class_name<Neuro::ElectrodeState>() {
+    return "ru/neurotech/neurosdk/channels/ElectrodeState";
 }
 
 template<>
-constexpr const char *jni::constructor_signature<Neuro::MEMS>() {
-    return "(DDDDDD)V";
-}
+const std::map<Neuro::ElectrodeState, std::string>
+        jni::enum_name_map<Neuro::ElectrodeState>::mEnumToNameMap;
 
 template<>
-template<>
-jni::java_object<Neuro::MEMS>::java_object(const Neuro::MEMS &);
+const std::map<std::string, Neuro::ElectrodeState>
+        jni::enum_name_map<Neuro::ElectrodeState>::mNameToEnumMap;
 
-#endif //ANDROID_JNI_MEMS_CHANNEL_WRAP_H
+#endif //ANDROID_JNI_ELECTRODES_STATE_CHANNEL_WRAP_H
