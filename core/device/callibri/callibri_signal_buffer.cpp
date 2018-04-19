@@ -31,9 +31,9 @@ void CallibriSignalBuffer::onDataReceived(packet_number_t number, const ByteBuff
         std::vector<signal_sample_t> zeroSamples(packetsLost * SignalDataLength / 2);
         mSignalBuffer.append(zeroSamples);
     }
-    else if (packetsLost == 0){
-        mSignalBuffer.append(samples);
-    }
+    if (packetsLost < 0)
+        return;
+    mSignalBuffer.append(samples);
 }
 
 const BaseBuffer<signal_sample_t> &CallibriSignalBuffer::buffer() const {

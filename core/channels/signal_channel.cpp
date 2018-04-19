@@ -40,9 +40,16 @@ public:
             return buffer.readFill(offset, length, 0.0);
         }
         else {
-            auto realOffset = offset * mChannelsCount + mInfo.mIndex;
+            auto realOffset = offset * mChannelsCount;
             auto realLength = length * mChannelsCount;
-            return buffer.readFill(realOffset, realLength, 0.0);
+            auto allChannelsData = buffer.readFill(realOffset, realLength, 0.0);
+            data_container resultBuffer;
+            resultBuffer.reserve(length);
+            for (std::size_t i = mInfo.mIndex; i < allChannelsData.size(); i+=mChannelsCount){
+                resultBuffer.push_back(allChannelsData[i]);
+            }
+            Ensures(resultBuffer.size() == length);
+            return resultBuffer;
         }
     }
 
