@@ -44,6 +44,7 @@ private:
     friend class MemsChannel;
     friend class OrientationChannel;
     friend class ConnectionStatsChannel;
+    friend class ResistanceChannel;
     Device(std::unique_ptr<DeviceImpl>);
 };
 

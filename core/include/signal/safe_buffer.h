@@ -46,7 +46,7 @@ public:
         return mBuffer.rawBuffer();
     }
 
-    std::size_t bufferSize() const noexcept override {
+    constexpr std::size_t bufferSize() const noexcept override {
         return mBuffer.bufferSize();
     }
 

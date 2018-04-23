@@ -38,7 +38,8 @@ public:
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
     virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
     virtual const BaseBuffer<MEMS> &memsBuffer() const = 0;
-    virtual const BaseBuffer<Quaternion> &orientationBuffer() const = 0;
+    virtual const BaseBuffer<Quaternion> &orientationBuffer() const = 0;    
+    virtual const BaseBuffer<resistance_sample_t> &resistanceBuffer() const = 0;
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;

@@ -90,16 +90,14 @@ int CallibriImpl::batteryChargePercents(){
 }
 
 bool CallibriImpl::isElectrodesAttached(){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_ELECTRODE_STATE);
-    log->debug("[%s: %s] Sending electrode state request", "CallibriImpl", __FUNCTION__);
+    LOG_DEBUG("Sending electrode state request");
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     auto error = cmdData->getError();
     if (error != CallibriError::NO_ERROR) {
-        log->warn("[%s: %s] Failed get electrode state. Error code: %d", "CallibriImpl",
-                  __FUNCTION__, error);
+        LOG_WARN_V("Failed get electrode state. Error code: %d", error);
         throw std::runtime_error("Unable get electrodes state due to connection error");
     }
     //electrode state consists of 1 bytes which represent byte
@@ -111,13 +109,11 @@ bool CallibriImpl::isElectrodesAttached(){
         std::copy(responseData.begin(), responseData.begin() + sizeof(unsigned char),
                   &electrodeState);
 
-        log->debug("[%s: %s] Electrode state received: %d", "CallibriImpl", __FUNCTION__,
-                   electrodeState);
+        LOG_DEBUG_V("Electrode state received: %d", electrodeState);
         return !electrodeState;
     }
     else {
-        log->warn("[%s: %s] Failed get electrode state. Response length is zero",
-                  "CallibriImpl", __FUNCTION__);
+        LOG_WARN("Failed get electrode state. Response length is zero");
         throw std::runtime_error("Unable get electrodes state due to connection error");
     }
 }
@@ -144,6 +140,10 @@ const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
 
 const BaseBuffer<Quaternion> &CallibriImpl::orientationBuffer() const {
     return mBufferCollection->orientationBuffer().buffer();
+}
+
+const BaseBuffer<resistance_sample_t> &CallibriImpl::resistanceBuffer() const {
+    throw std::runtime_error("Device has no resistance buffer");
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -190,15 +190,14 @@ void CallibriImpl::onDataReceived(const ByteBuffer &data){
 }
 
 int CallibriImpl::requestBattryVoltage(){
-    auto log = LoggerFactory::getCurrentPlatformLogger();
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_BATTERY_V);
-    log->debug("[%s: %s] Sending battery level request", "CallibriImpl", __FUNCTION__);
+    LOG_DEBUG("Sending battery level request");
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
 
     auto error = cmdData->getError();
     if (error != CallibriError::NO_ERROR) {
-        log->warn("[%s: %s] Failed get battery voltage. Error code: %d", "CallibriImpl", __FUNCTION__, error);
+        LOG_WARN_V("Failed get battery voltage. Error code: %d", error);
         throw std::runtime_error("Unable receive battery charge value due to communication error");
     }
 
@@ -210,7 +209,7 @@ int CallibriImpl::requestBattryVoltage(){
         auto responseData = cmdData->getResponseData();
         std::copy(responseData.begin(), responseData.begin() + sizeof(ByteInterpreter<unsigned short>::value), batteryVoltage.bytes);
 
-        log->debug("[%s: %s] Battery voltage received: %d", "CallibriImpl", __FUNCTION__, batteryVoltage.value);
+        LOG_DEBUG_V("Battery voltage received: %d", batteryVoltage.value);
         return batteryVoltage.value;
     }
     else{

@@ -4,6 +4,7 @@
 #include "device/device_impl.h"
 #include "device/request_scheduler.h"
 #include "brainbit_protocol.h"
+#include "brainbit_resistance_buffer.h"
 #include "signal/safe_buffer.h"
 #include "device/packet_sequence.h"
 
@@ -27,6 +28,7 @@ public:
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;
     const BaseBuffer<Quaternion> &orientationBuffer() const override;
+    const BaseBuffer<resistance_sample_t> &resistanceBuffer() const override;
 
 private:
     using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;
@@ -38,7 +40,8 @@ private:
     BrainbitCommand mBrainbitState;
     int mBatteryPercents;
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
-    PacketSequence<2047> mPacketCounter;
+    BrainbitResistanceBuffer mResistanceBuffer;
+    PacketSequence<2048> mPacketCounter;
     param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;
