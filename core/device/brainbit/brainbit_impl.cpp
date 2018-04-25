@@ -147,7 +147,7 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     }
 
     try{
-        auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
+       /* auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
         if (packetsLost > 0){
             LOG_WARN_V("Lost %d packets", packetsLost);
             static constexpr std::size_t samplesInPacket = 8;
@@ -156,7 +156,7 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
             mResistanceBuffer.append(zeroBuffer);
         }
         if (packetsLost < 0)
-            return;
+            return;*/
         if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
             mSignalBuffer.append(signalData);
             mResistanceBuffer.append(std::vector<double>(8));

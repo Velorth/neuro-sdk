@@ -41,11 +41,11 @@ void CallibriMemsBuffer::onDataReceived(packet_number_t number, const ByteBuffer
     gyroZ.bytes[1] = data[11];
     auto gyroZValue = gyroZ.value * doubleValue(mCommonParameters->gyroscopeSens()) / 32767;
 
-    auto packetsLost = mPacketSequence.onNewPacket(number);
+    /*auto packetsLost = mPacketSequence.onNewPacket(number);
     if (packetsLost > 0){
         std::vector<MEMS> zeroSamples(packetsLost, MEMS{});
         mMemsBuffer.append(zeroSamples);
-    }
+    }*/
 
     mMemsBuffer.append({MEMS{
                             {accelXValue, accelYValue, accelZValue},

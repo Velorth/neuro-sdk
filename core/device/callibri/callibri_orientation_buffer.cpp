@@ -44,11 +44,11 @@ void CallibriOrientationBuffer::onDataReceived(packet_number_t number, const Byt
         quat.Z = z.value;
     }
 
-    auto packetsLost = mPacketSequence.onNewPacket(number);
+    /*auto packetsLost = mPacketSequence.onNewPacket(number);
     if (packetsLost > 0){
         std::vector<Quaternion> zeroSamples(packetsLost, Quaternion{});
         mOrientationBuffer.append(zeroSamples);
-    }
+    }*/
 
     mOrientationBuffer.append({quat});
 }

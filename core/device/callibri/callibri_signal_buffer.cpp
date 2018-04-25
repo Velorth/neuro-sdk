@@ -25,14 +25,14 @@ void CallibriSignalBuffer::onDataReceived(packet_number_t number, const ByteBuff
         samples.push_back(sampleValue);
     }
 
-    auto packetsLost = mPacketSequence.onNewPacket(number);
+    /*auto packetsLost = mPacketSequence.onNewPacket(number);
     if (packetsLost > 0){
         LOG_WARN_V("Lost %d packets", packetsLost);
         std::vector<signal_sample_t> zeroSamples(packetsLost * SignalDataLength / 2);
         mSignalBuffer.append(zeroSamples);
     }
     if (packetsLost < 0)
-        return;
+        return;*/
     mSignalBuffer.append(samples);
 }
 
