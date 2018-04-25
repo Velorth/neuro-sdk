@@ -33,8 +33,7 @@ win32 {
     LIBS += -lws2_32
 }
 
-HEADERS += $$files(../../../core/include/*.h) \
-    ../../../core/include/device/brainbit/brainbit_resistance_buffer.h
+HEADERS += $$files(../../../core/include/*.h)
 HEADERS += $$files(../../../core/include/ble/*.h)
 HEADERS += $$files(../../../core/include/ble/emulator/*.h)
 HEADERS += $$files(../../../core/include/channels/*.h)
@@ -65,8 +64,7 @@ HEADERS += $$files(../../../core/include/ble/ios/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
 }
 
-SOURCES += $$files(../../../core/*.cpp) \
-    ../../../core/device/brainbit/brainbit_resistance_buffer.cpp
+SOURCES += $$files(../../../core/*.cpp)
 SOURCES += $$files(../../../core/ble/*.cpp)
 SOURCES += $$files(../../../core/ble/emulator/*.cpp)
 SOURCES += $$files(../../../core/channels/*.cpp)

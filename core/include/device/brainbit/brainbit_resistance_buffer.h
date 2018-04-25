@@ -9,7 +9,7 @@
 
 namespace Neuro {
 
-class BrainbitResistanceBuffer final : BaseBuffer<resistance_sample_t>{
+class BrainbitResistanceBuffer final : public BaseBuffer<resistance_sample_t>{
 public:
     BrainbitResistanceBuffer();
 
