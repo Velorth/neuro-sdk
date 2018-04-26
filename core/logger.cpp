@@ -21,7 +21,7 @@
 
 
 Logger::Logger():
-    currentLogLevel(LogLevel::Debug)
+    currentLogLevel(DefaultLogLevel)
 {
 
 }

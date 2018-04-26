@@ -58,6 +58,11 @@ enum class ParamAccess {
     ReadNotify
 };
 
+std::string to_string(const DeviceState &);
+std::string to_string(const Command &);
+std::string to_string(const Parameter &);
+std::string to_string(const ParamAccess &);
+
 template <Parameter>
 struct ParamValue;
 

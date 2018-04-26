@@ -28,6 +28,12 @@ enum class LogLevel: int
     Error = 4
 };
 
+#ifdef NDEBUG
+constexpr LogLevel DefaultLogLevel = LogLevel::Info;
+#else
+constexpr LogLevel DefaultLogLevel = LogLevel::Debug;
+#endif
+
 class Logger
 {
 public:
