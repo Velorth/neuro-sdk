@@ -1,3 +1,4 @@
+#include <saturation_cast.h>
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
 
@@ -26,6 +27,12 @@ Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_setName(JNIEnv *env, jobje
     infoPtr->setName(name);
 
     env->ReleaseStringUTFChars(name_, name);
+}
+
+JNIEXPORT jlong JNICALL
+Java_ru_neurotech_neurosdk_channels_NativeChannelInfo_getIndex(JNIEnv *env, jobject instance){
+    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, instance);
+    return saturation_cast<jlong>(infoPtr->getIndex());
 }
 
 }

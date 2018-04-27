@@ -57,15 +57,14 @@ public:
     void setName(std::string &&) noexcept;
     void setName(const std::string &);
     Type getType() const noexcept;
+    std::size_t getIndex() const noexcept;
 
     bool operator==(const ChannelInfo &) const noexcept;
     bool operator!=(const ChannelInfo &) const noexcept;
 
 private:
-    Type mType;
+    const Type mType;
     std::string mName;
-
-    friend class SignalChannel;
     const std::size_t mIndex;
 };
 

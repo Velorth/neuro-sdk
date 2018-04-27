@@ -23,4 +23,10 @@ public interface ChannelInfo {
      * @return Channel type
      */
     ChannelType getType();
+    
+    /**
+     * Returns index number of channel for devices with multiple channels
+     * @return channel index
+     */
+    long getIndex();
 }

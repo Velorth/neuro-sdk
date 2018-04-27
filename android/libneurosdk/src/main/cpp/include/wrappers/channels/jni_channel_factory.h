@@ -19,6 +19,7 @@
 
 #include <android/log.h>
 #include "wrappers/device/jni_device_wrap.h"
+#include "wrappers/channels/jni_channel_info_wrap.h"
 #include "device/param_values.h"
 
 template <typename ChannelWrap>
@@ -39,18 +40,27 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device){
 
 template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device, jobject info){
-    auto& deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
-    auto infoPtr = extract_pointer<Neuro::ChannelInfo>(env, info);
-    if (infoPtr == nullptr){
-        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromDevice",
-                            "Error creating channel: ChannelInfo object does not have native pointer");
-        jni::java_throw(env,
-                        "java/lang/IllegalArgumentException",
-                        std::runtime_error("ChannelInfo object does not have native pointer"));
-        return 0;
-    }
-    try {
-        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, *infoPtr);
+    auto &deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
+
+    auto objectClass = env->GetObjectClass(info);
+    auto nameMethodId = env->GetMethodID(objectClass, "getName", "()Ljava/lang/String;");
+    auto javaName = static_cast<jstring>(env->CallObjectMethod(info, nameMethodId));
+    auto name = env->GetStringUTFChars(javaName, 0);
+
+    auto typeSignature = std::string("()L") +
+                         std::string(jni::java_class_name<Neuro::ChannelInfo::Type>()) +
+                         std::string(";");
+    auto typeMethodId = env->GetMethodID(objectClass, "getType", typeSignature.c_str());
+    auto javaType = env->CallObjectMethod(info, typeMethodId);
+    auto type = jni::enumFromJavaObj<Neuro::ChannelInfo::Type>(env, javaType);
+
+    auto indexMethodId = env->GetMethodID(objectClass, "getIndex", "()J");
+    auto index = env->CallLongMethod(info, indexMethodId);
+
+    Neuro::ChannelInfo channelInfo(type, name, saturation_cast<std::size_t>(index));
+    env->ReleaseStringUTFChars(javaName, name);
+    try{
+        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, channelInfo);
         auto channelWrap = new ChannelWrap(channel);
         return reinterpret_cast<jlong>(channelWrap);
     }

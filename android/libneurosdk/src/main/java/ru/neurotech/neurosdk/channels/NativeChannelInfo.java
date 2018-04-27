@@ -22,4 +22,7 @@ public class NativeChannelInfo implements ChannelInfo {
 
     @Override
     public native ChannelType getType();
+    
+    @Override
+    public native long getIndex();
 }

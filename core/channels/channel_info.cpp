@@ -46,6 +46,10 @@ ChannelInfo::Type ChannelInfo::getType() const noexcept {
     return mType;
 }
 
+std::size_t ChannelInfo::getIndex() const noexcept{
+    return mIndex;
+}
+
 bool ChannelInfo::operator==(const ChannelInfo &rhs) const noexcept {
     return (mType == rhs.mType) && (mName == rhs.mName);
 }

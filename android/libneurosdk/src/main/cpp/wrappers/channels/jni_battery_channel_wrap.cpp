@@ -107,4 +107,3 @@ void JniBatteryChannelWrap::subscribeLengthChanged(jobject stateChangedSubscribe
         });
     });
 }
-

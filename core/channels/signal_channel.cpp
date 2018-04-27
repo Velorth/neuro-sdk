@@ -45,7 +45,7 @@ public:
             auto allChannelsData = buffer.readFill(realOffset, realLength, 0.0);
             data_container resultBuffer;
             resultBuffer.reserve(length);
-            for (std::size_t i = mInfo.mIndex; i < allChannelsData.size(); i+=mChannelsCount){
+            for (std::size_t i = mInfo.getIndex(); i < allChannelsData.size(); i+=mChannelsCount){
                 resultBuffer.push_back(allChannelsData[i]);
             }
             Ensures(resultBuffer.size() == length);
