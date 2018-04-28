@@ -1,3 +1,4 @@
+#include <string>
 #include "device/device_parameters.h"
 
 namespace Neuro {
