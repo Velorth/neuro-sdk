@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Neurotech MRC. http://neurotech.ru/
+ * Copyright 2016 - 2017 Neurotech MRC. http://neuromd.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ extern "C"
  * Get DeviceService UUID
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getDeviceServiceUUID(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getDeviceServiceUUID(JNIEnv *env,
                                                                               jobject instance,
                                                                               jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
@@ -36,7 +36,7 @@ Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getDeviceServiceUUID(JNIEn
  * Get receive characteristic UUID
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getRxCharacteristicUUID(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getRxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
@@ -48,7 +48,7 @@ Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getRxCharacteristicUUID(JN
  * Get transmit characteristic UUID
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getTxCharacteristicUUID(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getTxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
@@ -60,7 +60,7 @@ Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getTxCharacteristicUUID(JN
  * Get status characteristic UUID
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getStatusCharacteristicUUID(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getStatusCharacteristicUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
@@ -72,7 +72,7 @@ Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getStatusCharacteristicUUI
  * Get generic access service UUID
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getGenericAccessServiceUUID(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getGenericAccessServiceUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
@@ -84,7 +84,7 @@ Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getGenericAccessServiceUUI
  * Get CCCD
  */
 JNIEXPORT jstring JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceGattInfo_getCCCD(JNIEnv *env, jobject instance,
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_getCCCD(JNIEnv *env, jobject instance,
                                                                  jlong deviceInfoPtr) {
     auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
     auto cccd = gattInfo->cccd();

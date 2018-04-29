@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Neurotech MRC. http://neurotech.ru/
+ * Copyright 2016 - 2017 Neurotech MRC. http://neuromd.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 extern "C"
 {
 JNIEXPORT void JNICALL
-Java_ru_neurotech_bleconnection_device_DeviceFoundCallback_notifyDeviceFound(JNIEnv *env,
+Java_com_neuromd_bleconnection_device_DeviceFoundCallback_notifyDeviceFound(JNIEnv *env,
                                                                                 jobject instance,
                                                                                 jlong subscriberPtr,
                                                                                 jobject foundDevice) {

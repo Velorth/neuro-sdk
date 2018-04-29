@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Neurotech MRC. http://neurotech.ru/
+ * Copyright 2016 - 2017 Neurotech MRC. http://neuromd.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ namespace Neuro {
         jni::call_in_attached_thread([=](auto env) {
             appContext = env->NewGlobalRef(context);
             auto scannerFactoryClass = env->FindClass(
-                    "ru/neurotech/bleconnection/scanner/BleDeviceScannerFactory");
+                    "com/neuromd/bleconnection/scanner/BleDeviceScannerFactory");
             auto factoryMethod = env->GetStaticMethodID(scannerFactoryClass, "getBleDeviceScanner",
-                                                        "()Lru/neurotech/bleconnection/scanner/BleDeviceScanner;");
+                                                        "()Lcom/neuromd/bleconnection/scanner/BleDeviceScanner;");
             auto scannerObj = env->CallStaticObjectMethod(scannerFactoryClass, factoryMethod);
             javaScannerInstance = env->NewGlobalRef(scannerObj);
         });
@@ -109,7 +109,7 @@ namespace Neuro {
         emulator.setFilter(filterList);
         jni::call_in_attached_thread([=](auto env) {
             //Creating filter object
-            auto filterClass = env->FindClass("ru/neurotech/bleconnection/device/DeviceFilter");
+            auto filterClass = env->FindClass("com/neuromd/bleconnection/device/DeviceFilter");
             auto filterConstructor = env->GetMethodID(filterClass, "<init>", "()V");
             auto filterObject = env->NewObject(filterClass, filterConstructor);
             auto addFilterMethod = env->GetMethodID(filterClass, "addFilter",
@@ -124,7 +124,7 @@ namespace Neuro {
             //Add filter object to scanner
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
             auto setFilterMethodID = env->GetMethodID(scannerClass, "setFilter",
-                                                      "(Lru/neurotech/bleconnection/device/DeviceFilter;)V");
+                                                      "(Lcom/neuromd/bleconnection/device/DeviceFilter;)V");
             env->CallVoidMethod(javaScannerInstance, setFilterMethodID, filterObject);
         });
     }
@@ -137,7 +137,7 @@ namespace Neuro {
         jni::call_in_attached_thread([=](auto env) {
             //create java callback class
             auto deviceFoundCallbackClass = env->FindClass(
-                    "ru/neurotech/bleconnection/device/DeviceFoundCallback");
+                    "com/neuromd/bleconnection/device/DeviceFoundCallback");
             auto deviceFoundCallbackCtor = env->GetMethodID(deviceFoundCallbackClass, "<init>",
                                                             "(J)V");
 
@@ -151,7 +151,7 @@ namespace Neuro {
             //pass callback class to scanner
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
             auto setCallbackMethodID = env->GetMethodID(scannerClass, "subscribeDeviceFound",
-                                                        "(Lru/neurotech/bleconnection/device/DeviceFoundCallback;)V");
+                                                        "(Lcom/neuromd/bleconnection/device/DeviceFoundCallback;)V");
             env->CallVoidMethod(javaScannerInstance, setCallbackMethodID, deviceFoundCallbackObj);
         });
     }

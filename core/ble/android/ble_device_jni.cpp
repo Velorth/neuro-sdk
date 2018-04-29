@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Neurotech MRC. http://neurotech.ru/
+ * Copyright 2016 - 2017 Neurotech MRC. http://neuromd.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,15 @@ namespace Neuro {
             //class constructor
             auto gattInfo = deviceInfo->getGattInfo();
             auto gattInfoWrapClass = env->FindClass(
-                    "ru/neurotech/bleconnection/device/DeviceGattInfo");
+                    "com/neuromd/bleconnection/device/DeviceGattInfo");
             auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");
             auto gattInfoWrapper = env->NewObject(gattInfoWrapClass,
                                                   gattInfoWrapConstructor,
                                                   (jlong) gattInfo.get());
 
-            auto bleDeviceClass = env->FindClass("ru/neurotech/bleconnection/device/BleDevice");
+            auto bleDeviceClass = env->FindClass("com/neuromd/bleconnection/device/BleDevice");
             auto bleDeviceConstructor = env->GetMethodID(bleDeviceClass, "<init>",
-                                                         "(Landroid/bluetooth/BluetoothDevice;Lru/neurotech/bleconnection/device/DeviceGattInfo;)V");
+                                                         "(Landroid/bluetooth/BluetoothDevice;Lcom/neuromd/bleconnection/device/DeviceGattInfo;)V");
             auto bleDevice = env->NewObject(bleDeviceClass, bleDeviceConstructor,
                                             bluetoothDevice, gattInfoWrapper);
 
@@ -61,7 +61,7 @@ namespace Neuro {
 
             //Instantiate callback class
             auto deviceCallbackWrapClass = env->FindClass(
-                    "ru/neurotech/bleconnection/device/BleDeviceCallback");
+                    "com/neuromd/bleconnection/device/BleDeviceCallback");
             auto deviceCallbackWrapConstructor = env->GetMethodID(deviceCallbackWrapClass, "<init>",
                                                                   "(J)V");
             auto deviceCallbackWrapper = env->NewObject(deviceCallbackWrapClass,
@@ -70,7 +70,7 @@ namespace Neuro {
 
             //And pass it to BleDevice
             auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                    "(Lru/neurotech/bleconnection/device/BleDeviceCallback;)V");
+                                                    "(Lcom/neuromd/bleconnection/device/BleDeviceCallback;)V");
             env->CallVoidMethod(javaBleDevice, subscribeMethod, deviceCallbackWrapper);
         });
     }
@@ -81,7 +81,7 @@ namespace Neuro {
                 __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor");
                 auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
                 auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
-                                                        "(Lru/neurotech/bleconnection/device/BleDeviceCallback;)V");
+                                                        "(Lcom/neuromd/bleconnection/device/BleDeviceCallback;)V");
                 env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
                 env->DeleteGlobalRef(javaBleDevice);
                 env->DeleteGlobalRef(appContext);
@@ -199,13 +199,13 @@ namespace Neuro {
         return jni::call_in_attached_thread([=](auto env) {
             auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
             auto getStateMethod = env->GetMethodID(bleDeviceClass, "state",
-                                                   "()Lru/neurotech/bleconnection/device/BleDeviceState;");
+                                                   "()Lcom/neuromd/bleconnection/device/BleDeviceState;");
             auto javaState = env->CallObjectMethod(javaBleDevice, getStateMethod);
 
             BleDeviceState state;
             if (javaState != NULL) {
                 auto javaStateClass = env->FindClass(
-                        "ru/neurotech/bleconnection/device/DeviceGattInfo");
+                        "com/neuromd/bleconnection/device/DeviceGattInfo");
                 auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
                 auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
                 state = parseBleDeviceState(stateCode);
