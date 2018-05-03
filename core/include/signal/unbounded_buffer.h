@@ -33,7 +33,10 @@ public:
         Ensures(mBuffer.dataLength() == expectedDataLength);
 #endif
         mTotalLength += data.size();
-        mAvailableLength = mBuffer.dataLength();
+        mAvailableLength += data.size();
+        if (mAvailableLength >= mBuffer.bufferSize()){
+            mAvailableLength = mBuffer.dataLength();
+        }
         mLengthNotifier.notifyAll(mTotalLength);
     }
 
