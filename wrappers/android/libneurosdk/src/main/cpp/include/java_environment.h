@@ -82,11 +82,22 @@ constexpr const char *java_class_name();
 template<typename T>
 constexpr const char *constructor_signature();
 
+template <typename T>
+struct jni_type;
+
+template <typename T>
+using jni_type_t = typename jni_type<T>::type;
+
 template<>
 constexpr const char *java_class_name<int>() { return "java/lang/Integer"; };
 
 template<>
 constexpr const char *constructor_signature<int>() { return "(I)V"; };
+
+template <>
+struct jni_type<int>{
+    using type = jint;
+};
 
 template<>
 constexpr const char *java_class_name<long>() { return "java/lang/Long"; };
@@ -94,11 +105,21 @@ constexpr const char *java_class_name<long>() { return "java/lang/Long"; };
 template<>
 constexpr const char *constructor_signature<long>() { return "(J)V"; };
 
+template <>
+struct jni_type<long>{
+    using type = jlong;
+};
+
 template<>
 constexpr const char *java_class_name<double>() { return "java/lang/Double"; };
 
 template<>
 constexpr const char *constructor_signature<double>() { return "(D)V"; };
+
+template <>
+struct jni_type<double>{
+    using type = jdouble;
+};
 
 template<>
 constexpr const char *java_class_name<bool>() { return "java/lang/Boolean"; };
@@ -106,11 +127,21 @@ constexpr const char *java_class_name<bool>() { return "java/lang/Boolean"; };
 template<>
 constexpr const char *constructor_signature<bool>() { return "(Z)V"; };
 
+template <>
+struct jni_type<bool>{
+    using type = jboolean;
+};
+
 template<>
 constexpr const char *java_class_name<unsigned char>() { return "java/lang/Byte"; };
 
 template<>
 constexpr const char *constructor_signature<unsigned char>() { return "(B)V"; };
+
+template <>
+struct jni_type<unsigned char>{
+    using type = jbyte;
+};
 
 template<typename T>
 class java_object;
@@ -263,7 +294,7 @@ public:
             auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
                                                            constructor_signature<T>());
             javaObj = make_global_ref_ptr(
-                    env->NewObject(object_class, objectClassConstructor, nativeObj));
+                    env->NewObject(object_class, objectClassConstructor, static_cast<jni_type_t<T>>(nativeObj)));
         });
     }
 
