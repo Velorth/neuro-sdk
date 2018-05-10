@@ -22,7 +22,7 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += '../../../core/ble/android/java'
+        main.java.srcDirs += '../../core/ble/android/java'
     }
 
 

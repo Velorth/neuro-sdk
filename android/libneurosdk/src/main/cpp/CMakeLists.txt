@@ -5,9 +5,9 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(lib_build_DIR $ENV{HOME}/tmp)
 file(MAKE_DIRECTORY ${lib_build_DIR})
 
-set(SRC_DIR_CORE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../core)
-set(SRC_DIR_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/gsl)
-set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/network)
+set(SRC_DIR_CORE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../core)
+set(SRC_DIR_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/gsl)
+set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/network)
 set(SRC_DIR_ANDROID ${CMAKE_CURRENT_SOURCE_DIR})
 
 # copy out the lib binary... need to leave the static lib around to pass gradle check
