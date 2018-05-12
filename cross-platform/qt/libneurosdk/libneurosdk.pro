@@ -13,6 +13,7 @@ CONFIG(release, debug|release){
 INCLUDEPATH += ../../../core/include
 INCLUDEPATH += ../../../utils/network/
 INCLUDEPATH += ../../../utils/gsl/include
+INCLUDEPATH += ../../../utils/dsp/include
 linux:!android:!ios:!macx: INCLUDEPATH += ../../../core/linux/include
 android: INCLUDEPATH += ../../../core/android/include
 win32: INCLUDEPATH += ../../../core/windows/include
@@ -42,6 +43,7 @@ HEADERS += $$files(../../../core/include/device/brainbit/*.h)
 HEADERS += $$files(../../../core/include/device/callibri/*.h)
 HEADERS += $$files(../../../core/include/signal/*.h)
 HEADERS += $$files(../../../utils/network/*.h)
+HEADERS += $$files(../../../utils/dsp/include/*.h)
 HEADERS += $$files(../../../utils/gsl/include/gsl/*)
 
 win32{
