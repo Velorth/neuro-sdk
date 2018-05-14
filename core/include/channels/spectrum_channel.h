@@ -22,6 +22,7 @@ public:
     std::weak_ptr<Device> underlyingDevice() const noexcept override;
     sampling_frequency_t samplingFrequency() const noexcept override;
     void setSamplingFrequency(sampling_frequency_t) override;
+    double hzPerSpectrumSample() const noexcept;
 };
 
 }

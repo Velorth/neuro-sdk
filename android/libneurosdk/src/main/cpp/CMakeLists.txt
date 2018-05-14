@@ -8,6 +8,7 @@ file(MAKE_DIRECTORY ${lib_build_DIR})
 set(SRC_DIR_CORE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../core)
 set(SRC_DIR_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/gsl)
 set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/network)
+set(SRC_DIR_DSP ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/dsp)
 set(SRC_DIR_ANDROID ${CMAKE_CURRENT_SOURCE_DIR})
 
 # copy out the lib binary... need to leave the static lib around to pass gradle check
@@ -29,6 +30,7 @@ include_directories(${SRC_DIR_CORE}/include)
 include_directories(${SRC_DIR_GSL}/include)
 include_directories(${SRC_DIR_NET})
 include_directories(${SRC_DIR_ANDROID}/include)
+include_directories(${SRC_DIR_DSP}/include)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti")
