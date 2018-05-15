@@ -57,7 +57,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());
 #ifdef NDEBUG
-    logFactory->setLogLevel(LogLevel::Trace);
+    logFactory->setLogLevel(LogLevel::Info);
 #else
     logFactory->setLogLevel(LogLevel::Trace);
 #endif
