@@ -5,14 +5,19 @@
 #include "device/device_impl.h"
 #include "device/param_values.h"
 #include "signal/base_buffer.h"
+#include "logger.h"
+#include "event_notifier.h"
 
 namespace Neuro {
 
 class SignalChannel::Impl {
 private:
+    static constexpr const char *class_name = "SignalChannelImpl";
     std::shared_ptr<Device> mDevice;
     const ChannelInfo mInfo;
     const std::size_t mChannelsCount;
+    mutable Notifier<void, data_length_t> mLengthNotifier;
+    length_listener_ptr mSignalLengthListener;
 
 public:
     Impl(std::shared_ptr<Device> device, const ChannelInfo &info) :
@@ -22,12 +27,16 @@ public:
         Expects(device != nullptr);
         Expects(mChannelsCount > 0);
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
+
+        auto&& buffer = mDevice->mImpl->signalBuffer();
+        mSignalLengthListener = buffer.subscribeLengthChanged([=](std::size_t){
+            mLengthNotifier.notifyAll(totalLength());
+        });
     }
 
-    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {        
         try{
-            auto&& buffer = mDevice->mImpl->signalBuffer();
-            return buffer.subscribeLengthChanged(callback);
+            return mLengthNotifier.addListener(callback);
         }
         catch(...){
             return nullptr;
@@ -42,6 +51,7 @@ public:
         else {
             auto realOffset = offset * mChannelsCount;
             auto realLength = length * mChannelsCount;
+            LOG_TRACE_V("Real offset: %zd, Real length: %zd, Channels count: %zd, Number: %zd", realOffset, realLength, mChannelsCount,mInfo.getIndex());
             auto allChannelsData = buffer.readFill(realOffset, realLength, 0.0);
             data_container resultBuffer;
             resultBuffer.reserve(length);

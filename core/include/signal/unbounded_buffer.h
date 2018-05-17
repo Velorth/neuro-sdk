@@ -114,12 +114,20 @@ public:
             readLength -= trailingZerosCount;
         }
 
-        std::vector<SampleType> resultBuffer(length);
-        std::fill_n(resultBuffer.begin(), leadingZerosCount, fill_value);
-        auto availableData = mBuffer.read(bufferOffset, readLength);
-        std::copy(availableData.begin(), availableData.end(), resultBuffer.begin() + leadingZerosCount);
-        std::fill(resultBuffer.end() - trailingZerosCount, resultBuffer.end(), fill_value);
-        return resultBuffer;
+        try {
+            std::vector<SampleType> resultBuffer(length);
+            std::fill_n(resultBuffer.begin(), leadingZerosCount, fill_value);
+            if (readLength > 0){
+                auto availableData = mBuffer.read(bufferOffset, readLength);
+                std::copy(availableData.begin(), availableData.end(), resultBuffer.begin() + leadingZerosCount);
+            }
+            std::fill(resultBuffer.end() - trailingZerosCount, resultBuffer.end(), fill_value);
+            return resultBuffer;
+        }
+        catch(std::runtime_error &e){
+            LOG_ERROR_V("Failed to read data from circular buffer: %s\nOffset: %zd, length: %zd, real length: %zd", e.what(), bufferOffset, readLength, mBuffer.dataLength());
+            return std::vector<SampleType>(length, fill_value);
+        }
     }
 
     std::vector<SampleType> rawBuffer() const override {
