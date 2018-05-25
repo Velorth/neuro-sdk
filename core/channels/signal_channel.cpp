@@ -29,8 +29,12 @@ public:
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
 
         auto&& buffer = mDevice->mImpl->signalBuffer();
-        mSignalLengthListener = buffer.subscribeLengthChanged([=](std::size_t){
-            mLengthNotifier.notifyAll(totalLength());
+        mSignalLengthListener = buffer.subscribeLengthChanged([=](std::size_t length){
+            LOG_TRACE_V("New buffer length is %zd", length);
+            auto realLength = length / mChannelsCount;
+            auto remainder = length % mChannelsCount;
+            Expects(remainder == 0);
+            mLengthNotifier.notifyAll(realLength);
         });
     }
 
@@ -45,7 +49,7 @@ public:
 
     SignalChannel::data_container readData(data_offset_t offset, data_length_t length) const {
         auto&& buffer = mDevice->mImpl->signalBuffer();
-        if (mChannelsCount == 0){
+        if (mChannelsCount <= 1){
             return buffer.readFill(offset, length, 0.0);
         }
         else {
