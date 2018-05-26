@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include "common_types.h"
+#include "task_queue.h"
 
 namespace Neuro {
 
@@ -53,6 +54,8 @@ private:
 
     std::unique_ptr<ParameterReader> mParamReader;
     std::unique_ptr<ParameterWriter> mParamWriter;
+    TaskQueue mDataReceivedQueue{"DataReceived"};
+    TaskQueue mStatusReceivedQueue{"StatusReceived"};
 
     void subscribeDataReceived();
     void subscribeStatusReceived();

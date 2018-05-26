@@ -24,7 +24,7 @@ private:
     template <typename, typename... > friend class Notifier;
     std::function<R(Args...)> mFunc;
     void notify(Args... args){
-        std::thread(mFunc, args...).detach();
+        mFunc(args...);
     }
 };
 

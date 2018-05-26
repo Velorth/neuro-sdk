@@ -23,8 +23,6 @@ JavaVM *jni::java_machine;
 int jni::get_env(JNIEnv **g_env) {
     int getEnvStat = java_machine->GetEnv((void **) g_env, JNI_VERSION_1_6);
     if (getEnvStat == JNI_EDETACHED) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "GetEnvironmentRoutine",
-                            "Thread detached. Attaching to JVM");
         if (java_machine->AttachCurrentThread(g_env, nullptr) != 0) {
             __android_log_print(ANDROID_LOG_ERROR, "GetEnvironmentRoutine", "FAILED ATTACH THREAD");
             return 2; //Failed attach
@@ -35,8 +33,6 @@ int jni::get_env(JNIEnv **g_env) {
 }
 
 void jni::detach_thread() {
-    __android_log_print(ANDROID_LOG_VERBOSE, "GetEnvironmentRoutine",
-                        "Detaching thread");
     java_machine->DetachCurrentThread();
 }
 

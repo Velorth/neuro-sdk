@@ -314,14 +314,9 @@ public class BleDevice {
      */
     private void onReceiveCharacteristicChanged(BluetoothGattCharacteristic rxCharacteristic) {
         final byte[] data = rxCharacteristic.getValue();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (mDeviceCallback != null) {
-                    mDeviceCallback.onDataReceived(data);
-                }
-            }
-        }).start();
+        if (mDeviceCallback != null) {
+            mDeviceCallback.onDataReceived(data);
+        }
     }
 
     /**
@@ -332,14 +327,9 @@ public class BleDevice {
     private void onStatusCharacteristicChanged(BluetoothGattCharacteristic statusCharacteristic) {
         final byte[] statusData = statusCharacteristic.getValue();
         Log.v("JavaBleDevice", "On status characteristic changed");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (mDeviceCallback != null) {
-                    mDeviceCallback.onStatusReceived(statusData);
-                }
-            }
-        }).start();
+        if (mDeviceCallback != null) {
+            mDeviceCallback.onStatusReceived(statusData);
+        }
     }
 
     /**
