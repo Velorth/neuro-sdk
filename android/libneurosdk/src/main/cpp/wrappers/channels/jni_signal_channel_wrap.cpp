@@ -105,9 +105,11 @@ Java_com_neuromd_neurosdk_channels_SignalChannel_readData(JNIEnv *env, jobject i
 void JniSignalChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    mListener = this->object->subscribeLengthChanged([weakReference](auto length){
-        jni::call_in_attached_thread([&weakReference, &length](auto env){
-            sendNotification<long>(env, weakReference, length);
-        });
+    mListener = this->object->subscribeLengthChanged([weakReference](auto length) {
+        JNIEnv *env;
+        jni::get_env(&env);
+        env->PushLocalFrame(1);
+        sendNotification<long>(env, weakReference, length);
+        env->PopLocalFrame(nullptr);
     });
 }

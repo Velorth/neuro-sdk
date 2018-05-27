@@ -5,6 +5,7 @@ void callJavaSendNotification(JNIEnv *env, jobject subscriberNotifier, jobject p
     auto callbackMethod = env->GetMethodID(subscriberClass, "sendNotification",
                                            "(Ljava/lang/Object;Ljava/lang/Object;)V");
     env->CallVoidMethod(subscriberNotifier, callbackMethod, nullptr, param);
+    env->DeleteLocalRef(subscriberClass);
 }
 
 void sendNotification(JNIEnv *env, std::weak_ptr<jni::jobject_t> subscriberRefPtr){

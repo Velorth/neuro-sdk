@@ -152,7 +152,7 @@ private:
     static constexpr const char *class_name = "UnboundedBuffer";
 
     CircularBuffer<SampleType, BufferSize> mBuffer;
-    mutable Notifier<void, data_length_t> mLengthNotifier;
+    mutable Notifier<void, data_length_t> mLengthNotifier{class_name};
     std::size_t mAvailableLength{0};
     std::size_t mTotalLength{0};
 };

@@ -40,6 +40,7 @@ void sendNotification(JNIEnv *env, std::weak_ptr<jni::jobject_t> subscriberRefPt
 
     auto jObj = static_cast<jobject>(jni::java_object<T>(param));
     callJavaSendNotification(env, subscriberRef.get(), jObj);
+    env->DeleteLocalRef(jObj);
 }
 
 void sendNotification(JNIEnv *, std::weak_ptr<jni::jobject_t> subscriberRefPtr);

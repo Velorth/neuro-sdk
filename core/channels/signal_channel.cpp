@@ -16,7 +16,7 @@ private:
     std::shared_ptr<Device> mDevice;
     const ChannelInfo mInfo;
     const std::size_t mChannelsCount;
-    mutable Notifier<void, data_length_t> mLengthNotifier;
+    mutable Notifier<void, data_length_t> mLengthNotifier{class_name};
     length_listener_ptr mSignalLengthListener;
 
 public:
@@ -29,12 +29,8 @@ public:
         Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
 
         auto&& buffer = mDevice->mImpl->signalBuffer();
-        mSignalLengthListener = buffer.subscribeLengthChanged([=](std::size_t length){
-            LOG_TRACE_V("New buffer length is %zd", length);
-            auto realLength = length / mChannelsCount;
-            auto remainder = length % mChannelsCount;
-            Expects(remainder == 0);
-            mLengthNotifier.notifyAll(realLength);
+        mSignalLengthListener = buffer.subscribeLengthChanged([=](std::size_t){
+            mLengthNotifier.notifyAll(totalLength());
         });
     }
 
@@ -71,12 +67,18 @@ public:
         try {
             auto&& buffer = mDevice->mImpl->signalBuffer();
             auto totalLength = buffer.totalLength();
-            auto realLength = totalLength / mChannelsCount;
-            auto remainder = totalLength % mChannelsCount;
-            Expects(remainder == 0);
-            return realLength;
+            if (mChannelsCount <= 1){
+                return totalLength;
+            }
+            else {
+                auto realLength = totalLength / mChannelsCount;
+                auto remainder = totalLength % mChannelsCount;
+                Ensures(remainder == 0);
+                return realLength;
+            }
         }
         catch (std::exception &){
+            LOG_ERROR_V("Signal buffer size is not multiple of channels count");
             return 0;
         }
     }
