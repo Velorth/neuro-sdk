@@ -113,6 +113,26 @@ Java_com_neuromd_neurosdk_channels_SpectrumChannel_readData(JNIEnv *env, jobject
     }
 }
 
+JNIEXPORT jdoubleArray JNICALL
+Java_com_neuromd_neurosdk_channels_SpectrumChannel_readFast(JNIEnv *env, jobject instance,
+                                                          jlong offset, jlong length) {
+    try {
+        auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
+        auto data = spectrumChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
+                                                saturation_cast<Neuro::data_length_t>(length));
+
+        auto dataSize = saturation_cast<jsize>(data.size());
+        auto doubleArray = env->NewDoubleArray(dataSize);
+
+        env->SetDoubleArrayRegion(doubleArray, 0, dataSize, data.data());
+        return doubleArray;
+    }
+    catch (std::exception &e){
+        jni::java_throw(env, "UnsupportedOperationException", e);
+        return nullptr;
+    }
+}
+
 }
 
 void JniSpectrumChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {

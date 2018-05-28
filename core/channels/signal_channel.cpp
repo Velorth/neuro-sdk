@@ -78,7 +78,7 @@ public:
             }
         }
         catch (std::exception &){
-            LOG_ERROR_V("Signal buffer size is not multiple of channels count");
+            LOG_ERROR("Signal buffer size is not multiple of channels count");
             return 0;
         }
     }

@@ -43,6 +43,8 @@ public class SpectrumChannel extends BaseChannel<Double> {
     @Override
     public native Device underlyingDevice();
     
+    public native double[] readFast(long offset, long length);
+    
     public native double hzPerSpectrumSample();
     
     private static native long createFromChannel(BaseChannel<Double> channel);

@@ -100,6 +100,26 @@ Java_com_neuromd_neurosdk_channels_SignalChannel_readData(JNIEnv *env, jobject i
     }
 }
 
+JNIEXPORT jdoubleArray JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_readFast(JNIEnv *env, jobject instance,
+                                                          jlong offset, jlong length) {
+    try {
+        auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
+        auto data = signalChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
+                                                saturation_cast<Neuro::data_length_t>(length));
+
+        auto dataSize = saturation_cast<jsize>(data.size());
+        auto doubleArray = env->NewDoubleArray(dataSize);
+
+        env->SetDoubleArrayRegion(doubleArray, 0, dataSize, data.data());
+        return doubleArray;
+    }
+    catch (std::exception &e){
+        jni::java_throw(env, "UnsupportedOperationException", e);
+        return nullptr;
+    }
+}
+
 }
 
 void JniSignalChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {

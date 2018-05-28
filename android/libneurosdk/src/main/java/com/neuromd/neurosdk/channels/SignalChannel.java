@@ -55,6 +55,8 @@ public class SignalChannel extends BaseChannel<Double> {
     @Override
     public native Device underlyingDevice();
 
+    public native double[] readFast(long offset, long length);
+    
     private static native long create(Device device);
     private static native long createWithInfo(Device device, ChannelInfo info);
     private native void init();
