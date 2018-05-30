@@ -129,7 +129,7 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     rawData[2] = (int)(((unsigned int)(data[6] & 0x03) << 30) | ((unsigned int)data[7] << 22) | ((unsigned int)data[8] << 14) | ((unsigned int)data[9] << 6));
     rawData[2] /=  2048;
 
-    rawData[3] = (int)(((unsigned int)(data[9] & 0x07) << 27) | ((unsigned int)data[10] << 19) | ((unsigned int)data[11] << 11) | ((unsigned int)data[12] << 3));
+    rawData[3] = (int)(((unsigned int)(data[9] & 0x1F) << 27) | ((unsigned int)data[10] << 19) | ((unsigned int)data[11] << 11));
     rawData[3] /=  2048;
 
     rawData[4] = (short)((unsigned short)(data[12] << 8) | (unsigned short)data[13]);

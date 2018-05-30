@@ -139,8 +139,10 @@ void JniSpectrumChannelWrap::subscribeLengthChanged(jobject stateChangedSubscrib
     lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
     std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
     mListener = this->object->subscribeLengthChanged([weakReference](auto length){
-        jni::call_in_attached_thread([&weakReference, &length](auto env){
-            sendNotification<long>(env, weakReference, length);
-        });
+        JNIEnv *env;
+        jni::get_env(&env);
+        env->PushLocalFrame(1);
+        sendNotification<long>(env, weakReference, length);
+        env->PopLocalFrame(nullptr);
     });
 }
