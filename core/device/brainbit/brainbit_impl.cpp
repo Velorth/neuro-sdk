@@ -21,9 +21,9 @@ BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
 }
 
 std::vector<ChannelInfo> BrainbitImpl::channels() const {
-    auto t3Info = ChannelInfo(ChannelInfo::Type::Signal, "T3", 0);
-    auto t4Info = ChannelInfo(ChannelInfo::Type::Signal, "T4", 1);
-    auto o1Info = ChannelInfo(ChannelInfo::Type::Signal, "O1", 2);
+    auto t3Info = ChannelInfo(ChannelInfo::Type::Signal, "T3", 1);
+    auto t4Info = ChannelInfo(ChannelInfo::Type::Signal, "T4", 2);
+    auto o1Info = ChannelInfo(ChannelInfo::Type::Signal, "O1", 0);
     auto o2Info = ChannelInfo(ChannelInfo::Type::Signal, "O2", 3);
     return { ChannelInfo::Battery,
                 ChannelInfo::ConnectionStats,

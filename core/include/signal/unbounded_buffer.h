@@ -110,7 +110,7 @@ public:
         auto readLength = length;
         decltype(readLength) trailingZerosCount{0};
         if (bufferOffset + readLength > mAvailableLength){
-            trailingZerosCount = mAvailableLength - bufferOffset - readLength;
+            trailingZerosCount = bufferOffset + readLength - mAvailableLength;
             readLength -= trailingZerosCount;
         }
 

@@ -432,10 +432,12 @@ public class BleDevice {
                         return;
                     }
                     mDeviceGatt = mBleDevice.connectGatt(context, false, mBleGattCallback);
+                    refreshDeviceCache(mDeviceGatt);
                 }
-                else
+                else {
+                    refreshDeviceCache(mDeviceGatt);
                     mDeviceGatt.connect();
-                refreshDeviceCache(mDeviceGatt);
+                }
             }
         }).start();
     }

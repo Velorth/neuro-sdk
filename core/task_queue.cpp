@@ -14,6 +14,7 @@ TaskQueue::~TaskQueue(){
     mIsRunning.store(false);
     std::unique_lock<std::mutex> queueLock(mQueueMutex);
     mQueueCondition.notify_all();
+    queueLock.unlock();
     try{
         if (mExecThread.joinable())
             mExecThread.join();
