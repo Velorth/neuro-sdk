@@ -54,7 +54,7 @@ constexpr const char *jni::java_class_name<Neuro::ChannelInfo>() {
 
 template<>
 constexpr const char *jni::constructor_signature<Neuro::ChannelInfo>() {
-    return "(Lcom/neuromd/neurosdk/channels/ChannelType;Ljava/lang/String;)V";
+    return "(Lcom/neuromd/neurosdk/channels/ChannelType;Ljava/lang/String;J)V";
 }
 
 template<>

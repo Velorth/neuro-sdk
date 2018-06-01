@@ -80,8 +80,9 @@ jni::java_object<Neuro::ChannelInfo>::java_object(const Neuro::ChannelInfo &chan
                                                        constructor_signature<Neuro::ChannelInfo>());
         auto channelName = env->NewStringUTF(channelInfo.getName().c_str());
         auto channelType = static_cast<jobject>(jni::java_object<Neuro::ChannelInfo::Type>(channelInfo.getType()));
+        auto index = static_cast<jlong>(channelInfo.getIndex());
         javaObj = make_global_ref_ptr(
-                env->NewObject(object_class, objectClassConstructor, channelType, channelName));
+                env->NewObject(object_class, objectClassConstructor, channelType, channelName, index));
     });
 }
 
