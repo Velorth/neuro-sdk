@@ -372,7 +372,7 @@ public class BleDevice {
      * Initializes base device class from bluetoothDevice instance
      *
      * @param sourceDevice bluetooth device
-     * @param context      application context
+     * @param gattInfo     device gatt information
      */
     public BleDevice(BluetoothDevice sourceDevice, DeviceGattInfo gattInfo) {
         Log.v("JavaBleDevice", "Constructor");

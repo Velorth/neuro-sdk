@@ -23,16 +23,16 @@ import java.util.List;
 /**
  * Create instance of this class to use notification mechanism for your subscribers
  * Usage:
- * public SubscribersNotifier<myParamType> myEvent = new SubscribersNotifier<myParamType>();
+ * public SubscribersNotifier myEvent = new SubscribersNotifier();
  * ...
  * myEvent.sendNotification(param);
  * ...
  * <p>
  * To subscribe do the following:
- * private INotificationCallback<myParamType> _myScanCallback = new INotificationCallback<myParamType>()
+ * private INotificationCallback _myScanCallback = new INotificationCallback()
  * {
  *
- * @Override public void onNotify(myParamType nParam)
+ * public void onNotify(myParamType nParam)
  * {
  * //Handle notification
  * }
