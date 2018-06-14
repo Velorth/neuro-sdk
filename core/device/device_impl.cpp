@@ -9,16 +9,17 @@ namespace Neuro {
 DeviceImpl::~DeviceImpl(){}
 
 void DeviceImpl::connect(){
-    Expects(mBleDevice != nullptr);
-    mBleDevice->connect();
+    Expects(mParamReader != nullptr);
+    mParamReader->requestConnect();
 }
 
 void DeviceImpl::disconnect(){
-    Expects(mBleDevice != nullptr);
-    mBleDevice->disconnect();
+    Expects(mParamReader != nullptr);
+    mParamReader->requestDisconnect();
 }
 
 void DeviceImpl::subscribeDataReceived() {
+    Expects(mBleDevice != nullptr);
     mBleDevice->setDataReceivedCallback([=](auto&& data) {
         mDataReceivedQueue.exec([=](){
             onDataReceived(std::forward<decltype(data)>(data));
@@ -27,6 +28,7 @@ void DeviceImpl::subscribeDataReceived() {
 }
 
 void DeviceImpl::subscribeStatusReceived() {
+    Expects(mBleDevice != nullptr);
     mBleDevice->setStatusReceivedCallback([=](auto&& data) {
         mStatusReceivedQueue.exec([=](){
             onStatusDataReceived(std::forward<decltype(data)>(data));

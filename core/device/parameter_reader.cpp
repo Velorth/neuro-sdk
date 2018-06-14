@@ -14,6 +14,17 @@ ParameterReader::ParameterReader(std::shared_ptr<BleDevice> ble_device,
     subscribeBleDeviceStateChanged();
 }
 
+void ParameterReader::requestConnect(){
+    Expects(mBleDevice != nullptr);
+    mBleDevice->connect();
+}
+
+void ParameterReader::requestDisconnect(){
+    Expects(mBleDevice != nullptr);
+    mPendingDisconnectRequest = true;
+    mBleDevice->disconnect();
+}
+
 typename ParamValue<Parameter::Name>::Type ParameterReader::readName() const {
     Expects(mBleDevice != nullptr);
     return mBleDevice->getName();
@@ -74,6 +85,12 @@ void ParameterReader::onBleDisconnected(BleDeviceError error){
         LOG_DEBUG_V("Ble device disconnected. Device %s, address: %s",
                     mBleDevice->getName().c_str(),
                     mBleDevice->getNetAddress().c_str());
+        if (!mPendingDisconnectRequest){
+            mBleDevice->connect();
+        }
+        else {
+            mPendingDisconnectRequest = false;
+        }
     }
 }
 

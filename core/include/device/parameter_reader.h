@@ -15,6 +15,8 @@ public:
     ParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t);
     virtual ~ParameterReader() = default;
 
+    void requestConnect();
+    void requestDisconnect();
     typename ParamValue<Parameter::Name>::Type readName() const;
     typename ParamValue<Parameter::State>::Type readState() const;
     typename ParamValue<Parameter::Address>::Type readAddress() const;
@@ -52,6 +54,7 @@ private:
 
     std::shared_ptr<BleDevice> mBleDevice;
     DeviceState mState{DeviceState::Disconnected};
+    bool mPendingDisconnectRequest{false};
     param_changed_callback_t parameterChangedCallback;
 
     void subscribeBleDeviceStateChanged();
