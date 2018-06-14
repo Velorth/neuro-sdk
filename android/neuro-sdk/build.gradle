@@ -136,8 +136,8 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 bintray {
-    user = 'neuromd'
-    key = 'ff7b2fd02aafd0ddf53b267bc6a2029fedce58f3'
+    user = publishUser
+    key = publishKey
 
     configurations = ['archives']
     pkg {
