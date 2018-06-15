@@ -20,9 +20,6 @@
 #include <mutex>
 #include <condition_variable>
 #include "device/device.h"
-#ifdef __ANDROID__
-#include <jni.h>
-#endif
 
 namespace Neuro {
 
@@ -53,12 +50,6 @@ private:
 
     std::unique_ptr<Device> onNewBleDevice(std::unique_ptr<BleDevice>);
 };
-
-#ifdef __ANDROID__
-std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context);
-#else
-std::unique_ptr<DeviceScanner> createDeviceScanner();
-#endif
 
 }
 #endif //NEURO_CONNECTION_H

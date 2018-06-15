@@ -17,9 +17,10 @@
 #ifndef ble_scanner_objc_h
 #define ble_scanner_objc_h
 
-#import "ble_delegate.h"
-#include "device_scanner.h"
+#include "ble_delegate.h"
+#include "device_scanner/device_scanner.h"
 
+namespace Neuro {
 
 class NCBleScanner: public DeviceScanner
 {
@@ -43,5 +44,5 @@ private:
     std::function<void(std::shared_ptr<BleDevice>)> deviceFoundCallbackFunc;
 };
 
-
+}
 #endif /* ble_scanner__objc_h */

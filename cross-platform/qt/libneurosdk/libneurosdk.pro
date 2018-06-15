@@ -2,7 +2,7 @@ QT -= core gui
 
 TARGET = neurosdk
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += sharedlib
 
 DEFINES += LIBNEUROSDK_LIBRARY
 DEFINES += GSL_THROW_ON_CONTRACT_VIOLATION
@@ -17,7 +17,7 @@ INCLUDEPATH += ../../../utils/dsp/include
 linux:!android:!ios:!macx: INCLUDEPATH += ../../../core/linux/include
 android: INCLUDEPATH += ../../../core/android/include
 win32: INCLUDEPATH += ../../../core/windows/include
-ios: macx: INCLUDEPATH += ../../../core/ios/include
+INCLUDEPATH += ../../../core/ios/include
 
 
 CONFIG += c++14
@@ -39,6 +39,7 @@ HEADERS += $$files(../../../core/include/ble/*.h)
 HEADERS += $$files(../../../core/include/ble/emulator/*.h)
 HEADERS += $$files(../../../core/include/channels/*.h)
 HEADERS += $$files(../../../core/include/device/*.h)
+HEADERS += $$files(../../../core/include/device_scanner/*.h)
 HEADERS += $$files(../../../core/include/device/brainbit/*.h)
 HEADERS += $$files(../../../core/include/device/callibri/*.h)
 HEADERS += $$files(../../../core/include/signal/*.h)
@@ -61,36 +62,41 @@ HEADERS += $$files(../../../core/include/ble/android/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
 }
 
-ios: macx:{
+
 HEADERS += $$files(../../../core/include/ble/ios/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
-}
+
 
 SOURCES += $$files(../../../core/*.cpp)
 SOURCES += $$files(../../../core/ble/*.cpp)
 SOURCES += $$files(../../../core/ble/emulator/*.cpp)
 SOURCES += $$files(../../../core/channels/*.cpp)
 SOURCES += $$files(../../../core/device/*.cpp)
+SOURCES += $$files(../../../core/device_scanner/*.cpp)
 SOURCES += $$files(../../../core/device/brainbit/*.cpp)
 SOURCES += $$files(../../../core/device/callibri/*.cpp)
 SOURCES += $$files(../../../utils/network/*.cpp)
 
 linux:!android:!ios:!macx:{
 SOURCES+=$$files(../../../core/ble/linux/*.cpp)
+SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
 }
 
 android{
 SOURCES+=$$files(../../../core/ble/android/*.cpp)
+SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
 }
 
-ios: macx:{
+
 SOURCES+=$$files(../../../core/ble/ios/*.mm)
+SOURCES+=$$files(../../../core/device_scanner/mm/*.mm)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
-}
+
 
 win32:{
 SOURCES+=$$files(../../../core/ble/win/*.cpp)
+SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
 SOURCES += $$files(../../../utils/network/windows/*.cpp)
 }

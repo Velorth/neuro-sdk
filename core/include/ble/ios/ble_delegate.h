@@ -17,9 +17,8 @@
 #ifndef ble_delegate_h
 #define ble_delegate_h
 
-#import <CoreBluetooth/CoreBluetooth.h>
-#include "device_info.h"
-#include "device_comm_interface.h"
+#include <CoreBluetooth/CoreBluetooth.h>
+#include "ble/ble_device_info.h"
 
 @interface CBScannerDelegate:NSObject <CBCentralManagerDelegate>
 
@@ -36,7 +35,7 @@
 
 @interface CBDeviceDelegate:NSObject <CBPeripheralDelegate>
 
--(id)initWithGattInfo: (std::shared_ptr<DeviceGattInfo>) gattInfo;
+-(id)initWithGattInfo: (std::shared_ptr<Neuro::DeviceGattInfo>) gattInfo;
 
 -(bool)sendMessage:(void*)data length:(size_t)length;
 -(void)setCommunicationCallbacks: (std::shared_ptr<DeviceCommInterface>) commInterface;

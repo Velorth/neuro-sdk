@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#import "ble_delegate.h"
+#import "ble/ios/ble_delegate.h"
 #include <list>
 
 

@@ -17,8 +17,10 @@
 #ifndef ble_device_objc_h
 #define ble_device_objc_h
 
-#include "ble_device.h"
+#include "ble/ble_device.h"
 #import "ble_delegate.h"
+
+namespace Neuro{
 
 class NCBleDevice: public BleDevice
 {
@@ -47,4 +49,5 @@ private:
     void onDeviceError();
 };
 
+}
 #endif /* ble_device_objc_h */
