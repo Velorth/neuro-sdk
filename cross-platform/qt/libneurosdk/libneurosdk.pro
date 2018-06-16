@@ -45,6 +45,7 @@ HEADERS += $$files(../../../core/include/device/callibri/*.h)
 HEADERS += $$files(../../../core/include/signal/*.h)
 HEADERS += $$files(../../../utils/network/*.h)
 HEADERS += $$files(../../../utils/dsp/include/*.h)
+HEADERS += $$files(../../../utils/dsp/include/filter/*.h)
 HEADERS += $$files(../../../utils/gsl/include/gsl/*)
 
 win32{
@@ -62,10 +63,10 @@ HEADERS += $$files(../../../core/include/ble/android/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
 }
 
-
+ios:macx{
 HEADERS += $$files(../../../core/include/ble/ios/*.h)
 HEADERS += $$files(../../../utils/network/posix/*.h)
-
+}
 
 SOURCES += $$files(../../../core/*.cpp)
 SOURCES += $$files(../../../core/ble/*.cpp)
@@ -89,11 +90,11 @@ SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
 }
 
-
+ios:macx{
 SOURCES+=$$files(../../../core/ble/ios/*.mm)
 SOURCES+=$$files(../../../core/device_scanner/mm/*.mm)
 SOURCES += $$files(../../../utils/network/posix/*.cpp)
-
+}
 
 win32:{
 SOURCES+=$$files(../../../core/ble/win/*.cpp)

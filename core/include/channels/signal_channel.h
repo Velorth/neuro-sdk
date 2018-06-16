@@ -2,16 +2,16 @@
 #define SIGNAL_CHANNEL_H
 
 #include "base_channel.h"
+#include "filter/digital_filter.h"
 
 namespace Neuro {
 
 class SignalChannel final : public BaseChannel<signal_sample_t> {
-private:
+public:    
     class Impl;
-    std::unique_ptr<Impl> mImpl;
 
-public:
     SignalChannel(std::shared_ptr<Device>, const ChannelInfo & = ChannelInfo::Signal);
+    SignalChannel(std::shared_ptr<Device>, DSP::DigitalFilterPtr<signal_sample_t> &&, const ChannelInfo & = ChannelInfo::Signal);
     ~SignalChannel();
 
     length_listener_ptr subscribeLengthChanged(length_callback_t) noexcept override ;
@@ -21,6 +21,9 @@ public:
     std::weak_ptr<Device> underlyingDevice() const noexcept override;
     sampling_frequency_t samplingFrequency() const noexcept override;
     void setSamplingFrequency(sampling_frequency_t) override;
+
+private:
+    std::unique_ptr<Impl> mImpl;
 };
 
 }
