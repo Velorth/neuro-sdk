@@ -1,6 +1,7 @@
 #include "channels/channel_info.h"
 #include "channels/signal_channel.h"
 #include "channels/raw_signal_channel_impl.h"
+#include "channels/filtered_signal_channel_impl.h"
 
 namespace Neuro {
 
@@ -11,10 +12,10 @@ SignalChannel::SignalChannel(std::shared_ptr<Device> device, const ChannelInfo &
 }
 
 SignalChannel::SignalChannel(std::shared_ptr<Device> device,
-                             DSP::DigitalFilterPtr<signal_sample_t> &&filter_ptr,
+                             std::vector<DSP::DigitalFilterPtr<signal_sample_t>> &&filters,
                              const ChannelInfo &channel_info) :
     BaseChannel(channel_info),
-    mImpl(std::make_unique<RawSignalChannelImpl>(device, channel_info)){
+    mImpl(std::make_unique<FilteredSignalChannelImpl>(device, channel_info, std::move(filters))){
 
 }
 

@@ -11,12 +11,12 @@ private:
     static constexpr const char *class_name = "RawSignalChannelImpl";
     static constexpr std::size_t FilteredBufferSize = 75000; //5 minutes;
     SafeBuffer<signal_sample_t, FilteredBufferSize> mFilteredBuffer;
+    mutable Notifier<void, data_length_t> mLengthNotifier{class_name};
+    SignalChannel::length_listener_ptr mSignalLengthListener;
 
 public:
     RawSignalChannelImpl(std::shared_ptr<Device> device, const ChannelInfo &info);
-    SignalChannel::data_container readData(data_offset_t offset, data_length_t length) const override;
-    data_length_t totalLength() const noexcept override;
-    data_length_t bufferSize() const noexcept override;
+    SignalChannel::length_listener_ptr subscribeLengthChanged(SignalChannel::length_callback_t callback) noexcept override;
 };
 
 }
