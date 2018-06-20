@@ -24,6 +24,7 @@ private:
     std::vector<DSP::DigitalFilterPtr<signal_sample_t>> mFilterCollection;
     SafeBuffer<signal_sample_t, FilteredBufferSize> mFilteredBuffer;
 
+    std::vector<signal_sample_t> filterData(const std::vector<signal_sample_t> &signal_data);
     void onBufferLengthChanged(std::size_t length);
 };
 
