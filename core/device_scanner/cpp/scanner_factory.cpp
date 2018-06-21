@@ -16,17 +16,18 @@
 namespace Neuro {
 
 #ifdef __ANDROID__
-std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context){
-    auto bleScanner = std::make_unique<CurrentPlatformScanner>(context);
-    auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
-    return deviceScanner;
-}
-#else
-std::unique_ptr<DeviceScanner> createDeviceScanner(){
-    auto bleScanner = std::make_unique<CurrentPlatformScanner>();
-    auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
-    return deviceScanner;
-}
 
-}
+    std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context) {
+        auto bleScanner = std::make_unique<CurrentPlatformScanner>(context);
+        auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
+        return deviceScanner;
+    }
+
+#else
+    std::unique_ptr<DeviceScanner> createDeviceScanner(){
+        auto bleScanner = std::make_unique<CurrentPlatformScanner>();
+        auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
+        return deviceScanner;
+    }
 #endif
+}

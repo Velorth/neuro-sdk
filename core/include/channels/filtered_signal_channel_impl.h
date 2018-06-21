@@ -12,7 +12,7 @@ public:
                               const ChannelInfo &info,
                               std::vector<DSP::DigitalFilterPtr<signal_sample_t>> &&filters);
 
-    SignalChannel::length_listener_ptr subscribeLengthChanged(SignalChannel::length_callback_t callback) noexcept;
+    SignalChannel::length_listener_ptr subscribeLengthChanged(SignalChannel::length_callback_t callback) noexcept override;
     SignalChannel::data_container readData(data_offset_t offset, data_length_t length) const override;
     data_length_t totalLength() const noexcept override;
     data_length_t bufferSize() const noexcept override;

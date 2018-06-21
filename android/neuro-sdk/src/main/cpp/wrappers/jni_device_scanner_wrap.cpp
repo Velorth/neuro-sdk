@@ -16,7 +16,7 @@
 
 
 #include "wrappers/device/jni_device_wrap.h"
-#include "device_scanner.h"
+#include "device_scanner/scanner_factory.h"
 #include "wrappers/scan_state_callback.h"
 #include "wrappers/jni_connection_callback.h"
 #include "logger.h"

@@ -20,6 +20,7 @@ message(STATUS ${SRC_DIR_CORE})
 message(STATUS ${SRC_DIR_ANDROID})
 file(GLOB_RECURSE SOURCE_FILES_CORE_CHANNELS ${SRC_DIR_CORE}/channels/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_CORE_DEVICE ${SRC_DIR_CORE}/device/*.cpp)
+file(GLOB_RECURSE SOURCE_FILES_CORE_SCANNER ${SRC_DIR_CORE}/device_scanner/*.cpp)
 file(GLOB SOURCE_FILES_CORE_COMMON ${SRC_DIR_CORE}/*.cpp)
 file(GLOB SOURCE_FILES_CORE_BLE_COMMON ${SRC_DIR_CORE}/ble/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_CORE_BLE_EMUL ${SRC_DIR_CORE}/ble/emulator/*.cpp)
@@ -38,6 +39,7 @@ add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)
 add_library(neurosdk SHARED  ${SOURCE_FILES_CORE_COMMON}
                                 ${SOURCE_FILES_CORE_CHANNELS}
                                 ${SOURCE_FILES_CORE_DEVICE}
+                                ${SOURCE_FILES_CORE_SCANNER}
                                 ${SOURCE_FILES_CORE_BLE_COMMON}
                                 ${SOURCE_FILES_CORE_BLE_EMUL}
                                 ${SOURCE_FILES_CORE_BLE_ANDROID}

@@ -14,8 +14,20 @@ Java_com_neuromd_neurosdk_channels_SignalChannel_create(JNIEnv *env, jclass type
 
 JNIEXPORT jlong JNICALL
 Java_com_neuromd_neurosdk_channels_SignalChannel_createWithInfo(JNIEnv *env, jclass type,
-                                                         jobject device, jobject info) {
+                                                                jobject device, jobject info) {
     return createChannelFromDevice<JniSignalChannelWrap>(env, device, info);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_createWithFiltersAndInfo(JNIEnv *env, jclass type,
+                                                                jobject device, jobjectArray filters, jobject info) {
+    return createChannelFromDevice<JniSignalChannelWrap>(env, device, info, filters);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_createWithFilters(JNIEnv *env, jclass type,
+                                                                          jobject device, jobjectArray filters) {
+    return createChannelFromDevice<JniSignalChannelWrap>(env, device, filters);
 }
 
 JNIEXPORT jobject

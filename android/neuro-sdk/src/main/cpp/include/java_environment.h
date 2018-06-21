@@ -205,6 +205,8 @@ Enum enumFromJavaObj(JNIEnv *env, jobject enum_obj){
     return enumVal;
 }
 
+
+
 template <typename T>
 std::enable_if_t<!std::is_enum<T>::value, T> get_java_obj_value(JNIEnv *, jobject);
 

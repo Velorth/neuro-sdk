@@ -28,6 +28,20 @@ public class SignalChannel extends BaseChannel<Double> {
         init();
     }
 
+    public SignalChannel(Device device, Filter[] filters) {
+        mNativeObjPtr = createWithFilters(device, filters);
+        Assert.ensures(mNativeObjPtr != 0,
+                "Signal channel native object is null");
+        init();
+    }
+
+    public SignalChannel(Device device, Filter[] filters, ChannelInfo info) {
+        mNativeObjPtr = createWithFiltersAndInfo(device, filters, info);
+        Assert.ensures(mNativeObjPtr != 0,
+                "Signal channel native object is null");
+        init();
+    }
+
 
     public void finalize() throws Throwable {
         deleteNative();
@@ -59,6 +73,8 @@ public class SignalChannel extends BaseChannel<Double> {
     
     private static native long create(Device device);
     private static native long createWithInfo(Device device, ChannelInfo info);
+    private static native long createWithFilters(Device device, Filter[] filters);
+    private static native long createWithFiltersAndInfo(Device device, Filter[] filters, ChannelInfo info);
     private native void init();
     private native void deleteNative();
 }
