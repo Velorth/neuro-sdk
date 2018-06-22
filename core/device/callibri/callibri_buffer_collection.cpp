@@ -3,21 +3,21 @@
 namespace Neuro {
 
 CallibriSignalBuffer &CallibriBufferCollection::signalBuffer(){
-    if (mSignalBuffer == nullptr){
+    if (!hasSignalBuffer()){
         throw std::runtime_error("Device does not have signal buffer");
     }
     return *mSignalBuffer;
 }
 
 CallibriRespirationBuffer &CallibriBufferCollection::respirationBuffer(){
-    if (mRespirationBuffer == nullptr){
+    if (!hasRespirationBuffer()){
         throw std::runtime_error("Device does not have respiration buffer");
     }
     return *mRespirationBuffer;
 }
 
 CallibriMemsBuffer &CallibriBufferCollection::memsBuffer(){
-    if (mMemsBuffer == nullptr){
+    if (!hasMemsBuffer()){
         throw std::runtime_error("Device does not have MEMS buffer");
     }
     return *mMemsBuffer;
@@ -25,7 +25,7 @@ CallibriMemsBuffer &CallibriBufferCollection::memsBuffer(){
 
 
 CallibriOrientationBuffer &CallibriBufferCollection::orientationBuffer(){
-    if (mOrientationBuffer == nullptr){
+    if (!hasOrientationBuffer()){
         throw std::runtime_error("Device does not have angle buffer");
     }
     return *mOrientationBuffer;
@@ -45,6 +45,22 @@ void CallibriBufferCollection::setMemsBuffer(std::unique_ptr<CallibriMemsBuffer>
 
 void CallibriBufferCollection::setOrientationBuffer(std::unique_ptr<CallibriOrientationBuffer> &&buffer){
     mOrientationBuffer = std::move(buffer);
+}
+
+bool CallibriBufferCollection::hasSignalBuffer() const noexcept {
+    return mSignalBuffer != nullptr;
+}
+
+bool CallibriBufferCollection::hasRespirationBuffer() const noexcept {
+    return mRespirationBuffer != nullptr;
+}
+
+bool CallibriBufferCollection::hasMemsBuffer() const noexcept {
+    return mMemsBuffer != nullptr;
+}
+
+bool CallibriBufferCollection::hasOrientationBuffer() const noexcept {
+    return mOrientationBuffer != nullptr;
 }
 
 std::size_t CallibriBufferCollection::packetsLost(){

@@ -209,21 +209,27 @@ void CallibriParameterReader::createBuffers(std::vector<CallibriModule> modules)
         throw std::runtime_error("Unable create buffers. Collection ptr is null");
     }
 
-    if (std::find(modules.begin(), modules.end(), CallibriModule::Signal) != modules.end()){
+    if (std::find(modules.begin(), modules.end(), CallibriModule::Signal) != modules.end()
+            && !bufferCollectionPtr->hasSignalBuffer()){
         auto signalBuffer = std::make_unique<CallibriSignalBuffer>(mCommonParameters);
         bufferCollectionPtr->setSignalBuffer(std::move(signalBuffer));
     }
 
-    if (std::find(modules.begin(), modules.end(), CallibriModule::Respiration) != modules.end()){
+    if (std::find(modules.begin(), modules.end(), CallibriModule::Respiration) != modules.end()
+            && !bufferCollectionPtr->hasRespirationBuffer()){
         auto respBuffer = std::make_unique<CallibriRespirationBuffer>();
         bufferCollectionPtr->setRespirationBuffer(std::move(respBuffer));
     }
 
     if (std::find(modules.begin(), modules.end(), CallibriModule::MEMS) != modules.end()){
-        auto memsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParameters);
-        bufferCollectionPtr->setMemsBuffer(std::move(memsBuffer));
-        auto angleBuffer = std::make_unique<CallibriOrientationBuffer>();
-        bufferCollectionPtr->setOrientationBuffer(std::move(angleBuffer));
+        if (!bufferCollectionPtr->hasMemsBuffer()){
+            auto memsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParameters);
+            bufferCollectionPtr->setMemsBuffer(std::move(memsBuffer));
+        }
+        if (!bufferCollectionPtr->hasOrientationBuffer()){
+            auto angleBuffer = std::make_unique<CallibriOrientationBuffer>();
+            bufferCollectionPtr->setOrientationBuffer(std::move(angleBuffer));
+        }
     }
 }
 

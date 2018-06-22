@@ -24,6 +24,8 @@
 #include "filter/digital_filter.h"
 #include "filter/iir_filter.h"
 #include "filter/low_pass_filter.h"
+#include "filter/high_pass_filter.h"
+#include "filter/band_stop_filter.h"
 
 
 inline Neuro::ChannelInfo extractInfo(JNIEnv *env, jobject info) {
@@ -47,14 +49,46 @@ inline Neuro::ChannelInfo extractInfo(JNIEnv *env, jobject info) {
     return channelInfo;
 }
 
-inline DSP::DigitalFilterPtr<double> filterFromName(const std::string &filter_name){
-    if (filter_name == "LowPass_27_SF125") {
-        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<27, 5, 125>>>();
-    }
-    else if (filter_name == "LowPass_1_SF125_Reverse"){
-        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<1, 3, 125>>>();
-    }
-    else {
+inline DSP::DigitalFilterPtr<double> filterFromName(const std::string &filter_name) {
+    if (filter_name == "LowPass_1Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<1, 2, 125>>>();
+    } else if (filter_name == "LowPass_1Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<1, 2, 125>>>();
+    } else if (filter_name == "LowPass_5Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<5, 3, 125>>>();
+    } else if (filter_name == "LowPass_5Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<5, 3, 125>>>();
+    } else if (filter_name == "LowPass_15Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<15, 4, 125>>>();
+    } else if (filter_name == "LowPass_15Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<15, 4, 125>>>();
+    } else if (filter_name == "LowPass_27Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<27, 4, 125>>>();
+    } else if (filter_name == "LowPass_27Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<27, 4, 125>>>();
+    } else if (filter_name == "LowPass_30Hz_SF250") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<30, 2, 250>>>();
+    } else if (filter_name == "LowPass_30Hz_SF250_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::LowPass<30, 2, 250>>>();
+    } else if (filter_name == "HighPass_2Hz_SF250") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::HighPass<2, 2, 250>>>();
+    } else if (filter_name == "HighPass_2Hz_SF250_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::HighPass<2, 2, 250>>>();
+    } else if (filter_name == "HighPass_3Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::HighPass<3, 2, 125>>>();
+    } else if (filter_name == "HighPass_3Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::HighPass<3, 2, 125>>>();
+    } else if (filter_name == "HighPass_5Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::HighPass<5, 3, 125>>>();
+    } else if (filter_name == "HighPass_5Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::HighPass<5, 3, 125>>>();
+    } else if (filter_name == "HighPass_11Hz_SF125") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::HighPass<11, 3, 125>>>();
+    } else if (filter_name == "HighPass_11Hz_SF125_Reverse") {
+        return std::make_unique<DSP::IIRReverseFilter<DSP::HighPass<11, 3, 125>>>();
+    } else if (filter_name == "BandStop_45_55Hz_SF250") {
+        return std::make_unique<DSP::IIRForwardFilter<DSP::BandStop<45, 55, 4, 250>>>();
+    } else {
         throw std::runtime_error("Filter is not supported");
     }
 }
@@ -138,6 +172,22 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device, jobject info, jobject
     }
     catch (std::exception &e){
         __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromDevice",
+                            "Error creating channel: %s", e.what());
+        jni::java_throw(env, "java/lang/IllegalArgumentException", e);
+        return 0;
+    }
+}
+
+template <typename NewChannelWrap, typename SrcChannelWrap>
+jlong createChannelFromChannel(JNIEnv *env, jobject src_channel){
+    auto& srcChannelWrapPtr = *extract_pointer<SrcChannelWrap>(env, src_channel);
+    try {
+        auto channel = std::make_shared<typename NewChannelWrap::obj_t>(*srcChannelWrapPtr);
+        auto channelWrap = new NewChannelWrap(channel);
+        return reinterpret_cast<jlong>(channelWrap);
+    }
+    catch (std::exception &e){
+        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromChannel",
                             "Error creating channel: %s", e.what());
         jni::java_throw(env, "java/lang/IllegalArgumentException", e);
         return 0;
