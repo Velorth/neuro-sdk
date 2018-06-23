@@ -21,6 +21,11 @@ public:
     void setMemsBuffer(std::unique_ptr<CallibriMemsBuffer>&&);
     void setOrientationBuffer(std::unique_ptr<CallibriOrientationBuffer>&&);
 
+    bool hasSignalBuffer() const noexcept;
+    bool hasRespirationBuffer() const noexcept;
+    bool hasMemsBuffer() const noexcept;
+    bool hasOrientationBuffer() const noexcept;
+
     std::size_t packetsLost();
     std::size_t packetsReceived();
 
