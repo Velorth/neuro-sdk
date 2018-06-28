@@ -3,6 +3,7 @@
 
 #include <string>
 #include "device.h"
+#include "lib_export.h"
 
 namespace Neuro {
 template<>
@@ -94,77 +95,77 @@ struct ParamValue<Parameter::MotionAssistantParamPack>{
  * Parameters read
  */
 template<>
-typename ParamValue<Parameter::Name>::Type Device::readParam<Parameter::Name>() const;
+SDK_SHARED typename ParamValue<Parameter::Name>::Type Device::readParam<Parameter::Name>() const;
 template<>
-typename ParamValue<Parameter::State>::Type Device::readParam<Parameter::State>() const;
+SDK_SHARED typename ParamValue<Parameter::State>::Type Device::readParam<Parameter::State>() const;
 template<>
-typename ParamValue<Parameter::Address>::Type Device::readParam<Parameter::Address>() const;
+SDK_SHARED typename ParamValue<Parameter::Address>::Type Device::readParam<Parameter::Address>() const;
 template<>
-typename ParamValue<Parameter::SerialNumber>::Type Device::readParam<Parameter::SerialNumber>() const;
+SDK_SHARED typename ParamValue<Parameter::SerialNumber>::Type Device::readParam<Parameter::SerialNumber>() const;
 template<>
-typename ParamValue<Parameter::HardwareFilterState>::Type Device::readParam<Parameter::HardwareFilterState>() const;
+SDK_SHARED typename ParamValue<Parameter::HardwareFilterState>::Type Device::readParam<Parameter::HardwareFilterState>() const;
 template<>
-typename ParamValue<Parameter::FirmwareMode>::Type Device::readParam<Parameter::FirmwareMode>() const;
+SDK_SHARED typename ParamValue<Parameter::FirmwareMode>::Type Device::readParam<Parameter::FirmwareMode>() const;
 template<>
-typename ParamValue<Parameter::SamplingFrequency>::Type Device::readParam<Parameter::SamplingFrequency>() const;
+SDK_SHARED typename ParamValue<Parameter::SamplingFrequency>::Type Device::readParam<Parameter::SamplingFrequency>() const;
 template<>
-typename ParamValue<Parameter::Gain>::Type Device::readParam<Parameter::Gain>() const;
+SDK_SHARED typename ParamValue<Parameter::Gain>::Type Device::readParam<Parameter::Gain>() const;
 template<>
-typename ParamValue<Parameter::Offset>::Type Device::readParam<Parameter::Offset>() const;
+SDK_SHARED typename ParamValue<Parameter::Offset>::Type Device::readParam<Parameter::Offset>() const;
 template<>
-typename ParamValue<Parameter::ExternalSwitchState>::Type Device::readParam<Parameter::ExternalSwitchState>() const;
+SDK_SHARED typename ParamValue<Parameter::ExternalSwitchState>::Type Device::readParam<Parameter::ExternalSwitchState>() const;
 template<>
-typename ParamValue<Parameter::ADCInputState>::Type Device::readParam<Parameter::ADCInputState>() const;
+SDK_SHARED typename ParamValue<Parameter::ADCInputState>::Type Device::readParam<Parameter::ADCInputState>() const;
 template<>
-typename ParamValue<Parameter::AccelerometerSens>::Type Device::readParam<Parameter::AccelerometerSens>() const;
+SDK_SHARED typename ParamValue<Parameter::AccelerometerSens>::Type Device::readParam<Parameter::AccelerometerSens>() const;
 template<>
-typename ParamValue<Parameter::GyroscopeSens>::Type Device::readParam<Parameter::GyroscopeSens>() const;
+SDK_SHARED typename ParamValue<Parameter::GyroscopeSens>::Type Device::readParam<Parameter::GyroscopeSens>() const;
 template<>
-typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const;
+SDK_SHARED typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const;
 template<>
-typename ParamValue<Parameter::MotionAssistantState>::Type Device::readParam<Parameter::MotionAssistantState>() const;
+SDK_SHARED typename ParamValue<Parameter::MotionAssistantState>::Type Device::readParam<Parameter::MotionAssistantState>() const;
 template<>
-typename ParamValue<Parameter::StimulatorParamPack>::Type Device::readParam<Parameter::StimulatorParamPack>() const;
+SDK_SHARED typename ParamValue<Parameter::StimulatorParamPack>::Type Device::readParam<Parameter::StimulatorParamPack>() const;
 template<>
-typename ParamValue<Parameter::MotionAssistantParamPack>::Type Device::readParam<Parameter::MotionAssistantParamPack>() const;
+SDK_SHARED typename ParamValue<Parameter::MotionAssistantParamPack>::Type Device::readParam<Parameter::MotionAssistantParamPack>() const;
 
 /*
  * Parameters set
  */
 template<>
-bool Device::setParam<Parameter::Name>(typename ParamValue<Parameter::Name>::Type);
+SDK_SHARED bool Device::setParam<Parameter::Name>(typename ParamValue<Parameter::Name>::Type);
 template<>
-bool Device::setParam<Parameter::State>(typename ParamValue<Parameter::State>::Type);
+SDK_SHARED bool Device::setParam<Parameter::State>(typename ParamValue<Parameter::State>::Type);
 template<>
-bool Device::setParam<Parameter::Address>(typename ParamValue<Parameter::Address>::Type);
+SDK_SHARED bool Device::setParam<Parameter::Address>(typename ParamValue<Parameter::Address>::Type);
 template<>
-bool Device::setParam<Parameter::SerialNumber>(typename ParamValue<Parameter::SerialNumber>::Type);
+SDK_SHARED bool Device::setParam<Parameter::SerialNumber>(typename ParamValue<Parameter::SerialNumber>::Type);
 template<>
-bool Device::setParam<Parameter::HardwareFilterState>(typename ParamValue<Parameter::HardwareFilterState>::Type);
+SDK_SHARED bool Device::setParam<Parameter::HardwareFilterState>(typename ParamValue<Parameter::HardwareFilterState>::Type);
 template<>
-bool Device::setParam<Parameter::FirmwareMode>(typename ParamValue<Parameter::FirmwareMode>::Type);
+SDK_SHARED bool Device::setParam<Parameter::FirmwareMode>(typename ParamValue<Parameter::FirmwareMode>::Type);
 template<>
-bool Device::setParam<Parameter::SamplingFrequency>(typename ParamValue<Parameter::SamplingFrequency>::Type);
+SDK_SHARED bool Device::setParam<Parameter::SamplingFrequency>(typename ParamValue<Parameter::SamplingFrequency>::Type);
 template<>
-bool Device::setParam<Parameter::Gain>(typename ParamValue<Parameter::Gain>::Type);
+SDK_SHARED bool Device::setParam<Parameter::Gain>(typename ParamValue<Parameter::Gain>::Type);
 template<>
-bool Device::setParam<Parameter::Offset>(typename ParamValue<Parameter::Offset>::Type);
+SDK_SHARED bool Device::setParam<Parameter::Offset>(typename ParamValue<Parameter::Offset>::Type);
 template<>
-bool Device::setParam<Parameter::ExternalSwitchState>(typename ParamValue<Parameter::ExternalSwitchState>::Type);
+SDK_SHARED bool Device::setParam<Parameter::ExternalSwitchState>(typename ParamValue<Parameter::ExternalSwitchState>::Type);
 template<>
-bool Device::setParam<Parameter::ADCInputState>(typename ParamValue<Parameter::ADCInputState>::Type);
+SDK_SHARED bool Device::setParam<Parameter::ADCInputState>(typename ParamValue<Parameter::ADCInputState>::Type);
 template<>
-bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Parameter::AccelerometerSens>::Type);
+SDK_SHARED bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Parameter::AccelerometerSens>::Type);
 template<>
-bool Device::setParam<Parameter::GyroscopeSens>(typename ParamValue<Parameter::GyroscopeSens>::Type);
+SDK_SHARED bool Device::setParam<Parameter::GyroscopeSens>(typename ParamValue<Parameter::GyroscopeSens>::Type);
 template<>
-bool Device::setParam<Parameter::StimulatorState>(typename ParamValue<Parameter::StimulatorState>::Type);
+SDK_SHARED bool Device::setParam<Parameter::StimulatorState>(typename ParamValue<Parameter::StimulatorState>::Type);
 template<>
-bool Device::setParam<Parameter::MotionAssistantState>(typename ParamValue<Parameter::MotionAssistantState>::Type);
+SDK_SHARED bool Device::setParam<Parameter::MotionAssistantState>(typename ParamValue<Parameter::MotionAssistantState>::Type);
 template<>
-bool Device::setParam<Parameter::StimulatorParamPack>(typename ParamValue<Parameter::StimulatorParamPack>::Type);
+SDK_SHARED bool Device::setParam<Parameter::StimulatorParamPack>(typename ParamValue<Parameter::StimulatorParamPack>::Type);
 template<>
-bool Device::setParam<Parameter::MotionAssistantParamPack>(typename ParamValue<Parameter::MotionAssistantParamPack>::Type);
+SDK_SHARED bool Device::setParam<Parameter::MotionAssistantParamPack>(typename ParamValue<Parameter::MotionAssistantParamPack>::Type);
 
 }
 

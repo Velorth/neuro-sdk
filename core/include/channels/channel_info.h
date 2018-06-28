@@ -2,10 +2,11 @@
 #define CHANNEL_INFO_H
 
 #include <string>
+#include "lib_export.h"
 
 namespace Neuro {
 
-class ChannelInfo final {
+class SDK_SHARED ChannelInfo final {
 public:
     enum class Type {
         Signal,

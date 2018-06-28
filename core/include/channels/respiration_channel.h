@@ -2,10 +2,11 @@
 #define RESPIRATION_CHANNEL_H
 
 #include "base_channel.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class RespirationChannel final : public BaseChannel<double> {
+class SDK_SHARED RespirationChannel final : public BaseChannel<double> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

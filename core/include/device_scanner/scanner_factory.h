@@ -2,6 +2,7 @@
 #define SCANNER_FACTORY_H
 
 #include <memory>
+#include "lib_export.h"
 #include "device_scanner.h"
 #ifdef __ANDROID__
 #include <jni.h>
@@ -12,7 +13,7 @@ namespace Neuro {
 #ifdef __ANDROID__
 std::unique_ptr<DeviceScanner> createDeviceScanner(jobject context);
 #else
-std::unique_ptr<DeviceScanner> createDeviceScanner();
+SDK_SHARED std::unique_ptr<DeviceScanner> createDeviceScanner();
 #endif
 
 }

@@ -2,10 +2,11 @@
 #define RESISTANCE_CHANNEL_H
 
 #include "base_channel.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class ResistanceChannel final : public BaseChannel<resistance_sample_t> {
+class SDK_SHARED ResistanceChannel final : public BaseChannel<resistance_sample_t> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

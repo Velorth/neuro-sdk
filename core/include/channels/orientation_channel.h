@@ -3,10 +3,11 @@
 
 #include "base_channel.h"
 #include "quaternion.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class OrientationChannel final : public BaseChannel<Quaternion> {
+class SDK_SHARED OrientationChannel final : public BaseChannel<Quaternion> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

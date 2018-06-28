@@ -3,10 +3,11 @@
 
 #include "base_channel.h"
 #include "filter/digital_filter.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class SignalChannel final : public BaseChannel<signal_sample_t> {
+class SDK_SHARED SignalChannel final : public BaseChannel<signal_sample_t> {
 public:    
     class Impl;
 

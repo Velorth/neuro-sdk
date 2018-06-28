@@ -6,6 +6,7 @@
 #include <functional>
 #include "channels/channel_info.h"
 #include "device_parameters.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
@@ -14,7 +15,7 @@ class DeviceImpl;
 template <Parameter>
 struct ParamValue;
 
-class Device final {
+class SDK_SHARED Device final {
 private:
     std::unique_ptr<DeviceImpl> mImpl;
 

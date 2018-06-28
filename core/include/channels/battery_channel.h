@@ -3,10 +3,11 @@
 
 #include <memory>
 #include "base_channel.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class BatteryChannel final : public BaseChannel<int> {
+class SDK_SHARED BatteryChannel final : public BaseChannel<int> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

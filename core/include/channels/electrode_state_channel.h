@@ -2,6 +2,7 @@
 #define ELECTRODE_STATE_CHANNEL_H
 
 #include "base_channel.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
@@ -11,7 +12,7 @@ enum class ElectrodeState {
     Detached
 };
 
-class ElectrodeStateChannel final : public BaseChannel<ElectrodeState> {
+class SDK_SHARED ElectrodeStateChannel final : public BaseChannel<ElectrodeState> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

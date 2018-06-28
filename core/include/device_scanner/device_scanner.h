@@ -20,13 +20,14 @@
 #include <mutex>
 #include <condition_variable>
 #include "device/device.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
 class BleScanner;
 class BleDevice;
 
-class DeviceScanner
+class SDK_SHARED DeviceScanner
 {
 public:
     DeviceScanner(std::unique_ptr<BleScanner> deviceScanner);

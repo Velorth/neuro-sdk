@@ -3,10 +3,11 @@
 
 #include "base_channel.h"
 #include "mems_data.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class MemsChannel final : public BaseChannel<MEMS> {
+class SDK_SHARED MemsChannel final : public BaseChannel<MEMS> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

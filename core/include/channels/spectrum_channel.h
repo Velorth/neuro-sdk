@@ -3,10 +3,11 @@
 
 #include <memory>
 #include "base_channel.h"
+#include "lib_export.h"
 
 namespace Neuro {
 
-class SpectrumChannel final : public BaseChannel<double> {
+class SDK_SHARED SpectrumChannel final : public BaseChannel<double> {
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

@@ -4,6 +4,7 @@
 #include "ma_device_params.h"
 #include "mems_device_params.h"
 #include "signal_device_params.h"
+#include "lib_export.h"
 #include <utility>
 
 namespace Neuro {
@@ -58,10 +59,10 @@ enum class ParamAccess {
     ReadNotify
 };
 
-std::string to_string(const DeviceState &);
-std::string to_string(const Command &);
-std::string to_string(const Parameter &);
-std::string to_string(const ParamAccess &);
+SDK_SHARED std::string to_string(const DeviceState &);
+SDK_SHARED std::string to_string(const Command &);
+SDK_SHARED std::string to_string(const Parameter &);
+SDK_SHARED std::string to_string(const ParamAccess &);
 
 template <Parameter>
 struct ParamValue;
