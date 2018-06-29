@@ -39,18 +39,6 @@ INCLUDEPATH += ../../../core/include
 INCLUDEPATH += ../../../utils/network/
 INCLUDEPATH += ../../../utils/gsl/include
 INCLUDEPATH += ../../../utils/dsp/include
-linux:!android:!ios:!macx {
-    INCLUDEPATH += ../../../core/linux/include
-}
-android {
-    INCLUDEPATH += ../../../core/android/include
-}
-win32 {
-    INCLUDEPATH += ../../../core/windows/include
-}
-ios:macx {
-    INCLUDEPATH += ../../../core/ios/include
-}
 #############################
 
 
@@ -172,5 +160,6 @@ win32 {
     target.path = $$(NEUROSDK)
     INSTALLS += target shared_headers shared_headers_channels shared_headers_device shared_headers_device_scanner shared_headers_filter
     LIBS += -lws2_32
+    LIBS += -lSetupApi
 }
 ##################

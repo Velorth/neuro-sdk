@@ -105,8 +105,13 @@ namespace Neuro {
         });
     }
 
-    void BluetoothScannerJni::setFilter(std::vector<std::string> filterList) {
-        emulator.setFilter(filterList);
+    void BluetoothScannerJni::setFilter(std::vector<std::shared_ptr<DeviceGattInfo>> filterList) {
+        std::vector<std::string> filterNames;
+        for (auto &gattInfo: filterList) {
+            auto names = gattInfo->getValidBtNames();
+            filterNames.insert(filterNames.end(), names.begin(), names.end());
+        }
+        emulator.setFilter(filterNames);
         jni::call_in_attached_thread([=](auto env) {
             //Creating filter object
             auto filterClass = env->FindClass("com/neuromd/bleconnection/device/DeviceFilter");
@@ -116,7 +121,8 @@ namespace Neuro {
                                                     "(Ljava/lang/String;)V");
 
             //Filling it with supported device names
-            for (auto filter: filterList) {
+
+            for (auto &filter : filterNames) {
                 auto javaFilter = env->NewStringUTF(filter.c_str());
                 env->CallVoidMethod(filterObject, addFilterMethod, javaFilter);
             }

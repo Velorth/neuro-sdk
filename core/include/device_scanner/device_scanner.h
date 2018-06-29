@@ -41,8 +41,9 @@ public:
     void subscribeScanStateChanged(std::function<void(bool)>);
     std::unique_ptr<Device> findDeviceByAddress(std::string address);
     void releaseDevice(std::string name, std::string address);
-private:
 
+private:
+    static constexpr const char *class_name = "DeviceScanner";
     std::shared_ptr<BleScanner> scanner;
     std::condition_variable stopScanCondition;
     std::mutex stopScanMutex;

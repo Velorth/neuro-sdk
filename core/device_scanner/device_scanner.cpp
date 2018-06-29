@@ -31,46 +31,19 @@ using std::chrono::milliseconds;
 namespace Neuro {
 
 DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):scanner(std::move(device_scanner)) {
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->trace("[%s: %s] Neuro connection constructor", "NeuroConnection", __FUNCTION__);
-
-    vector<string> filter;
-
-    {
-        auto brainBitValidNames = DeviceGattInfoCreator::getGattInfo(
-                DeviceGattType::BRAINBIT)->getValidBtNames();
-        filter.insert(filter.end(), brainBitValidNames.begin(), brainBitValidNames.end());
-    }
-
-    {
-        auto colibriRedValidNames = DeviceGattInfoCreator::getGattInfo(
-                DeviceGattType::COLIBRI_RED)->getValidBtNames();
-        filter.insert(filter.end(), colibriRedValidNames.begin(), colibriRedValidNames.end());
-    }
-
-    {
-        auto colibriBlueValidNames = DeviceGattInfoCreator::getGattInfo(
-                DeviceGattType::COLIBRI_BLUE)->getValidBtNames();
-        filter.insert(filter.end(), colibriBlueValidNames.begin(), colibriBlueValidNames.end());
-    }
-
-    {
-        auto colibriYellowValidNames = DeviceGattInfoCreator::getGattInfo(
-                DeviceGattType::COLIBRI_YELLOW)->getValidBtNames();
-        filter.insert(filter.end(), colibriYellowValidNames.begin(), colibriYellowValidNames.end());
-    }
-
-    {
-        auto colibriWhiteValidNames = DeviceGattInfoCreator::getGattInfo(
-                DeviceGattType::COLIBRI_WHITE)->getValidBtNames();
-        filter.insert(filter.end(), colibriWhiteValidNames.begin(), colibriWhiteValidNames.end());
-    }
-
+    vector<std::shared_ptr<DeviceGattInfo>> filter;
+    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::BRAINBIT));
+    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_RED));
+    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_BLUE));
+    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_YELLOW));
+    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_WHITE));
     scanner->setFilter(filter);
-    auto scannerCallback = [this, log](std::unique_ptr<BleDevice> bleDevice) {
+    auto scannerCallback = [=](std::unique_ptr<BleDevice> bleDevice) {
+        auto deviceName = bleDevice->getName();
+        auto deviceAddress = bleDevice->getNetAddress();
         auto neuroDevice = onNewBleDevice(std::move(bleDevice));
         if (neuroDevice) {
-            log->debug("[%s: %s] Notifying device found", "NeuroConnection", __FUNCTION__);
+            LOG_DEBUG_V("Notifying device %s [%s] found", deviceName.c_str(), deviceAddress.c_str());
             if (this->deviceFoundCallback) this->deviceFoundCallback(std::move(neuroDevice));
         }
     };
@@ -78,45 +51,45 @@ DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):scanner
 }
 
 DeviceScanner::~DeviceScanner(){
-
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Neuro connection destructor", "NeuroConnection", __FUNCTION__);
     stopScan();
 }
 
 void DeviceScanner::startScan(int timeout){
+    LOG_DEBUG("Start scan");
+    if (scanner->isScanning())
+        stopScan();
 
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Start scan", "NeuroConnection", __FUNCTION__);
-    if (scanner->isScanning()) stopScan();
     scanner->startScan();
-    LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Notifying scan state changed: %s", "NeuroConnection", __FUNCTION__, scanner->isScanning()?"TRUE":"FALSE");
-    std::thread([=]{if (this->scanStateChangedCallback) scanStateChangedCallback(scanner->isScanning());}).detach();
-    if (timeout > 0){
+    LOG_DEBUG_V("Notifying scan state changed: %s", scanner->isScanning() ? "TRUE" : "FALSE");
+    std::thread([=]{
+        if (this->scanStateChangedCallback)
+            scanStateChangedCallback(scanner->isScanning());
+    }).detach();
 
+    if (timeout > 0){
         std::thread([=]{
-            LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Timeout thread", "NeuroConnection", __FUNCTION__);
             std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
-            LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Waiting...", "NeuroConnection", __FUNCTION__);
             auto cvStatus = stopScanCondition.wait_for(stopScanLock, std::chrono::milliseconds(timeout));
             if (cvStatus == std::cv_status::timeout) {
-                LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Scan timeout", "NeuroConnection", __FUNCTION__);
+                LOG_DEBUG("Scan timeout");
                 scanner->stopScan();
-                if (this->scanStateChangedCallback) scanStateChangedCallback(scanner->isScanning());
+                if (this->scanStateChangedCallback)
+                    scanStateChangedCallback(scanner->isScanning());
                 return;
             }
-            LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] No timeout. Exiting thread", "NeuroConnection", __FUNCTION__);
         }).detach();
     }
 }
 
 void DeviceScanner::stopScan(){
-
-    LoggerFactory::getCurrentPlatformLogger()->debug("[%s: %s] Stop scan", "NeuroConnection", __FUNCTION__);
+    LOG_DEBUG("Stop scan");
     std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
     stopScanCondition.notify_all();
     scanner->stopScan();
-    std::thread([=]{if (this->scanStateChangedCallback) scanStateChangedCallback(scanner->isScanning());}).detach();
+    std::thread([=]{
+        if (this->scanStateChangedCallback)
+            scanStateChangedCallback(scanner->isScanning());
+    }).detach();
 }
 
 void DeviceScanner::subscribeDeviceFound(function<void(std::unique_ptr<Device>)> deviceFound){
@@ -130,16 +103,14 @@ void DeviceScanner::subscribeScanStateChanged(function<void(bool)> scanStateChan
 std::unique_ptr<Device> DeviceScanner::findDeviceByAddress(std::string address){
     auto bleDevice = scanner->getDeviceByAddress(address);
     if (!bleDevice){
-        auto log = LoggerFactory::getCurrentPlatformLogger();
-        log->warn("[%s: %s] Find device by address: device is null", "NeuroConnection", __FUNCTION__);
+        LOG_WARN("Find device by address: device is null");
         return std::unique_ptr<Device>();
     }
     return onNewBleDevice(std::move(bleDevice));
 }
 
 std::unique_ptr<Device> DeviceScanner::onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
-    auto log = LoggerFactory::getCurrentPlatformLogger();
-    log->debug("[%s: %s] Creating Device", "NeuroConnection", __FUNCTION__);
+    LOG_DEBUG("Creating device");
     switch (ble_device->getDeviceType()) {
        case DeviceType::Brainbit:
             return BrainbitDeviceFactory().create(std::move(ble_device));
