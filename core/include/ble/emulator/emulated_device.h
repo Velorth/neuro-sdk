@@ -20,7 +20,7 @@ public:
 private:
     std::string deviceName;
     std::string deviceAddress;
-    BleDeviceState mState{BleDeviceState::DISCONNECTED};
+    BleDeviceState mState{BleDeviceState::Disconnected};
     unsigned short mPort;
     unsigned short sendPort;
     std::unique_ptr<Net::UdpSocket> deviceSocket{nullptr};

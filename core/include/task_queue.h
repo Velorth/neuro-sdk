@@ -26,9 +26,9 @@ private:
     const std::string mName;
     std::queue<std::function<void()>> mExecutionQueue;
     std::atomic<bool> mIsRunning{true};
-    std::thread mExecThread;
     std::mutex mQueueMutex;
-    std::condition_variable mQueueCondition;
+    std::condition_variable mQueueCondition;    
+    std::thread mExecThread;
 
     void execFunction();
 };

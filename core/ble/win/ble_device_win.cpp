@@ -2,6 +2,12 @@
 
 namespace Neuro {
 
+BleDeviceWin::BleDeviceWin(DeviceHandle &&device_handle, std::string name, std::string address) :
+    mDeviceHandle(std::move(device_handle)),
+    mName(name),
+    mAddress(address){
+}
+
 void BleDeviceWin::connect(){
 
 }
@@ -19,15 +25,15 @@ bool BleDeviceWin::sendCommand(const std::vector<Byte> &commandData){
 }
 
 BleDeviceState BleDeviceWin::getState() const {
-    return BleDeviceState::ERROR;
+    return BleDeviceState::Error;
 }
 
 std::string BleDeviceWin::getName() const {
-    return "null";
+    return mName;
 }
 
 std::string BleDeviceWin::getNetAddress() const {
-    return "null";
+    return mAddress;
 }
 
 }

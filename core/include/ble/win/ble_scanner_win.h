@@ -29,11 +29,11 @@ private:
     static constexpr const char *class_name = "BleScannerWin";
 
     std::atomic<bool> mIsScanning{false};
-    Loop<void(BleScannerWin*)> mSpawnScanTaskLoop;
-    TaskQueue mScanTaskQueue;
     std::vector<std::shared_ptr<DeviceGattInfo>> mFilterCollection;
     std::set<std::string> mFoundDeviceAddresses;
     std::function<void(std::unique_ptr<BleDevice>)> mDeviceFoundCallback;
+    TaskQueue mScanTaskQueue;
+    Loop<void(BleScannerWin*)> mSpawnScanTaskLoop;
 
     void spawnScanTask();
     void onDeviceFound(std::unique_ptr<BleDevice>);

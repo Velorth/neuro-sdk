@@ -211,7 +211,7 @@ namespace Neuro {
                 state = parseBleDeviceState(stateCode);
                 env->DeleteLocalRef(javaState);
             } else {
-                state = BleDeviceState::ERROR;
+                state = BleDeviceState::Error;
                 __android_log_print(ANDROID_LOG_ERROR, "BleDeviceJni", "State is null");
             }
 
@@ -220,15 +220,15 @@ namespace Neuro {
     }
 
     void BleDeviceJni::onConnected() {
-        deviceStateChangedCallback(BleDeviceState::CONNECTED, BleDeviceError::NO_ERROR);
+        deviceStateChangedCallback(BleDeviceState::Connected, BleDeviceError::NO_ERROR);
     }
 
     void BleDeviceJni::onDisconnected() {
-        deviceStateChangedCallback(BleDeviceState::DISCONNECTED, BleDeviceError::NO_ERROR);
+        deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::NO_ERROR);
     }
 
     void BleDeviceJni::onError(BleDeviceError error) {
-        deviceStateChangedCallback(BleDeviceState::ERROR, error);
+        deviceStateChangedCallback(BleDeviceState::Error, error);
     }
 
     void BleDeviceJni::onDataReceived(const std::vector<Byte> &data) {

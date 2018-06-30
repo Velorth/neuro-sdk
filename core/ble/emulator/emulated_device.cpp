@@ -56,10 +56,10 @@ void EmulatedDevice::connect(){
                 }
                 if (waitCondition.wait_for(waitLock, std::chrono::seconds(3)) == std::cv_status::timeout ||
                         !deviceSocket){
-                    mState = BleDeviceState::DISCONNECTED;
+                    mState = BleDeviceState::Disconnected;
                     std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
                 }else{
-                    mState = BleDeviceState::CONNECTED;
+                    mState = BleDeviceState::Connected;
                     std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
                 }
             }
@@ -68,13 +68,13 @@ void EmulatedDevice::connect(){
             std::cerr<< "Failed to connect to emulation server: " << e.what() << std::endl;
             assert(false);
         }
-        mState = BleDeviceState::DISCONNECTED;
+        mState = BleDeviceState::Disconnected;
         std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
     }).detach();
 }
 
 void EmulatedDevice::disconnect(){
-    if (mState!=BleDeviceState::CONNECTED)
+    if (mState!=BleDeviceState::Connected)
         return;
     std::thread([=](){
         try{
@@ -104,7 +104,7 @@ void EmulatedDevice::disconnect(){
             assert(false);
             return;
         }
-        mState = BleDeviceState::DISCONNECTED;
+        mState = BleDeviceState::Disconnected;
         std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
     }).detach();
 }

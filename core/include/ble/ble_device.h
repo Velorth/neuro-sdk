@@ -25,17 +25,17 @@
 namespace Neuro {
 
 enum class BleDeviceState : int {
-    DISCONNECTED = 0,
-    CONNECTED = 1,
-    ERROR = 2
+    Disconnected = 0,
+    Connected = 1,
+    Error = 2
 };
 
 inline BleDeviceState parseBleDeviceState(int stateCode){
     switch (stateCode){
-        case 0: return BleDeviceState::DISCONNECTED;
-        case 1: return BleDeviceState::CONNECTED;
+        case 0: return BleDeviceState::Disconnected;
+        case 1: return BleDeviceState::Connected;
         case 2:
-        default: return BleDeviceState::ERROR;
+        default: return BleDeviceState::Error;
     }
 }
 

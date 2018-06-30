@@ -46,7 +46,7 @@ void ParameterReader::subscribeBleDeviceStateChanged() {
 }
 
 void ParameterReader::onBleDeviceStateChanged(BleDeviceState state, BleDeviceError error) {
-    if (state == BleDeviceState::CONNECTED) {
+    if (state == BleDeviceState::Connected) {
         onBleConnected();
     }
     else {
