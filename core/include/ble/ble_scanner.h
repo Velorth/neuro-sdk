@@ -32,7 +32,7 @@ public:
     virtual void startScan() = 0;
     virtual void stopScan() = 0;
     virtual std::unique_ptr<BleDevice> getDeviceByAddress(std::string) = 0;
-    virtual void setFilter(std::vector<std::shared_ptr<DeviceGattInfo>>) = 0;
+    virtual void setFilter(std::vector<std::string>) = 0;
     virtual void subscribeDeviceFound(std::function<void(std::unique_ptr<BleDevice>)>) = 0;
     virtual bool isScanning() = 0;
     virtual void releaseDevice(std::string name, std::string address) = 0;

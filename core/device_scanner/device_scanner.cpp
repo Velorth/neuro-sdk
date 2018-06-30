@@ -31,12 +31,37 @@ using std::chrono::milliseconds;
 namespace Neuro {
 
 DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):scanner(std::move(device_scanner)) {
-    vector<std::shared_ptr<DeviceGattInfo>> filter;
-    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::BRAINBIT));
-    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_RED));
-    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_BLUE));
-    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_YELLOW));
-    filter.push_back(DeviceGattInfoCreator::getGattInfo(DeviceGattType::COLIBRI_WHITE));
+    vector<string> filter;
+
+    {
+        auto brainBitValidNames = DeviceGattInfoCreator::getGattInfo(
+                DeviceGattType::BRAINBIT)->getValidBtNames();
+        filter.insert(filter.end(), brainBitValidNames.begin(), brainBitValidNames.end());
+    }
+
+    {
+        auto colibriRedValidNames = DeviceGattInfoCreator::getGattInfo(
+                DeviceGattType::COLIBRI_RED)->getValidBtNames();
+        filter.insert(filter.end(), colibriRedValidNames.begin(), colibriRedValidNames.end());
+    }
+
+    {
+        auto colibriBlueValidNames = DeviceGattInfoCreator::getGattInfo(
+                DeviceGattType::COLIBRI_BLUE)->getValidBtNames();
+        filter.insert(filter.end(), colibriBlueValidNames.begin(), colibriBlueValidNames.end());
+    }
+
+    {
+        auto colibriYellowValidNames = DeviceGattInfoCreator::getGattInfo(
+                DeviceGattType::COLIBRI_YELLOW)->getValidBtNames();
+        filter.insert(filter.end(), colibriYellowValidNames.begin(), colibriYellowValidNames.end());
+    }
+
+    {
+        auto colibriWhiteValidNames = DeviceGattInfoCreator::getGattInfo(
+                DeviceGattType::COLIBRI_WHITE)->getValidBtNames();
+        filter.insert(filter.end(), colibriWhiteValidNames.begin(), colibriWhiteValidNames.end());
+    }
     scanner->setFilter(filter);
     auto scannerCallback = [=](std::unique_ptr<BleDevice> bleDevice) {
         auto deviceName = bleDevice->getName();

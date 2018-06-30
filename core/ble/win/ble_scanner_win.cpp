@@ -63,9 +63,7 @@ std::string extractBluetoothAddressFromDeviceInstanceId(const std::string& insta
   }
 
   size_t end = instance_id.find("\\", start);
-  if (end == std::string::npos) {
-    return "";
-  }
+
   start++;
   std::string address = instance_id.substr(start, end - start);
   return address;
@@ -138,13 +136,15 @@ std::string getDeviceAddress(const DeviceInfoListPtr &device_info_list, SP_DEVIN
     }
 }
 
-std::vector<std::unique_ptr<BleDevice>> findDevicesByGuid(GUID serviceGuid){
-    LoggerFactory::getCurrentPlatformLogger()->trace("[%s: %s] Looking for devices with service GUID %s", "BleScannerWrapper", __FUNCTION__, to_string(serviceGuid).c_str());
-    std::vector<std::unique_ptr<BleDevice>> foundDevices;
-    auto deviceListPtr = make_device_list(serviceGuid);
+
+std::vector<std::unique_ptr<BleDevice>> findDevicesWithFilters(const std::vector<std::string> &nameFilters){
+    std::vector<std::unique_ptr<BleDevice>> devices;
+
+    GUID BluetoothInterfaceGUID = GUID_BLUETOOTHLE_DEVICE_INTERFACE;
+    auto deviceListPtr = make_device_list(BluetoothInterfaceGUID);
     if (deviceListPtr.get() == INVALID_HANDLE_VALUE){
         LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] Invalid handle", "BleScannerWrapper", __FUNCTION__);
-        return foundDevices;
+        return devices;
     }
 
     SP_DEVICE_INTERFACE_DATA deviceInterfaceData;
@@ -153,17 +153,21 @@ std::vector<std::unique_ptr<BleDevice>> findDevicesByGuid(GUID serviceGuid){
     SP_DEVINFO_DATA deviceInfoData;
     deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
-    for (DWORD i = 0; SetupDiEnumDeviceInterfaces(deviceListPtr.get(), NULL, &serviceGuid, i, &deviceInterfaceData); i++){
+    for (DWORD i = 0; SetupDiEnumDeviceInterfaces(deviceListPtr.get(), NULL, &BluetoothInterfaceGUID, i, &deviceInterfaceData); i++){
         auto deviceInterfaceDetails = getInterfaceDetails(deviceListPtr, deviceInterfaceData, deviceInfoData);
         if (deviceInterfaceDetails == nullptr){
-            break;
+            continue;
         }
         try {
             auto deviceName = getDeviceName(deviceListPtr, deviceInfoData);
+            if (std::find(nameFilters.begin(), nameFilters.end(), deviceName) == nameFilters.end()){
+                continue;
+            }
+
             auto deviceAddress = getDeviceAddress(deviceListPtr, deviceInfoData);
             auto deviceHandle = make_handle(deviceInterfaceDetails);
             if (deviceHandle != nullptr){
-                foundDevices.push_back(std::make_unique<BleDeviceWin>(std::move(deviceHandle), deviceName, deviceAddress));
+                devices.push_back(std::make_unique<BleDeviceWin>(std::move(deviceHandle), deviceName, deviceAddress));
             }else{
                 LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] Unable to create handle for device %s [%s]: Handle is null",
                                                                 "BleScannerWrapper",
@@ -179,18 +183,7 @@ std::vector<std::unique_ptr<BleDevice>> findDevicesByGuid(GUID serviceGuid){
                                                             e.what());
         }
     }
-    return foundDevices;
-}
 
-std::vector<std::unique_ptr<BleDevice>> findDevicesWithFilters(const std::vector<std::shared_ptr<DeviceGattInfo>> &gattFilters){
-    auto serviceGuids = getServiceGuids(gattFilters);
-    std::vector<std::unique_ptr<BleDevice>> devices;
-    for (auto guid : serviceGuids){
-        auto guidDevices = findDevicesByGuid(guid);
-        devices.insert(devices.end(),
-                       std::make_move_iterator(guidDevices.begin()),
-                       std::make_move_iterator(guidDevices.end()));
-    }
     return devices;
 }
 
@@ -213,14 +206,9 @@ std::unique_ptr<BleDevice> BleScannerWin::getDeviceByAddress(std::string address
     return emulator.getDeviceByAddress(address);
 }
 
-void BleScannerWin::setFilter(std::vector<std::shared_ptr<DeviceGattInfo>> gattFilter){
-    std::vector<std::string> filterNames;
-    for (auto &gattInfo: gattFilter) {
-        auto names = gattInfo->getValidBtNames();
-        filterNames.insert(filterNames.end(), names.begin(), names.end());
-    }
-    emulator.setFilter(filterNames);
-    mFilterCollection = gattFilter;
+void BleScannerWin::setFilter(std::vector<std::string> nameFilter){
+    emulator.setFilter(nameFilter);
+    mFilterCollection = nameFilter;
 }
 
 void BleScannerWin::subscribeDeviceFound(std::function<void (std::unique_ptr<BleDevice>)> callback){

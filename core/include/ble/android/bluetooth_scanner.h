@@ -35,7 +35,7 @@ namespace Neuro {
 
         std::unique_ptr<BleDevice> getDeviceByAddress(std::string) override;
 
-        void setFilter(std::vector<std::shared_ptr<DeviceGattInfo>>) override;
+        void setFilter(std::vector<std::string>) override;
 
         void subscribeDeviceFound(std::function<void(std::unique_ptr<BleDevice>)>) override;
 
