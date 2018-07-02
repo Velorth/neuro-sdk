@@ -47,6 +47,10 @@ Device::Device(std::unique_ptr<DeviceImpl> impl) :
 }
 
 
+void libDeviceDeleter(Device *device_ptr){
+    delete device_ptr;
+}
+
 bool checkHasChannel(const Device &device, const ChannelInfo &info){
     auto channels = device.channels();
     return std::find(channels.begin(), channels.end(), info) != channels.end();

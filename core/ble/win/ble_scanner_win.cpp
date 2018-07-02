@@ -1,60 +1,12 @@
 #include "ble/win/ble_scanner_win.h"
-
-#include <windows.h>
-#include <SetupAPI.h>
-#include <regstr.h>
-#include <bthdef.h>
-#include <devguid.h>
-#include <Bluetoothleapis.h>
+#include <algorithm>
+#include <cctype>
 #include <sstream>
 #include "ble/win/ble_device_win.h"
 #include "ble/win/gatt_wrapper.h"
 #include "logger.h"
 
 namespace Neuro {
-
-std::string to_narrow(const wchar_t *s, char def = '?', const std::locale& loc = std::locale()){
-    std::ostringstream stm;
-    while (*s != L'\0') {
-        stm << std::use_facet< std::ctype<wchar_t> >(loc).narrow(*s++, def);
-    }
-    return stm.str();
-}
-
-std::string getErrorString(DWORD error_message_id){
-    if(error_message_id == 0)
-        return std::string(); //No error message has been recorded
-
-    LPSTR messageBuffer = nullptr;
-    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 NULL, error_message_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-
-    std::string message(messageBuffer, size);
-    LocalFree(messageBuffer);
-
-    return message;
-}
-
-GUID guidFromString(const std::string &guid_string){
-    GUID guid;
-    sscanf(guid_string.c_str(),
-           "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
-           &guid.Data1, &guid.Data2, &guid.Data3,
-           &guid.Data4[0], &guid.Data4[1], &guid.Data4[2], &guid.Data4[3],
-            &guid.Data4[4], &guid.Data4[5], &guid.Data4[6], &guid.Data4[7] );
-    return guid;
-}
-
-std::vector<GUID> getServiceGuids(const std::vector<std::shared_ptr<DeviceGattInfo>> &gattInfoCollection){
-    std::vector<GUID> serviceUUIDs;
-    std::transform(gattInfoCollection.begin(),
-                   gattInfoCollection.end(),
-                   std::back_inserter(serviceUUIDs),
-                   [](const auto &gattInfoPtr){
-        return guidFromString(gattInfoPtr->deviceServiceUUID());
-    });
-    return serviceUUIDs;
-}
 
 std::string extractBluetoothAddressFromDeviceInstanceId(const std::string& instance_id) {
   size_t start = instance_id.find("_");
@@ -66,6 +18,12 @@ std::string extractBluetoothAddressFromDeviceInstanceId(const std::string& insta
 
   start++;
   std::string address = instance_id.substr(start, end - start);
+  std::transform(address.begin(), address.end(), address.begin(), [](unsigned char ch){return std::toupper(ch);});
+  address.insert(address.begin() + 2, ':');
+  address.insert(address.begin() + 5, ':');
+  address.insert(address.begin() + 8, ':');
+  address.insert(address.begin() + 11, ':');
+  address.insert(address.begin() + 14, ':');
   return address;
 }
 
@@ -90,34 +48,9 @@ DevInterfaceDetailData getInterfaceDetails(const DeviceInfoListPtr &device_info_
     return DevInterfaceDetailData(nullptr, &UniversalGlobalDeleter);
 }
 
-std::string readStringRegistryProperty(const DeviceInfoListPtr &device_info_list,
-                                       SP_DEVINFO_DATA dev_info_data,
-                                       DWORD property){
-    LPTSTR propertyBuffer = NULL;
-    DWORD propertyBufferSize = 0;
-    while (!SetupDiGetDeviceRegistryProperty(
-               device_info_list.get(),
-               &dev_info_data,
-               property,
-               NULL,
-               (PBYTE)propertyBuffer,
-               propertyBufferSize,
-               &propertyBufferSize)){
-        auto lastError = GetLastError();
-        if (lastError == ERROR_INSUFFICIENT_BUFFER){
-            if (propertyBuffer) LocalFree(propertyBuffer);
-            propertyBuffer = (wchar_t *)LocalAlloc(LPTR,propertyBufferSize * 2);
-        }else{
-            auto excMsg = std::string("Unable read property: Error code ") + std::to_string(lastError) + std::string(" - ") + getErrorString(lastError);
-            throw std::runtime_error(excMsg.c_str());
-        }
-    }
-    return to_narrow(propertyBuffer);
-}
-
 std::string getDeviceName(const DeviceInfoListPtr &device_info_list, SP_DEVINFO_DATA dev_info_data){
     try{
-        return readStringRegistryProperty(device_info_list, dev_info_data, SPDRP_FRIENDLYNAME);
+        return read_registry_property<SPDRP_FRIENDLYNAME>(device_info_list, dev_info_data);
     }
     catch(std::runtime_error &e){
         LoggerFactory::getCurrentPlatformLogger()->error("[%s: %s] %s", "BleScannerWrapper", __FUNCTION__, e.what());
@@ -127,7 +60,7 @@ std::string getDeviceName(const DeviceInfoListPtr &device_info_list, SP_DEVINFO_
 
 std::string getDeviceAddress(const DeviceInfoListPtr &device_info_list, SP_DEVINFO_DATA dev_info_data){
     try{
-        auto instanceId = readStringRegistryProperty(device_info_list, dev_info_data, SPDRP_HARDWAREID);
+        auto instanceId = read_registry_property<SPDRP_HARDWAREID>(device_info_list, dev_info_data);
         return extractBluetoothAddressFromDeviceInstanceId(instanceId);
     }
     catch(std::runtime_error &e){
@@ -135,7 +68,6 @@ std::string getDeviceAddress(const DeviceInfoListPtr &device_info_list, SP_DEVIN
         throw std::runtime_error("Unable retreive device address");
     }
 }
-
 
 std::vector<std::unique_ptr<BleDevice>> findDevicesWithFilters(const std::vector<std::string> &nameFilters){
     std::vector<std::unique_ptr<BleDevice>> devices;
@@ -213,6 +145,7 @@ void BleScannerWin::setFilter(std::vector<std::string> nameFilter){
 
 void BleScannerWin::subscribeDeviceFound(std::function<void (std::unique_ptr<BleDevice>)> callback){
     emulator.subscribeDeviceFound(callback);
+    mDeviceFoundCallback = callback;
 }
 
 bool BleScannerWin::isScanning(){
@@ -238,7 +171,7 @@ void BleScannerWin::spawnScanTask(){
     });
 }
 
-void BleScannerWin::onDeviceFound(std::unique_ptr<BleDevice> device_ptr){
+void BleScannerWin::onDeviceFound(std::unique_ptr<BleDevice> &&device_ptr){
     auto deviceAddress = device_ptr->getNetAddress();
     if (mFoundDeviceAddresses.find(deviceAddress) != mFoundDeviceAddresses.end()){
         LOG_TRACE_V("Device %s already found", deviceAddress.c_str());

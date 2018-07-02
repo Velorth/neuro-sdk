@@ -9,9 +9,9 @@
 namespace Neuro {
 
 EmulatedDevice::EmulatedDevice(std::string name, std::string address):
+    BleDevice(BleDeviceInfo::fromDeviceName(name)),
     deviceName(name),
     deviceAddress(address){
-    deviceInfo = BleDeviceInfo::fromDeviceName(name);
     static unsigned short basePort = 41001;
     mPort = basePort++;
 }

@@ -117,7 +117,7 @@ void DeviceScanner::stopScan(){
     }).detach();
 }
 
-void DeviceScanner::subscribeDeviceFound(function<void(std::unique_ptr<Device>)> deviceFound){
+void DeviceScanner::subscribeDeviceFound(function<void(std::unique_ptr<Device, DeviceDeleter>)> deviceFound){
     deviceFoundCallback = deviceFound;
 }
 
@@ -125,16 +125,16 @@ void DeviceScanner::subscribeScanStateChanged(function<void(bool)> scanStateChan
     scanStateChangedCallback = scanStateChanged;
 }
 
-std::unique_ptr<Device> DeviceScanner::findDeviceByAddress(std::string address){
+std::unique_ptr<Device, DeviceDeleter> DeviceScanner::findDeviceByAddress(std::string address){
     auto bleDevice = scanner->getDeviceByAddress(address);
     if (!bleDevice){
         LOG_WARN("Find device by address: device is null");
-        return std::unique_ptr<Device>();
+        return std::unique_ptr<Device, DeviceDeleter>(nullptr, &libDeviceDeleter);
     }
     return onNewBleDevice(std::move(bleDevice));
 }
 
-std::unique_ptr<Device> DeviceScanner::onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
+std::unique_ptr<Device, DeviceDeleter> DeviceScanner::onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
     LOG_DEBUG("Creating device");
     switch (ble_device->getDeviceType()) {
        case DeviceType::Brainbit:

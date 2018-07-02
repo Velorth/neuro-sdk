@@ -1,6 +1,5 @@
 #include "gsl/gsl_assert"
 #include "device/device_factory.h"
-#include "device/device.h"
 #include "ble/ble_device.h"
 #include "device/callibri/callibri_impl.h"
 #include "device/brainbit/brainbit_impl.h"
@@ -11,15 +10,15 @@
 
 namespace Neuro {
 
-std::unique_ptr<Device> DeviceFactory::createFromImpl(std::unique_ptr<DeviceImpl> impl){
+std::unique_ptr<Device, DeviceDeleter> DeviceFactory::createFromImpl(std::unique_ptr<DeviceImpl> impl){
     Expects(impl != nullptr);
-    auto device = std::unique_ptr<Device>(new Device(std::move(impl)));
+    auto device = std::unique_ptr<Device, DeviceDeleter>(new Device(std::move(impl)), &libDeviceDeleter);
     Ensures(device != nullptr);
     return device;
 }
 
 
-std::unique_ptr<Device> CallibriDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
+std::unique_ptr<Device, DeviceDeleter> CallibriDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
     Expects(ble_device != nullptr);
     auto sharedDevice = std::shared_ptr<BleDevice>(ble_device.release());
     auto requestHandler = std::make_shared<CallibriRequestScheduler>();
@@ -31,7 +30,7 @@ std::unique_ptr<Device> CallibriDeviceFactory::create(std::unique_ptr<BleDevice>
     return device;
 }
 
-std::unique_ptr<Device> BrainbitDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
+std::unique_ptr<Device, DeviceDeleter> BrainbitDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
     Expects(ble_device != nullptr);
     auto sharedDevice = std::shared_ptr<BleDevice>(ble_device.release());
     auto brainbitImpl = std::make_unique<BrainbitImpl>(sharedDevice);

@@ -32,11 +32,11 @@ private:
     std::vector<std::string> mFilterCollection;
     std::set<std::string> mFoundDeviceAddresses;
     std::function<void(std::unique_ptr<BleDevice>)> mDeviceFoundCallback;
-    TaskQueue mScanTaskQueue;
+    TaskQueue mScanTaskQueue{"ScanTaskQueue"};
     Loop<void(BleScannerWin*)> mSpawnScanTaskLoop;
 
     void spawnScanTask();
-    void onDeviceFound(std::unique_ptr<BleDevice>);
+    void onDeviceFound(std::unique_ptr<BleDevice> &&);
 };
 
 }

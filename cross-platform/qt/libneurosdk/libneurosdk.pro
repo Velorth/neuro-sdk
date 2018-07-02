@@ -24,8 +24,12 @@ CONFIG(release, debug|release){
 CONFIG += c++14
 !msvc {
     QMAKE_CXXFLAGS += -Wall -pedantic-errors
+    QMAKE_CXXFLAGS_RELEASE += -O3
 }
-
+msvc{
+    QMAKE_CXXFLAGS_DEBUG = /MTd
+    QMAKE_CXXFLAGS_RELEASE = /O2 /MT
+}
 build_pass:CONFIG(debug, release|debug) {
     TARGET = $$join(TARGET,,,d)
 }
@@ -161,5 +165,6 @@ win32 {
     INSTALLS += target shared_headers shared_headers_channels shared_headers_device shared_headers_device_scanner shared_headers_filter
     LIBS += -lws2_32
     LIBS += -lSetupApi
+    LIBS += -lBluetoothAPIs
 }
 ##################

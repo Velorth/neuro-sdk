@@ -49,6 +49,9 @@ private:
     Device(std::unique_ptr<DeviceImpl>);
 };
 
+void libDeviceDeleter(Device *);
+using DeviceDeleter = decltype(&libDeviceDeleter);
+
 bool checkHasChannel(const Device &, const ChannelInfo &);
 bool checkHasCommand(const Device &, Command);
 bool checkHasParameter(const Device &, Parameter);

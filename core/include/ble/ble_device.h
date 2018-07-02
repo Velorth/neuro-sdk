@@ -68,7 +68,8 @@ public:
     using data_received_callback_t = std::function<void(const std::vector<Byte> &)>;
     using status_received_callback_t = std::function<void(const std::vector<Byte> &)>;
 
-    BleDevice(){}
+    BleDevice(std::unique_ptr<BleDeviceInfo> &&device_info):
+        mDeviceInfo(std::move(device_info)){}
     BleDevice(const BleDevice&) = delete;
     BleDevice& operator=(const BleDevice&) = delete;
     virtual ~BleDevice(){
@@ -91,7 +92,7 @@ public:
     virtual std::string getNetAddress() const = 0;
 
     DeviceType getDeviceType() const {
-        return deviceInfo->getDeviceType();
+        return mDeviceInfo->getDeviceType();
     }
 
     void setStateChangedCallback(state_changed_callback_t callback){
@@ -107,7 +108,7 @@ public:
     }
 
 protected:
-    std::unique_ptr<BleDeviceInfo> deviceInfo;
+    std::unique_ptr<BleDeviceInfo> mDeviceInfo;
     state_changed_callback_t deviceStateChangedCallback;
     data_received_callback_t dataReceivedCallback;
     status_received_callback_t statusReceivedCallback;

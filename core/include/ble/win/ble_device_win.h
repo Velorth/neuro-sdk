@@ -3,6 +3,8 @@
 
 #include "ble/ble_device.h"
 #include "ble/win/gatt_wrapper.h"
+#include "loop.h"
+#include "task_queue.h"
 
 namespace Neuro {
 
@@ -18,9 +20,19 @@ public:
     std::string getNetAddress() const override;
 
 private:
+    static constexpr const char *class_name = "BleDeviceWin";
+
     DeviceHandle mDeviceHandle;
     std::string mName;
     std::string mAddress;
+    BTH_LE_GATT_SERVICE mService;
+    BTH_LE_GATT_CHARACTERISTIC mRxCharacteristic;
+    BTH_LE_GATT_CHARACTERISTIC mTxCharacteristic;
+    std::atomic<bool> mIsConnected{false};
+    TaskQueue mGetServiceTaskQueue;
+    //Loop<void()> mTaskSpawnLoop;
+
+    void spawnGetServiceTask();
 };
 
 }
