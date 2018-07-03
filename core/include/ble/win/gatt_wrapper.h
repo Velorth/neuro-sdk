@@ -7,6 +7,7 @@
 #include <bthdef.h>
 #include <devguid.h>
 #include <bluetoothleapis.h>
+#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -68,9 +69,21 @@ auto read_registry_property(const DeviceInfoListPtr &device_info_list, const SP_
     return convert_registry_property<Property>(propertyBuffer);
 }
 
+template <typename T, typename SizeType>
+std::unique_ptr<T> alloc_smart_buffer(SizeType size){
+    using SmartBufferPtr = std::unique_ptr<T>;
+    auto rawByteBuffer = new Byte[size]();
+    auto smartBuffer = SmartBufferPtr(reinterpret_cast<T *>(rawByteBuffer));
+    return smartBuffer;
+}
+
 bool write_characteristic(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, const ByteBuffer &);
 BTH_LE_GATT_CHARACTERISTIC get_device_characteristic(const DeviceHandle &, BTH_LE_GATT_SERVICE, std::string);
 BTH_LE_GATT_SERVICE get_service(const DeviceHandle &, std::string);
+BTH_LE_GATT_DESCRIPTOR get_descriptor(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, std::string);
+BTH_LE_GATT_DESCRIPTOR_VALUE get_descriptor_value(const DeviceHandle &, BTH_LE_GATT_DESCRIPTOR);
+bool set_descriptor_value(const DeviceHandle &, BTH_LE_GATT_DESCRIPTOR, BTH_LE_GATT_DESCRIPTOR_VALUE);
+BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, PFNBLUETOOTH_GATT_EVENT_CALLBACK);
 
 }
 #endif // GATT_WRAPPER_H

@@ -27,8 +27,8 @@ CONFIG += c++14
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
 msvc{
-    QMAKE_CXXFLAGS_DEBUG = /MTd
-    QMAKE_CXXFLAGS_RELEASE = /O2 /MT
+    QMAKE_CXXFLAGS_DEBUG = /MDd
+    QMAKE_CXXFLAGS_RELEASE = /O2 /MD
 }
 build_pass:CONFIG(debug, release|debug) {
     TARGET = $$join(TARGET,,,d)

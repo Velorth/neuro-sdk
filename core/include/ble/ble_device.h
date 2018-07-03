@@ -40,24 +40,24 @@ inline BleDeviceState parseBleDeviceState(int stateCode){
 }
 
 enum class BleDeviceError : int {
-    NO_ERROR = 0,
-    TX_NOT_FOUND = 1,
-    RX_NOT_FOUND = 2,
-    STATUS_NOT_FOUND = 3,
-    SERVICE_NOT_FOUND = 4,
-    GENERAL_CONNECTION_ERROR = 5,
-    UNKNOWN = 6
+    NoError = 0,
+    TxNotFound = 1,
+    RxNotFound = 2,
+    StatusNotFound = 3,
+    ServiceNotFound = 4,
+    GeneralConnectionError = 5,
+    Unknown = 6
 };
 
 inline BleDeviceError parseBleErrorType(int errorCode){
     switch (errorCode){
-        case 0: return BleDeviceError::NO_ERROR;
-        case 1: return BleDeviceError::TX_NOT_FOUND;
-        case 2: return BleDeviceError::RX_NOT_FOUND;
-        case 3: return BleDeviceError::STATUS_NOT_FOUND;
-        case 4: return BleDeviceError::SERVICE_NOT_FOUND;
-        case 5: return BleDeviceError::GENERAL_CONNECTION_ERROR;
-        default: return BleDeviceError::UNKNOWN;
+        case 0: return BleDeviceError::NoError;
+        case 1: return BleDeviceError::TxNotFound;
+        case 2: return BleDeviceError::RxNotFound;
+        case 3: return BleDeviceError::StatusNotFound;
+        case 4: return BleDeviceError::ServiceNotFound;
+        case 5: return BleDeviceError::GeneralConnectionError;
+        default: return BleDeviceError::Unknown;
     }
 }
 

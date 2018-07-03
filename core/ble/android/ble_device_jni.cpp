@@ -226,11 +226,11 @@ BleDeviceState BleDeviceJni::getState() const {
 }
 
 void BleDeviceJni::onConnected() {
-    deviceStateChangedCallback(BleDeviceState::Connected, BleDeviceError::NO_ERROR);
+    deviceStateChangedCallback(BleDeviceState::Connected, BleDeviceError::NoError);
 }
 
 void BleDeviceJni::onDisconnected() {
-    deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::NO_ERROR);
+    deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::NoError);
 }
 
 void BleDeviceJni::onError(BleDeviceError error) {

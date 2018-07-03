@@ -76,7 +76,7 @@ void ParameterReader::onBleConnected(){
 void ParameterReader::onBleDisconnected(BleDeviceError error){
     mState = DeviceState::Disconnected;
     parameterChangedCallback(Parameter::State);
-    if (error != BleDeviceError::NO_ERROR){
+    if (error != BleDeviceError::NoError){
         LOG_ERROR_V("Neuro device bluetooth error. Device %s, address: %s",
                     mBleDevice->getName().c_str(),
                     mBleDevice->getNetAddress().c_str());

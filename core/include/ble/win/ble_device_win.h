@@ -28,11 +28,14 @@ private:
     BTH_LE_GATT_SERVICE mService;
     BTH_LE_GATT_CHARACTERISTIC mRxCharacteristic;
     BTH_LE_GATT_CHARACTERISTIC mTxCharacteristic;
+    BTH_LE_GATT_DESCRIPTOR mCCCDDescriptor;
     std::atomic<bool> mIsConnected{false};
-    TaskQueue mGetServiceTaskQueue;
-    //Loop<void()> mTaskSpawnLoop;
+    TaskQueue mDeviceTaskQueue;
+    Loop<void(BleDeviceWin*)> mTaskSpawnLoop;
 
-    void spawnGetServiceTask();
+    void performConnect();
+    void performDisconnect();
+    void spawnGetDescriptorsTask();
 };
 
 }
