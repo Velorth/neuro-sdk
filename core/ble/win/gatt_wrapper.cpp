@@ -246,25 +246,42 @@ BTH_LE_GATT_DESCRIPTOR get_descriptor(const DeviceHandle &device, BTH_LE_GATT_CH
 
 BTH_LE_GATT_DESCRIPTOR_VALUE get_descriptor_value(const DeviceHandle &device, BTH_LE_GATT_DESCRIPTOR descriptor){
     auto descValueDataSize = USHORT{0};
-    if (BluetoothGATTGetDescriptorValue(
+    auto getSizeResult = BluetoothGATTGetDescriptorValue(
                 device.get(),
                 &descriptor,
                 0,
                 NULL,
                 &descValueDataSize,
-                BLUETOOTH_GATT_FLAG_FORCE_READ_FROM_DEVICE) != HRESULT_FROM_WIN32(ERROR_MORE_DATA)) {
-        throw std::runtime_error("Unable to read device descriptor");
+                BLUETOOTH_GATT_FLAG_FORCE_READ_FROM_DEVICE);
+    if (getSizeResult != HRESULT_FROM_WIN32(ERROR_MORE_DATA)) {
+        if (getSizeResult == HRESULT_FROM_WIN32(ERROR_SEM_TIMEOUT)){
+            throw gatt_timeout("Device is out of range");
+        }
+        else{
+            auto errStr = std::string("Unable to get device descriptor size. Error code 0x") +
+                    to_hex_string(getSizeResult) +
+                    std::string(". Descriptor: ") +
+                    to_string(descriptor.DescriptorUuid.Value.LongUuid);
+            throw std::runtime_error(errStr);
+        }
     }
 
     auto descriptorBuffer = alloc_smart_buffer<BTH_LE_GATT_DESCRIPTOR_VALUE>(descValueDataSize);
-    if (BluetoothGATTGetDescriptorValue(
-            device.get(),
-            &descriptor,
-            descValueDataSize,
-            descriptorBuffer.get(),
-            NULL,
-            BLUETOOTH_GATT_FLAG_FORCE_READ_FROM_DEVICE) != S_OK) {
-        throw std::runtime_error("Unable to read device descriptor");
+    auto getValueResult = BluetoothGATTGetDescriptorValue(
+                device.get(),
+                &descriptor,
+                descValueDataSize,
+                descriptorBuffer.get(),
+                NULL,
+                BLUETOOTH_GATT_FLAG_FORCE_READ_FROM_DEVICE);
+    if (getValueResult != S_OK) {
+        if (getValueResult == HRESULT_FROM_WIN32(ERROR_SEM_TIMEOUT)){
+            throw gatt_timeout("Device is out of range");
+        }
+        else{
+            auto errStr = std::string("Unable to get device descriptor size. Error code ") + std::to_string(getValueResult);
+            throw std::runtime_error(errStr);
+        }
     }
 
     return *descriptorBuffer;
@@ -280,7 +297,7 @@ bool set_descriptor_value(const DeviceHandle &device, BTH_LE_GATT_DESCRIPTOR des
 
 BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceHandle &device,
                                                                    BTH_LE_GATT_CHARACTERISTIC characteristic,
-                                                                   PFNBLUETOOTH_GATT_EVENT_CALLBACK callback){
+                                                                   PFNBLUETOOTH_GATT_EVENT_CALLBACK callback, void *context){
     if (!characteristic.IsNotifiable) {
         throw std::runtime_error("Notifications are not available for this characteristic");
     }
@@ -296,7 +313,7 @@ BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceH
                 eventType,
                 &eventParameterIn,
                 callback,
-                NULL,
+                context,
                 &eventHandle,
                 BLUETOOTH_GATT_FLAG_NONE) != S_OK){
         throw std::runtime_error("Failed to set characteristic notifications");

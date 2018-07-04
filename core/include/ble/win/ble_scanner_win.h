@@ -36,6 +36,7 @@ private:
     Loop<void(BleScannerWin*)> mSpawnScanTaskLoop;
 
     void spawnScanTask();
+    std::vector<std::unique_ptr<BleDevice>> findDevicesWithFilters(const std::vector<std::string> &);
     void onDeviceFound(std::unique_ptr<BleDevice> &&);
 };
 

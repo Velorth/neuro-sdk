@@ -89,6 +89,7 @@ void Logger::printLogMessage(LogLevel logLevel, const char *format, va_list args
     fprintf(stderr, "|");
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");
+    fflush(stderr);
 }
 
 void Logger::setLogLevel(LogLevel level) {

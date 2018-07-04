@@ -3,6 +3,16 @@
 
 namespace Neuro {
 
+void characteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID eventOutParameter, PVOID context){
+    auto bleDevice = reinterpret_cast<BleDeviceWin *>(context);
+    auto valueChangedParams = reinterpret_cast<PBLUETOOTH_GATT_VALUE_CHANGED_EVENT>(eventOutParameter);
+    auto valueDataPtr = valueChangedParams->CharacteristicValue->Data;
+    auto valueDataSize = valueChangedParams->CharacteristicValue->DataSize;
+    ByteBuffer data(valueDataPtr, valueDataPtr + valueDataSize);
+    if (bleDevice->dataReceivedCallback)
+        bleDevice->dataReceivedCallback(data);
+}
+
 BleDeviceWin::BleDeviceWin(DeviceHandle &&device_handle, std::string name, std::string address) :
     BleDevice(BleDeviceInfo::fromDeviceName(name)),
     mDeviceHandle(std::move(device_handle)),
@@ -63,16 +73,21 @@ void BleDeviceWin::performConnect(){
                 get_descriptor_value(mDeviceHandle, mCCCDDescriptor);
                 break;
             }
-            catch (...){
+            catch (gatt_timeout &){
                 mIsConnected.store(false);
-                LOG_WARN_V("Device %s [%s] is offline. Trying to reconnect", mName.c_str(), mAddress.c_str());
+                LOG_TRACE_V("Device %s [%s] is offline. Trying to reconnect", mName.c_str(), mAddress.c_str());
+            }
+            catch (std::runtime_error &e){
+                mIsConnected.store(false);                
+                LOG_WARN_V("Error read descriptor for device %s [%s]: %s", mName.c_str(), mAddress.c_str(), e.what());
+                return;
             }
         }
         BTH_LE_GATT_DESCRIPTOR_VALUE newValue;
         newValue.DescriptorType = ClientCharacteristicConfiguration;
         newValue.ClientCharacteristicConfiguration.IsSubscribeToNotification = TRUE;
         if (set_descriptor_value(mDeviceHandle, mCCCDDescriptor, newValue)){
-            subscribe_characteristic_value_changed(mDeviceHandle, mTxCharacteristic, [=](BTH_LE_GATT_EVENT_TYPE EventType, PVOID EventOutParameter, PVOID Context){});
+            subscribe_characteristic_value_changed(mDeviceHandle, mRxCharacteristic, &characteristicValueChanged, this);
         }
         else {
             mIsConnected.store(false);

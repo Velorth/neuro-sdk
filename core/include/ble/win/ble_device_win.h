@@ -22,6 +22,8 @@ public:
 private:
     static constexpr const char *class_name = "BleDeviceWin";
 
+    friend void characteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
+
     DeviceHandle mDeviceHandle;
     std::string mName;
     std::string mAddress;
@@ -30,6 +32,7 @@ private:
     BTH_LE_GATT_CHARACTERISTIC mTxCharacteristic;
     BTH_LE_GATT_DESCRIPTOR mCCCDDescriptor;
     std::atomic<bool> mIsConnected{false};
+    std::function<void(BTH_LE_GATT_EVENT_TYPE,PVOID,PVOID)> mTxChangedCallback;
     TaskQueue mDeviceTaskQueue;
     Loop<void(BleDeviceWin*)> mTaskSpawnLoop;
 

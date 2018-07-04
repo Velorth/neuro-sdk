@@ -43,7 +43,7 @@ public:
     Loop& operator=(const Loop &) = delete;
 
     ~Loop(){
-        LOG_DEBUG("Loop destructor join");
+        LOG_TRACE("Loop destructor join");
         mThreadRunning.store(false);
         std::unique_lock<std::mutex> waitLock(mWaitMutex);
         mWaitCondition.notify_all();
@@ -55,7 +55,7 @@ public:
         catch (std::system_error &e){
             LOG_ERROR_V("Thread destruction error: %s", e.what());
         }
-        LOG_DEBUG("Loop thread exited");
+        LOG_TRACE("Loop thread exited");
     }
 
     void setDelay(delay_time_t delay){

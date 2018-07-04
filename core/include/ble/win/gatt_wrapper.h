@@ -13,10 +13,18 @@
 #include <type_traits>
 #include "gsl/span"
 #include "common_types.h"
+#include <sstream>
 
 namespace Neuro {
 
 std::string to_string(GUID);
+
+template <typename T, std::enable_if_t<std::is_integral<T>::value, T>* Deduce = nullptr>
+std::string to_hex_string(T value){
+    std::stringstream stream;
+    stream << std::hex << value;
+    return stream.str();
+}
 
 BOOL DeviceInfoListUniversalDestroyer(HDEVINFO) noexcept;
 HGLOBAL UniversalGlobalDeleter(HGLOBAL) noexcept;
@@ -83,7 +91,16 @@ BTH_LE_GATT_SERVICE get_service(const DeviceHandle &, std::string);
 BTH_LE_GATT_DESCRIPTOR get_descriptor(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, std::string);
 BTH_LE_GATT_DESCRIPTOR_VALUE get_descriptor_value(const DeviceHandle &, BTH_LE_GATT_DESCRIPTOR);
 bool set_descriptor_value(const DeviceHandle &, BTH_LE_GATT_DESCRIPTOR, BTH_LE_GATT_DESCRIPTOR_VALUE);
-BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, PFNBLUETOOTH_GATT_EVENT_CALLBACK);
+BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceHandle &, BTH_LE_GATT_CHARACTERISTIC, PFNBLUETOOTH_GATT_EVENT_CALLBACK, void *);
+
+class gatt_timeout : public std::runtime_error{
+public:
+    explicit gatt_timeout(const std::string &message)
+        : std::runtime_error(message){}
+
+    explicit gatt_timeout(const char *message)
+        : std::runtime_error(message){}
+};
 
 }
 #endif // GATT_WRAPPER_H

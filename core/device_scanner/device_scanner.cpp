@@ -68,8 +68,8 @@ DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):scanner
         auto deviceAddress = bleDevice->getNetAddress();
         auto neuroDevice = onNewBleDevice(std::move(bleDevice));
         if (neuroDevice) {
-            LOG_DEBUG_V("Notifying device %s [%s] found", deviceName.c_str(), deviceAddress.c_str());
-            if (this->deviceFoundCallback) this->deviceFoundCallback(std::move(neuroDevice));
+            if (this->deviceFoundCallback)
+                this->deviceFoundCallback(std::move(neuroDevice));
         }
     };
     scanner->subscribeDeviceFound(scannerCallback);
@@ -135,7 +135,6 @@ std::unique_ptr<Device, DeviceDeleter> DeviceScanner::findDeviceByAddress(std::s
 }
 
 std::unique_ptr<Device, DeviceDeleter> DeviceScanner::onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
-    LOG_DEBUG("Creating device");
     switch (ble_device->getDeviceType()) {
        case DeviceType::Brainbit:
             return BrainbitDeviceFactory().create(std::move(ble_device));
