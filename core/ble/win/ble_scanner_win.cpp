@@ -72,7 +72,7 @@ std::string getDeviceAddress(const DeviceInfoListPtr &device_info_list, SP_DEVIN
 
 
 BleScannerWin::BleScannerWin():
-    mSpawnScanTaskLoop(&BleScannerWin::spawnScanTask, std::chrono::milliseconds(300), this){
+    mSpawnScanTaskLoop(&BleScannerWin::spawnScanTask, std::chrono::milliseconds(1000), this){
 }
 
 void BleScannerWin::startScan(){
@@ -106,6 +106,7 @@ bool BleScannerWin::isScanning(){
 
 void BleScannerWin::releaseDevice(std::string name, std::string address){
     emulator.releaseDevice(name, address);
+    LOG_DEBUG_V("Release device %s [%s]", name.c_str(), address.c_str());
     auto deviceIt = mFoundDeviceAddresses.find(address);
     if (deviceIt != mFoundDeviceAddresses.end()){
         mFoundDeviceAddresses.erase(deviceIt);
@@ -125,62 +126,62 @@ void BleScannerWin::spawnScanTask(){
 
 std::vector<std::unique_ptr<BleDevice>> BleScannerWin::findDevicesWithFilters(const std::vector<std::string> &nameFilters){
     std::vector<std::unique_ptr<BleDevice>> devices;
+    auto btDevicesListPtr = make_device_list(GUID_BLUETOOTHLE_DEVICE_INTERFACE);
+    for (auto &name : nameFilters) {
+        auto bleInfo = BleDeviceInfo::fromDeviceName(name);
+        auto uuid = bleInfo->getGattInfo()->deviceServiceUUID();
+        GUID serviceGUID = guid_from_string(uuid);
 
-    GUID BluetoothInterfaceGUID = GUID_BLUETOOTHLE_DEVICE_INTERFACE;
-    auto deviceListPtr = make_device_list(BluetoothInterfaceGUID);
-    if (deviceListPtr.get() == INVALID_HANDLE_VALUE){
-        LoggerFactory::getCurrentPlatformLogger()->warn("[%s: %s] Invalid handle", "BleScannerWrapper", __FUNCTION__);
-        return devices;
-    }
-
-    SP_DEVICE_INTERFACE_DATA deviceInterfaceData;
-    deviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-
-    SP_DEVINFO_DATA deviceInfoData;
-    deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-
-    for (DWORD i = 0; SetupDiEnumDeviceInterfaces(deviceListPtr.get(), NULL, &BluetoothInterfaceGUID, i, &deviceInterfaceData); i++){
-        auto deviceInterfaceDetails = getInterfaceDetails(deviceListPtr, deviceInterfaceData, deviceInfoData);
-        if (deviceInterfaceDetails == nullptr){
-            continue;
+        auto serviceListPtr = make_device_list(serviceGUID);
+        if (serviceListPtr.get() == INVALID_HANDLE_VALUE){
+            LOG_WARN("Invalid handle");
+            return devices;
         }
-        try {
-            auto deviceName = getDeviceName(deviceListPtr, deviceInfoData);
-            if (std::find(nameFilters.begin(), nameFilters.end(), deviceName) == nameFilters.end()){
+
+        SP_DEVICE_INTERFACE_DATA serviceInterfaceData;
+        serviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+
+        SP_DEVINFO_DATA serviceInfoData;
+        serviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+        for (DWORD i = 0; SetupDiEnumDeviceInterfaces(serviceListPtr.get(), NULL, &serviceGUID, i, &serviceInterfaceData); i++){
+            auto serviceInterfaceDetails = getInterfaceDetails(serviceListPtr, serviceInterfaceData, serviceInfoData);
+            if (serviceInterfaceDetails == nullptr){
                 continue;
             }
-
-            auto deviceAddress = getDeviceAddress(deviceListPtr, deviceInfoData);
-            if (mFoundDeviceAddresses.find(deviceAddress) != mFoundDeviceAddresses.end()){
-                LOG_TRACE_V("Device %s already found", deviceAddress.c_str());
-                continue;
+            try {
+                SP_DEVINFO_DATA parentDeviceInfoData;
+                parentDeviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+                SetupDiEnumDeviceInfo(btDevicesListPtr.get(), i, &parentDeviceInfoData);
+                auto r = CM_Get_Parent(&parentDeviceInfoData.DevInst, serviceInfoData.DevInst, 0);
+                if (r != CR_SUCCESS){
+                    LOG_WARN_V("Unable to find parent device for service %s", uuid.c_str());
+                    continue;
+                }
+                auto deviceAddress = getDeviceAddress(btDevicesListPtr, parentDeviceInfoData);
+                auto deviceName = getDeviceName(btDevicesListPtr, parentDeviceInfoData);
+                if (mFoundDeviceAddresses.find(deviceAddress) != mFoundDeviceAddresses.end()){
+                    LOG_TRACE_V("Device %s already found", deviceAddress.c_str());
+                    continue;
+                }
+                auto serviceHandle = make_handle(serviceInterfaceDetails);
+                if (serviceHandle != nullptr){
+                    devices.push_back(std::make_unique<BleDeviceWin>(std::move(serviceHandle), deviceName, deviceAddress));
+                    mFoundDeviceAddresses.insert(deviceAddress);
+                }else{
+                    LOG_WARN_V("Unable to create handle for device %s [%s]: Handle is null", deviceName.c_str(), deviceAddress.c_str());
+                }
             }
-
-            auto deviceHandle = make_handle(deviceInterfaceDetails);
-            get_descriptor_value(deviceHandle,
-                                 get_descriptor(deviceHandle,
-                                                get_device_characteristic(deviceHandle,
-                                                                          get_service(deviceHandle,
-                                                                                      "6E400001-B534-F393-68A9-E50E24DCCA9E"),
-                                                                          "6E400002-B534-F393-68A9-E50E24DCCA9E"),
-                                                "00002902-0000-0000-0000-000000000000"));
-            if (deviceHandle != nullptr){
-                devices.push_back(std::make_unique<BleDeviceWin>(std::move(deviceHandle), deviceName, deviceAddress));
-            }else{
-                LOG_WARN_V("Unable to create handle for device %s [%s]: Handle is null", deviceName.c_str(), deviceAddress.c_str());
+            catch(std::runtime_error &e){
+                LOG_WARN_V("Unable to create handle for device: %s", e.what());
             }
-        }
-        catch(std::runtime_error &e){
-            LOG_WARN_V("Unable to create handle for device: %s", e.what());
         }
     }
-
     return devices;
 }
 
 void BleScannerWin::onDeviceFound(std::unique_ptr<BleDevice> &&device_ptr){
     LOG_DEBUG_V("Found device %s [%s]", device_ptr->getName().c_str(), device_ptr->getNetAddress().c_str());
-    mFoundDeviceAddresses.insert(device_ptr->getNetAddress());
     if (mDeviceFoundCallback)
         mDeviceFoundCallback(std::move(device_ptr));
 }

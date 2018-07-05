@@ -58,12 +58,12 @@ void ParameterReader::onBleConnected(){
     LOG_DEBUG_V("Ble device connected. Device %s, address: %s. Initializing...",
                 mBleDevice->getName().c_str(),
                 mBleDevice->getNetAddress().c_str());
-    if (loadDeviceParams()) {
-        mState = DeviceState::Connected;
-        parameterChangedCallback(Parameter::State);
+    if (loadDeviceParams()) {        
         LOG_DEBUG_V("Neuro device connected. Device %s, address: %s",
                     mBleDevice->getName().c_str(),
                     mBleDevice->getNetAddress().c_str());
+        mState = DeviceState::Connected;
+        parameterChangedCallback(Parameter::State);
     }
     else{
         LOG_ERROR_V("Neuro device protocol error. Device %s, address: %s",
@@ -86,9 +86,11 @@ void ParameterReader::onBleDisconnected(BleDeviceError error){
                     mBleDevice->getName().c_str(),
                     mBleDevice->getNetAddress().c_str());
         if (!mPendingDisconnectRequest){
+            LOG_DEBUG("No pending disconnect requests registered. Reconnecting...");
             mBleDevice->connect();
         }
         else {
+            LOG_DEBUG("Pending disconnect requests registered. Device disconnected.");
             mPendingDisconnectRequest = false;
         }
     }

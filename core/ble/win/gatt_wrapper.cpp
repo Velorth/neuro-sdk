@@ -113,11 +113,13 @@ std::unique_ptr<wchar_t> generic_read_registry_property(const DeviceInfoListPtr 
     return propertyBuffer;
 }
 
-bool write_characteristic(const DeviceHandle &device, BTH_LE_GATT_CHARACTERISTIC characteristic, const ByteBuffer &data){
-    auto requiredLength = data.size() + offsetof(BTH_LE_GATT_CHARACTERISTIC_VALUE, Data);
+bool write_characteristic(const DeviceHandle &device, BTH_LE_GATT_CHARACTERISTIC characteristic, const ByteBuffer &commandData){
+    auto offset = offsetof(BTH_LE_GATT_CHARACTERISTIC_VALUE, Data);
+    auto requiredLength = commandData.size() + offset;
     auto charValuePtr = alloc_smart_buffer<BTH_LE_GATT_CHARACTERISTIC_VALUE>(requiredLength);
-    charValuePtr->DataSize = data.size();
-    std::copy(data.begin(), data.end(), charValuePtr->Data);
+    charValuePtr->DataSize = commandData.size();
+    std::copy(commandData.begin(), commandData.end(), std::begin(charValuePtr->Data));
+
     auto result = BluetoothGATTSetCharacteristicValue(device.get(),
                                                &characteristic,
                                                charValuePtr.get(),
@@ -279,7 +281,7 @@ BTH_LE_GATT_DESCRIPTOR_VALUE get_descriptor_value(const DeviceHandle &device, BT
             throw gatt_timeout("Device is out of range");
         }
         else{
-            auto errStr = std::string("Unable to get device descriptor size. Error code ") + std::to_string(getValueResult);
+            auto errStr = std::string("Unable to get device descriptor size. Error code ") + to_hex_string(getValueResult);
             throw std::runtime_error(errStr);
         }
     }
@@ -308,15 +310,17 @@ BLUETOOTH_GATT_EVENT_HANDLE subscribe_characteristic_value_changed(const DeviceH
     eventParameterIn.NumCharacteristics = 1;
 
     BLUETOOTH_GATT_EVENT_HANDLE eventHandle;
-    if (BluetoothGATTRegisterEvent(
+    auto subscribeResult = BluetoothGATTRegisterEvent(
                 device.get(),
                 eventType,
                 &eventParameterIn,
                 callback,
                 context,
                 &eventHandle,
-                BLUETOOTH_GATT_FLAG_NONE) != S_OK){
-        throw std::runtime_error("Failed to set characteristic notifications");
+                BLUETOOTH_GATT_FLAG_NONE);
+    if (subscribeResult != S_OK) {
+        auto errStr = std::string("Unable to set characteristic notifications. Error code ") + to_hex_string(subscribeResult);
+        throw std::runtime_error(errStr);
     }
     return eventHandle;
 }

@@ -20,16 +20,17 @@ public:
     std::string getNetAddress() const override;
 
 private:
-    static constexpr const char *class_name = "BleDeviceWin";
+    friend void rxCharacteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
+    friend void statusCharacteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
 
-    friend void characteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
-
-    DeviceHandle mDeviceHandle;
+    DeviceHandle mServiceHandle;
     std::string mName;
     std::string mAddress;
     BTH_LE_GATT_SERVICE mService;
     BTH_LE_GATT_CHARACTERISTIC mRxCharacteristic;
     BTH_LE_GATT_CHARACTERISTIC mTxCharacteristic;
+    bool mHasStatusCharacteristic{false};
+    BTH_LE_GATT_CHARACTERISTIC mStatusCharacteristic;
     BTH_LE_GATT_DESCRIPTOR mCCCDDescriptor;
     std::atomic<bool> mIsConnected{false};
     std::function<void(BTH_LE_GATT_EVENT_TYPE,PVOID,PVOID)> mTxChangedCallback;

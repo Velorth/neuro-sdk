@@ -7,6 +7,7 @@
 #include <bthdef.h>
 #include <devguid.h>
 #include <bluetoothleapis.h>
+#include <cfgmgr32.h>
 #include <functional>
 #include <memory>
 #include <string>
