@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "neurosdk", "neurosdk.csproj", "{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88A3C7A7-C1A3-48B6-97CB-EA930981AF21}
+	EndGlobalSection
+EndGlobal
