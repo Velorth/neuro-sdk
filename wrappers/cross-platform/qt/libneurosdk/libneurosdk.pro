@@ -39,44 +39,44 @@ build_pass:CONFIG(debug, release|debug) {
 #########################
 ##INCLUDE PATHS SECTION##
 #########################
-INCLUDEPATH += ../../../core/include
-INCLUDEPATH += ../../../utils/network/
-INCLUDEPATH += ../../../utils/gsl/include
-INCLUDEPATH += ../../../utils/dsp/include
+INCLUDEPATH += ../../../../core/include
+INCLUDEPATH += ../../../../utils/network/
+INCLUDEPATH += ../../../../utils/gsl/include
+INCLUDEPATH += ../../../../utils/dsp/include
 #############################
 
 
 ###################
 ##HEADERS SECTION##
 ###################
-HEADERS += $$files(../../../core/include/*.h)
-HEADERS += $$files(../../../core/include/ble/*.h)
-HEADERS += $$files(../../../core/include/ble/emulator/*.h)
-HEADERS += $$files(../../../core/include/channels/*.h)
-HEADERS += $$files(../../../core/include/device/*.h)
-HEADERS += $$files(../../../core/include/device_scanner/*.h)
-HEADERS += $$files(../../../core/include/device/brainbit/*.h)
-HEADERS += $$files(../../../core/include/device/callibri/*.h)
-HEADERS += $$files(../../../core/include/signal/*.h)
-HEADERS += $$files(../../../utils/network/*.h)
-HEADERS += $$files(../../../utils/dsp/include/*.h)
-HEADERS += $$files(../../../utils/dsp/include/filter/*.h)
-HEADERS += $$files(../../../utils/gsl/include/gsl/*)
+HEADERS += $$files(../../../../core/include/*.h)
+HEADERS += $$files(../../../../core/include/ble/*.h)
+HEADERS += $$files(../../../../core/include/ble/emulator/*.h)
+HEADERS += $$files(../../../../core/include/channels/*.h)
+HEADERS += $$files(../../../../core/include/device/*.h)
+HEADERS += $$files(../../../../core/include/device_scanner/*.h)
+HEADERS += $$files(../../../../core/include/device/brainbit/*.h)
+HEADERS += $$files(../../../../core/include/device/callibri/*.h)
+HEADERS += $$files(../../../../core/include/signal/*.h)
+HEADERS += $$files(../../../../utils/network/*.h)
+HEADERS += $$files(../../../../utils/dsp/include/*.h)
+HEADERS += $$files(../../../../utils/dsp/include/filter/*.h)
+HEADERS += $$files(../../../../utils/gsl/include/gsl/*)
 win32 {
-    HEADERS += $$files(../../../core/include/ble/win/*.h)
-    HEADERS += $$files(../../../utils/network/windows/*.h)
+    HEADERS += $$files(../../../../core/include/ble/win/*.h)
+    HEADERS += $$files(../../../../utils/network/windows/*.h)
 }
 linux:!android:!ios:!macx {
-    HEADERS += $$files(../../../core/include/ble/linux/*.h)
-    HEADERS += $$files(../../../utils/network/posix/*.h)
+    HEADERS += $$files(../../../../core/include/ble/linux/*.h)
+    HEADERS += $$files(../../../../utils/network/posix/*.h)
 }
 android {
-    HEADERS += $$files(../../../core/include/ble/android/*.h)
-    HEADERS += $$files(../../../utils/network/posix/*.h)
+    HEADERS += $$files(../../../../core/include/ble/android/*.h)
+    HEADERS += $$files(../../../../utils/network/posix/*.h)
 }
 ios:macx {
-    HEADERS += $$files(../../../core/include/ble/ios/*.h)
-    HEADERS += $$files(../../../utils/network/posix/*.h)
+    HEADERS += $$files(../../../../core/include/ble/ios/*.h)
+    HEADERS += $$files(../../../../utils/network/posix/*.h)
 }
 ##################
 
@@ -84,34 +84,34 @@ ios:macx {
 ###################
 ##SOURCES SECTION##
 ###################
-SOURCES += $$files(../../../core/*.cpp)
-SOURCES += $$files(../../../core/ble/*.cpp)
-SOURCES += $$files(../../../core/ble/emulator/*.cpp)
-SOURCES += $$files(../../../core/channels/*.cpp)
-SOURCES += $$files(../../../core/device/*.cpp)
-SOURCES += $$files(../../../core/device_scanner/*.cpp)
-SOURCES += $$files(../../../core/device/brainbit/*.cpp)
-SOURCES += $$files(../../../core/device/callibri/*.cpp)
-SOURCES += $$files(../../../utils/network/*.cpp)
+SOURCES += $$files(../../../../core/*.cpp)
+SOURCES += $$files(../../../../core/ble/*.cpp)
+SOURCES += $$files(../../../../core/ble/emulator/*.cpp)
+SOURCES += $$files(../../../../core/channels/*.cpp)
+SOURCES += $$files(../../../../core/device/*.cpp)
+SOURCES += $$files(../../../../core/device_scanner/*.cpp)
+SOURCES += $$files(../../../../core/device/brainbit/*.cpp)
+SOURCES += $$files(../../../../core/device/callibri/*.cpp)
+SOURCES += $$files(../../../../utils/network/*.cpp)
 linux:!android:!ios:!macx {
-    SOURCES+=$$files(../../../core/ble/linux/*.cpp)
-    SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
-    SOURCES += $$files(../../../utils/network/posix/*.cpp)
+    SOURCES+=$$files(../../../../core/ble/linux/*.cpp)
+    SOURCES+=$$files(../../../../core/device_scanner/cpp/*.cpp)
+    SOURCES += $$files(../../../../utils/network/posix/*.cpp)
 }
 android {
-    SOURCES+=$$files(../../../core/ble/android/*.cpp)
-    SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
-    SOURCES += $$files(../../../utils/network/posix/*.cpp)
+    SOURCES+=$$files(../../../../core/ble/android/*.cpp)
+    SOURCES+=$$files(../../../../core/device_scanner/cpp/*.cpp)
+    SOURCES += $$files(../../../../utils/network/posix/*.cpp)
 }
 ios:macx {
-    SOURCES+=$$files(../../../core/ble/ios/*.mm)
-    SOURCES+=$$files(../../../core/device_scanner/mm/*.mm)
-    SOURCES += $$files(../../../utils/network/posix/*.cpp)
+    SOURCES+=$$files(../../../../core/ble/ios/*.mm)
+    SOURCES+=$$files(../../../../core/device_scanner/mm/*.mm)
+    SOURCES += $$files(../../../../utils/network/posix/*.cpp)
 }
 win32 {
-    SOURCES+=$$files(../../../core/ble/win/*.cpp)
-    SOURCES+=$$files(../../../core/device_scanner/cpp/*.cpp)
-    SOURCES += $$files(../../../utils/network/windows/*.cpp)
+    SOURCES+=$$files(../../../../core/ble/win/*.cpp)
+    SOURCES+=$$files(../../../../core/device_scanner/cpp/*.cpp)
+    SOURCES += $$files(../../../../utils/network/windows/*.cpp)
 }
 ##################
 
@@ -119,31 +119,31 @@ win32 {
 ##########################
 ##EXPORT HEADERS SECTION##
 ##########################
-shared_headers.files = ../../../core/include/common_types.h
-shared_headers.files += ../../../core/include/event_listener.h
-shared_headers.files += ../../../core/include/lib_export.h
-shared_headers_channels.files += ../../../core/include/channels/base_channel.h
-shared_headers_channels.files += ../../../core/include/channels/battery_channel.h
-shared_headers_channels.files += ../../../core/include/channels/channel_info.h
-shared_headers_channels.files += ../../../core/include/channels/connection_stats_channel.h
-shared_headers_channels.files += ../../../core/include/channels/electrode_state_channel.h
-shared_headers_channels.files += ../../../core/include/channels/mems_channel.h
-shared_headers_channels.files += ../../../core/include/channels/mems_data.h
-shared_headers_channels.files += ../../../core/include/channels/orientation_channel.h
-shared_headers_channels.files += ../../../core/include/channels/quaternion.h
-shared_headers_channels.files += ../../../core/include/channels/resistance_channel.h
-shared_headers_channels.files += ../../../core/include/channels/respiration_channel.h
-shared_headers_channels.files += ../../../core/include/channels/signal_channel.h
-shared_headers_channels.files += ../../../core/include/channels/spectrum_channel.h
-shared_headers_device.files += ../../../core/include/device/device.h
-shared_headers_device.files += ../../../core/include/device/device_parameters.h
-shared_headers_device.files += ../../../core/include/device/ma_device_params.h
-shared_headers_device.files += ../../../core/include/device/mems_device_params.h
-shared_headers_device.files += ../../../core/include/device/param_values.h
-shared_headers_device.files += ../../../core/include/device/signal_device_params.h
-shared_headers_device_scanner.files += ../../../core/include/device_scanner/device_scanner.h
-shared_headers_device_scanner.files += ../../../core/include/device_scanner/scanner_factory.h
-shared_headers_filter.files += ../../../utils/dsp/include/filter/*.h
+shared_headers.files = ../../../../core/include/common_types.h
+shared_headers.files += ../../../../core/include/event_listener.h
+shared_headers.files += ../../../../core/include/lib_export.h
+shared_headers_channels.files += ../../../../core/include/channels/base_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/battery_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/channel_info.h
+shared_headers_channels.files += ../../../../core/include/channels/connection_stats_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/electrode_state_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/mems_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/mems_data.h
+shared_headers_channels.files += ../../../../core/include/channels/orientation_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/quaternion.h
+shared_headers_channels.files += ../../../../core/include/channels/resistance_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/respiration_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/signal_channel.h
+shared_headers_channels.files += ../../../../core/include/channels/spectrum_channel.h
+shared_headers_device.files += ../../../../core/include/device/device.h
+shared_headers_device.files += ../../../../core/include/device/device_parameters.h
+shared_headers_device.files += ../../../../core/include/device/ma_device_params.h
+shared_headers_device.files += ../../../../core/include/device/mems_device_params.h
+shared_headers_device.files += ../../../../core/include/device/param_values.h
+shared_headers_device.files += ../../../../core/include/device/signal_device_params.h
+shared_headers_device_scanner.files += ../../../../core/include/device_scanner/device_scanner.h
+shared_headers_device_scanner.files += ../../../../core/include/device_scanner/scanner_factory.h
+shared_headers_filter.files += ../../../../utils/dsp/include/filter/*.h
 #########################
 
 

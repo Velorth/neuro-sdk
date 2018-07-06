@@ -2,22 +2,12 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 
-set(lib_build_DIR $ENV{HOME}/tmp)
-file(MAKE_DIRECTORY ${lib_build_DIR})
-
-set(SRC_DIR_CORE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../core)
-set(SRC_DIR_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/gsl)
-set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/network)
-set(SRC_DIR_DSP ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../utils/dsp)
+set(SRC_DIR_CORE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../core)
+set(SRC_DIR_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/gsl)
+set(SRC_DIR_NET ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/network)
+set(SRC_DIR_DSP ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/dsp)
 set(SRC_DIR_ANDROID ${CMAKE_CURRENT_SOURCE_DIR})
 
-# copy out the lib binary... need to leave the static lib around to pass gradle check
-set(DISTRIBUTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../lib/${ANDROID_ABI}")
-file(MAKE_DIRECTORY ${DISTRIBUTION_DIR})
-message(STATUS ${DISTRIBUTION_DIR})
-
-message(STATUS ${SRC_DIR_CORE})
-message(STATUS ${SRC_DIR_ANDROID})
 file(GLOB_RECURSE SOURCE_FILES_CORE_CHANNELS ${SRC_DIR_CORE}/channels/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_CORE_DEVICE ${SRC_DIR_CORE}/device/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_CORE_SCANNER ${SRC_DIR_CORE}/device_scanner/*.cpp)
@@ -46,6 +36,3 @@ add_library(neurosdk SHARED  ${SOURCE_FILES_CORE_COMMON}
                                 ${SOURCE_FILES_ANDROID}
                                 ${SOURCE_FILES_NET})
 target_link_libraries(neurosdk log android)
-set_target_properties(neurosdk
-                      PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${DISTRIBUTION_DIR})
