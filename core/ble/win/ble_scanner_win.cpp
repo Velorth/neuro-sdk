@@ -164,6 +164,7 @@ std::vector<std::unique_ptr<BleDevice>> BleScannerWin::findDevicesWithFilters(co
                     LOG_TRACE_V("Device %s already found", deviceAddress.c_str());
                     continue;
                 }
+                LOG_TRACE_V("Creating service handle for device %s [%s]", deviceName.c_str(), deviceAddress.c_str());
                 auto serviceHandle = make_handle(serviceInterfaceDetails);
                 if (serviceHandle != nullptr){
                     devices.push_back(std::make_unique<BleDeviceWin>(std::move(serviceHandle), deviceName, deviceAddress));

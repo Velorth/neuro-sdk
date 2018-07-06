@@ -204,7 +204,8 @@ BTH_LE_GATT_SERVICE get_service(const DeviceHandle &device, std::string service_
             return discoveredService;
         }
     }
-    throw std::runtime_error("Service not found");
+    auto errStr = std::string("Service ") + service_guid_str + std::string(" not found");
+    throw std::runtime_error(errStr);
 }
 
 BTH_LE_GATT_DESCRIPTOR get_descriptor(const DeviceHandle &device, BTH_LE_GATT_CHARACTERISTIC characteristic, std::string guid_string){
