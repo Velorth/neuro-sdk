@@ -35,7 +35,7 @@ public:
     DeviceScanner& operator=(const DeviceScanner&) = delete;
     ~DeviceScanner();
 
-    void startScan(int timeout);
+    void startScan(int timeout_ms);
     void stopScan();
     void subscribeDeviceFound(std::function<void(std::unique_ptr<Device, DeviceDeleter>)>);
     void subscribeScanStateChanged(std::function<void(bool)>);
