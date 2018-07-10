@@ -1,6 +1,6 @@
 ﻿namespace Neuro
 {
-    public class Device
+    class DeviceScanner
     {
     }
 }

@@ -7,8 +7,8 @@
     <ProjectGuid>{8D53F3AE-8B09-4FCA-99D1-DFAACBC71ADB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>neurosdk</RootNamespace>
-    <AssemblyName>neurosdk</AssemblyName>
+    <RootNamespace>Neuro</RootNamespace>
+    <AssemblyName>net-neurosdk</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
