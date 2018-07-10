@@ -12,7 +12,7 @@ enum class AccelerometerSensitivity {
     Sens16g
 };
 
-enum class GyroscopeSensitivity : unsigned char {
+enum class GyroscopeSensitivity {
     Sens250Grad,
     Sens500Grad,
     Sens1000Grad,
