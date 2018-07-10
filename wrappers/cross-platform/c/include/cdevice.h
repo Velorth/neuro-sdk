@@ -60,11 +60,6 @@ typedef struct _ParamInfoArray{
 	size_t info_count;
 } ParamInfoArray;
 
-typedef struct _ParamValue {
-	void *param_value;
-	size_t value_size;
-} ParamValueType;
-
 typedef enum _ChannelType {
 	ChannelTypeSignal,
 	ChannelTypeBattery,
@@ -95,9 +90,7 @@ SDK_SHARED void device_delete(Device *);
 SDK_SHARED int device_available_channels(const Device *, ChannelInfoArray *);
 SDK_SHARED int device_available_commands(const Device *, CommandArray *);
 SDK_SHARED int device_available_parameters(const Device *, ParamInfoArray *);
-SDK_SHARED int device_execute(Device *, Command);
-SDK_SHARED int device_subscribe_param_changed(Device*, void (*)(Parameter));
-SDK_SHARED int device_read_param(Device *, Parameter);
-SDK_SHARED int device_set_param(Device *, Parameter, ParamValueType);
+SDK_SHARED int device_execute(Device *, Command); 
+SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Parameter));
 
 #endif // CDEVICE_H

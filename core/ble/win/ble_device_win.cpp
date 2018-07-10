@@ -108,7 +108,10 @@ void BleDeviceWin::performConnect(){
         newValue.DescriptorType = ClientCharacteristicConfiguration;
         newValue.ClientCharacteristicConfiguration.IsSubscribeToNotification = TRUE;
         if (set_descriptor_value(mServiceHandle, mCCCDDescriptor, newValue)){
-            subscribe_characteristic_value_changed(mServiceHandle, mRxCharacteristic, &rxCharacteristicValueChanged, this);
+            subscribe_characteristic_value_changed(mServiceHandle,
+                                                   mRxCharacteristic,
+                                                   reinterpret_cast<PFNBLUETOOTH_GATT_EVENT_CALLBACK>(&rxCharacteristicValueChanged),
+                                                   this);
         }
         else {
             mIsConnected.store(false);
@@ -135,7 +138,10 @@ void BleDeviceWin::performConnect(){
             newStatusValue.DescriptorType = ClientCharacteristicConfiguration;
             newStatusValue.ClientCharacteristicConfiguration.IsSubscribeToNotification = TRUE;
             if (set_descriptor_value(mServiceHandle, statusCccd, newStatusValue)){
-                subscribe_characteristic_value_changed(mServiceHandle, mStatusCharacteristic, &statusCharacteristicValueChanged, this);
+                subscribe_characteristic_value_changed(mServiceHandle,
+                                                       mStatusCharacteristic,
+                                                       reinterpret_cast<PFNBLUETOOTH_GATT_EVENT_CALLBACK>(&statusCharacteristicValueChanged),
+                                                       this);
             }
             else {
                 mIsConnected.store(false);

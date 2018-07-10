@@ -12,7 +12,7 @@ BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
     DeviceImpl(ble_device,
                std::make_unique<BrainbitParameterReader>(ble_device,
                                                          [=](auto param){
-                                                             onParameterChanged(param);
+                                                             this->onParameterChanged(param);
                                                          }),
                std::make_unique<BrainbitParameterWriter>()),
     mRequestHandler(std::make_unique<BrainbitRequestHandler>(

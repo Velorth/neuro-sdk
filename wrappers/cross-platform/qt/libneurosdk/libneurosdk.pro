@@ -161,7 +161,7 @@ win32 {
     shared_headers_device.path = $$(NEUROSDK)/include/device
     shared_headers_device_scanner.path = $$(NEUROSDK)/include/device_scanner
     shared_headers_filter.path = $$(NEUROSDK)/include/filter
-    target.path = $$(NEUROSDK)
+    target.path = $$(NEUROSDK)/$$ARCH
     INSTALLS += target shared_headers shared_headers_channels shared_headers_device shared_headers_device_scanner shared_headers_filter
     LIBS += -lws2_32
     LIBS += -lSetupApi

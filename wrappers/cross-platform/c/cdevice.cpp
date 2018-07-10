@@ -8,12 +8,6 @@ extern "C"
 
 extern std::string sdk_last_error;
 
-template<Neuro::Parameter Param>
-bool setDeviceParam(const std::unique_ptr<Neuro::Device> &device, ParamValueType param_value) {
-	auto value = getSdkParamValue<Param::Type>(param_value);
-	return device->setParam<Param>(value);
-}
-
 ret_code device_connect(Device *device_ptr) {
 	auto& device = *reinterpret_cast<std::unique_ptr<Neuro::Device> *>(device_ptr);
 	try {
@@ -111,105 +105,6 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Para
 			}
 		});
 		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		sdk_last_error = e.what();
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-ret_code device_read_param(Device *device_ptr, Parameter, ParamValueType *result) {
-	throw;
-}
-
-ret_code device_set_param(Device *device_ptr, Parameter parameter, ParamValueType value) {
-	auto& device = *reinterpret_cast<std::unique_ptr<Neuro::Device> *>(device_ptr);
-	try {
-		bool result{ false };
-		switch (parameter) {
-		case ParameterName: {
-			result = setDeviceParam<Neuro::Parameter::Name>(device, value);
-			break;
-		}
-		case ParameterState: {
-			result = setDeviceParam<Neuro::Parameter::State>(device, value);
-			break;
-		}
-		case ParameterAddress: {
-			result = setDeviceParam<Neuro::Parameter::Address>(device, value);
-			break;
-		}
-		case ParameterSerialNumber: {
-			result = setDeviceParam<Neuro::Parameter::SerialNumber>(device, value);
-			break;
-		}
-		case ParameterHardwareFilterState: {
-			result = setDeviceParam<Neuro::Parameter::HardwareFilterState>(device, value);
-			break;
-		}
-		case ParameterFirmwareMode: {
-			result = setDeviceParam<Neuro::Parameter::FirmwareMode>(device, value);
-			break;
-		}
-		case ParameterSamplingFrequency: {
-			result = setDeviceParam<Neuro::Parameter::SamplingFrequency>(device, value);
-			break;
-		}
-		case ParameterGain: {
-			result = setDeviceParam<Neuro::Parameter::Gain>(device, value);
-			break;
-		}
-		case ParameterOffset: {
-			result = setDeviceParam<Neuro::Parameter::Offset>(device, value);
-			break;
-		}
-		case ParameterExternalSwitchState: {
-			result = setDeviceParam<Neuro::Parameter::ExternalSwitchState>(device, value);
-			break;
-		}
-		case ParameterADCInputState: {
-			result = setDeviceParam<Neuro::Parameter::ADCInputState>(device, value);
-			break;
-		}
-		case ParameterAccelerometerSens: {
-			result = setDeviceParam<Neuro::Parameter::AccelerometerSens>(device, value);
-			break;
-		}
-		case ParameterGyroscopeSens: {
-			result = setDeviceParam<Neuro::Parameter::GyroscopeSens>(device, value);
-			break;
-		}
-		case ParameterStimulatorState: {
-			result = setDeviceParam<Neuro::Parameter::StimulatorState>(device, value);
-			break;
-		}
-		case ParameterMotionAssistantState: {
-			result = setDeviceParam<Neuro::Parameter::MotionAssistantState>(device, value);
-			break;
-		}
-		case ParameterStimulatorParamPack: {
-			result = setDeviceParam<Neuro::Parameter::StimulatorParamPack>(device, value);
-			break;
-		}
-		case ParameterMotionAssistantParamPack: {
-			result = setDeviceParam<Neuro::Parameter::MotionAssistantParamPack>(device, value);
-			break;
-		}
-		default: {
-			sdk_last_error = "Unknown parameter type";
-			return ERROR_EXCEPTION_WITH_MESSAGE;
-		}
-		}
-		if (result) {
-			return SDK_NO_ERROR;
-		}
-		else {
-			sdk_last_error = "Unable to set parameter";
-			return ERROR_EXCEPTION_WITH_MESSAGE;
-		}
 	}
 	catch (std::exception &e) {
 		sdk_last_error = e.what();
