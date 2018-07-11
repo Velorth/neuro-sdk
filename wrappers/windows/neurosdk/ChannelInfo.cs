@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,10 +21,19 @@ namespace Neuro
         Custom
     }
 
-    public class ChannelInfo
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ChannelInfo
     {
-        public string Name { get; set; }
-        public ChannelType Type { get; private set; }
-        public int Index { get; private set; }
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string Name;
+        public ChannelType Type;
+        public uint Index;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ChannelInfoArray
+    {
+        public IntPtr InfoArray;
+        public uint InfoCount;
     }
 }

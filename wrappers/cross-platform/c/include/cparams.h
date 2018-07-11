@@ -86,7 +86,7 @@ typedef struct _StimulationParams {
 	int stimulus_duration;
 } StimulationParams;
 
-SDK_SHARED int device_read_Name(Device *, char *out_name);
+SDK_SHARED int device_read_Name(Device *, char *out_name, unsigned length);
 SDK_SHARED int device_read_State(Device *, DeviceState *out_state);
 SDK_SHARED int device_read_Address(Device *, char *out_address);
 SDK_SHARED int device_read_SerialNumber(Device *, char *out_serial);

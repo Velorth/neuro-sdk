@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Neuro
 {
@@ -18,72 +19,66 @@ namespace Neuro
             {
                 throw new ArgumentNullException(nameof(devicePtr), "Device pointer is null");
             }
-            device_subscribe_param_changed(_devicePtr, (Parameter param) => { ParameterChanged?.Invoke(this, param); });
+
+            var result = device_subscribe_param_changed(_devicePtr, OnParameterChanged);
+            Debug.Assert(result == SdkError.SdkNoError);
+            SdkError.ThrowIfError(result);
+        }
+
+        ~Device()
+        {
+            device_delete(_devicePtr);
         }
 
         public void Connect()
         {
-            var result = device_connect(_devicePtr);
-            switch (result)
-            {
-                case SdkError.ERROR_EXCEPTION_WITH_MESSAGE:
-                    throw new InvalidOperationException(SdkError.sdk_last_error_msg());
-                case SdkError.ERROR_UNHANDLED_EXCEPTION:
-                    throw new InvalidOperationException("Unknown error");
-                default:
-                    break;
-            }
+            SdkError.ThrowIfError(device_connect(_devicePtr));
         }
 
         public void Disconnect()
         {
-            var result = device_disconnect(_devicePtr);
-            switch (result)
-            {
-                case SdkError.ERROR_EXCEPTION_WITH_MESSAGE:
-                    throw new InvalidOperationException(SdkError.sdk_last_error_msg());
-                case SdkError.ERROR_UNHANDLED_EXCEPTION:
-                    throw new InvalidOperationException("Unknown error");
-                default:
-                    break;
-            }
+            SdkError.ThrowIfError(device_disconnect(_devicePtr));
         }
 
         public IEnumerable<ChannelInfo> Channels()
         {
-
+            SdkError.ThrowIfError(device_available_channels(_devicePtr, out var nativeArray));
+            return NativeAdapter.MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount, NativeAdapter.NativeStructPtrReader<ChannelInfo>);
         }
 
         public IEnumerable<Command> Commands()
         {
-
+            SdkError.ThrowIfError(device_available_commands(_devicePtr, out var nativeArray));
+            return NativeAdapter.MarshalArray(nativeArray.CmdArray, nativeArray.CmdArraySize, NativeAdapter.NativeEnumPtrReader<Command>);
         }
 
         public IEnumerable<ParamInfo> Parameters()
         {
-
+            SdkError.ThrowIfError(device_available_parameters(_devicePtr, out var nativeArray));
+            return NativeAdapter.MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount, NativeAdapter.NativeStructPtrReader<ParamInfo>);
         }
 
         public void Execute(Command command)
         {
-            var result = device_execute(_devicePtr, command);
-            switch (result)
-            {
-                case SdkError.ERROR_EXCEPTION_WITH_MESSAGE:
-                    throw new InvalidOperationException(SdkError.sdk_last_error_msg());
-                case SdkError.ERROR_UNHANDLED_EXCEPTION:
-                    throw new InvalidOperationException("Unknown error");
-                default:
-                    break;
-            }
+            SdkError.ThrowIfError(device_execute(_devicePtr, command));
         }
 
         public T ReadParam<T>(Parameter parameter)
         {
+            var paramTypeInfo = new ParameterTypeInfo(parameter);
+            if (paramTypeInfo.Type != typeof(T))
+            {
+                throw new ArgumentException($"Wrong return generic type argument. Must be {paramTypeInfo.Type.Name}");
+            }
+            return (T) new object();
+        }
+
+        public void SetParam<T>(Parameter parameter, T value)
+        {
 
         }
 
-        public void SetParam(object value)
+        private void OnParameterChanged(Parameter parameter)
         {
 
         }
@@ -106,13 +101,13 @@ namespace Neuro
         private static extern void device_delete(IntPtr devicePtr);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_available_channels(IntPtr devicePtr, ChannelInfoArray*);
+        private static extern int device_available_channels(IntPtr devicePtr, out ChannelInfoArray infoArray);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_available_commands(IntPtr devicePtr, CommandArray*);
+        private static extern int device_available_commands(IntPtr devicePtr, out CommandArray cmdArray);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_available_parameters(IntPtr devicePtr, ParamInfoArray*);
+        private static extern int device_available_parameters(IntPtr devicePtr, out ParamInfoArray infoArray);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_execute(IntPtr devicePtr, Command command);
@@ -121,7 +116,7 @@ namespace Neuro
         private static extern int device_subscribe_param_changed(IntPtr devicePtr, DeviceParamChangedFunc callback);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_Name(IntPtr devicePtr, [MarshalAs(UnmanagedType.LPStr)] out string outName);
+        private static extern int device_read_Name(IntPtr devicePtr, StringBuilder outName, uint bufferLength);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_read_State(IntPtr devicePtr, out DeviceState outState);

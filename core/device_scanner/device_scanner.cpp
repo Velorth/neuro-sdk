@@ -68,8 +68,14 @@ DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):scanner
         auto deviceAddress = bleDevice->getNetAddress();
         auto neuroDevice = onNewBleDevice(std::move(bleDevice));
         if (neuroDevice) {
-            if (this->deviceFoundCallback)
-                this->deviceFoundCallback(std::move(neuroDevice));
+            if (this->deviceFoundCallback){
+                try {
+                    this->deviceFoundCallback(std::move(neuroDevice));
+                }
+                catch(std::exception &e){
+                    LOG_ERROR_V("Error occured in user-defined DeviceFound callback function: %s", e.what());
+                }
+            }
         }
     };
     scanner->subscribeDeviceFound(scannerCallback);

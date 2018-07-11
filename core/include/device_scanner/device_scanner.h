@@ -37,9 +37,9 @@ public:
 
     void startScan(int timeout_ms);
     void stopScan();
-    void subscribeDeviceFound(std::function<void(std::unique_ptr<Device, DeviceDeleter>)>);
+    void subscribeDeviceFound(std::function<void(DeviceUniquePtr)>);
     void subscribeScanStateChanged(std::function<void(bool)>);
-    std::unique_ptr<Device, DeviceDeleter> findDeviceByAddress(std::string address);
+    DeviceUniquePtr findDeviceByAddress(std::string address);
     void releaseDevice(std::string name, std::string address);
 
 private:
@@ -47,10 +47,10 @@ private:
     std::shared_ptr<BleScanner> scanner;
     std::condition_variable stopScanCondition;
     std::mutex stopScanMutex;
-    std::function<void(std::unique_ptr<Device, DeviceDeleter>)> deviceFoundCallback;
+    std::function<void(DeviceUniquePtr)> deviceFoundCallback;
     std::function<void(bool)> scanStateChangedCallback;
 
-    std::unique_ptr<Device, DeviceDeleter> onNewBleDevice(std::unique_ptr<BleDevice>);
+    DeviceUniquePtr onNewBleDevice(std::unique_ptr<BleDevice>);
 };
 
 }
