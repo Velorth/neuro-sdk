@@ -19,7 +19,7 @@ namespace Neuro
                 throw new SystemException("Unable to retreive BLE device scanner instance");
             }
 
-            SdkError.ThrowIfError(scanner_set_scan_state_callback(_scannerPtr, isScanning => ScanStateChanged?.Invoke(this, isScanning)));
+            SdkError.ThrowIfError(scanner_set_scan_state_callback(_scannerPtr, OnScanStateChanged ));
             SdkError.ThrowIfError(scanner_set_device_found_callback(_scannerPtr, OnDeviceFound));
         }
 
@@ -59,6 +59,11 @@ namespace Neuro
             {
                 //TODO log or something else...
             }
+        }
+
+        private void OnScanStateChanged(bool isScanning)
+        {
+            ScanStateChanged?.Invoke(this, isScanning);
         }
 
 #if DEBUG

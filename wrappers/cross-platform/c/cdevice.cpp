@@ -68,12 +68,49 @@ ret_code device_available_channels(const Device *device_ptr, ChannelInfoArray *c
 	}
 }
 
-ret_code device_available_commands(const Device *device_ptr, CommandArray *) {
-	throw;
+ret_code device_available_commands(const Device *device_ptr, CommandArray *command_array) {
+	auto& device = *reinterpret_cast<const Neuro::DeviceUniquePtr *>(device_ptr);
+	try {
+		auto commands = device->commands();
+		command_array->cmd_array_size = commands.size();
+		const auto memorySize = command_array->cmd_array_size * sizeof(Command);
+		command_array->cmd_array = reinterpret_cast<Command *>(malloc(memorySize));
+		std::transform(commands.begin(), commands.end(), command_array->cmd_array, [](auto command) {
+			return static_cast<Command>(command);
+		});
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
-ret_code device_available_parameters(const Device *device_ptr, ParamInfoArray *) {
-	throw;
+ret_code device_available_parameters(const Device *device_ptr, ParamInfoArray *param_info_array) {
+	auto& device = *reinterpret_cast<const Neuro::DeviceUniquePtr *>(device_ptr);
+	try {
+		auto params = device->parameters();
+		param_info_array->info_count = params.size();
+		const auto memorySize = param_info_array->info_count * sizeof(ParameterInfo);
+		param_info_array->info_array = reinterpret_cast<ParameterInfo *>(malloc(memorySize));
+		std::transform(params.begin(), params.end(), param_info_array->info_array, [](const auto& param_info) {
+			ParameterInfo info;
+			info.parameter = static_cast<Parameter>(param_info.first);
+			info.access = static_cast<ParamAccess>(param_info.second);
+			return info;
+		});
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
 ret_code device_execute(Device *device_ptr, Command cmd) {
@@ -101,7 +138,7 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Para
 	try {
 		device->setParamChangedCallback([callback](auto param) {
 			if (callback != nullptr) {
-				callback(ParameterState);
+				callback(static_cast<Parameter>(param));
 			}
 		});
 		return SDK_NO_ERROR;

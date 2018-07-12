@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Neuro
 {
@@ -8,6 +9,20 @@ namespace Neuro
         public const int SdkNoError = 0;
         public const int ErrorUnhandledException = 1;
         public const int ErrorExceptionWithMessage = 2;
+
+        public static string LastErrorMessage
+        {
+            get
+            {
+                var messageBuffer = new StringBuilder(256);
+                var result = sdk_last_error_msg(messageBuffer, (uint)messageBuffer.Capacity);
+                if (result != SdkNoError)
+                {
+                    throw new InvalidOperationException("Failed to read last error message");
+                }
+                return messageBuffer.ToString();
+            }
+        }
 
         /// <summary>
         /// Checks result code of native operation and throws in case operation failed
@@ -18,7 +33,7 @@ namespace Neuro
             switch (resultCode)
             {
                 case ErrorExceptionWithMessage:
-                    throw new InvalidOperationException(sdk_last_error_msg());
+                    throw new InvalidOperationException(LastErrorMessage);
                 case ErrorUnhandledException:
                     throw new InvalidOperationException("Unhandled exception in native code");
                 case SdkNoError:
@@ -35,6 +50,6 @@ namespace Neuro
 #endif
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.LPStr)]
-        private static extern string sdk_last_error_msg();
+        private static extern int sdk_last_error_msg(StringBuilder msgBuffer, uint bufferLength);
     }
 }

@@ -21,19 +21,19 @@ namespace Neuro
         Custom
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct ChannelInfo
     {
-        [MarshalAs(UnmanagedType.LPStr)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public string Name;
         public ChannelType Type;
-        public uint Index;
+        public UIntPtr Index;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct ChannelInfoArray
     {
         public IntPtr InfoArray;
-        public uint InfoCount;
+        public UIntPtr InfoCount;
     }
 }

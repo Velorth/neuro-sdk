@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
-project(c-neurosdk C CXX)
+if (WIN32)
+    if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+		set (TARGET_PLATFORM "x86")
+	else ()
+		set (TARGET_PLATFORM "x64")
+	endif()
+endif (WIN32)
+
+project(c-neurosdk-${TARGET_PLATFORM} C CXX)
 
 ###################
 ##DEFINES SECTION##
@@ -21,14 +29,6 @@ if (WIN32)
 else () 
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti")
-endif (WIN32)
-
-if (WIN32)
-    if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-		set (TARGET_PLATFORM "x86")
-	else ()
-		set (TARGET_PLATFORM "x64")
-	endif()
 endif (WIN32)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")

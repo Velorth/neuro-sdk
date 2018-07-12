@@ -17,13 +17,14 @@ namespace Neuro
             return (T)(object)Marshal.ReadInt32(nativePtr);
         }
 
-        public static T[] MarshalArray<T>(IntPtr structArrayPtr, uint length, NativePtrReader<T> reader)
+        public static T[] MarshalArray<T>(IntPtr firstElemPtr, UIntPtr length, NativePtrReader<T> reader)
         {
-            var result = new T[length];
-            for (var i = 0; i < length; i++)
+            var result = new T[length.ToUInt32()];
+            var type = typeof(T).IsEnum ? typeof(T).GetEnumUnderlyingType() : typeof(T);
+            for (uint i = 0; i < length.ToUInt32(); i++)
             {
-                structArrayPtr = IntPtr.Add(structArrayPtr, Marshal.SizeOf<T>());
-                result[i] = reader(structArrayPtr);
+                result[i] = reader(firstElemPtr);
+                firstElemPtr = IntPtr.Add(firstElemPtr, Marshal.SizeOf(type));
             }
 
             return result;
