@@ -52,7 +52,7 @@ int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
 		scanner->subscribeDeviceFound([callback](auto device) {
-			auto device_raw_ptr = new decltype(device)(std::move(device));
+			const auto device_raw_ptr = new Neuro::DeviceSharedPtr(std::move(device));
 			if (callback != nullptr) {
 				callback(reinterpret_cast<Device *>(device_raw_ptr));
 			}
