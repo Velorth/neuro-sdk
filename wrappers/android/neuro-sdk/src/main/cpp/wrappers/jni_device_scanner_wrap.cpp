@@ -38,7 +38,7 @@ Java_com_neuromd_neurosdk_DeviceScanner_create(JNIEnv *env,
                 javaOnScanStateChanged(globalSubscriberRef, isScanning);
             });
     neuroConnectionPtr->subscribeDeviceFound(
-            [globalSubscriberRef](std::unique_ptr<Neuro::Device> device) {
+            [globalSubscriberRef](Neuro::DeviceUniquePtr device) {
                 //here we have to pass heap allocated shared_ptr to callback function
                 //to be sure that shared_ptr and object, managed by it will be alive
                 //as long as managed code needs

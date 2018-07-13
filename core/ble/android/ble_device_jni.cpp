@@ -22,19 +22,20 @@ namespace Neuro {
 std::string getBleName(jobject ble_device_obj){
     return jni::call_in_attached_thread([=](auto env) {
         //first we need to get name of bluetooth device
-        auto btDeviceClass = env->GetObjectClass(bluetoothDevice);
+        auto btDeviceClass = env->GetObjectClass(ble_device_obj);
         auto btDeviceNameMethod = env->GetMethodID(btDeviceClass, "getName",
                                                    "()Ljava/lang/String;");
-        auto btDeviceNameObj = (jstring) env->CallObjectMethod(bluetoothDevice,
+        auto btDeviceNameObj = (jstring) env->CallObjectMethod(ble_device_obj,
                                                                btDeviceNameMethod);
 
         //if name string is null it means that device is unavailable now
         if (btDeviceNameObj == NULL)
             throw std::runtime_error("Failed to initialize device");
 
-        auto btDeviceName = std::string(env->GetStringUTFChars(btDeviceNameObj, NULL));
+        auto btNameChars = env->GetStringUTFChars(btDeviceNameObj, NULL);
+        auto btDeviceName = std::string(btNameChars);
 
-        env->ReleaseStringUTFChars(btDeviceNameObj, btDeviceName);
+        env->ReleaseStringUTFChars(btDeviceNameObj, btNameChars);
         env->DeleteLocalRef(btDeviceNameObj);
         return btDeviceName;
     });
