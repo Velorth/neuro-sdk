@@ -2,15 +2,50 @@
 
 namespace Neuro {
 
-const ChannelInfo ChannelInfo::Signal = ChannelInfo(Type::Signal);
-const ChannelInfo ChannelInfo::Battery = ChannelInfo(Type::Battery);
-const ChannelInfo ChannelInfo::ElectrodesState = ChannelInfo(Type::ElectrodesState);
-const ChannelInfo ChannelInfo::Respiration = ChannelInfo(Type::Respiration);
-const ChannelInfo ChannelInfo::MEMS = ChannelInfo(Type::MEMS);
-const ChannelInfo ChannelInfo::Orientation = ChannelInfo(Type::Orientation);
-const ChannelInfo ChannelInfo::ConnectionStats = ChannelInfo(Type::ConnectionStats);
-const ChannelInfo ChannelInfo::Resistance = ChannelInfo(Type::Resistance);
-const ChannelInfo ChannelInfo::Pedometer = ChannelInfo(Type::Pedometer);
+ChannelInfo ChannelInfo::Signal(){
+    static ChannelInfo SignalInfo = ChannelInfo(Type::Signal);
+    return SignalInfo;
+}
+
+ChannelInfo ChannelInfo::Battery(){
+    static ChannelInfo BatteryInfo = ChannelInfo(Type::Battery);
+    return BatteryInfo;
+}
+
+ChannelInfo ChannelInfo::ElectrodesState(){
+    static ChannelInfo ElectrodesStateInfo = ChannelInfo(Type::ElectrodesState);
+    return ElectrodesStateInfo;
+}
+
+ChannelInfo ChannelInfo::Respiration(){
+    static ChannelInfo RespirationInfo = ChannelInfo(Type::Respiration);
+    return RespirationInfo;
+}
+
+ChannelInfo ChannelInfo::MEMS(){
+    static ChannelInfo MEMSInfo = ChannelInfo(Type::MEMS);
+    return MEMSInfo;
+}
+
+ChannelInfo ChannelInfo::Orientation(){
+    static ChannelInfo OrientationInfo = ChannelInfo(Type::Orientation);
+    return OrientationInfo;
+}
+
+ChannelInfo ChannelInfo::ConnectionStats(){
+    static ChannelInfo ConnectionStatsInfo = ChannelInfo(Type::ConnectionStats);
+    return ConnectionStatsInfo;
+}
+
+ChannelInfo ChannelInfo::Resistance(){
+    static ChannelInfo ResistanceInfo = ChannelInfo(Type::Resistance);
+    return ResistanceInfo;
+}
+
+ChannelInfo ChannelInfo::Pedometer(){
+    static ChannelInfo PedometerInfo = ChannelInfo(Type::Pedometer);
+    return PedometerInfo;
+}
 
 ChannelInfo::ChannelInfo(ChannelInfo::Type type):
     mType(type),

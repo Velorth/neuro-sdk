@@ -152,16 +152,16 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     auto responseData = cmdData->getResponseData();
     auto featuresFlags = responseData[0];
     if (featuresFlags&0x01){
-        mAvailableChannels.push_back(ChannelInfo::Signal);
-        mAvailableChannels.push_back(ChannelInfo::ElectrodesState);
+        mAvailableChannels.push_back(ChannelInfo::Signal());
+        mAvailableChannels.push_back(ChannelInfo::ElectrodesState());
         mAvailableCommands.push_back(Command::StartSignal);
         mAvailableCommands.push_back(Command::StopSignal);
         modules.push_back(CallibriModule::Signal);
         LOG_DEBUG("Has signal module");
     }
     if (featuresFlags&0x02){
-        mAvailableChannels.push_back(ChannelInfo::MEMS);
-        mAvailableChannels.push_back(ChannelInfo::Orientation);
+        mAvailableChannels.push_back(ChannelInfo::MEMS());
+        mAvailableChannels.push_back(ChannelInfo::Orientation());
         mAvailableCommands.push_back(Command::StartMEMS);
         mAvailableCommands.push_back(Command::StopMEMS);
         modules.push_back(CallibriModule::MEMS);
@@ -178,15 +178,15 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
         LOG_DEBUG("Has stimulation module");
     }
     if (featuresFlags&0x08){
-        mAvailableChannels.push_back(ChannelInfo::Respiration);
+        mAvailableChannels.push_back(ChannelInfo::Respiration());
         mAvailableCommands.push_back(Command::StartRespiration);
         mAvailableCommands.push_back(Command::StopRespiration);
         modules.push_back(CallibriModule::Respiration);
         LOG_DEBUG("Has spyrometry module");
     }
 
-    mAvailableChannels.push_back(ChannelInfo::ConnectionStats);
-    mAvailableChannels.push_back(ChannelInfo::Battery);
+    mAvailableChannels.push_back(ChannelInfo::ConnectionStats());
+    mAvailableChannels.push_back(ChannelInfo::Battery());
 
     mSamplingFrequency = fromByteCode<SamplingFrequency>(responseData[CallibriSamplFreqBytePos]);
     mAvailableParameters.push_back({Parameter::SamplingFrequency, ParamAccess::ReadWrite});

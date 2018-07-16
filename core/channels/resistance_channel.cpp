@@ -16,7 +16,7 @@ public:
     Impl(std::shared_ptr<Device> device) :
         mDevice(device){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Resistance));
+        Expects(checkHasChannel(*device, ChannelInfo::Resistance()));
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -70,7 +70,7 @@ public:
 };
 
 ResistanceChannel::ResistanceChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::Resistance),
+    BaseChannel(ChannelInfo::Resistance()),
     mImpl(std::make_unique<Impl>(device)){
 
 }

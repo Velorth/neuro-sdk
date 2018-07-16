@@ -31,7 +31,7 @@ public:
         mDevice(device),
         mLoop(&Impl::readConnectionStatsFunc, std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency), this){
         Expects(mDevice != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::ConnectionStats));
+        Expects(checkHasChannel(*device, ChannelInfo::ConnectionStats()));
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -71,7 +71,7 @@ public:
 };
 
 ConnectionStatsChannel::ConnectionStatsChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::ConnectionStats),
+    BaseChannel(ChannelInfo::ConnectionStats()),
     mImpl(std::make_unique<Impl>(device)){}
 
 ConnectionStatsChannel::~ConnectionStatsChannel(){}

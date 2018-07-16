@@ -57,7 +57,7 @@ public:
         mDevice(device),
         mLoop(&Impl::readElectrodeFunc, std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency), this){
         Expects(mDevice != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::ElectrodesState));
+        Expects(checkHasChannel(*device, ChannelInfo::ElectrodesState()));
         checkAdcInput();
     }
 
@@ -98,7 +98,7 @@ public:
 };
 
 ElectrodeStateChannel::ElectrodeStateChannel(std::shared_ptr<Device> device):
-    BaseChannel(ChannelInfo::ElectrodesState),
+    BaseChannel(ChannelInfo::ElectrodesState()),
     mImpl(std::make_unique<Impl>(device)){
 
 }

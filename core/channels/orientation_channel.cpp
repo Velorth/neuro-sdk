@@ -18,7 +18,7 @@ public:
     Impl(std::shared_ptr<Device> device) :
         mDevice(device){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Orientation));
+        Expects(checkHasChannel(*device, ChannelInfo::Orientation()));
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -66,7 +66,7 @@ public:
 };
 
 OrientationChannel::OrientationChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::Signal),
+    BaseChannel(ChannelInfo::Orientation()),
     mImpl(std::make_unique<Impl>(device)){
 
 }

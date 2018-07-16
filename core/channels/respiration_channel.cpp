@@ -17,7 +17,7 @@ public:
     Impl(std::shared_ptr<Device> device) :
         mDevice(device){
         Expects(device != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Respiration));
+        Expects(checkHasChannel(*device, ChannelInfo::Respiration()));
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -65,7 +65,7 @@ public:
 };
 
 RespirationChannel::RespirationChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::Signal),
+    BaseChannel(ChannelInfo::Respiration()),
     mImpl(std::make_unique<Impl>(device)){
 
 }

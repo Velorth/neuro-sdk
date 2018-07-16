@@ -36,15 +36,15 @@ public:
         }
     }
 
-    static const ChannelInfo Signal;
-    static const ChannelInfo Battery;
-    static const ChannelInfo ElectrodesState;
-    static const ChannelInfo Respiration;
-    static const ChannelInfo MEMS;
-    static const ChannelInfo Orientation;
-    static const ChannelInfo ConnectionStats;
-    static const ChannelInfo Resistance;
-    static const ChannelInfo Pedometer;
+    static ChannelInfo Signal();
+    static ChannelInfo Battery();
+    static ChannelInfo ElectrodesState();
+    static ChannelInfo Respiration();
+    static ChannelInfo MEMS();
+    static ChannelInfo Orientation();
+    static ChannelInfo ConnectionStats();
+    static ChannelInfo Resistance();
+    static ChannelInfo Pedometer();
 
     ChannelInfo(Type);
     ChannelInfo(Type, std::string &&, std::size_t = 0) noexcept;

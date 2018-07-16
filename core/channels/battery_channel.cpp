@@ -45,7 +45,7 @@ public:
         mDevice(device),
         mLoop(&Impl::readBatteryFunc, std::chrono::duration<sampling_frequency_t>(1.0/mSamplingFrequency), this){
         Expects(mDevice != nullptr);
-        Expects(checkHasChannel(*device, ChannelInfo::Battery));
+        Expects(checkHasChannel(*device, ChannelInfo::Battery()));
     }
 
     length_listener_ptr setLengthChangedCallback(length_callback_t callback) noexcept {
@@ -85,7 +85,7 @@ public:
 };
 
 BatteryChannel::BatteryChannel(std::shared_ptr<Device> device) :
-    BaseChannel(ChannelInfo::Battery),
+    BaseChannel(ChannelInfo::Battery()),
     mImpl(std::make_unique<Impl>(device)){}
 
 BatteryChannel::~BatteryChannel(){}

@@ -62,6 +62,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseChannel.cs" />
+    <Compile Include="BatteryChannel.cs" />
     <Compile Include="ChannelInfo.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceScanner.cs" />

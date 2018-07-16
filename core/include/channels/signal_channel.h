@@ -12,11 +12,11 @@ public:
     class Impl;
 
     SignalChannel(std::shared_ptr<Device>,
-                  const ChannelInfo & = ChannelInfo::Signal);
+                  const ChannelInfo & = ChannelInfo::Signal());
 
     SignalChannel(std::shared_ptr<Device>,
                   std::vector<DSP::DigitalFilterPtr<signal_sample_t>> &&,
-                  const ChannelInfo & = ChannelInfo::Signal);
+                  const ChannelInfo & = ChannelInfo::Signal());
 
     ~SignalChannel();
 
