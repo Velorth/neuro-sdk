@@ -166,10 +166,12 @@ namespace Neuro
     public class ParameterTypeInfo
     {
         internal delegate object ReadParamDelegate(Device device);
+        internal delegate void SetParamDelegate(Device device, object value);
 
         public Type Type { get; }
 
         internal ReadParamDelegate ReadParamValue { get; }
+        internal SetParamDelegate SetParamValue { get; }
 
         public ParameterTypeInfo(Parameter parameter)
         {
@@ -182,6 +184,10 @@ namespace Neuro
                         var nameBuffer = new StringBuilder(128);
                         SdkError.ThrowIfError(device_read_Name(device.DevicePtr, nameBuffer, (uint)nameBuffer.Capacity));
                         return nameBuffer.ToString();
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+
                     };
                     break;
                 case Parameter.State:

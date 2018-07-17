@@ -156,15 +156,62 @@ int readSamplingFrequency(const Neuro::CommonChannelInterface &channel, float* o
 	}
 }
 
+int setSamplingFrequency(Neuro::CommonChannelInterface &channel, float frequency) {
+	try {
+		channel.setSamplingFrequency(frequency);
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int getChannelInfo(Neuro::CommonChannelInterface &channel, ChannelInfo *out_frequency) {
+	try {
+		auto channelInfo = channel.info();
+		ChannelInfo info;
+		strcpy(info.name, channelInfo.getName().c_str());
+		info.type = static_cast<ChannelType>(channelInfo.getType());
+		info.index = channelInfo.getIndex();
+		*out_frequency = info;
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
 BatteryChannel* create_BatteryChannel(Device *device_ptr) {
 	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	const auto channelPtr = new std::shared_ptr<Neuro::BatteryChannel>(std::make_shared<Neuro::BatteryChannel>(device));
-	return reinterpret_cast<BatteryChannel *>(channelPtr);
+	try {
+		const auto channelPtr = new std::shared_ptr<Neuro::BatteryChannel>(std::make_shared<Neuro::BatteryChannel>(device));
+		return reinterpret_cast<BatteryChannel *>(channelPtr);
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return nullptr;
+	}
+	catch (...) {
+		return nullptr;
+	}
 }
 
 void BatteryChannel_delete(BatteryChannel *channel) {
 	const auto batteryChannel = reinterpret_cast<std::shared_ptr<Neuro::BatteryChannel> *>(channel);
 	delete batteryChannel;
+}
+
+int BatteryChannel_get_info(BatteryChannel * channel, ChannelInfo * out_info){
+	auto& batteryChannel = *reinterpret_cast<std::shared_ptr<Neuro::BatteryChannel> *>(channel);
+	return getChannelInfo(*batteryChannel, out_info);
 }
 
 int BatteryChannel_read_data(BatteryChannel *channel, size_t offset, size_t length, int *out_buffer) {
@@ -182,6 +229,11 @@ int BatteryChannel_get_sampling_frequency(BatteryChannel* channel, float* out_fr
 	return readSamplingFrequency(*batteryChannel, out_frequency);
 }
 
+int BatteryChannel_set_sampling_frequency(BatteryChannel* channel, float frequency) {
+	auto& batteryChannel = *reinterpret_cast<std::shared_ptr<Neuro::BatteryChannel> *>(channel);
+	return setSamplingFrequency(*batteryChannel, frequency);
+}
+
 int BatteryChannel_add_length_callback(BatteryChannel *channel, void(*callback)(BatteryChannel *, size_t), ListenerHandle* handle) {
 	auto& batteryChannel = *reinterpret_cast<std::shared_ptr<Neuro::BatteryChannel> *>(channel);
 	try {
@@ -195,11 +247,11 @@ int BatteryChannel_add_length_callback(BatteryChannel *channel, void(*callback)(
 		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
-	catch(std::exception &e) {
+	catch (std::exception &e) {
 		sdk_last_error = e.what();
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
-	catch(...) {
+	catch (...) {
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
 }
@@ -211,8 +263,17 @@ int BatteryChannel_get_total_length(BatteryChannel* channel, size_t* out_length)
 
 SignalChannel* create_SignalChannel(Device* device_ptr) {
 	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	const auto channelPtr = new std::shared_ptr<Neuro::SignalChannel>(std::make_shared<Neuro::SignalChannel>(device));
-	return reinterpret_cast<SignalChannel *>(channelPtr);
+	try {
+		const auto channelPtr = new std::shared_ptr<Neuro::SignalChannel>(std::make_shared<Neuro::SignalChannel>(device));
+		return reinterpret_cast<SignalChannel *>(channelPtr);
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return nullptr;
+	}
+	catch (...) {
+		return nullptr;
+	}
 }
 
 SignalChannel* create_SignalChannel_info(Device *device_ptr, ChannelInfo info) {
@@ -242,6 +303,11 @@ void SignalChannel_delete(SignalChannel* channel) {
 	delete signalChannel;
 }
 
+int SignalChannel_get_info(SignalChannel * channel, ChannelInfo * out_info) {
+	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::SignalChannel> *>(channel);
+	return getChannelInfo(*signalChannel, out_info);
+}
+
 int SignalChannel_read_data(SignalChannel* channel, size_t offset, size_t length, double* out_buffer) {
 	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::SignalChannel> *>(channel);
 	return readChannelData(*signalChannel, offset, length, out_buffer);
@@ -250,6 +316,11 @@ int SignalChannel_read_data(SignalChannel* channel, size_t offset, size_t length
 int SignalChannel_get_sampling_frequency(SignalChannel* channel, float* out_frequency) {
 	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::SignalChannel> *>(channel);
 	return readSamplingFrequency(*signalChannel, out_frequency);
+}
+
+int SignalChannel_set_sampling_frequency(SignalChannel* channel, float frequency) {
+	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::SignalChannel> *>(channel);
+	return setSamplingFrequency(*signalChannel, frequency);
 }
 
 int SignalChannel_add_length_callback(SignalChannel* channel, void(*callback)(SignalChannel *, size_t), ListenerHandle* handle) {

@@ -1,27 +1,32 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public interface CommonChannelInterface
+    public interface ICommonChannelInterface
     {
         event EventHandler<int> LengthChanged;
         ChannelInfo Info { get; set; }
         int TotalLength { get; }
         int BufferSize { get; }
         float SamplingFrequency { get; set; }
+        Device UnderlyingDevice { get; }
     }
 
-    public abstract class BaseChannel<T> : CommonChannelInterface
+    public abstract class BaseChannel<T> : ICommonChannelInterface
     {
-        protected BaseChannel(ChannelInfo channelInfo)
+        protected BaseChannel(Device devcie)
         {
-            Info = channelInfo;
+            UnderlyingDevice = devcie;
         }
 
+        public abstract T[] ReadData(int offset, int length);
+
         public abstract event EventHandler<int> LengthChanged;
-        public ChannelInfo Info { get; set; }
+        public abstract ChannelInfo Info { get; set; }
         public abstract int TotalLength { get; }
         public abstract int BufferSize { get; }
         public abstract float SamplingFrequency { get; set; }
+        public Device UnderlyingDevice { get; }
     }
 }
