@@ -59,3 +59,4 @@ target_link_libraries(c-neurosdk debug neurosdkd)
 target_link_libraries(c-neurosdk optimized neurosdk)
 
 install(TARGETS c-neurosdk DESTINATION $ENV{NEUROSDK}/wrappers/c/${TARGET_PLATFORM})
+install(FILES ${HEADER_FILES} DESTINATION $ENV{NEUROSDK}/wrappers/c/include)

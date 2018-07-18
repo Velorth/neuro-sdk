@@ -9,7 +9,7 @@ extern "C"
 
 extern std::string sdk_last_error;
 
-ret_code device_read_Name(Device *device_ptr, char* out_name, unsigned length) {
+ret_code device_read_Name(Device *device_ptr, char* out_name, size_t length) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		auto value = device->readParam<Neuro::Parameter::Name>();
@@ -45,10 +45,14 @@ ret_code device_read_State(Device *device_ptr, DeviceState* out_state) {
 	}
 }
 
-ret_code device_read_Address(Device *device_ptr, char* out_address) {
+ret_code device_read_Address(Device *device_ptr, char* out_address, size_t length) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		auto value = device->readParam<Neuro::Parameter::Address>();
+		if (value.size() > length) {
+			sdk_last_error = "Address string is greater than read buffer";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
 		strcpy(out_address, value.c_str());
 		return SDK_NO_ERROR;
 	}
@@ -61,10 +65,14 @@ ret_code device_read_Address(Device *device_ptr, char* out_address) {
 	}
 }
 
-ret_code device_read_SerialNumber(Device *device_ptr, char* out_serial) {
+ret_code device_read_SerialNumber(Device *device_ptr, char* out_serial, size_t length) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		auto value = device->readParam<Neuro::Parameter::SerialNumber>();
+		if (value.size() > length) {
+			sdk_last_error = "Serial number string is greater than read buffer";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
 		strcpy(out_serial, value.c_str());
 		return SDK_NO_ERROR;
 	}

@@ -2,6 +2,7 @@
 #define SCANNER_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include "lib_export.h"
 
 typedef struct _DevScanner DeviceScanner;

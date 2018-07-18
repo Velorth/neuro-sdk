@@ -2,6 +2,8 @@
 #define CDEVICE_H
 
 #include "lib_export.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct _Device Device;
 

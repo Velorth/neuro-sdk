@@ -2,6 +2,8 @@
 #define CPARAMS_H
 
 #include "lib_export.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct _Device Device;
 
@@ -86,10 +88,10 @@ typedef struct _StimulationParams {
 	int stimulus_duration;
 } StimulationParams;
 
-SDK_SHARED int device_read_Name(Device *, char *out_name, unsigned length);
+SDK_SHARED int device_read_Name(Device *, char *out_name, size_t length);
 SDK_SHARED int device_read_State(Device *, DeviceState *out_state);
-SDK_SHARED int device_read_Address(Device *, char *out_address);
-SDK_SHARED int device_read_SerialNumber(Device *, char *out_serial);
+SDK_SHARED int device_read_Address(Device *, char *out_address, size_t length);
+SDK_SHARED int device_read_SerialNumber(Device *, char *out_serial, size_t length);
 SDK_SHARED int device_read_HardwareFilterState(Device *, bool *out_is_enabled);
 SDK_SHARED int device_read_FirmwareMode(Device *, FirmwareMode *out_mode);
 SDK_SHARED int device_read_SamplingFrequency(Device *, SamplingFrequency *out_freq);

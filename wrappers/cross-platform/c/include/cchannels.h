@@ -3,6 +3,8 @@
 
 #include "lib_export.h"
 #include "cdevice.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct _CommonChannelInterface CommonChannelInterface;
 typedef struct _BatteryChannel BatteryChannel;

@@ -332,16 +332,16 @@ namespace Neuro
 #endif
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_Name(IntPtr devicePtr, StringBuilder outName, uint bufferLength);
+        private static extern int device_read_Name(IntPtr devicePtr, StringBuilder outName, IntPtr bufferLength);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_read_State(IntPtr devicePtr, out DeviceState outState);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_Address(IntPtr devicePtr, StringBuilder outAddress, uint bufferLength);
+        private static extern int device_read_Address(IntPtr devicePtr, StringBuilder outAddress, IntPtr bufferLength);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_SerialNumber(IntPtr devicePtr, StringBuilder outSerial, uint bufferLength);
+        private static extern int device_read_SerialNumber(IntPtr devicePtr, StringBuilder outSerial, IntPtr bufferLength);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_read_HardwareFilterState(IntPtr devicePtr, out bool outIsEnabled);

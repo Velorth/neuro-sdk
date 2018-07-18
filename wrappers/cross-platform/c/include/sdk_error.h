@@ -2,6 +2,7 @@
 #define SDK_ERROR_H
 
 #include "lib_export.h"
+#include <stddef.h>
 
 typedef int ret_code;
 
