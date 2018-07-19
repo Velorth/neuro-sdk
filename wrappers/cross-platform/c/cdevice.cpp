@@ -8,6 +8,66 @@ extern "C"
 
 extern std::string sdk_last_error;
 
+int command_to_string(Command cmd, char* buffer, size_t buffer_length) {
+	try {
+		auto commandString = Neuro::to_string(static_cast<Neuro::Command>(cmd));
+		if (commandString.size() > buffer_length) {
+			sdk_last_error = "Command string is greater than read buffer";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+
+		}
+		strcpy(buffer, commandString.c_str());
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int parameter_to_string(Parameter param, char* buffer, size_t buffer_length) {
+	try {
+		auto paramString = Neuro::to_string(static_cast<Neuro::Parameter>(param));
+		if (paramString.size() > buffer_length) {
+			sdk_last_error = "Parameter string is greater than read buffer";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+
+		}
+		strcpy(buffer, paramString.c_str());
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int parameter_access_to_string(ParamAccess access, char* buffer, size_t buffer_length) {
+	try {
+		auto accessString = Neuro::to_string(static_cast<Neuro::ParamAccess>(access));
+		if (accessString.size() > buffer_length) {
+			sdk_last_error = "ParamAccess string is greater than read buffer";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+
+		}
+		strcpy(buffer, accessString.c_str());
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
 ret_code device_connect(Device *device_ptr) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
@@ -133,12 +193,12 @@ ret_code device_execute(Device *device_ptr, Command cmd) {
 	}
 }
 
-ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Parameter)) {
+ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Device*, Parameter)) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		device->setParamChangedCallback([callback](auto param) {
+		device->setParamChangedCallback([device_ptr, callback](auto param) {
 			if (callback != nullptr) {
-				callback(static_cast<Parameter>(param));
+				callback(device_ptr, static_cast<Parameter>(param));
 			}
 		});
 		return SDK_NO_ERROR;

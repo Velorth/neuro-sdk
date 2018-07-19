@@ -21,6 +21,8 @@ typedef enum _Command {
 	CommandFindMe
 }Command;
 
+SDK_SHARED int command_to_string(Command cmd, char *buffer, size_t buffer_length);
+
 typedef struct _CommandArray {
 	Command *cmd_array;
 	size_t cmd_array_size;
@@ -46,11 +48,15 @@ typedef enum _Parameter{
 	ParameterMotionAssistantParamPack
 }Parameter;
 
+SDK_SHARED int parameter_to_string(Parameter param, char *buffer, size_t buffer_length);
+
 typedef enum _ParamAccess {
 	Read,
 	ReadWrite,
 	ReadNotify
 }ParamAccess;
+
+SDK_SHARED int parameter_access_to_string(ParamAccess access, char *buffer, size_t buffer_length);
 
 typedef struct _ParameterInfo {
 	Parameter parameter;
@@ -93,6 +99,6 @@ SDK_SHARED int device_available_channels(const Device *, ChannelInfoArray *);
 SDK_SHARED int device_available_commands(const Device *, CommandArray *);
 SDK_SHARED int device_available_parameters(const Device *, ParamInfoArray *);
 SDK_SHARED int device_execute(Device *, Command); 
-SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Parameter));
+SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Device*, Parameter));
 
 #endif // CDEVICE_H

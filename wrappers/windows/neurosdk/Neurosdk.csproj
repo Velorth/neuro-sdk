@@ -95,4 +95,11 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>del /S /Q "%25NEUROSDK%25\wrappers\.net\$(PlatformName)\$(ConfigurationName)\*.*"
+xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\wrappers\.net\$(PlatformName)\$(ConfigurationName)\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>if not exist "%25NEUROSDK%25\wrappers\.net" mkdir "%25NEUROSDK%25\wrappers\.net\$(ConfigurationName)"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

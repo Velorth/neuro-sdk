@@ -182,7 +182,7 @@ namespace Neuro
                     ReadParamValue = device =>
                     {
                         var nameBuffer = new StringBuilder(128);
-                        SdkError.ThrowIfError(device_read_Name(device.DevicePtr, nameBuffer, (uint)nameBuffer.Capacity));
+                        SdkError.ThrowIfError(device_read_Name(device.DevicePtr, nameBuffer, (IntPtr)nameBuffer.Capacity));
                         return nameBuffer.ToString();
                     };
                     SetParamValue = (device, value) =>
@@ -203,7 +203,7 @@ namespace Neuro
                     ReadParamValue = device =>
                     {
                         var addressBuffer = new StringBuilder(64);
-                        SdkError.ThrowIfError(device_read_Address(device.DevicePtr, addressBuffer, (uint)addressBuffer.Capacity));
+                        SdkError.ThrowIfError(device_read_Address(device.DevicePtr, addressBuffer, (IntPtr)addressBuffer.Capacity));
                         return addressBuffer.ToString();
                     };
                     break;
@@ -212,7 +212,7 @@ namespace Neuro
                     ReadParamValue = device =>
                     {
                         var stringBuilder = new StringBuilder(64);
-                        SdkError.ThrowIfError(device_read_SerialNumber(device.DevicePtr, stringBuilder, (uint)stringBuilder.Capacity));
+                        SdkError.ThrowIfError(device_read_SerialNumber(device.DevicePtr, stringBuilder, (IntPtr)stringBuilder.Capacity));
                         return stringBuilder.ToString();
                     };
                     break;
