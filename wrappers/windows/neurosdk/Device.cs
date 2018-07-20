@@ -100,7 +100,7 @@ namespace Neuro
             paramTypeInfo.SetParamValue(this, value);
         }
 
-        private void OnParameterChanged(Parameter parameter)
+        private void OnParameterChanged(IntPtr devicePtr, Parameter parameter)
         {
             ParameterChanged?.Invoke(this, parameter);
         }
@@ -111,7 +111,7 @@ namespace Neuro
         private const string LibName = "c-neurosdk.dll";
 #endif
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        delegate void DeviceParamChangedFunc(Parameter parameter);
+        delegate void DeviceParamChangedFunc(IntPtr devicePtr, Parameter parameter);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_connect(IntPtr devicePtr);

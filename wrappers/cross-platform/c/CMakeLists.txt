@@ -53,10 +53,12 @@ endif (WIN32)
 
 file(GLOB SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+file(GLOB SDKLIB_FILES $ENV{NEUROSDK}/${TARGET_PLATFORM}/*.dll)
 
 add_library(c-neurosdk SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(c-neurosdk debug neurosdkd)
 target_link_libraries(c-neurosdk optimized neurosdk)
 
 install(TARGETS c-neurosdk DESTINATION $ENV{NEUROSDK}/wrappers/c/${TARGET_PLATFORM})
+install(FILES ${SDKLIB_FILES} DESTINATION $ENV{NEUROSDK}/wrappers/c/${TARGET_PLATFORM})
 install(FILES ${HEADER_FILES} DESTINATION $ENV{NEUROSDK}/wrappers/c/include)
