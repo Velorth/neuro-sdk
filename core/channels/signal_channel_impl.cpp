@@ -15,6 +15,7 @@ SignalChannel::Impl::Impl(std::shared_ptr<Device> device, const ChannelInfo &inf
     Expects(mChannelsCount > 0);
     Expects(checkHasParameter(*device, Parameter::SamplingFrequency));
 }
+
 SignalChannel::data_container SignalChannel::Impl::readData(data_offset_t offset, data_length_t length) const {
     auto&& buffer = getDeviceBuffer();
     if (mChannelsCount <= 1){

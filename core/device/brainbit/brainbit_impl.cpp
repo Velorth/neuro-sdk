@@ -25,13 +25,20 @@ std::vector<ChannelInfo> BrainbitImpl::channels() const {
     auto t4Info = ChannelInfo(ChannelInfo::Type::Signal, "T4", 2);
     auto o1Info = ChannelInfo(ChannelInfo::Type::Signal, "O1", 0);
     auto o2Info = ChannelInfo(ChannelInfo::Type::Signal, "O2", 3);
+    auto t3ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T3", 1);
+    auto t4ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T4", 2);
+    auto o1ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O1", 0);
+    auto o2ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O2", 3);
     return { ChannelInfo::Battery(),
                 ChannelInfo::ConnectionStats(),
                 t3Info,
                 t4Info,
                 o1Info,
                 o2Info,
-                ChannelInfo::Resistance() };
+                t3ResistInfo,
+                t4ResistInfo,
+                o1ResistInfo,
+                o2ResistInfo, };
 }
 
 std::vector<Command> BrainbitImpl::commands() const {

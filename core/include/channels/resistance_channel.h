@@ -12,7 +12,7 @@ private:
     std::unique_ptr<Impl> mImpl;
 
 public:
-    ResistanceChannel(std::shared_ptr<Device>);
+    ResistanceChannel(std::shared_ptr<Device>, const ChannelInfo &);
     ~ResistanceChannel();
 
     length_listener_ptr subscribeLengthChanged(length_callback_t) noexcept override ;

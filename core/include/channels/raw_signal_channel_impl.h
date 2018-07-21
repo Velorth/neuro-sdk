@@ -9,8 +9,6 @@ namespace Neuro {
 class RawSignalChannelImpl : public SignalChannel::Impl {
 private:
     static constexpr const char *class_name = "RawSignalChannelImpl";
-    static constexpr std::size_t FilteredBufferSize = 75000; //5 minutes;
-    SafeBuffer<signal_sample_t, FilteredBufferSize> mFilteredBuffer;
     mutable Notifier<void, data_length_t> mLengthNotifier{class_name};
     SignalChannel::length_listener_ptr mSignalLengthListener;
 
