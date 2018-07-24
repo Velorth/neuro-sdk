@@ -2,7 +2,7 @@
 #define CALLIBRI_ANGLE_BUFFER_H
 
 #include "signal/safe_buffer.h"
-#include "channels/quaternion.h"
+#include "channels/info/quaternion.h"
 #include "common_types.h"
 #include "callibri_buffer.h"
 

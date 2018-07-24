@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 #include "common_types.h"
-#include "channel_info.h"
+#include "info/channel_info.h"
 #include "event_listener.h"
 
 namespace Neuro {

@@ -1,5 +1,5 @@
 #include "device/callibri/callibri_common_parameters.h"
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "logger.h"
 
 namespace Neuro {

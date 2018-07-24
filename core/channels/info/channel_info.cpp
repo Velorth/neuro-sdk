@@ -1,4 +1,4 @@
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 
 namespace Neuro {
 

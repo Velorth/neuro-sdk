@@ -1,4 +1,4 @@
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "device/brainbit/brainbit_impl.h"
 #include "device/device_parameters.h"
 #include "device/brainbit/brainbit_parameter_reader.h"
@@ -109,10 +109,6 @@ const BaseBuffer<Quaternion> &BrainbitImpl::orientationBuffer() const {
     throw std::runtime_error("Device does not have angle buffer");
 }
 
-const BaseBuffer<resistance_sample_t> &BrainbitImpl::resistanceBuffer() const {
-    return mResistanceBuffer;
-}
-
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     if (data.size() != BRAINBIT_PACKET_SIZE){
         LOG_WARN_V("Wrong data packet size: %d, expected: %d", data.size(), BRAINBIT_PACKET_SIZE);
@@ -166,11 +162,12 @@ void BrainbitImpl::onDataReceived(const ByteBuffer &data){
             return;*/
         if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
             mSignalBuffer.append(signalData);
-            mResistanceBuffer.append(std::vector<double>(8));
+            mSignalNotifier.notifyAll(signalData);
         }
         else if (mBrainbitState == BrainbitCommand::CMD_RESIST){
-            mResistanceBuffer.append(signalData);
+            mResistanceNotifier.notifyAll(signalData);
             mSignalBuffer.append(std::vector<double>(8));
+            mSignalNotifier.notifyAll(std::vector<double>(8));
         }
     }
     catch (std::exception &e){

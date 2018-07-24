@@ -4,16 +4,14 @@
 #include <memory>
 #include <vector>
 #include <functional>
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "device_parameters.h"
+#include "event_listener.h"
 #include "lib_export.h"
 
 namespace Neuro {
 
 class DeviceImpl;
-
-template <Parameter>
-struct ParamValue;
 
 class SDK_SHARED Device final {
 private:
@@ -36,6 +34,10 @@ public:
     template <Parameter P>
     bool setParam(typename ParamValue<P>::Type value);
 
+    template <ChannelInfo::Type Channel>
+    ListenerPtr<void, const typename ChannelData<Channel>::Type &>
+    subscribeDataReceived(std::function<void(const typename ChannelData<Channel>::Type &)>);
+
 private:
     friend class DeviceFactory;
     friend class BatteryChannel;
@@ -45,7 +47,6 @@ private:
     friend class MemsChannel;
     friend class OrientationChannel;
     friend class ConnectionStatsChannel;
-    friend class ResistanceChannel;
     Device(std::unique_ptr<DeviceImpl>);
 };
 

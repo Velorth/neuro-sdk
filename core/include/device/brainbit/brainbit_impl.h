@@ -28,7 +28,6 @@ public:
     const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
     const BaseBuffer<MEMS> &memsBuffer() const override;
     const BaseBuffer<Quaternion> &orientationBuffer() const override;
-    const BaseBuffer<resistance_sample_t> &resistanceBuffer() const override;
 
 private:
     using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;
@@ -40,7 +39,6 @@ private:
     BrainbitCommand mBrainbitState;
     int mBatteryPercents;
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
-    BrainbitResistanceBuffer mResistanceBuffer;
     PacketSequence<2048> mPacketCounter;
     param_changed_callback_t parameterChangedCallback;
 

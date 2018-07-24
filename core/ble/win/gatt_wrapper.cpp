@@ -117,7 +117,7 @@ bool write_characteristic(const DeviceHandle &device, BTH_LE_GATT_CHARACTERISTIC
     auto offset = offsetof(BTH_LE_GATT_CHARACTERISTIC_VALUE, Data);
     auto requiredLength = commandData.size() + offset;
     auto charValuePtr = alloc_smart_buffer<BTH_LE_GATT_CHARACTERISTIC_VALUE>(requiredLength);
-    charValuePtr->DataSize = commandData.size();
+    charValuePtr->DataSize = static_cast<ULONG>(commandData.size());
     std::copy(commandData.begin(), commandData.end(), std::begin(charValuePtr->Data));
 
     auto result = BluetoothGATTSetCharacteristicValue(device.get(),

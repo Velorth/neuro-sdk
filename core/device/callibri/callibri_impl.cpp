@@ -1,4 +1,4 @@
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "device/device_parameters.h"
 #include "device/callibri/callibri_buffer_collection.h"
 #include "device/callibri/callibri_impl.h"
@@ -140,10 +140,6 @@ const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {
 
 const BaseBuffer<Quaternion> &CallibriImpl::orientationBuffer() const {
     return mBufferCollection->orientationBuffer().buffer();
-}
-
-const BaseBuffer<resistance_sample_t> &CallibriImpl::resistanceBuffer() const {
-    throw std::runtime_error("Device has no resistance buffer");
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){

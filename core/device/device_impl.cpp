@@ -18,6 +18,52 @@ void DeviceImpl::disconnect(){
     mParamReader->requestDisconnect();
 }
 
+
+ListenerPtr<void, const std::vector<int> &>
+DeviceImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback){
+    return mBatteryNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<signal_sample_t> &>
+DeviceImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback){
+    return mSignalNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<resistance_sample_t> &>
+DeviceImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback){
+    return mResistanceNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<MEMS> &>
+DeviceImpl::subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)> callback){
+    return mMEMSNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<Quaternion> &>
+DeviceImpl::subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)> callback){
+    return mOrientationNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<double> &>
+DeviceImpl::subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)> callback){
+    return mRespirationNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<int> &>
+DeviceImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback){
+    return mConnectionStatsNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<int> &>
+DeviceImpl::subscribePedometerDataReceived(std::function<void(const std::vector<int> &)> callback){
+    return mPedometerNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<ElectrodeState> &>
+DeviceImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback){
+    return mElectrodesNotifier.addListener(callback);
+}
+
 void DeviceImpl::subscribeDataReceived() {
     Expects(mBleDevice != nullptr);
     mBleDevice->setDataReceivedCallback([=](auto&& data) {

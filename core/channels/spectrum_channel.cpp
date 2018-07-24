@@ -1,7 +1,7 @@
 #include "gsl/gsl_assert"
 #include "algorithm.h"
 #include <algorithm>
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "channels/spectrum_channel.h"
 
 namespace Neuro {

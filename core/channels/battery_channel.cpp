@@ -1,6 +1,6 @@
 #include "gsl/gsl_assert"
 #include "loop.h"
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "channels/battery_channel.h"
 #include "device/device.h"
 #include "device/device_impl.h"

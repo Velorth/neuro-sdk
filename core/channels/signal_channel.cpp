@@ -1,4 +1,4 @@
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "channels/signal_channel.h"
 #include "channels/raw_signal_channel_impl.h"
 #include "channels/filtered_signal_channel_impl.h"

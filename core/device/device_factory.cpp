@@ -6,7 +6,7 @@
 #include "device/request_scheduler.h"
 #include "device/callibri/callibri_common_parameters.h"
 #include "device/callibri/callibri_buffer_collection.h"
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 
 namespace Neuro {
 

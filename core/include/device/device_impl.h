@@ -6,6 +6,7 @@
 #include <vector>
 #include "common_types.h"
 #include "task_queue.h"
+#include "event_notifier.h"
 
 namespace Neuro {
 
@@ -20,6 +21,7 @@ template <typename>
 class BaseBuffer;
 struct MEMS;
 struct Quaternion;
+enum class ElectrodeState;
 
 class DeviceImpl {
 public:
@@ -39,8 +41,34 @@ public:
     virtual const BaseBuffer<signal_sample_t> &signalBuffer() const = 0;
     virtual const BaseBuffer<resp_sample_t> &respirationBuffer() const = 0;
     virtual const BaseBuffer<MEMS> &memsBuffer() const = 0;
-    virtual const BaseBuffer<Quaternion> &orientationBuffer() const = 0;    
-    virtual const BaseBuffer<resistance_sample_t> &resistanceBuffer() const = 0;
+    virtual const BaseBuffer<Quaternion> &orientationBuffer() const = 0;
+
+    ListenerPtr<void, const std::vector<int> &>
+    subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)>);
+
+    ListenerPtr<void, const std::vector<signal_sample_t> &>
+    subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>);
+
+    ListenerPtr<void, const std::vector<resistance_sample_t> &>
+    subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)>);
+
+    ListenerPtr<void, const std::vector<MEMS> &>
+    subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)>);
+
+    ListenerPtr<void, const std::vector<Quaternion> &>
+    subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)>);
+
+    ListenerPtr<void, const std::vector<double> &>
+    subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)>);
+
+    ListenerPtr<void, const std::vector<int> &>
+    subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)>);
+
+    ListenerPtr<void, const std::vector<int> &>
+    subscribePedometerDataReceived(std::function<void(const std::vector<int> &)>);
+
+    ListenerPtr<void, const std::vector<ElectrodeState> &>
+    subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)>);
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;
@@ -49,8 +77,19 @@ protected:
                std::unique_ptr<ParameterReader>,
                std::unique_ptr<ParameterWriter>);
 
+    Notifier<void, const std::vector<int> &> mBatteryNotifier{class_name};
+    Notifier<void, const std::vector<signal_sample_t> &> mSignalNotifier{class_name};
+    Notifier<void, const std::vector<resistance_sample_t> &> mResistanceNotifier{class_name};
+    Notifier<void, const std::vector<MEMS> &> mMEMSNotifier{class_name};
+    Notifier<void, const std::vector<Quaternion> &> mOrientationNotifier{class_name};
+    Notifier<void, const std::vector<double> &> mRespirationNotifier{class_name};
+    Notifier<void, const std::vector<int> &> mConnectionStatsNotifier{class_name};
+    Notifier<void, const std::vector<int> &> mPedometerNotifier{class_name};
+    Notifier<void, const std::vector<ElectrodeState> &> mElectrodesNotifier{class_name};
+
 private:
     friend class Device;
+    static constexpr const char *class_name = "DeviceImpl";
 
     std::unique_ptr<ParameterReader> mParamReader;
     std::unique_ptr<ParameterWriter> mParamWriter;

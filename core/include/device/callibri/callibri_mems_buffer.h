@@ -2,7 +2,7 @@
 #define CALLIBRI_MEMS_BUFFER_H
 
 #include <memory>
-#include "channels/mems_data.h"
+#include "channels/info/mems_data.h"
 #include "common_types.h"
 #include "callibri_buffer.h"
 #include "signal/safe_buffer.h"

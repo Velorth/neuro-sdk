@@ -2,6 +2,10 @@
 #define CHANNEL_INFO_H
 
 #include <string>
+#include "common_types.h"
+#include "mems_data.h"
+#include "quaternion.h"
+#include "electrode_state.h"
 #include "lib_export.h"
 
 namespace Neuro {
@@ -67,6 +71,54 @@ private:
     const Type mType;
     std::string mName;
     const std::size_t mIndex;
+};
+
+template <ChannelInfo::Type DataType>
+struct ChannelData;
+
+template <>
+struct ChannelData<ChannelInfo::Type::Signal>{
+    using Type = std::vector<signal_sample_t>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::Battery>{
+    using Type = std::vector<int>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::Resistance>{
+    using Type = std::vector<resistance_sample_t>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::Respiration>{
+    using Type = std::vector<double>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::MEMS>{
+    using Type = std::vector<MEMS>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::Orientation>{
+    using Type = std::vector<Quaternion>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::ConnectionStats>{
+    using Type = std::vector<int>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::ElectrodesState>{
+    using Type = std::vector<ElectrodeState>;
+};
+
+template <>
+struct ChannelData<ChannelInfo::Type::Pedometer>{
+    using Type = std::vector<int>;
 };
 
 }

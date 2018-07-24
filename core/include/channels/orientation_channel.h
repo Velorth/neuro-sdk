@@ -2,7 +2,7 @@
 #define ANGLE_CHANNEL_H
 
 #include "base_channel.h"
-#include "quaternion.h"
+#include "info/quaternion.h"
 #include "lib_export.h"
 
 namespace Neuro {

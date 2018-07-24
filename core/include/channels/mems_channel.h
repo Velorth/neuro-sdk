@@ -2,7 +2,7 @@
 #define MEMS_CHANNEL_H
 
 #include "base_channel.h"
-#include "mems_data.h"
+#include "info/mems_data.h"
 #include "lib_export.h"
 
 namespace Neuro {

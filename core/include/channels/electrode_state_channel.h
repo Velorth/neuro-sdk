@@ -6,12 +6,6 @@
 
 namespace Neuro {
 
-enum class ElectrodeState {
-    Normal,
-    HighResistance,
-    Detached
-};
-
 class SDK_SHARED ElectrodeStateChannel final : public BaseChannel<ElectrodeState> {
 private:
     class Impl;

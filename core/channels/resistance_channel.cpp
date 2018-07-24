@@ -1,10 +1,11 @@
 #include "gsl/gsl_assert"
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
+#include "channels/info/channel_notification.h"
 #include "channels/resistance_channel.h"
 #include "device/device.h"
 #include "device/device_impl.h"
 #include "device/param_values.h"
-#include "signal/base_buffer.h"
+#include "signal/safe_buffer.h"
 #include "event_notifier.h"
 #include "logger.h"
 
@@ -13,15 +14,12 @@ namespace Neuro {
 class ResistanceChannel::Impl {
 private:
     static constexpr const char *class_name = "ResistanceChannelImpl";
+    static constexpr std::size_t ResistanceBufferSize = 150000; //10 minutes for 250 Hz sampling frequency;
+    SafeBuffer<signal_sample_t, ResistanceBufferSize> mResistanceBuffer;
+    ListenerPtr<void, const std::vector<resistance_sample_t> &> mResistanceListener;
     std::shared_ptr<Device> mDevice;
     const ChannelInfo mInfo;
     const std::size_t mChannelsCount;
-    mutable Notifier<void, data_length_t> mLengthNotifier{class_name};
-    ResistanceChannel::length_listener_ptr mLengthListener;
-
-    const BaseBuffer<resistance_sample_t> &getDeviceBuffer() const noexcept {
-        return mDevice->mImpl->signalBuffer();
-    }
 
 public:
     Impl(std::shared_ptr<Device> device, const ChannelInfo &channel_info) :
@@ -30,15 +28,23 @@ public:
         mChannelsCount(countChannelsWithType(*device, mInfo.getType())){
         Expects(device != nullptr);
         Expects(checkHasChannel(*device, mInfo));
-        auto&& buffer = getDeviceBuffer();
-        mLengthListener = buffer.subscribeLengthChanged([=](std::size_t){
-            mLengthNotifier.notifyAll(totalLength());
+        mResistanceListener = device->subscribeDataReceived<ChannelInfo::Type::Resistance>([=](const std::vector<resistance_sample_t> &data){
+            if (data.size() % mChannelsCount != 0){
+                LOG_ERROR_V("Wrong data length. Skipping packet");
+                return;
+            }
+            ResistanceChannel::data_container resultBuffer;
+            resultBuffer.reserve(data.size() / mChannelsCount);
+            for (std::size_t i = mInfo.getIndex(); i < data.size(); i+=mChannelsCount){
+                resultBuffer.push_back(data[i]);
+            }
+            mResistanceBuffer.append(resultBuffer);
         });
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
         try{
-            return mLengthNotifier.addListener(callback);
+            return mResistanceBuffer.subscribeLengthChanged(callback);
         }
         catch(...){
             return nullptr;
@@ -46,57 +52,15 @@ public:
     }
 
     ResistanceChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        auto&& buffer = getDeviceBuffer();
-        if (mChannelsCount <= 1){
-            return buffer.readFill(offset, length, 0.0);
-        }
-        else {
-            auto realOffset = offset * mChannelsCount;
-            auto realLength = length * mChannelsCount;
-            LOG_TRACE_V("Real offset: %zd, Real length: %zd, Channels count: %zd, Number: %zd", realOffset, realLength, mChannelsCount,mInfo.getIndex());
-            auto allChannelsData = buffer.readFill(realOffset, realLength, 0.0);
-            ResistanceChannel::data_container resultBuffer;
-            resultBuffer.reserve(length);
-            for (std::size_t i = mInfo.getIndex(); i < allChannelsData.size(); i+=mChannelsCount){
-                resultBuffer.push_back(allChannelsData[i]);
-            }
-            Ensures(resultBuffer.size() == length);
-            return resultBuffer;
-        }
+        return mResistanceBuffer.readFill(offset, length, signal_sample_t{0});
     }
 
     data_length_t totalLength() const noexcept {
-        try {
-            auto&& buffer = getDeviceBuffer();
-            auto totalLength = buffer.totalLength();
-            if (mChannelsCount <= 1){
-                return totalLength;
-            }
-            else {
-                auto realLength = totalLength / mChannelsCount;
-                auto remainder = totalLength % mChannelsCount;
-                Ensures(remainder == 0);
-                return realLength;
-            }
-        }
-        catch (std::exception &){
-            LOG_ERROR("Resistance buffer size is not multiple of channels count");
-            return 0;
-        }
+        return mResistanceBuffer.totalLength();
     }
 
     data_length_t bufferSize() const noexcept {
-        try {
-            auto&& buffer = getDeviceBuffer();
-            auto bufferSize = buffer.bufferSize();
-            auto realSize = bufferSize / mChannelsCount;
-            auto remainder = bufferSize % mChannelsCount;
-            Expects(remainder == 0);
-            return realSize;
-        }
-        catch (std::exception &){
-            return 0;
-        }
+        return mResistanceBuffer.bufferSize();
     }
 
     std::weak_ptr<Device> underlyingDevice() const noexcept {
