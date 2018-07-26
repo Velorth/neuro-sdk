@@ -68,58 +68,75 @@ public:
     bool operator!=(const ChannelInfo &) const noexcept;
 
 private:
-    const Type mType;
+    Type mType;
     std::string mName;
-    const std::size_t mIndex;
+    std::size_t mIndex;
 };
 
-template <ChannelInfo::Type DataType>
-struct ChannelData;
+template <ChannelInfo::Type InfoType>
+struct ChannelTraits;
 
 template <>
-struct ChannelData<ChannelInfo::Type::Signal>{
-    using Type = std::vector<signal_sample_t>;
-};
-
-template <>
-struct ChannelData<ChannelInfo::Type::Battery>{
-    using Type = std::vector<int>;
+struct ChannelTraits<ChannelInfo::Type::Signal>{
+    using DataType = std::vector<signal_sample_t>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Signal(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::Resistance>{
-    using Type = std::vector<resistance_sample_t>;
+struct ChannelTraits<ChannelInfo::Type::Battery>{
+    using DataType = std::vector<int>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Battery(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::Respiration>{
-    using Type = std::vector<double>;
+struct ChannelTraits<ChannelInfo::Type::Resistance>{
+    using DataType = std::vector<resistance_sample_t>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Resistance(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::MEMS>{
-    using Type = std::vector<MEMS>;
+struct ChannelTraits<ChannelInfo::Type::Respiration>{
+    using DataType = std::vector<double>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Respiration(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::Orientation>{
-    using Type = std::vector<Quaternion>;
+struct ChannelTraits<ChannelInfo::Type::MEMS>{
+    using DataType = std::vector<MEMS>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::MEMS(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::ConnectionStats>{
-    using Type = std::vector<int>;
+struct ChannelTraits<ChannelInfo::Type::Orientation>{
+    using DataType = std::vector<Quaternion>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Orientation(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::ElectrodesState>{
-    using Type = std::vector<ElectrodeState>;
+struct ChannelTraits<ChannelInfo::Type::ConnectionStats>{
+    using DataType = std::vector<int>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::ConnectionStats(); }
 };
 
 template <>
-struct ChannelData<ChannelInfo::Type::Pedometer>{
-    using Type = std::vector<int>;
+struct ChannelTraits<ChannelInfo::Type::ElectrodesState>{
+    using DataType = std::vector<ElectrodeState>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::ElectrodesState(); }
 };
+
+template <>
+struct ChannelTraits<ChannelInfo::Type::Pedometer>{
+    using DataType = std::vector<int>;
+    static ChannelInfo defaultInfo(){ return ChannelInfo::Pedometer(); }
+};
+
+template <ChannelInfo::Type InfoType>
+using channel_data_t = typename ChannelTraits<InfoType>::DataType;
+
+template <ChannelInfo::Type InfoType>
+ChannelInfo default_channel_info(){
+    return ChannelTraits<InfoType>::defaultInfo();
+}
 
 }
 

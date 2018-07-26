@@ -20,47 +20,59 @@ void DeviceImpl::disconnect(){
 
 
 ListenerPtr<void, const std::vector<int> &>
-DeviceImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback){
+DeviceImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo){
     return mBatteryNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<signal_sample_t> &>
-DeviceImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback){
-    return mSignalNotifier.addListener(callback);
+DeviceImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info){
+    Expects(info.getType() == ChannelInfo::Type::Signal);
+    auto channels = this->channels();
+    Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+    if (mSignalNotifierMap.find(info.getIndex()) != mSignalNotifierMap.end()){
+        return mSignalNotifierMap[info.getIndex()].addListener(callback);
+    }
+    throw std::runtime_error("Unable to subscribe signal data notifications");
 }
 
 ListenerPtr<void, const std::vector<resistance_sample_t> &>
-DeviceImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback){
-    return mResistanceNotifier.addListener(callback);
+DeviceImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback, ChannelInfo info){
+    Expects(info.getType() == ChannelInfo::Type::Resistance);
+    auto channels = this->channels();
+    Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+    if (mResistanceNotifierMap.find(info.getIndex()) != mResistanceNotifierMap.end()){
+        return mResistanceNotifierMap[info.getIndex()].addListener(callback);
+    }
+    throw std::runtime_error("Unable to subscribe resistance data notifications");
 }
 
 ListenerPtr<void, const std::vector<MEMS> &>
-DeviceImpl::subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)> callback){
+DeviceImpl::subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)> callback, ChannelInfo){
     return mMEMSNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<Quaternion> &>
-DeviceImpl::subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)> callback){
+DeviceImpl::subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)> callback, ChannelInfo){
     return mOrientationNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<double> &>
-DeviceImpl::subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)> callback){
+DeviceImpl::subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)> callback, ChannelInfo){
     return mRespirationNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<int> &>
-DeviceImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback){
+DeviceImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo){
     return mConnectionStatsNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<int> &>
-DeviceImpl::subscribePedometerDataReceived(std::function<void(const std::vector<int> &)> callback){
+DeviceImpl::subscribePedometerDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo){
     return mPedometerNotifier.addListener(callback);
 }
 
 ListenerPtr<void, const std::vector<ElectrodeState> &>
-DeviceImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback){
+DeviceImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback, ChannelInfo){
     return mElectrodesNotifier.addListener(callback);
 }
 

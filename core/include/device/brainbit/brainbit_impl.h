@@ -41,15 +41,23 @@ private:
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
     PacketSequence<2048> mPacketCounter;
     param_changed_callback_t parameterChangedCallback;
+    std::vector<ChannelInfo> mChannels;
+    std::size_t mCurrentResistChannel;
+    std::vector<resistance_sample_t> mResistBuffer;
 
+    void initChannels();
     void onDataReceived(const ByteBuffer &) override;
     void onStatusDataReceived(const ByteBuffer &) override;
     void onParameterChanged(Parameter);
     void parseBattery(const ByteBuffer &);
     void parseState(BrainbitCommand cmd, const ByteBuffer &);
+    void parseSignalData(const ByteBuffer &);
+    void onSignalReceived(const std::vector<signal_sample_t> &);
+    void onResistanceReceived(const std::vector<resistance_sample_t> &);
     bool execStartSignalCommand();
     bool execStopSignalCommand();
-    bool execStartResistCommand();
+    bool startResist();
+    bool execStartResistCommand(std::size_t);
     bool execStopResistCommand();
     bool stopAll();
     void sendCommandPacket(std::shared_ptr<BrainbitCommandData>);

@@ -17,28 +17,11 @@ BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
                std::make_unique<BrainbitParameterWriter>()),
     mRequestHandler(std::make_unique<BrainbitRequestHandler>(
                         [=](std::shared_ptr<BrainbitCommandData> cmd){sendCommandPacket(cmd);})){
-
+    initChannels();
 }
 
 std::vector<ChannelInfo> BrainbitImpl::channels() const {
-    auto t3Info = ChannelInfo(ChannelInfo::Type::Signal, "T3", 1);
-    auto t4Info = ChannelInfo(ChannelInfo::Type::Signal, "T4", 2);
-    auto o1Info = ChannelInfo(ChannelInfo::Type::Signal, "O1", 0);
-    auto o2Info = ChannelInfo(ChannelInfo::Type::Signal, "O2", 3);
-    auto t3ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T3", 1);
-    auto t4ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T4", 2);
-    auto o1ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O1", 0);
-    auto o2ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O2", 3);
-    return { ChannelInfo::Battery(),
-                ChannelInfo::ConnectionStats(),
-                t3Info,
-                t4Info,
-                o1Info,
-                o2Info,
-                t3ResistInfo,
-                t4ResistInfo,
-                o1ResistInfo,
-                o2ResistInfo, };
+    return mChannels;
 }
 
 std::vector<Command> BrainbitImpl::commands() const {
@@ -69,7 +52,7 @@ bool BrainbitImpl::execute(Command command){
     case Command::StopSignal:
         return execStopSignalCommand();
     case Command::StartResist:
-        return execStartResistCommand();
+        return startResist();
     case Command::StopResist:
         return execStopResistCommand();
     default:
@@ -109,71 +92,43 @@ const BaseBuffer<Quaternion> &BrainbitImpl::orientationBuffer() const {
     throw std::runtime_error("Device does not have angle buffer");
 }
 
+void BrainbitImpl::initChannels(){
+    auto t3Info = ChannelInfo(ChannelInfo::Type::Signal, "T3", 1);
+    auto t4Info = ChannelInfo(ChannelInfo::Type::Signal, "T4", 2);
+    auto o1Info = ChannelInfo(ChannelInfo::Type::Signal, "O1", 0);
+    auto o2Info = ChannelInfo(ChannelInfo::Type::Signal, "O2", 3);
+    auto t3ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T3", 1);
+    auto t4ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "T4", 2);
+    auto o1ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O1", 0);
+    auto o2ResistInfo = ChannelInfo(ChannelInfo::Type::Resistance, "O2", 3);
+    mChannels = { ChannelInfo::Battery(),
+              ChannelInfo::ConnectionStats(),
+              t3Info,
+              t4Info,
+              o1Info,
+              o2Info,
+              t3ResistInfo,
+              t4ResistInfo,
+              o1ResistInfo,
+              o2ResistInfo };
+
+    mSignalNotifierMap.emplace(t3Info.getIndex(), class_name);
+    mSignalNotifierMap.emplace(t4Info.getIndex(), class_name);
+    mSignalNotifierMap.emplace(o1Info.getIndex(), class_name);
+    mSignalNotifierMap.emplace(o2Info.getIndex(), class_name);
+
+    mResistanceNotifierMap.emplace(t3ResistInfo.getIndex(), class_name);
+    mResistanceNotifierMap.emplace(t4ResistInfo.getIndex(), class_name);
+    mResistanceNotifierMap.emplace(o1ResistInfo.getIndex(), class_name);
+    mResistanceNotifierMap.emplace(o2ResistInfo.getIndex(), class_name);
+}
+
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
     if (data.size() != BRAINBIT_PACKET_SIZE){
         LOG_WARN_V("Wrong data packet size: %d, expected: %d", data.size(), BRAINBIT_PACKET_SIZE);
         return;
-    }
-
-
-    auto packetNumber = static_cast<unsigned short>(data[0]) << 3 | static_cast<unsigned short>(data[1]) >> 5;
-    auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
-    LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
-
-    constexpr static double K = 2.4 / (0xFFFFF * 6);
-
-    int rawData[8];
-    rawData[0] = (int)(((unsigned int)(data[1] & 0x0F) << 28) | ((unsigned int)data[2] << 20) | ((unsigned int)data[3] << 12) | ((unsigned int)data[4] << 4));
-    rawData[0] /= 2048;
-
-    rawData[1] = (int)(((unsigned int)(data[4] & 0x7F) << 25) | ((unsigned int)data[5] << 17) | ((unsigned int)data[6] << 9) | ((unsigned int)data[7] << 1));
-    rawData[1] /= 2048;
-
-    rawData[2] = (int)(((unsigned int)(data[6] & 0x03) << 30) | ((unsigned int)data[7] << 22) | ((unsigned int)data[8] << 14) | ((unsigned int)data[9] << 6));
-    rawData[2] /=  2048;
-
-    rawData[3] = (int)(((unsigned int)(data[9] & 0x1F) << 27) | ((unsigned int)data[10] << 19) | ((unsigned int)data[11] << 11));
-    rawData[3] /=  2048;
-
-    rawData[4] = (short)((unsigned short)(data[12] << 8) | (unsigned short)data[13]);
-    rawData[4] += rawData[0];
-    rawData[5] = (short)((unsigned short)(data[14] << 8) | (unsigned short)data[15]);
-    rawData[5] += rawData[1];
-    rawData[6] = (short)((unsigned short)(data[16] << 8) | (unsigned short)data[17]);
-    rawData[6] += rawData[2];
-    rawData[7] = (short)((unsigned short)(data[18] << 8) | (unsigned short)data[19]);
-    rawData[7] += rawData[3];
-
-    std::vector<double> signalData(8);
-    for (auto i = 0; i < 8; ++i){
-        signalData[i] = rawData[i]*K;
-    }
-
-    try{
-       /* auto packetsLost = mPacketCounter.onNewPacket(packetNumber);
-        if (packetsLost > 0){
-            LOG_WARN_V("Lost %d packets", packetsLost);
-            static constexpr std::size_t samplesInPacket = 8;
-            std::vector<double> zeroBuffer(packetsLost * samplesInPacket, 0.0);
-            mSignalBuffer.append(zeroBuffer);
-            mResistanceBuffer.append(zeroBuffer);
-        }
-        if (packetsLost < 0)
-            return;*/
-        if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
-            mSignalBuffer.append(signalData);
-            mSignalNotifier.notifyAll(signalData);
-        }
-        else if (mBrainbitState == BrainbitCommand::CMD_RESIST){
-            mResistanceNotifier.notifyAll(signalData);
-            mSignalBuffer.append(std::vector<double>(8));
-            mSignalNotifier.notifyAll(std::vector<double>(8));
-        }
-    }
-    catch (std::exception &e){
-        LOG_ERROR_V("Unable to add new packets: %s. Packet number: %zd", e.what(), packetNumber);
-    }
-
+    }    
+    parseSignalData(data);
 }
 
 void BrainbitImpl::onStatusDataReceived(const ByteBuffer &status_data){
@@ -208,6 +163,97 @@ void BrainbitImpl::parseState(BrainbitCommand cmd, const ByteBuffer &status_data
     }
 }
 
+void BrainbitImpl::parseSignalData(const ByteBuffer &data){
+    auto packetNumber = static_cast<unsigned short>(data[0]) << 3 | static_cast<unsigned short>(data[1]) >> 5;
+    auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
+    LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
+
+    constexpr static double K = 2.4 / (0xFFFFF * 6);
+
+    int rawData[8];
+    rawData[0] = (int)(((unsigned int)(data[1] & 0x0F) << 28) | ((unsigned int)data[2] << 20) | ((unsigned int)data[3] << 12) | ((unsigned int)data[4] << 4));
+    rawData[0] /= 2048;
+
+    rawData[1] = (int)(((unsigned int)(data[4] & 0x7F) << 25) | ((unsigned int)data[5] << 17) | ((unsigned int)data[6] << 9) | ((unsigned int)data[7] << 1));
+    rawData[1] /= 2048;
+
+    rawData[2] = (int)(((unsigned int)(data[6] & 0x03) << 30) | ((unsigned int)data[7] << 22) | ((unsigned int)data[8] << 14) | ((unsigned int)data[9] << 6));
+    rawData[2] /=  2048;
+
+    rawData[3] = (int)(((unsigned int)(data[9] & 0x1F) << 27) | ((unsigned int)data[10] << 19) | ((unsigned int)data[11] << 11));
+    rawData[3] /=  2048;
+
+    rawData[4] = (short)((unsigned short)(data[12] << 8) | (unsigned short)data[13]);
+    rawData[4] += rawData[0];
+    rawData[5] = (short)((unsigned short)(data[14] << 8) | (unsigned short)data[15]);
+    rawData[5] += rawData[1];
+    rawData[6] = (short)((unsigned short)(data[16] << 8) | (unsigned short)data[17]);
+    rawData[6] += rawData[2];
+    rawData[7] = (short)((unsigned short)(data[18] << 8) | (unsigned short)data[19]);
+    rawData[7] += rawData[3];
+
+    std::vector<double> signalData(8);
+    for (auto i = 0; i < 8; ++i){
+        signalData[i] = rawData[i]*K;
+    }
+
+    try{
+        if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
+            onSignalReceived(signalData);
+        }
+        else if (mBrainbitState == BrainbitCommand::CMD_RESIST){
+            onResistanceReceived(signalData);
+        }
+    }
+    catch (std::exception &e){
+        LOG_ERROR_V("Unable to add new packets: %s. Packet number: %zd", e.what(), packetNumber);
+    }
+}
+
+void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
+    mSignalBuffer.append(data);
+    for (auto& info : mChannels){
+        if (info.getType() == ChannelInfo::Type::Signal){
+            std::vector<signal_sample_t> channelSamples{data[info.getIndex()], data[info.getIndex()+4]};
+            mSignalNotifierMap[info.getIndex()].notifyAll(channelSamples);
+        }
+    }
+}
+
+void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
+    onSignalReceived(std::vector<signal_sample_t>(8));
+    mResistBuffer.push_back(data[mCurrentResistChannel]);
+    mResistBuffer.push_back(data[mCurrentResistChannel+4]);
+    if (mResistBuffer.size() >= 100){
+        double res = 0;
+        bool overflow = false;
+        for (std::size_t r = 20; r < mResistBuffer.size(); r++)
+        {
+            res += mResistBuffer[r];
+            if (mResistBuffer[r] == 400000000.0)
+                overflow = true;
+        }
+        if (overflow == false)
+        {
+            double midle = res / (mResistBuffer.size() - 20);
+            res = 0;
+            for (std::size_t r = 20; r < mResistBuffer.size(); r++){
+                res += std::abs(mResistBuffer[r] - midle);
+            }
+            res = res / (mResistBuffer.size() - 20) / 24;
+            res = std::abs(res / 2);
+        }
+        else
+        {
+            res = std::numeric_limits<double>::max();
+        }
+        mResistanceNotifierMap[mCurrentResistChannel].notifyAll({res});
+        auto nextChannel = mCurrentResistChannel + 1;
+        mCurrentResistChannel = nextChannel > 3 ? 0 : nextChannel;
+        execStartResistCommand(mCurrentResistChannel);
+    }
+}
+
 bool BrainbitImpl::execStartSignalCommand(){
     if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
         LOG_DEBUG("Device is already in signal mode");
@@ -230,22 +276,37 @@ bool BrainbitImpl::execStopSignalCommand(){
     return stopAll();
 }
 
-bool BrainbitImpl::execStartResistCommand(){
+bool BrainbitImpl::startResist(){
     if (mBrainbitState == BrainbitCommand::CMD_RESIST){
         LOG_DEBUG("Device is already in resist mode");
         return true;
     }
 
-    auto cmdData = std::make_shared<BrainbitCommandData>(BrainbitCommand::CMD_RESIST);
-    cmdData->setRequestData({0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0xA0});
-    mRequestHandler->sendRequest(cmdData);
-    cmdData->wait();
-
-    if (cmdData->getError() != BrainbitCommandError::NO_ERROR || mBrainbitState != BrainbitCommand::CMD_RESIST){
-        LOG_ERROR_V("Failed send start resist command. Error code: %d", cmdData->getError());
+    if (!execStartResistCommand(0) || mBrainbitState != BrainbitCommand::CMD_RESIST){
+        LOG_ERROR("Failed send start resist command.");
         return false;
     }
     return true;
+}
+
+bool BrainbitImpl::execStartResistCommand(std::size_t channel_index){
+    auto cmdData = std::make_shared<BrainbitCommandData>(BrainbitCommand::CMD_RESIST);
+    std::vector<Byte> requestData(7);
+    for (std::size_t i = 0; i < 4; ++i){
+        if (i == channel_index){
+            requestData[i] = 0b01100000;
+        }
+        else{
+            requestData[i] = 0b10010001;
+        }
+    }
+    requestData[4] = 0b00000010;
+    requestData[5] = 0b00000010;
+    cmdData->setRequestData(requestData);
+    mRequestHandler->sendRequest(cmdData);
+    cmdData->wait();
+
+    return cmdData->getError() == BrainbitCommandError::NO_ERROR;
 }
 
 bool BrainbitImpl::execStopResistCommand(){
@@ -263,6 +324,8 @@ bool BrainbitImpl::stopAll(){
     cmdData->wait();
 
     LOG_DEBUG("Stop all command response received");
+    mResistBuffer.clear();
+    mCurrentResistChannel = 0;
 
     return (cmdData->getError() == BrainbitCommandError::NO_ERROR) && mBrainbitState == BrainbitCommand::CMD_STOP;
 }

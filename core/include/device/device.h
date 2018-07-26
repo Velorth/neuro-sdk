@@ -35,8 +35,9 @@ public:
     bool setParam(typename ParamValue<P>::Type value);
 
     template <ChannelInfo::Type Channel>
-    ListenerPtr<void, const typename ChannelData<Channel>::Type &>
-    subscribeDataReceived(std::function<void(const typename ChannelData<Channel>::Type &)>);
+    ListenerPtr<void, const channel_data_t<Channel> &>
+    subscribeDataReceived(std::function<void(const channel_data_t<Channel> &)>,
+                          ChannelInfo info = default_channel_info<Channel>());
 
 private:
     friend class DeviceFactory;

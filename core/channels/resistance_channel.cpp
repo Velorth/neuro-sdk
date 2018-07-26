@@ -21,6 +21,13 @@ private:
     const ChannelInfo mInfo;
     const std::size_t mChannelsCount;
 
+    resistance_sample_t getLastResistanceValue(){
+        if (mResistanceBuffer.totalLength()>0){
+            return mResistanceBuffer.readFill(mResistanceBuffer.totalLength()-1, 1, 0)[0];
+        }
+        return 0;
+    }
+
 public:
     Impl(std::shared_ptr<Device> device, const ChannelInfo &channel_info) :
         mDevice(device),
@@ -33,13 +40,8 @@ public:
                 LOG_ERROR_V("Wrong data length. Skipping packet");
                 return;
             }
-            ResistanceChannel::data_container resultBuffer;
-            resultBuffer.reserve(data.size() / mChannelsCount);
-            for (std::size_t i = mInfo.getIndex(); i < data.size(); i+=mChannelsCount){
-                resultBuffer.push_back(data[i]);
-            }
-            mResistanceBuffer.append(resultBuffer);
-        });
+            mResistanceBuffer.append(data);
+        }, mInfo);
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -70,7 +72,7 @@ public:
     sampling_frequency_t samplingFrequency() const noexcept {
         try{
             auto frequency = mDevice->readParam<Parameter::SamplingFrequency>();
-            return static_cast<float>(intValue(frequency));
+            return static_cast<float>(intValue(frequency))/mChannelsCount;
         }
         catch (std::runtime_error &){
             return 0.f;
