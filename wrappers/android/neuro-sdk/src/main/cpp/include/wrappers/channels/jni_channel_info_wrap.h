@@ -17,7 +17,7 @@
 #ifndef ANDROID_JNI_CHANNEL_INFO_WRAP_H
 #define ANDROID_JNI_CHANNEL_INFO_WRAP_H
 
-#include "channels/channel_info.h"
+#include "channels/info/channel_info.h"
 #include "java_environment.h"
 
 template<>

@@ -10,6 +10,7 @@ extern "C"
 #include "filter/band_stop_filter.h"
 #include "channels/signal_channel.h"
 #include "channels/battery_channel.h"
+#include "channels/resistance_channel.h"
 #include "sdk_error.h"
 
 extern std::string sdk_last_error;
@@ -209,7 +210,7 @@ void BatteryChannel_delete(BatteryChannel *channel) {
 	delete batteryChannel;
 }
 
-int BatteryChannel_get_info(BatteryChannel * channel, ChannelInfo * out_info){
+int BatteryChannel_get_info(BatteryChannel * channel, ChannelInfo * out_info) {
 	auto& batteryChannel = *reinterpret_cast<std::shared_ptr<Neuro::BatteryChannel> *>(channel);
 	return getChannelInfo(*batteryChannel, out_info);
 }
@@ -353,4 +354,69 @@ int SignalChannel_get_total_length(SignalChannel* channel, size_t* out_length) {
 int SignalChannel_get_buffer_size(SignalChannel* channel, size_t* out_buffer_size) {
 	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::SignalChannel> *>(channel);
 	return readBufferSize(*signalChannel, out_buffer_size);
+}
+
+ResistanceChannel* create_ResistanceChannel_info(Device* device_ptr, ChannelInfo info) {
+	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+	Neuro::ChannelInfo channelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index);
+	const auto channelPtr = new std::shared_ptr<Neuro::ResistanceChannel>(std::make_shared<Neuro::ResistanceChannel>(device, channelInfo));
+	return reinterpret_cast<ResistanceChannel *>(channelPtr);
+}
+
+void ResistanceChannel_delete(ResistanceChannel* channel) {
+	auto resistanceChannel = reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	delete resistanceChannel;
+}
+
+int ResistanceChannel_get_info(ResistanceChannel* channel, ChannelInfo* out_info) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return getChannelInfo(*resistanceChannel, out_info);
+}
+
+int ResistanceChannel_read_data(ResistanceChannel* channel, size_t offset, size_t length, double* out_buffer) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return readChannelData(*resistanceChannel, offset, length, out_buffer);
+}
+
+int ResistanceChannel_get_sampling_frequency(ResistanceChannel* channel, float* out_frequency) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return readSamplingFrequency(*resistanceChannel, out_frequency);
+}
+
+int ResistanceChannel_set_sampling_frequency(ResistanceChannel* channel, float frequency) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return setSamplingFrequency(*resistanceChannel, frequency);
+}
+
+int ResistanceChannel_add_length_callback(ResistanceChannel* channel, void(*callback)(ResistanceChannel*, size_t),
+	ListenerHandle* handle) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel); 
+	try {
+		auto listener = resistanceChannel->subscribeLengthChanged([channel, callback](size_t new_length) {
+			if (callback != nullptr) callback(channel, new_length);
+		});
+		if (listener == nullptr) {
+			sdk_last_error = "Failed to subscribe length changed event: length listenr is null";
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		sdk_last_error = e.what();
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int ResistanceChannel_get_total_length(ResistanceChannel* channel, size_t* out_length) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return readTotalLength(*resistanceChannel, out_length);
+}
+
+int ResistanceChannel_get_buffer_size(ResistanceChannel* channel, size_t* out_buffer_size) {
+	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
+	return readBufferSize(*resistanceChannel, out_buffer_size);
 }

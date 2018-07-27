@@ -112,15 +112,17 @@ void BrainbitImpl::initChannels(){
               o1ResistInfo,
               o2ResistInfo };
 
-    mSignalNotifierMap.emplace(t3Info.getIndex(), class_name);
-    mSignalNotifierMap.emplace(t4Info.getIndex(), class_name);
-    mSignalNotifierMap.emplace(o1Info.getIndex(), class_name);
-    mSignalNotifierMap.emplace(o2Info.getIndex(), class_name);
+    std::string name(class_name);
 
-    mResistanceNotifierMap.emplace(t3ResistInfo.getIndex(), class_name);
-    mResistanceNotifierMap.emplace(t4ResistInfo.getIndex(), class_name);
-    mResistanceNotifierMap.emplace(o1ResistInfo.getIndex(), class_name);
-    mResistanceNotifierMap.emplace(o2ResistInfo.getIndex(), class_name);
+    mSignalNotifierMap.emplace(t3Info.getIndex(), name);
+    mSignalNotifierMap.emplace(t4Info.getIndex(), name);
+    mSignalNotifierMap.emplace(o1Info.getIndex(), name);
+    mSignalNotifierMap.emplace(o2Info.getIndex(), name);
+
+    mResistanceNotifierMap.emplace(t3ResistInfo.getIndex(), name);
+    mResistanceNotifierMap.emplace(t4ResistInfo.getIndex(), name);
+    mResistanceNotifierMap.emplace(o1ResistInfo.getIndex(), name);
+    mResistanceNotifierMap.emplace(o2ResistInfo.getIndex(), name);
 }
 
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){
@@ -222,6 +224,11 @@ void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
 
 void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
     onSignalReceived(std::vector<signal_sample_t>(8));
+    if (data[mCurrentResistChannel] == 0.0 || data[mCurrentResistChannel+4] == 0.0){
+        //LOG_ERROR_V("Skip resist, %f, %f, %f, %f, %f, %f, %f, %f", data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+        //LOG_ERROR_V("Current channel: %zd", mCurrentResistChannel);
+        return;
+    }
     mResistBuffer.push_back(data[mCurrentResistChannel]);
     mResistBuffer.push_back(data[mCurrentResistChannel+4]);
     if (mResistBuffer.size() >= 100){
@@ -240,13 +247,14 @@ void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &
             for (std::size_t r = 20; r < mResistBuffer.size(); r++){
                 res += std::abs(mResistBuffer[r] - midle);
             }
-            res = res / (mResistBuffer.size() - 20) / 24;
+            res = res / (mResistBuffer.size() - 20) / 24e-9;
             res = std::abs(res / 2);
         }
         else
         {
             res = std::numeric_limits<double>::max();
         }
+        mResistBuffer.clear();
         mResistanceNotifierMap[mCurrentResistChannel].notifyAll({res});
         auto nextChannel = mCurrentResistChannel + 1;
         mCurrentResistChannel = nextChannel > 3 ? 0 : nextChannel;

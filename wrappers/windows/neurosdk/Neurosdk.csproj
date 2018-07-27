@@ -73,6 +73,7 @@
     <Compile Include="Parameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SdkError.cs" />
+    <Compile Include="ResistanceChannel.cs" />
     <Compile Include="SignalChannel.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release'">

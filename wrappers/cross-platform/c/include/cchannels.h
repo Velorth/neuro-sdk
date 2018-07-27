@@ -9,6 +9,7 @@
 typedef struct _CommonChannelInterface CommonChannelInterface;
 typedef struct _BatteryChannel BatteryChannel;
 typedef struct _SignalChannel SignalChannel;
+typedef struct _ResistanceChannel ResistanceChannel;
 typedef void* ListenerHandle;
 
 typedef enum _Filter {
@@ -59,5 +60,16 @@ SDK_SHARED int SignalChannel_set_sampling_frequency(SignalChannel *channel, floa
 SDK_SHARED int SignalChannel_add_length_callback(SignalChannel *channel, void(*callback)(SignalChannel *, size_t), ListenerHandle *handle);
 SDK_SHARED int SignalChannel_get_total_length(SignalChannel *channel, size_t *out_length);
 SDK_SHARED int SignalChannel_get_buffer_size(SignalChannel *channel, size_t *out_buffer_size);
+
+SDK_SHARED ResistanceChannel* create_ResistanceChannel(Device *device_ptr);
+SDK_SHARED ResistanceChannel* create_ResistanceChannel_info(Device *device_ptr, ChannelInfo info);
+SDK_SHARED void ResistanceChannel_delete(ResistanceChannel *channel);
+SDK_SHARED int ResistanceChannel_get_info(ResistanceChannel *channel, ChannelInfo *out_info);
+SDK_SHARED int ResistanceChannel_read_data(ResistanceChannel *channel, size_t offset, size_t length, double *out_buffer);
+SDK_SHARED int ResistanceChannel_get_sampling_frequency(ResistanceChannel *channel, float * out_frequency);
+SDK_SHARED int ResistanceChannel_set_sampling_frequency(ResistanceChannel *channel, float frequency);
+SDK_SHARED int ResistanceChannel_add_length_callback(ResistanceChannel *channel, void(*callback)(ResistanceChannel *, size_t), ListenerHandle *handle);
+SDK_SHARED int ResistanceChannel_get_total_length(ResistanceChannel *channel, size_t *out_length);
+SDK_SHARED int ResistanceChannel_get_buffer_size(ResistanceChannel *channel, size_t *out_buffer_size);
 
 #endif // CCHANNELS_H

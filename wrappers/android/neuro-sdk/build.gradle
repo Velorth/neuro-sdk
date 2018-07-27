@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://wiki.neuromd.com/'
     gitUrl = 'https://github.com/NeuroMD/neuro-sdk.git'
 
-    libraryVersion = '1.1'
+    libraryVersion = '1.2'
 
     developerId = 'neuromdltd'
     developerName = 'NeuroMD'
@@ -41,7 +41,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 26
         versionCode 1
-        versionName "1.1"
+        versionName "1.2"
         externalNativeBuild {
             cmake {
                 abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'

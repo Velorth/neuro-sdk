@@ -37,12 +37,12 @@ private:
 
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;
-    int mBatteryPercents;
+    int mBatteryPercents{0};
     SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
     PacketSequence<2048> mPacketCounter;
     param_changed_callback_t parameterChangedCallback;
     std::vector<ChannelInfo> mChannels;
-    std::size_t mCurrentResistChannel;
+    std::size_t mCurrentResistChannel{0};
     std::vector<resistance_sample_t> mResistBuffer;
 
     void initChannels();

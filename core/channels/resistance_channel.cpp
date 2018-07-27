@@ -21,13 +21,6 @@ private:
     const ChannelInfo mInfo;
     const std::size_t mChannelsCount;
 
-    resistance_sample_t getLastResistanceValue(){
-        if (mResistanceBuffer.totalLength()>0){
-            return mResistanceBuffer.readFill(mResistanceBuffer.totalLength()-1, 1, 0)[0];
-        }
-        return 0;
-    }
-
 public:
     Impl(std::shared_ptr<Device> device, const ChannelInfo &channel_info) :
         mDevice(device),
@@ -36,10 +29,6 @@ public:
         Expects(device != nullptr);
         Expects(checkHasChannel(*device, mInfo));
         mResistanceListener = device->subscribeDataReceived<ChannelInfo::Type::Resistance>([=](const std::vector<resistance_sample_t> &data){
-            if (data.size() % mChannelsCount != 0){
-                LOG_ERROR_V("Wrong data length. Skipping packet");
-                return;
-            }
             mResistanceBuffer.append(data);
         }, mInfo);
     }
