@@ -45,7 +45,6 @@ public:
     virtual std::vector<std::string> getValidBtNames() = 0;
 
     std::string genericAccessUUID() {return "00001800-0000-1000-8000-00805F9B34FB";}
-    std::string cccd() {return "00002902-0000-0000-0000-000000000000";}
 };
 
 class BrainbitGattInfo:public DeviceGattInfo
