@@ -86,8 +86,6 @@ Java_com_neuromd_bleconnection_device_DeviceGattInfo_getGenericAccessServiceUUID
 JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getCCCD(JNIEnv *env, jobject instance,
                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
-    auto cccd = gattInfo->cccd();
-    return env->NewStringUTF(cccd.c_str());
+    return env->NewStringUTF("000002902-0000-1000-8000-00805f9b34fb");
 }
 }

@@ -87,7 +87,7 @@ void BleDeviceWin::performConnect(){
         if (mIsConnected.load())
             return;
 
-        mCCCDDescriptor = get_descriptor(mServiceHandle, mRxCharacteristic, mDeviceInfo->getGattInfo()->cccd());
+        mCCCDDescriptor = get_descriptor(mServiceHandle, mRxCharacteristic, "00002902-0000-0000-0000-000000000000");
         while(true){
             try {
                 get_descriptor_value(mServiceHandle, mCCCDDescriptor);
@@ -119,7 +119,7 @@ void BleDeviceWin::performConnect(){
         }
 
         if (mHasStatusCharacteristic){
-            auto statusCccd = get_descriptor(mServiceHandle, mStatusCharacteristic, mDeviceInfo->getGattInfo()->cccd());
+            auto statusCccd = get_descriptor(mServiceHandle, mStatusCharacteristic, "00002902-0000-0000-0000-000000000000");
             try {
                 get_descriptor_value(mServiceHandle, statusCccd);
             }
