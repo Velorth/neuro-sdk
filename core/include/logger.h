@@ -18,6 +18,7 @@
 #define LOGGER_H
 
 #include <mutex>
+#include "lib_export.h"
 
 enum class LogLevel: int
 {
@@ -34,7 +35,7 @@ constexpr LogLevel DefaultLogLevel = LogLevel::Info;
 constexpr LogLevel DefaultLogLevel = LogLevel::Debug;
 #endif
 
-class Logger
+class SDK_SHARED Logger
 {
 public:
     Logger();
@@ -57,7 +58,7 @@ private:
     std::mutex writeLogMutex;
 };
 
-class LoggerFactory
+class SDK_SHARED LoggerFactory
 {
 public:
     LoggerFactory(const LoggerFactory&) = delete;

@@ -7,10 +7,11 @@
 #include <mutex>
 #include <queue>
 #include <string>
+#include "lib_export.h"
 
 namespace Neuro {
 
-class TaskQueue{
+class SDK_SHARED TaskQueue{
 public:
     using delay_time_t = std::chrono::duration<double>;
 

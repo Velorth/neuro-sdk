@@ -123,7 +123,12 @@ win32 {
 ##########################
 shared_headers.files = ../../../../core/include/common_types.h
 shared_headers.files += ../../../../core/include/event_listener.h
+shared_headers.files += ../../../../core/include/event_notifier.h
+shared_headers.files += ../../../../core/include/loop.h
+shared_headers.files += ../../../../core/include/logger.h
+shared_headers.files += ../../../../core/include/task_queue.h
 shared_headers.files += ../../../../core/include/lib_export.h
+shared_headers_signal.files += ../../../../core/include/signal/*.h
 shared_headers_channels.files += ../../../../core/include/channels/base_channel.h
 shared_headers_channels.files += ../../../../core/include/channels/battery_channel.h
 shared_headers_channels.files += ../../../../core/include/channels/connection_stats_channel.h
@@ -165,8 +170,9 @@ win32 {
     shared_headers_device.path = $$(NEUROSDK)/include/device
     shared_headers_device_scanner.path = $$(NEUROSDK)/include/device_scanner
     shared_headers_filter.path = $$(NEUROSDK)/include/filter
+    shared_headers_signal.path = $$(NEUROSDK)/include/signal
     target.path = $$(NEUROSDK)/$$ARCH
-    INSTALLS += target shared_headers shared_headers_channels shared_headers_channels_info shared_headers_device shared_headers_device_scanner shared_headers_filter
+    INSTALLS += target shared_headers shared_headers_channels shared_headers_channels_info shared_headers_device shared_headers_device_scanner shared_headers_filter shared_headers_signal
     LIBS += -lws2_32
     LIBS += -lSetupApi
     LIBS += -lBluetoothAPIs
