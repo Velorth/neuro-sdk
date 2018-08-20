@@ -50,11 +50,6 @@ android {
         }
     }
 
-    sourceSets {
-        main.java.srcDirs += '../../../core/ble/android/java'
-    }
-
-
     lintOptions {
         abortOnError false
     }

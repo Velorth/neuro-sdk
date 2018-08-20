@@ -1,1 +1,1 @@
-include ':neuro-sdk'
+include ':neuro-sdk', ':libneurosdk'

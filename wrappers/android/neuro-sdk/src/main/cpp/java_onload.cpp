@@ -1,6 +1,6 @@
-#include <channels/electrode_state_channel.h>
-#include <wrappers/channels/jni_electrodes_state_channel_wrap.h>
-#include <wrappers/channels/jni_spectrum_channel_wrap.h>
+#include "channels/electrode_state_channel.h"
+#include "wrappers/channels/jni_electrodes_state_channel_wrap.h"
+#include "wrappers/channels/jni_spectrum_channel_wrap.h"
 #include "wrappers/channels/jni_connection_stats_channel_wrap.h"
 #include "wrappers/channels/jni_angle_channel_wrap.h"
 #include "wrappers/channels/jni_respiration_channel_wrap.h"

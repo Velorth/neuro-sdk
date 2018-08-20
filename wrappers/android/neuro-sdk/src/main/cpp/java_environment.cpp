@@ -16,7 +16,6 @@
 
 #include <android/log.h>
 #include <java_environment.h>
-#include "java_environment.h"
 
 JavaVM *jni::java_machine;
 
