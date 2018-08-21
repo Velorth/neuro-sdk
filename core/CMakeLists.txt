@@ -6,10 +6,11 @@ if (WIN32)
 	else ()
 		set (TARGET_PLATFORM "x64")
 	endif()
+	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif (WIN32)
 
 # project name and supported languages
-project(neurosdk CXX)
+project(neurosdk-${TARGET_PLATFORM} CXX)
 
 ###################
 ##DEFINES SECTION##

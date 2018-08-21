@@ -6,6 +6,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../core/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/dsp/include)
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)

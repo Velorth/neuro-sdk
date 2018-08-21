@@ -7,3 +7,6 @@ url=https://github.com/NeurotechLtd/networking.git
 [submodule "utils/dsp"]
 	path = utils/dsp
 url=https://github.com/NeurotechLtd/dsp.git
+[submodule "utils/jni-support"]
+	path = utils/jni-support
+	url = https://github.com/NeuroMD/jni-support.git

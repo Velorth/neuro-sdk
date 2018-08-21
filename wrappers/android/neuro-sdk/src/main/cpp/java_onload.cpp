@@ -14,9 +14,10 @@
 #include "jni_logger.h"
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    jni::java_machine = vm;
+    jni::on_vm_load(vm);
     JNIEnv *env;
-    jni::java_machine->GetEnv((void **) &env, JNI_VERSION_1_6);
+    if (!jni::get_env(&env))
+        std::abort();
 
     jni::initJavaObjClass<int>(env);
     jni::initJavaObjClass<long>(env);
