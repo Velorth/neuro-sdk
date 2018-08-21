@@ -1,5 +1,4 @@
 #include "java_environment.h"
-#include "jni_logger.h"
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::on_vm_load(vm);
@@ -14,12 +13,5 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<unsigned char>(env);
     jni::initJavaObjClass<std::string>(env);
 
-    auto logFactory = LoggerFactory::getInstance();
-    logFactory->setLogger(new JniLogger());
-#ifdef NDEBUG
-    logFactory->setLogLevel(LogLevel::Info);
-#else
-    logFactory->setLogLevel(LogLevel::Trace);
-#endif
     return JNI_VERSION_1_6;
 }

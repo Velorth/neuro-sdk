@@ -50,6 +50,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/gsl/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/network)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support)
 #############################
 
 
