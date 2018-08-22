@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 
 if (WIN32)
     if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
@@ -170,6 +170,7 @@ add_library(neurosdk SHARED ${SOURCE_FILES_COMMON}
 file(GLOB SHARED_HEADERS_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/include/common_types.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/event_listener.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/event_notifier.h
+								${CMAKE_CURRENT_SOURCE_DIR}/include/saturation_cast.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/loop.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/logger.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/task_queue.h
@@ -215,8 +216,27 @@ if (UNIX)
     if (DEBIAN_FOUND)
     	target_link_libraries(neurosdk bluetooth gattlib)
     else(DEBIAN_FOUND)    	
-		if (ANDROID) 
-    		target_link_libraries(neurosdk log android)
+		if (ANDROID)
+    		target_link_libraries(neurosdk android)
+    		set(DISTRIBUTION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../wrappers/android/share)
+
+    		file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/${ANDROID_ABI})
+    		add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:neurosdk> ${DISTRIBUTION_DIR}/${ANDROID_ABI})
+
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_COMMON} ${DISTRIBUTION_DIR}/include)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS} ${DISTRIBUTION_DIR}/include/channels)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels/info)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS_INFO} ${DISTRIBUTION_DIR}/include/channels/info)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVICE} ${DISTRIBUTION_DIR}/include/device)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device_scanner)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVSCAN} ${DISTRIBUTION_DIR}/include/device_scanner)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/filter)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_FILTERS} ${DISTRIBUTION_DIR}/include/filter)
+            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/signal)
+            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_SIGNAL} ${DISTRIBUTION_DIR}/include/signal)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
 		endif (ANDROID)
@@ -227,11 +247,11 @@ if (WIN32)
     target_link_libraries(neurosdk ws2_32 setupapi bluetoothapis)
     install(TARGETS neurosdk DESTINATION $ENV{NEUROSDK}/${TARGET_PLATFORM})
     install(FILES ${SHARED_HEADERS_COMMON} DESTINATION $ENV{NEUROSDK}/include)
-    install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION $ENV{NEUROSDK}/include/channels)
-    install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION $ENV{NEUROSDK}/include/channels/info)
-    install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION $ENV{NEUROSDK}/include/device)
-    install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION $ENV{NEUROSDK}/include/device_scanner)
-    install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION $ENV{NEUROSDK}/include/filter)
-    install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION $ENV{NEUROSDK}/include/signal)
+	install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION $ENV{NEUROSDK}/include/channels)
+	install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION $ENV{NEUROSDK}/include/channels/info)
+	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION $ENV{NEUROSDK}/include/device)
+	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION $ENV{NEUROSDK}/include/device_scanner)
+	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION $ENV{NEUROSDK}/include/filter)
+	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION $ENV{NEUROSDK}/include/signal)
 endif (WIN32)
 ##################
