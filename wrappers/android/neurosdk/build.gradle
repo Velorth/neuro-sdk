@@ -15,11 +15,11 @@ android {
         minSdkVersion 18
         targetSdkVersion 26
         versionCode 1
-        versionName "1.2"
+        versionName currentSdkVersion
         externalNativeBuild {
             cmake {
                 abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                arguments '-DANDROID_STL=c++_static'
+                arguments '-DANDROID_STL=c++_shared'
             }
         }
     }

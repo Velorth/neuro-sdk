@@ -4,7 +4,7 @@ import com.neuromd.common.Assert;
 
 public class NativeChannelInfo implements ChannelInfo {
     static {
-        System.loadLibrary("neurosdk");
+        System.loadLibrary("android-neurosdk");
     }
 
     private long mNativeObjPtr = 0;

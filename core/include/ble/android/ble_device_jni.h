@@ -57,6 +57,8 @@ namespace Neuro {
         void onStatusReceived(const std::vector<Byte> &);
 
     private:
+        static constexpr const char *class_name = "BleDeviceJni";
+
         jobject javaBleDevice;
         jobject appContext;
     };

@@ -27,7 +27,7 @@ public class DeviceScanner {
     private long mNativeObjPtr;
 
     static {
-        System.loadLibrary("neurosdk");
+        System.loadLibrary("android-neurosdk");
     }
 
     public final SubscribersNotifier<Device> deviceFound = new SubscribersNotifier<>();

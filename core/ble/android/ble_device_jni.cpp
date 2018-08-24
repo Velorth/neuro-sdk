@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <android/log.h>
 #include "ble/android/ble_device_jni.h"
+#include "logger.h"
 
 namespace Neuro {
 
@@ -44,7 +44,7 @@ std::string getBleName(jobject ble_device_obj){
 BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) :
     BleDevice(BleDeviceInfo::fromDeviceName(getBleName(bluetoothDevice))) {
     jni::call_in_attached_thread([=](auto env) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Constructor");
+        LOG_TRACE("Constructor");
         appContext = env->NewGlobalRef(context);
 
         //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
@@ -85,20 +85,18 @@ BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) :
 BleDeviceJni::~BleDeviceJni() {
     try {
         jni::call_in_attached_thread([=](auto env) {
-            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor");
+            LOG_TRACE("Destructor");
             auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
             auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
                                                     "(Lcom/neuromd/bleconnection/device/BleDeviceCallback;)V");
             env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
             env->DeleteGlobalRef(javaBleDevice);
             env->DeleteGlobalRef(appContext);
-            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Destructor EXIT");
+            LOG_TRACE("Destructor EXIT");
         });
     }
     catch (std::runtime_error &e){
-        __android_log_print(ANDROID_LOG_FATAL,
-                            "BleDeviceJni",
-                            "Destructon failure: %s", e.what());
+        LOG_ERROR_V("Destructon failure: %s", e.what());
     }
 }
 
@@ -113,8 +111,7 @@ void BleDeviceJni::connect() {
 
 void BleDeviceJni::disconnect() {
     jni::call_in_attached_thread([=](auto env) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "disconnect");
-
+        LOG_TRACE("disconnect");
         auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
         auto disconnectMethod = env->GetMethodID(bleDeviceClass, "disconnect", "()V");
         env->CallVoidMethod(javaBleDevice, disconnectMethod);
@@ -123,8 +120,7 @@ void BleDeviceJni::disconnect() {
 
 void BleDeviceJni::close() {
     jni::call_in_attached_thread([=](auto env) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "close");
-
+        LOG_TRACE("close");
         auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
         auto closeMethod = env->GetMethodID(bleDeviceClass, "close", "()V");
         env->CallVoidMethod(javaBleDevice, closeMethod);
@@ -144,14 +140,17 @@ bool BleDeviceJni::sendCommand(const std::vector<Byte> &commandData) {
         memcpy(tempCmdArray, commandData.data(), commandData.size());
         env->ReleasePrimitiveArrayCritical(retArray, tempCmdArray, 0);
 
-        __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Sending command");
+        LOG_TRACE("Sending command");
         auto bleDeviceClass = env->GetObjectClass(javaBleDevice);
         auto sendCommandMethod = env->GetMethodID(bleDeviceClass, "sendCommand", "([B)Z");
         auto sendResult = env->CallBooleanMethod(javaBleDevice, sendCommandMethod, retArray);
 
-        if (sendResult)
-            __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command sent");
-        else __android_log_print(ANDROID_LOG_VERBOSE, "BleDeviceJni", "Command not sent");
+        if (sendResult) {
+            LOG_TRACE("Command sent");
+        }
+        else {
+            LOG_TRACE("Command not sent");
+        }
 
         return sendResult;
     });
@@ -172,7 +171,7 @@ std::string BleDeviceJni::getName() const {
             env->DeleteLocalRef(javaStringName);
         } else {
             stringName = "NULL";
-            __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
+            LOG_WARN("Name string is null");
         }
 
         return stringName;
@@ -195,7 +194,7 @@ std::string BleDeviceJni::getNetAddress() const {
             env->DeleteLocalRef(javaStringAddress);
         } else {
             stringAddress = "NULL";
-            __android_log_print(ANDROID_LOG_WARN, "BleDeviceJni", "Name string is null");
+            LOG_WARN("Name string is null");
         }
 
         return stringAddress;
@@ -219,7 +218,7 @@ BleDeviceState BleDeviceJni::getState() const {
             env->DeleteLocalRef(javaState);
         } else {
             state = BleDeviceState::Error;
-            __android_log_print(ANDROID_LOG_ERROR, "BleDeviceJni", "State is null");
+            LOG_WARN("State is null");
         }
 
         return state;

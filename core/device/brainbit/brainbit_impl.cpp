@@ -114,15 +114,31 @@ void BrainbitImpl::initChannels(){
 
     std::string name(class_name);
 
-    mSignalNotifierMap.emplace(t3Info.getIndex(), name);
-    mSignalNotifierMap.emplace(t4Info.getIndex(), name);
-    mSignalNotifierMap.emplace(o1Info.getIndex(), name);
-    mSignalNotifierMap.emplace(o2Info.getIndex(), name);
+    mSignalNotifierMap.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(t3Info.getIndex()),
+                               std::forward_as_tuple(name));
+    mSignalNotifierMap.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(t4Info.getIndex()),
+                               std::forward_as_tuple(name));
+    mSignalNotifierMap.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(o1Info.getIndex()),
+                               std::forward_as_tuple(name));
+    mSignalNotifierMap.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(o2Info.getIndex()),
+                               std::forward_as_tuple(name));
 
-    mResistanceNotifierMap.emplace(t3ResistInfo.getIndex(), name);
-    mResistanceNotifierMap.emplace(t4ResistInfo.getIndex(), name);
-    mResistanceNotifierMap.emplace(o1ResistInfo.getIndex(), name);
-    mResistanceNotifierMap.emplace(o2ResistInfo.getIndex(), name);
+    mResistanceNotifierMap.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(t3ResistInfo.getIndex()),
+                                   std::forward_as_tuple(name));
+    mResistanceNotifierMap.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(t4ResistInfo.getIndex()),
+                                   std::forward_as_tuple(name));
+    mResistanceNotifierMap.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(o1ResistInfo.getIndex()),
+                                   std::forward_as_tuple(name));
+    mResistanceNotifierMap.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(o2ResistInfo.getIndex()),
+                                   std::forward_as_tuple(name));
 }
 
 void BrainbitImpl::onDataReceived(const ByteBuffer &data){

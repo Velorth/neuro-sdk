@@ -9,7 +9,7 @@ import com.neuromd.neurosdk.Device;
  */
 public class ResistanceChannel extends BaseChannel<Double> {
     static {
-        System.loadLibrary("neurosdk");
+        System.loadLibrary("android-neurosdk");
     }
 
     protected long mNativeObjPtr = 0;

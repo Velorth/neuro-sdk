@@ -26,7 +26,7 @@ import com.neuromd.neurosdk.parameters.types.DeviceState;
 
 public class Device {
     static {
-        System.loadLibrary("neurosdk");
+        System.loadLibrary("android-neurosdk");
     }
 
     private long mNativeObjPtr = 0;

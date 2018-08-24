@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <android/log.h>
+#include "logger.h"
 #include "ble/android/bluetooth_scanner.h"
 #include "ble/android/ble_device_jni.h"
 
 namespace Neuro {
     BluetoothScannerJni::BluetoothScannerJni(jobject context) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BluetoothScannerJni", "Constructor");
+        LOG_TRACE("Constructor");
         isScanProcessing.store(false);
         jni::call_in_attached_thread([=](auto env) {
             appContext = env->NewGlobalRef(context);
@@ -41,16 +41,14 @@ namespace Neuro {
             });
         }
         catch (std::runtime_error &e){
-            __android_log_print(ANDROID_LOG_FATAL,
-                                "BluetoothScannerJni",
-                                "Error during destruction: %s", e.what());
+            LOG_ERROR_V("Error during destruction: %s", e.what());
         }
     }
 
     void BluetoothScannerJni::startScan() {
         emulator.startScan();
         jni::call_in_attached_thread([=](auto env) {
-            __android_log_print(ANDROID_LOG_VERBOSE, "BluetoothScannerJni", "Start scan");
+            LOG_TRACE("Start scan");
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
             auto resetMethodID = env->GetMethodID(scannerClass, "reset", "()V");
             env->CallVoidMethod(javaScannerInstance, resetMethodID);
@@ -64,7 +62,7 @@ namespace Neuro {
     void BluetoothScannerJni::stopScan() {
         emulator.stopScan();
         jni::call_in_attached_thread([=](auto env) {
-            __android_log_print(ANDROID_LOG_VERBOSE, "BluetoothScannerJni", "Stop scan");
+            LOG_TRACE("Stop scan");
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
             auto stopMethodID = env->GetMethodID(scannerClass, "stopScan", "()V");
             env->CallVoidMethod(javaScannerInstance, stopMethodID);
@@ -95,8 +93,7 @@ namespace Neuro {
                 bleDevice.reset(new BleDeviceJni(bluetoothDevice, appContext));
             }
             catch (std::runtime_error &error) {
-                __android_log_print(ANDROID_LOG_ERROR, "BluetoothScannerJni",
-                                    "Failed get device by address: %s", error.what());
+                LOG_ERROR_V("Failed get device by address: %s", error.what());
             }
 
             env->DeleteLocalRef(bluetoothDevice);
@@ -141,9 +138,7 @@ namespace Neuro {
             auto deviceFoundCallbackCtor = env->GetMethodID(deviceFoundCallbackClass, "<init>",
                                                             "(J)V");
 
-            __android_log_print(ANDROID_LOG_VERBOSE, "BluetoothScannerJni",
-                                "Subscribing device found, callback ptr is %ld",
-                                reinterpret_cast<long>(this));
+            LOG_TRACE_V("Subscribing device found, callback ptr is %ld", reinterpret_cast<long>(this));
             auto deviceFoundCallbackObj = env->NewObject(deviceFoundCallbackClass,
                                                          deviceFoundCallbackCtor,
                                                          (jlong) this);
@@ -157,7 +152,7 @@ namespace Neuro {
     }
 
     void BluetoothScannerJni::onDeviceFound(jobject bluetoothDevice) {
-        __android_log_print(ANDROID_LOG_VERBOSE, "BluetoothScannerJni", "On device found function");
+        LOG_TRACE("On device found function");
         std::unique_ptr<BleDeviceJni> bleDevice(new BleDeviceJni(bluetoothDevice, appContext));
         if (deviceFoundCallback) deviceFoundCallback(std::move(bleDevice));
 

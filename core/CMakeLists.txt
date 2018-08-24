@@ -26,16 +26,13 @@ endif (WIN32)
 ########################
 ##BUILD CONFIG SECTION##
 ########################
-if (WIN32) 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /MD")
+if (WIN32)
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /MD")
 else () 
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti -pedantic-errors")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -fexceptions -fno-rtti -pedantic-errors")
+	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif (WIN32)
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_EXE_LINKER_FLAGS}")
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;")
 
 if(NOT CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX d)
@@ -84,6 +81,7 @@ if (UNIX)
         if (ANDROID)
             file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/android/*.h)
             file(GLOB HEADER_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.h)
+            file(GLOB HEADER_FILES_UTILS_JNI ${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support/*.h)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
     	endif (ANDROID)
@@ -127,6 +125,7 @@ if (UNIX)
     		file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/android/*.cpp)
     		file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
     		file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
+    		file(GLOB SOURCE_FILES_UTILS_JNI ${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support/*.cpp)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
 		endif (ANDROID)
@@ -150,6 +149,7 @@ add_library(neurosdk SHARED ${SOURCE_FILES_COMMON}
 							${SOURCE_FILES_DEVSCAN_OS} 
 							${SOURCE_FILES_UTILS_NET}  
 							${SOURCE_FILES_UTILS_NET_OS}
+							${SOURCE_FILES_UTILS_JNI}
 							${HEADER_FILES_COMMON} 
 							${HEADER_FILES_BLE} 
 							${HEADER_FILES_BLE_OS} 
@@ -162,7 +162,8 @@ add_library(neurosdk SHARED ${SOURCE_FILES_COMMON}
 							${HEADER_FILES_UTILS_NET}
 							${HEADER_FILES_UTILS_NET_OS}
 							${HEADER_FILES_UTILS_DSP}
-							${HEADER_FILES_UTILS_GSL})
+							${HEADER_FILES_UTILS_GSL}
+							${HEADER_FILES_UTILS_JNI})
 
 ##########################
 ##EXPORT HEADERS SECTION##
@@ -224,19 +225,19 @@ if (UNIX)
     		add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:neurosdk> ${DISTRIBUTION_DIR}/${ANDROID_ABI})
 
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_COMMON} ${DISTRIBUTION_DIR}/include)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_COMMON} ${DISTRIBUTION_DIR}/include)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS} ${DISTRIBUTION_DIR}/include/channels)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS} ${DISTRIBUTION_DIR}/include/channels)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels/info)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS_INFO} ${DISTRIBUTION_DIR}/include/channels/info)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS_INFO} ${DISTRIBUTION_DIR}/include/channels/info)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVICE} ${DISTRIBUTION_DIR}/include/device)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVICE} ${DISTRIBUTION_DIR}/include/device)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device_scanner)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVSCAN} ${DISTRIBUTION_DIR}/include/device_scanner)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVSCAN} ${DISTRIBUTION_DIR}/include/device_scanner)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/filter)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_FILTERS} ${DISTRIBUTION_DIR}/include/filter)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_FILTERS} ${DISTRIBUTION_DIR}/include/filter)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/signal)
-            add_custom_command(TARGET neurosdk PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_SIGNAL} ${DISTRIBUTION_DIR}/include/signal)
+            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_SIGNAL} ${DISTRIBUTION_DIR}/include/signal)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
 		endif (ANDROID)

@@ -1,1 +1,1 @@
-include ':android-neurosdk', ':neurosdk'
+include  ':neurosdk', ':android-neurosdk'

@@ -46,6 +46,8 @@ namespace Neuro {
         bool isScanning() override { return isScanProcessing.load() || emulator.isScanning(); }
 
     private:
+        static constexpr const char *class_name = "BluetoothScannerJni";
+
         jobject appContext;
         jobject javaScannerInstance;
 

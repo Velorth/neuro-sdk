@@ -5,7 +5,7 @@ import com.neuromd.neurosdk.Device;
 
 public class ElectrodesStateChannel extends BaseChannel<ElectrodeState> {
 static {
-        System.loadLibrary("neurosdk");
+        System.loadLibrary("android-neurosdk");
         }
 
 protected long mNativeObjPtr = 0;
