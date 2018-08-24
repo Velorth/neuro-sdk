@@ -22,7 +22,6 @@ import com.neuromd.neurosdk.channels.ChannelInfo;
 import com.neuromd.neurosdk.parameters.Command;
 import com.neuromd.neurosdk.parameters.Parameter;
 import com.neuromd.neurosdk.parameters.ParameterName;
-import com.neuromd.neurosdk.parameters.types.DeviceState;
 
 public class Device {
     static {

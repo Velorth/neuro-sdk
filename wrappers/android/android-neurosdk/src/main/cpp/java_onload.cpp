@@ -16,7 +16,7 @@
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::on_vm_load(vm);
     JNIEnv *env;
-    if (!jni::get_env(&env))
+    if (jni::get_env(&env)!=0)
         std::terminate();
 
     jni::initJavaObjClass<int>(env);

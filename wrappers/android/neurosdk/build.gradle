@@ -47,6 +47,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:26.1.0'
+}
+
+task copyJavaClasses(type: Copy) {
+    from 'build/intermediates/bundles/default'
+    include 'classes.jar'
+    into '../share/libs'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleRelease') {
+        task.finalizedBy 'copyJavaClasses'
+    }
 }
