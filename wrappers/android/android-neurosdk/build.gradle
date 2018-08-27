@@ -69,7 +69,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':neurosdk')
 }
 
 task copyLibs(type: Copy) {
@@ -81,6 +80,7 @@ task copyLibs(type: Copy) {
 preBuild.dependsOn(':neurosdk:build')
 preBuild.dependsOn('copyLibs')
 
+archivesBaseName = 'neuro-sdk'
 group = publishedGroupId
 version = libraryVersion
 
@@ -136,9 +136,6 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 bintray {
     user = publishUser
