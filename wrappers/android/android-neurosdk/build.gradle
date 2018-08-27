@@ -72,13 +72,14 @@ dependencies {
     compile project(':neurosdk')
 }
 
-preBuild.dependsOn(':neurosdk:build')
-
 task copyLibs(type: Copy) {
     from '../share/libs'
     include 'classes.jar'
     into 'libs'
 }
+
+preBuild.dependsOn(':neurosdk:build')
+preBuild.dependsOn('copyLibs')
 
 group = publishedGroupId
 version = libraryVersion
