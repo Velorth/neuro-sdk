@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class SignalChannel : BaseChannel<double>
+    public sealed class SignalChannel : BaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
 
@@ -60,7 +60,7 @@ namespace Neuro
         }
 
         public override event EventHandler<int> LengthChanged;
-        public sealed override ChannelInfo Info { get; set; }
+        public override ChannelInfo Info { get; set; }
 
         public override int TotalLength
         {

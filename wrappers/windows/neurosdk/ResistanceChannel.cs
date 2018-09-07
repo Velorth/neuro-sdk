@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class ResistanceChannel : BaseChannel<double>
+    public sealed class ResistanceChannel : BaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
 

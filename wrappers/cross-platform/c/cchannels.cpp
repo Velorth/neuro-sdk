@@ -240,3 +240,70 @@ int ResistanceChannel_get_buffer_size(ResistanceChannel* channel, size_t* out_bu
 	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::ResistanceChannel> *>(channel);
 	return readBufferSize(*resistanceChannel, out_buffer_size);
 }
+
+struct BridgeDoubleChannelObj {
+	GetInfoFunc getInfoFunc;
+	ReadDataFunc readDataFunc;
+	GetFrequencyFunc getFrequencyFunc;
+	SetFrequencyFunc setFrequencyFunc;
+	AddLengthCallbackFunc addLengthCallbackFunc;
+	GetTotalLengthFunc getTotalLengthFunc;
+	GetBufferSizeFunc getBufferSizeFunc;
+};
+
+BridgeDoubleChannel* create_BridgeDoubleChannel_info(GetInfoFunc get_info_func, 
+	ReadDataFunc read_data_func, 
+	GetFrequencyFunc get_frequency_func, 
+	SetFrequencyFunc set_frequency_func, 
+	AddLengthCallbackFunc add_length_callback_func,
+	GetTotalLengthFunc get_total_length_func, 
+	GetBufferSizeFunc get_buffer_size_func) {
+	const auto bridgeObject = new BridgeDoubleChannelObj(BridgeDoubleChannelObj{get_info_func, 
+		read_data_func, 
+		get_frequency_func, 
+		set_frequency_func, 
+		add_length_callback_func, 
+		get_total_length_func, 
+		get_buffer_size_func});
+	return reinterpret_cast<BridgeDoubleChannel *>(bridgeObject);
+}
+
+void BridgeDoubleChannel_delete(BridgeDoubleChannel *channel) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	delete bridgeChannel;
+}
+
+int BridgeDoubleChannel_get_info(BridgeDoubleChannel *channel, ChannelInfo *out_info) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->getInfoFunc(out_info);
+}
+
+int BridgeDoubleChannel_read_data(BridgeDoubleChannel *channel, size_t offset, size_t length, double *out_buffer) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->readDataFunc(offset, length, out_buffer);
+}
+
+int BridgeDoubleChannel_get_sampling_frequency(BridgeDoubleChannel *channel, float * out_frequency) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->getFrequencyFunc(out_frequency);
+}
+
+int BridgeDoubleChannel_set_sampling_frequency(BridgeDoubleChannel *channel, float frequency) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->setFrequencyFunc(frequency);
+}
+
+int BridgeDoubleChannel_add_length_callback(BridgeDoubleChannel *channel, void(*callback)(BridgeDoubleChannel *, size_t), ListenerHandle *handle) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->addLengthCallbackFunc(callback, handle);
+}
+
+int BridgeDoubleChannel_get_total_length(BridgeDoubleChannel *channel, size_t *out_length) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->getTotalLengthFunc(out_length);
+}
+
+int BridgeDoubleChannel_get_buffer_size(BridgeDoubleChannel *channel, size_t *out_buffer_size) {
+	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	return bridgeChannel->getBufferSizeFunc(out_buffer_size);
+}
