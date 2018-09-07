@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Neuro
 {
-    internal static class SdkError
+    public static class SdkError
     {
         public const int SdkNoError = 0;
         public const int ErrorUnhandledException = 1;

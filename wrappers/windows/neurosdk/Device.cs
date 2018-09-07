@@ -8,7 +8,7 @@ namespace Neuro
 {
     public class Device
     {
-        internal readonly IntPtr DevicePtr;
+        public readonly IntPtr DevicePtr;
         public event EventHandler<Parameter> ParameterChanged;
 
         internal Device(IntPtr devicePtr)

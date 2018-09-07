@@ -15,6 +15,8 @@ namespace Neuro
 
     public abstract class BaseChannel<T> : ICommonChannelInterface
     {
+        public IntPtr ChannelPtr { get; protected set; }
+
         protected BaseChannel(Device devcie)
         {
             UnderlyingDevice = devcie;

@@ -5,8 +5,6 @@ extern "C"
 }
 #include "device_scanner/scanner_factory.h"
 
-extern std::string sdk_last_error;
-
 DeviceScanner* create_device_scanner() {
 	auto scanner = Neuro::createDeviceScanner();
 	const auto scanner_ptr = new decltype(scanner)(std::move(scanner));
@@ -25,7 +23,7 @@ int scanner_start_scan(DeviceScanner *scanner_ptr, int timeout_ms) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch(...) {
@@ -40,7 +38,7 @@ int scanner_stop_scan(DeviceScanner *scanner_ptr) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -60,7 +58,7 @@ int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -79,7 +77,7 @@ int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -98,7 +96,7 @@ Device* scanner_get_device_by_address(DeviceScanner *scanner_ptr, const char *ad
 		return reinterpret_cast<Device *>(device_raw_ptr);
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return nullptr;
 	}
 	catch (...) {
@@ -113,7 +111,7 @@ int scanner_release_device(DeviceScanner *scanner_ptr, const char *name, const c
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {

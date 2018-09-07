@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 typedef struct _CommonChannelInterface CommonChannelInterface;
+typedef struct _BaseDoubleChannel BaseDoubleChannel;
 typedef struct _BatteryChannel BatteryChannel;
 typedef struct _SignalChannel SignalChannel;
 typedef struct _ResistanceChannel ResistanceChannel;

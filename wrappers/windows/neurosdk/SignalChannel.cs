@@ -5,58 +5,57 @@ namespace Neuro
 {
     public class SignalChannel : BaseChannel<double>
     {
-        private readonly IntPtr _channelPtr;
         private readonly IntPtr _listenerPtr;
 
         public SignalChannel(Device device) : base(device)
         {
-            _channelPtr = create_SignalChannel(device.DevicePtr);
-            if (_channelPtr == null)
+            ChannelPtr = create_SignalChannel(device.DevicePtr);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(SignalChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
-            SdkError.ThrowIfError(SignalChannel_get_info(_channelPtr, out var info));
+            SdkError.ThrowIfError(SignalChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(SignalChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
 
         public SignalChannel(Device device, ChannelInfo info) : base(device)
         {
-            _channelPtr = create_SignalChannel_info(device.DevicePtr, info);
-            if (_channelPtr == null)
+            ChannelPtr = create_SignalChannel_info(device.DevicePtr, info);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(SignalChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(SignalChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
             Info = info;
         }
 
         public SignalChannel(Device device, ChannelInfo info, Filter[] filters) : base(device)
         {
-            _channelPtr = create_SignalChannel_info_filters(device.DevicePtr, info, filters, (IntPtr)filters.Length);
-            if (_channelPtr == null)
+            ChannelPtr = create_SignalChannel_info_filters(device.DevicePtr, info, filters, (IntPtr)filters.Length);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(SignalChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(SignalChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
             Info = info;
         }
 
         public SignalChannel(Device device, Filter[] filters) : base(device)
         {
-            _channelPtr = create_SignalChannel_filters(device.DevicePtr, filters, (IntPtr)filters.Length);
-            if (_channelPtr == null)
+            ChannelPtr = create_SignalChannel_filters(device.DevicePtr, filters, (IntPtr)filters.Length);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(SignalChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
-            SdkError.ThrowIfError(SignalChannel_get_info(_channelPtr, out var info));
+            SdkError.ThrowIfError(SignalChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(SignalChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
 
         ~SignalChannel()
         {
-            SignalChannel_delete(_channelPtr);
+            SignalChannel_delete(ChannelPtr);
             free_listener_handle(_listenerPtr);
         }
 
@@ -67,7 +66,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(SignalChannel_get_total_length(_channelPtr, out var length));
+                SdkError.ThrowIfError(SignalChannel_get_total_length(ChannelPtr, out var length));
                 return (int)length;
             }
         }
@@ -76,7 +75,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(SignalChannel_get_buffer_size(_channelPtr, out var size));
+                SdkError.ThrowIfError(SignalChannel_get_buffer_size(ChannelPtr, out var size));
                 return (int)size;
             }
         }
@@ -85,10 +84,10 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(SignalChannel_get_sampling_frequency(_channelPtr, out var frequency));
+                SdkError.ThrowIfError(SignalChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(SignalChannel_set_sampling_frequency(_channelPtr, value));
+            set => SdkError.ThrowIfError(SignalChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
         public override double[] ReadData(int offset, int length)
@@ -102,7 +101,7 @@ namespace Neuro
             try
             {
                 SdkError.ThrowIfError(
-                    SignalChannel_read_data(_channelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
+                    SignalChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
                 var buffer = new double[length];
                 Marshal.Copy(bufferPtr, buffer, 0, length);
                 return buffer;

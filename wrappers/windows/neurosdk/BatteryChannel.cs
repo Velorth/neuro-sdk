@@ -5,25 +5,24 @@ namespace Neuro
 {
     public class BatteryChannel : BaseChannel<int>
     {
-        private readonly IntPtr _channelPtr;
         private readonly IntPtr _listenerPtr;
 
         public BatteryChannel(Device device) : base(device)
         {
-            _channelPtr = create_BatteryChannel(device.DevicePtr);
-            if (_channelPtr == null)
+            ChannelPtr = create_BatteryChannel(device.DevicePtr);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(BatteryChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out var listener));
+            SdkError.ThrowIfError(BatteryChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out var listener));
             _listenerPtr = listener;
-            SdkError.ThrowIfError(BatteryChannel_get_info(_channelPtr, out var info));
+            SdkError.ThrowIfError(BatteryChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
 
         ~BatteryChannel()
         {
-            BatteryChannel_delete(_channelPtr);
+            BatteryChannel_delete(ChannelPtr);
             free_listener_handle(_listenerPtr);
         }
 
@@ -34,7 +33,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(BatteryChannel_get_total_length(_channelPtr, out var length));
+                SdkError.ThrowIfError(BatteryChannel_get_total_length(ChannelPtr, out var length));
                 return (int)length;
             }
         }
@@ -43,7 +42,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(BatteryChannel_get_buffer_size(_channelPtr, out var size));
+                SdkError.ThrowIfError(BatteryChannel_get_buffer_size(ChannelPtr, out var size));
                 return (int) size;
             }
         }
@@ -52,10 +51,10 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(BatteryChannel_get_sampling_frequency(_channelPtr, out var frequency));
+                SdkError.ThrowIfError(BatteryChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(BatteryChannel_set_sampling_frequency(_channelPtr, value));
+            set => SdkError.ThrowIfError(BatteryChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
         public override int[] ReadData(int offset, int length)
@@ -69,7 +68,7 @@ namespace Neuro
             try
             {
                 SdkError.ThrowIfError(
-                    BatteryChannel_read_data(_channelPtr, (IntPtr) offset, (IntPtr) length, bufferPtr));
+                    BatteryChannel_read_data(ChannelPtr, (IntPtr) offset, (IntPtr) length, bufferPtr));
                 var buffer = new int[length];
                 Marshal.Copy(bufferPtr, buffer, 0, length);
                 return buffer;

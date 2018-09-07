@@ -7,21 +7,19 @@ extern "C"
 #include "device/device.h"
 #include "device/param_values.h"
 
-extern std::string sdk_last_error;
-
 ret_code device_read_Name(Device *device_ptr, char* out_name, size_t length) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		auto value = device->readParam<Neuro::Parameter::Name>();
 		if (value.size() > length) {
-			sdk_last_error = "Name string is greater than read buffer";
+			set_sdk_last_error("Name string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
 		strcpy(out_name, value.c_str());
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -37,7 +35,7 @@ ret_code device_read_State(Device *device_ptr, DeviceState* out_state) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -50,14 +48,14 @@ ret_code device_read_Address(Device *device_ptr, char* out_address, size_t lengt
 	try {
 		auto value = device->readParam<Neuro::Parameter::Address>();
 		if (value.size() > length) {
-			sdk_last_error = "Address string is greater than read buffer";
+			set_sdk_last_error("Address string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
 		strcpy(out_address, value.c_str());
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -70,14 +68,14 @@ ret_code device_read_SerialNumber(Device *device_ptr, char* out_serial, size_t l
 	try {
 		auto value = device->readParam<Neuro::Parameter::SerialNumber>();
 		if (value.size() > length) {
-			sdk_last_error = "Serial number string is greater than read buffer";
+			set_sdk_last_error("Serial number string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
 		strcpy(out_serial, value.c_str());
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -93,7 +91,7 @@ ret_code device_read_HardwareFilterState(Device *device_ptr, bool* out_is_enable
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -109,7 +107,7 @@ ret_code device_read_FirmwareMode(Device *device_ptr, FirmwareMode* out_mode) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -125,7 +123,7 @@ ret_code device_read_SamplingFrequency(Device *device_ptr, SamplingFrequency* ou
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -141,7 +139,7 @@ ret_code device_read_Gain(Device *device_ptr, Gain* out_gain) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -157,7 +155,7 @@ ret_code device_read_Offset(Device *device_ptr, unsigned char* out_offset) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -173,7 +171,7 @@ ret_code device_read_ExternalSwitchState(Device *device_ptr, ExternalSwitchInput
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -189,7 +187,7 @@ ret_code device_read_ADCInputState(Device *device_ptr, ADCInput* out_adc_input) 
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -205,7 +203,7 @@ ret_code device_read_AccelerometerSens(Device *device_ptr, AccelerometerSensitiv
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -221,7 +219,7 @@ ret_code device_read_GyroscopeSens(Device *device_ptr, GyroscopeSensitivity* out
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -237,7 +235,7 @@ ret_code device_read_StimulatorState(Device *device_ptr, bool* out_is_enabled) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -253,7 +251,7 @@ ret_code device_read_MotionAssistantState(Device *device_ptr, bool* out_is_enabl
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -272,7 +270,7 @@ ret_code device_read_StimulatorParamPack(Device *device_ptr, StimulationParams* 
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -292,7 +290,7 @@ ret_code device_read_MotionAssistantParamPack(Device *device_ptr, MotionAssistan
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -309,7 +307,7 @@ ret_code device_set_Name(Device *device_ptr, const char* name) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -324,7 +322,7 @@ ret_code device_set_State(Device *device_ptr, DeviceState state) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -339,7 +337,7 @@ ret_code device_set_Address(Device *device_ptr, const char* address) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -354,7 +352,7 @@ ret_code device_set_SerialNumber(Device *device_ptr, const char* serial) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -369,7 +367,7 @@ ret_code device_set_HardwareFilterState(Device *device_ptr, bool is_enabled) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -384,7 +382,7 @@ ret_code device_set_FirmwareMode(Device *device_ptr, FirmwareMode mode) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -399,7 +397,7 @@ ret_code device_set_SamplingFrequency(Device *device_ptr, SamplingFrequency freq
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -414,7 +412,7 @@ ret_code device_set_Gain(Device *device_ptr, Gain gain) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -429,7 +427,7 @@ ret_code device_set_Offset(Device *device_ptr, unsigned char offset) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -444,7 +442,7 @@ ret_code device_set_ExternalSwitchState(Device *device_ptr, ExternalSwitchInput 
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -459,7 +457,7 @@ ret_code device_set_ADCInputState(Device *device_ptr, ADCInput adc_input) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -474,7 +472,7 @@ ret_code device_set_AccelerometerSens(Device *device_ptr, AccelerometerSensitivi
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -489,7 +487,7 @@ ret_code device_set_GyroscopeSens(Device *device_ptr, GyroscopeSensitivity gyro_
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -504,7 +502,7 @@ ret_code device_set_StimulatorState(Device *device_ptr, bool is_enabled) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -519,7 +517,7 @@ ret_code device_set_MotionAssistantState(Device *device_ptr, bool is_enabled) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -539,7 +537,7 @@ ret_code device_set_StimulatorParamPack(Device *device_ptr, StimulationParams st
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -560,7 +558,7 @@ ret_code device_set_MotionAssistantParamPack(Device *device_ptr, MotionAssistant
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {

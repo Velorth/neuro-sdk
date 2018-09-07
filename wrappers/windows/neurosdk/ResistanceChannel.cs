@@ -5,35 +5,34 @@ namespace Neuro
 {
     public class ResistanceChannel : BaseChannel<double>
     {
-        private readonly IntPtr _channelPtr;
         private readonly IntPtr _listenerPtr;
 
         public ResistanceChannel(Device device) : base(device)
         {
-            _channelPtr = create_ResistanceChannel(device.DevicePtr);
-            if (_channelPtr == null)
+            ChannelPtr = create_ResistanceChannel(device.DevicePtr);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
-            SdkError.ThrowIfError(ResistanceChannel_get_info(_channelPtr, out var info));
+            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(ResistanceChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
 
         public ResistanceChannel(Device device, ChannelInfo info) : base(device)
         {
-            _channelPtr = create_ResistanceChannel_info(device.DevicePtr, info);
-            if (_channelPtr == null)
+            ChannelPtr = create_ResistanceChannel_info(device.DevicePtr, info);
+            if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(_channelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
             Info = info;
         }
 
         ~ResistanceChannel()
         {
-            ResistanceChannel_delete(_channelPtr);
+            ResistanceChannel_delete(ChannelPtr);
             free_listener_handle(_listenerPtr);
         }
 
@@ -44,7 +43,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_total_length(_channelPtr, out var length));
+                SdkError.ThrowIfError(ResistanceChannel_get_total_length(ChannelPtr, out var length));
                 return (int)length;
             }
         }
@@ -53,7 +52,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_buffer_size(_channelPtr, out var size));
+                SdkError.ThrowIfError(ResistanceChannel_get_buffer_size(ChannelPtr, out var size));
                 return (int)size;
             }
         }
@@ -62,10 +61,10 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_sampling_frequency(_channelPtr, out var frequency));
+                SdkError.ThrowIfError(ResistanceChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(ResistanceChannel_set_sampling_frequency(_channelPtr, value));
+            set => SdkError.ThrowIfError(ResistanceChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
         public override double[] ReadData(int offset, int length)
@@ -79,7 +78,7 @@ namespace Neuro
             try
             {
                 SdkError.ThrowIfError(
-                    ResistanceChannel_read_data(_channelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
+                    ResistanceChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
                 var buffer = new double[length];
                 Marshal.Copy(bufferPtr, buffer, 0, length);
                 return buffer;

@@ -6,13 +6,11 @@ extern "C"
 #include <algorithm>
 #include "device/device.h"
 
-extern std::string sdk_last_error;
-
 int command_to_string(Command cmd, char* buffer, size_t buffer_length) {
 	try {
 		auto commandString = Neuro::to_string(static_cast<Neuro::Command>(cmd));
 		if (commandString.size() > buffer_length) {
-			sdk_last_error = "Command string is greater than read buffer";
+			set_sdk_last_error("Command string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 
 		}
@@ -20,7 +18,7 @@ int command_to_string(Command cmd, char* buffer, size_t buffer_length) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -32,7 +30,7 @@ int parameter_to_string(Parameter param, char* buffer, size_t buffer_length) {
 	try {
 		auto paramString = Neuro::to_string(static_cast<Neuro::Parameter>(param));
 		if (paramString.size() > buffer_length) {
-			sdk_last_error = "Parameter string is greater than read buffer";
+			set_sdk_last_error("Parameter string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 
 		}
@@ -40,7 +38,7 @@ int parameter_to_string(Parameter param, char* buffer, size_t buffer_length) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -52,7 +50,7 @@ int parameter_access_to_string(ParamAccess access, char* buffer, size_t buffer_l
 	try {
 		auto accessString = Neuro::to_string(static_cast<Neuro::ParamAccess>(access));
 		if (accessString.size() > buffer_length) {
-			sdk_last_error = "ParamAccess string is greater than read buffer";
+			set_sdk_last_error("ParamAccess string is greater than read buffer");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 
 		}
@@ -60,7 +58,7 @@ int parameter_access_to_string(ParamAccess access, char* buffer, size_t buffer_l
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -75,7 +73,7 @@ ret_code device_connect(Device *device_ptr) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -90,7 +88,7 @@ ret_code device_disconnect(Device *device_ptr) {
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -120,7 +118,7 @@ ret_code device_available_channels(const Device *device_ptr, ChannelInfoArray *c
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -141,7 +139,7 @@ ret_code device_available_commands(const Device *device_ptr, CommandArray *comma
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -165,7 +163,7 @@ ret_code device_available_parameters(const Device *device_ptr, ParamInfoArray *p
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -180,12 +178,12 @@ ret_code device_execute(Device *device_ptr, Command cmd) {
 			return SDK_NO_ERROR;
 		}
 		else {
-			sdk_last_error = "Unable to execute command";
+			set_sdk_last_error("Unable to execute command");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {
@@ -204,7 +202,7 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Devi
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
-		sdk_last_error = e.what();
+		set_sdk_last_error(e.what());
 		return ERROR_EXCEPTION_WITH_MESSAGE;
 	}
 	catch (...) {

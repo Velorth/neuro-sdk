@@ -6,6 +6,10 @@ extern "C"
 
 std::string sdk_last_error;
 
+void set_sdk_last_error(const char *msg) {
+	sdk_last_error = msg;
+}
+
 int sdk_last_error_msg(char *msg_buffer, size_t length) {
 	if (length < sdk_last_error.size()) {
 		return ERROR_UNHANDLED_EXCEPTION;
