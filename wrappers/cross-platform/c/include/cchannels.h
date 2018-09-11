@@ -8,7 +8,6 @@
 
 typedef struct _CommonChannelInterface CommonChannelInterface;
 typedef struct _BaseDoubleChannel BaseDoubleChannel;
-typedef struct _BridgeDoubleChannel BridgeDoubleChannel;
 typedef struct _BatteryChannel BatteryChannel;
 typedef struct _SignalChannel SignalChannel;
 typedef struct _ResistanceChannel ResistanceChannel;
@@ -75,22 +74,15 @@ SDK_SHARED int ResistanceChannel_get_total_length(ResistanceChannel *channel, si
 SDK_SHARED int ResistanceChannel_get_buffer_size(ResistanceChannel *channel, size_t *out_buffer_size);
 
 
-typedef int(*GetInfoFunc)(ChannelInfo *);
 typedef int(*ReadDataFunc)(size_t offset, size_t length, double *out_buffer);
 typedef int(*GetFrequencyFunc)(float * out_frequency);
 typedef int(*SetFrequencyFunc)(float frequency);
-typedef int(*AddLengthCallbackFunc)(void(*callback)(BridgeDoubleChannel *, size_t), ListenerHandle *handle);
+typedef int(*AddLengthCallbackFunc)(void(*callback)(BaseDoubleChannel *, size_t), ListenerHandle *handle);
 typedef int(*GetTotalLengthFunc)(size_t *out_length);
 typedef int(*GetBufferSizeFunc)(size_t *out_buffer_size);
+typedef Device*(*GetDeviceFunc)();
 
-SDK_SHARED BridgeDoubleChannel* create_BridgeDoubleChannel_info(GetInfoFunc, ReadDataFunc, GetFrequencyFunc, SetFrequencyFunc, AddLengthCallbackFunc, GetTotalLengthFunc, GetBufferSizeFunc);
-SDK_SHARED void BridgeDoubleChannel_delete(BridgeDoubleChannel *channel);
-SDK_SHARED int BridgeDoubleChannel_get_info(BridgeDoubleChannel *channel, ChannelInfo *out_info);
-SDK_SHARED int BridgeDoubleChannel_read_data(BridgeDoubleChannel *channel, size_t offset, size_t length, double *out_buffer);
-SDK_SHARED int BridgeDoubleChannel_get_sampling_frequency(BridgeDoubleChannel *channel, float * out_frequency);
-SDK_SHARED int BridgeDoubleChannel_set_sampling_frequency(BridgeDoubleChannel *channel, float frequency);
-SDK_SHARED int BridgeDoubleChannel_add_length_callback(BridgeDoubleChannel *channel, void(*callback)(BridgeDoubleChannel *, size_t), ListenerHandle *handle);
-SDK_SHARED int BridgeDoubleChannel_get_total_length(BridgeDoubleChannel *channel, size_t *out_length);
-SDK_SHARED int BridgeDoubleChannel_get_buffer_size(BridgeDoubleChannel *channel, size_t *out_buffer_size);
+SDK_SHARED BaseDoubleChannel* create_BridgeDoubleChannel_info(ChannelInfo, ReadDataFunc, GetFrequencyFunc, SetFrequencyFunc, AddLengthCallbackFunc, GetTotalLengthFunc, GetBufferSizeFunc, GetDeviceFunc);
+SDK_SHARED void BridgeDoubleChannel_delete(BaseDoubleChannel *channel);
 
 #endif // CCHANNELS_H

@@ -8,6 +8,7 @@ extern "C"
 #include "channels/battery_channel.h"
 #include "channels/resistance_channel.h"
 #include "cchannel-helper.h"
+#include "event_notifier.h"
 #include "sdk_error.h"
 
 BatteryChannel* create_BatteryChannel(Device *device_ptr) {
@@ -241,69 +242,117 @@ int ResistanceChannel_get_buffer_size(ResistanceChannel* channel, size_t* out_bu
 	return readBufferSize(*resistanceChannel, out_buffer_size);
 }
 
-struct BridgeDoubleChannelObj {
-	GetInfoFunc getInfoFunc;
-	ReadDataFunc readDataFunc;
-	GetFrequencyFunc getFrequencyFunc;
-	SetFrequencyFunc setFrequencyFunc;
-	AddLengthCallbackFunc addLengthCallbackFunc;
-	GetTotalLengthFunc getTotalLengthFunc;
-	GetBufferSizeFunc getBufferSizeFunc;
+struct BridgeDoubleChannelObj : Neuro::BaseChannel<double> {
+	BridgeDoubleChannelObj(ChannelInfo info, 
+		ReadDataFunc read_data_func,
+		GetFrequencyFunc get_frequency_func,
+		SetFrequencyFunc set_frequency_func,
+		AddLengthCallbackFunc add_length_callback_func,
+		GetTotalLengthFunc get_total_length_func,
+		GetBufferSizeFunc get_buffer_size_func,
+		GetDeviceFunc get_device_func):
+		BaseChannel<double>(Neuro::ChannelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index)),
+		mReadDataFunc(read_data_func),
+		mGetFrequencyFunc(get_frequency_func),
+		mSetFrequencyFunc(set_frequency_func),
+		mAddLengthCallbackFunc(add_length_callback_func),
+		mGetTotalLengthFunc(get_total_length_func),
+		mGetBufferSizeFunc(get_buffer_size_func),
+		mGetDeviceFunc(get_device_func){}
+
+	friend void BridgeDoubleChannel_lengthChanged(BaseDoubleChannel *, std::size_t);
+
+	length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept override {
+		mAddLengthCallbackFunc(BridgeDoubleChannel_lengthChanged, &mListenHandle);
+		return mLengthListener.addListener(callback);
+	}
+
+	Neuro::data_length_t totalLength() const noexcept override {
+		std::size_t totalLength;
+		if (mGetTotalLengthFunc(&totalLength) != SDK_NO_ERROR) {
+			return 0;
+		}
+		return totalLength;
+	}
+
+	Neuro::data_length_t bufferSize() const noexcept override {
+		std::size_t bufferSize;
+		if (mGetBufferSizeFunc(&bufferSize) != SDK_NO_ERROR) {
+			return 0;
+		}
+		return bufferSize;
+	}
+
+	Neuro::sampling_frequency_t samplingFrequency() const noexcept override {
+		float samplingFreq;
+		if (mGetFrequencyFunc(&samplingFreq) != SDK_NO_ERROR) {
+			return .0f;
+		}
+		return samplingFreq;
+	}
+
+	void setSamplingFrequency(Neuro::sampling_frequency_t sampling_frequency) override {
+		if (mSetFrequencyFunc(sampling_frequency) != SDK_NO_ERROR) {
+			throw std::runtime_error("Unable set frequency for wrapped channel");
+		}
+	}
+
+	std::weak_ptr<Neuro::Device> underlyingDevice() const noexcept override {
+		const auto rawDevicePtr = mGetDeviceFunc();
+		if (rawDevicePtr == nullptr) {
+			return std::shared_ptr<Neuro::Device>();
+		}
+		const auto device = reinterpret_cast<std::shared_ptr<Neuro::Device> *>(rawDevicePtr);
+		return std::weak_ptr<Neuro::Device>(*device);
+	}
+
+	~BridgeDoubleChannelObj() override = default;
+
+	data_container readData(const Neuro::data_offset_t offset, const Neuro::data_length_t length) const override {
+		std::vector<double> channelData(length);
+		if (mReadDataFunc(offset, length, channelData.data()) != SDK_NO_ERROR){
+			throw std::runtime_error("Unable to read channel data");
+		}
+		return channelData;
+	}
+
+private:
+	Neuro::Notifier<void, Neuro::data_length_t> mLengthListener {"BridgeDoubleChannel"};
+	ListenerHandle mListenHandle;
+	const ReadDataFunc mReadDataFunc;
+	const GetFrequencyFunc mGetFrequencyFunc;
+	const SetFrequencyFunc mSetFrequencyFunc;
+	const AddLengthCallbackFunc mAddLengthCallbackFunc;
+	const GetTotalLengthFunc mGetTotalLengthFunc;
+	const GetBufferSizeFunc mGetBufferSizeFunc;
+	const GetDeviceFunc mGetDeviceFunc;
 };
 
-BridgeDoubleChannel* create_BridgeDoubleChannel_info(GetInfoFunc get_info_func, 
+void BridgeDoubleChannel_lengthChanged(BaseDoubleChannel *channel, std::size_t length) {
+	auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	bridgeChannel->mLengthListener.notifyAll(length);
+}
+
+BaseDoubleChannel* create_BridgeDoubleChannel_info(ChannelInfo info,
 	ReadDataFunc read_data_func, 
 	GetFrequencyFunc get_frequency_func, 
 	SetFrequencyFunc set_frequency_func, 
 	AddLengthCallbackFunc add_length_callback_func,
 	GetTotalLengthFunc get_total_length_func, 
-	GetBufferSizeFunc get_buffer_size_func) {
-	const auto bridgeObject = new BridgeDoubleChannelObj(BridgeDoubleChannelObj{get_info_func, 
+	GetBufferSizeFunc get_buffer_size_func,
+	GetDeviceFunc get_device_func) {
+	const auto bridgeObject = new BridgeDoubleChannelObj(info,
 		read_data_func, 
 		get_frequency_func, 
 		set_frequency_func, 
 		add_length_callback_func, 
 		get_total_length_func, 
-		get_buffer_size_func});
-	return reinterpret_cast<BridgeDoubleChannel *>(bridgeObject);
+		get_buffer_size_func,
+		get_device_func);
+	return reinterpret_cast<BaseDoubleChannel *>(bridgeObject);
 }
 
-void BridgeDoubleChannel_delete(BridgeDoubleChannel *channel) {
+void BridgeDoubleChannel_delete(BaseDoubleChannel *channel) {
 	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
 	delete bridgeChannel;
-}
-
-int BridgeDoubleChannel_get_info(BridgeDoubleChannel *channel, ChannelInfo *out_info) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->getInfoFunc(out_info);
-}
-
-int BridgeDoubleChannel_read_data(BridgeDoubleChannel *channel, size_t offset, size_t length, double *out_buffer) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->readDataFunc(offset, length, out_buffer);
-}
-
-int BridgeDoubleChannel_get_sampling_frequency(BridgeDoubleChannel *channel, float * out_frequency) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->getFrequencyFunc(out_frequency);
-}
-
-int BridgeDoubleChannel_set_sampling_frequency(BridgeDoubleChannel *channel, float frequency) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->setFrequencyFunc(frequency);
-}
-
-int BridgeDoubleChannel_add_length_callback(BridgeDoubleChannel *channel, void(*callback)(BridgeDoubleChannel *, size_t), ListenerHandle *handle) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->addLengthCallbackFunc(callback, handle);
-}
-
-int BridgeDoubleChannel_get_total_length(BridgeDoubleChannel *channel, size_t *out_length) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->getTotalLengthFunc(out_length);
-}
-
-int BridgeDoubleChannel_get_buffer_size(BridgeDoubleChannel *channel, size_t *out_buffer_size) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
-	return bridgeChannel->getBufferSizeFunc(out_buffer_size);
 }

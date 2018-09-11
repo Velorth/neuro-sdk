@@ -27,7 +27,7 @@ namespace Neuro
         }
 
         public override event EventHandler<int> LengthChanged;
-        public sealed override ChannelInfo Info { get; set; }
+        public override ChannelInfo Info { get; set; }
 
         public override int TotalLength
         {
