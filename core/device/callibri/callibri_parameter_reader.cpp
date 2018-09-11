@@ -89,6 +89,11 @@ CallibriParameterReader::readMotionAssistantParamPack() const {
     throw std::runtime_error("Not implemented");
 }
 
+typename ParamValue<Parameter::FirmwareVersion>::Type
+CallibriParameterReader::readFirmwareVersion() const {
+	return mCommonParameters->firmwareVersion();
+}
+
 bool CallibriParameterReader::loadDeviceParams(){
     LOG_DEBUG("Start init");
     if (!initAddress())
@@ -116,6 +121,7 @@ bool CallibriParameterReader::loadDeviceParams(){
 }
 
 void CallibriParameterReader::sendEcho(){
+	mCommonParameters->setFirmwareVersion(FirmwareVersion{0,0});
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::ECHO);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();
@@ -132,6 +138,14 @@ void CallibriParameterReader::sendEcho(){
 
     auto responseData = cmdData->getResponseData();
     mFirmwareMode = (responseData[0] & 0x80) ? FirmwareMode::Bootloader : FirmwareMode::Application;
+	FirmwareVersion version{};
+	version.Version = responseData[0] & 0x3F;
+	ByteInterpreter<unsigned short> buildInerpreter;
+	buildInerpreter.value = 0;
+	buildInerpreter.bytes[0] = responseData[1];
+	buildInerpreter.bytes[1] = responseData[2];
+	version.Build = buildInerpreter.value;
+	mCommonParameters->setFirmwareVersion(version);
 }
 
 void CallibriParameterReader::requestSerialNumber(){

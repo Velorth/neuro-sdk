@@ -48,6 +48,8 @@ public:
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const = 0;
     virtual
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const = 0;
+	virtual
+	typename ParamValue<Parameter::FirmwareVersion>::Type readFirmwareVersion() const = 0;
 
 private:
     static constexpr const char *class_name = "ParameterReader";

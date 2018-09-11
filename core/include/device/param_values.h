@@ -91,6 +91,11 @@ struct ParamValue<Parameter::MotionAssistantParamPack>{
     using Type = MotionAssistantParams;
 };
 
+template<>
+struct ParamValue<Parameter::FirmwareVersion> {
+	using Type = FirmwareVersion;
+};
+
 /*
  * Parameters read
  */
@@ -128,6 +133,8 @@ template<>
 SDK_SHARED typename ParamValue<Parameter::StimulatorParamPack>::Type Device::readParam<Parameter::StimulatorParamPack>() const;
 template<>
 SDK_SHARED typename ParamValue<Parameter::MotionAssistantParamPack>::Type Device::readParam<Parameter::MotionAssistantParamPack>() const;
+template<>
+SDK_SHARED typename ParamValue<Parameter::FirmwareVersion>::Type Device::readParam<Parameter::FirmwareVersion>() const;
 
 /*
  * Parameters set

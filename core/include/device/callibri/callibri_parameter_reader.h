@@ -34,6 +34,7 @@ public:
     typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const override;
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const override;
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const override;
+	typename ParamValue<Parameter::FirmwareVersion>::Type readFirmwareVersion() const override;
 
 private:
     static constexpr const char *class_name = "CallibriParameterReader";

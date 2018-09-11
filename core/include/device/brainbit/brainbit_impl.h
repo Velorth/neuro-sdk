@@ -7,11 +7,16 @@
 #include "brainbit_resistance_buffer.h"
 #include "signal/safe_buffer.h"
 #include "device/packet_sequence.h"
+#include "device/device_parameters.h"
 
 namespace Neuro {
 
 class BrainbitImpl : public DeviceImpl {
 public:
+	struct BrainbitParameterSetter {
+		FirmwareVersion FirmwareVersion{0};
+	};
+
     using param_changed_callback_t = std::function<void(Parameter)>;
     BrainbitImpl(std::shared_ptr<BleDevice>);
 
@@ -44,6 +49,7 @@ private:
     std::vector<ChannelInfo> mChannels;
     std::size_t mCurrentResistChannel{0};
     std::vector<resistance_sample_t> mResistBuffer;
+	BrainbitParameterSetter mSetter;
 
     void initChannels();
     void onDataReceived(const ByteBuffer &) override;
@@ -51,6 +57,7 @@ private:
     void onParameterChanged(Parameter);
     void parseBattery(const ByteBuffer &);
     void parseState(BrainbitCommand cmd, const ByteBuffer &);
+	void parseVersion(const ByteBuffer &);
     void parseSignalData(const ByteBuffer &);
     void onSignalReceived(const std::vector<signal_sample_t> &);
     void onResistanceReceived(const std::vector<resistance_sample_t> &);

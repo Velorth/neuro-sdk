@@ -52,6 +52,10 @@ CallibriCommonParameters::gyroscopeSens() const {
     return mGyroscopeSens;
 }
 
+typename ParamValue<Parameter::FirmwareVersion>::Type
+CallibriCommonParameters::firmwareVersion() const {
+	return mFirmwareVersion;
+}
 
 bool CallibriCommonParameters::setHardwareFilterState(typename ParamValue<Parameter::HardwareFilterState>::Type value){
     if (!sendSetParamCommand<Parameter::HardwareFilterState>(value))
@@ -146,6 +150,7 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     mAvailableParameters.push_back({Parameter::Address, ParamAccess::Read});
     mAvailableParameters.push_back({Parameter::SerialNumber, ParamAccess::Read});
     mAvailableParameters.push_back({Parameter::FirmwareMode, ParamAccess::Read});
+	mAvailableParameters.push_back({ Parameter::FirmwareVersion, ParamAccess::Read });
     mAvailableCommands.push_back(Command::FindMe);
 
     LOG_DEBUG("Getting module info");
@@ -228,5 +233,8 @@ void CallibriCommonParameters::setSerialNumber(unsigned long address) noexcept {
     mSerialNumber = address;
 }
 
+void CallibriCommonParameters::setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type version) noexcept {
+	mFirmwareVersion = version;
+}
 
 }

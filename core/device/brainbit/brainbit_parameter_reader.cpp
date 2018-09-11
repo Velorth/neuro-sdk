@@ -3,8 +3,10 @@
 namespace Neuro {
 
 BrainbitParameterReader::BrainbitParameterReader(std::shared_ptr<BleDevice> ble_device,
-                                                 param_changed_callback_t callback):
-    ParameterReader(ble_device, callback){
+                                                 param_changed_callback_t callback,
+												 const BrainbitImpl::BrainbitParameterSetter &setter):
+    ParameterReader(ble_device, callback),
+	mSetter(setter){
 
 }
 
@@ -76,6 +78,11 @@ BrainbitParameterReader::readStimulatorParamPack() const {
 typename ParamValue<Parameter::MotionAssistantParamPack>::Type
 BrainbitParameterReader::readMotionAssistantParamPack() const {
     throw std::runtime_error("Attempt to read unsupported parameter");
+}
+
+typename ParamValue<Parameter::FirmwareVersion>::Type
+BrainbitParameterReader::readFirmwareVersion() const {
+	return mSetter.FirmwareVersion;
 }
 
 bool BrainbitParameterReader::loadDeviceParams(){

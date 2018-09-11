@@ -13,7 +13,8 @@ BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
                std::make_unique<BrainbitParameterReader>(ble_device,
                                                          [=](auto param){
                                                              this->onParameterChanged(param);
-                                                         }),
+                                                         },
+														 mSetter),
                std::make_unique<BrainbitParameterWriter>()),
     mRequestHandler(std::make_unique<BrainbitRequestHandler>(
                         [=](std::shared_ptr<BrainbitCommandData> cmd){sendCommandPacket(cmd);})){
@@ -38,7 +39,8 @@ std::vector<ParamPair > BrainbitImpl::parameters() const {
         { Parameter::FirmwareMode, ParamAccess::ReadWrite },
         { Parameter::SamplingFrequency, ParamAccess::Read },
         { Parameter::Gain, ParamAccess::Read },
-        { Parameter::Offset, ParamAccess::Read }};
+        { Parameter::Offset, ParamAccess::Read },
+		{ Parameter::FirmwareVersion, ParamAccess::Read } };
 }
 
 void BrainbitImpl::setParamChangedCallback(param_changed_callback_t callback) {
@@ -157,6 +159,7 @@ void BrainbitImpl::onStatusDataReceived(const ByteBuffer &status_data){
     }
     parseBattery(status_data);
     parseState(cmd, status_data);
+	parseVersion(status_data);
 }
 
 void BrainbitImpl::onParameterChanged(Parameter param) {
@@ -179,6 +182,12 @@ void BrainbitImpl::parseState(BrainbitCommand cmd, const ByteBuffer &status_data
         mBrainbitState = cmd;
         mRequestHandler->onCommandResponse(cmd, status_data.data()+1, status_data.size()-1);
     }
+}
+
+void BrainbitImpl::parseVersion(const ByteBuffer &status_data) {
+	LOG_DEBUG("Parsing firmware version");
+	mSetter.FirmwareVersion = FirmwareVersion{ status_data[STATUS_VERSION_BYTE_POS], 0 };
+	LOG_DEBUG_V("Firmware version: %d", mSetter.FirmwareVersion);
 }
 
 void BrainbitImpl::parseSignalData(const ByteBuffer &data){

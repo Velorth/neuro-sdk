@@ -50,13 +50,19 @@ enum class Parameter {
     StimulatorState,
     MotionAssistantState,
     StimulatorParamPack,
-    MotionAssistantParamPack
+    MotionAssistantParamPack,
+	FirmwareVersion
 };
 
 enum class ParamAccess {
     Read,
     ReadWrite,
     ReadNotify
+};
+
+struct FirmwareVersion {
+	unsigned Version;
+	unsigned Build;
 };
 
 SDK_SHARED std::string to_string(const DeviceState &);

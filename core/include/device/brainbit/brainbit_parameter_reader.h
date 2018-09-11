@@ -2,12 +2,13 @@
 #define BRAINBIT_PARAMETER_READER_H
 
 #include "device/parameter_reader.h"
+#include "brainbit_impl.h"
 
 namespace Neuro {
 
 class BrainbitParameterReader : public ParameterReader {
 public:
-    BrainbitParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t);
+    BrainbitParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t, const BrainbitImpl::BrainbitParameterSetter &);
 
     typename ParamValue<Parameter::SerialNumber>::Type readSerialNumber() const override;
     typename ParamValue<Parameter::HardwareFilterState>::Type readHardwareFilterState() const override;
@@ -23,9 +24,11 @@ public:
     typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const override;
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const override;
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const override;
+	typename ParamValue<Parameter::FirmwareVersion>::Type readFirmwareVersion() const override;
 
 private:
     bool loadDeviceParams() override;
+	const BrainbitImpl::BrainbitParameterSetter &mSetter;
 };
 
 }

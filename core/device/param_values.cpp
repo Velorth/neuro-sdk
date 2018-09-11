@@ -128,6 +128,13 @@ typename ParamValue<Parameter::MotionAssistantParamPack>::Type Device::readParam
     return mImpl->mParamReader->readMotionAssistantParamPack();
 }
 
+template<>
+typename ParamValue<Parameter::FirmwareVersion>::Type Device::readParam<Parameter::FirmwareVersion>() const {
+	Expects(mImpl != nullptr);
+	Expects(mImpl->mParamReader != nullptr);
+	return mImpl->mParamReader->readFirmwareVersion();
+}
+
 /*
  * Parameters set
  */
@@ -249,8 +256,5 @@ bool Device::setParam<Parameter::MotionAssistantParamPack>(typename ParamValue<P
     Expects(mImpl->mParamWriter != nullptr);
     return mImpl->mParamWriter->setMotionAssistantParamPack(value);
 }
-
-
-
 
 }

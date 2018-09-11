@@ -24,6 +24,7 @@ public:
     typename ParamValue<Parameter::ADCInputState>::Type ADCInputState() const;
     typename ParamValue<Parameter::AccelerometerSens>::Type accelerometerSens() const;
     typename ParamValue<Parameter::GyroscopeSens>::Type gyroscopeSens() const;
+	typename ParamValue<Parameter::FirmwareVersion>::Type firmwareVersion() const;
 
     std::vector<CallibriModule> syncParameters();
     void setSerialNumber(unsigned long) noexcept;
@@ -38,6 +39,7 @@ public:
     std::vector<ChannelInfo> availableChannels() const;
     std::vector<Command> availableCommands() const;
     std::vector<ParamPair> availableParameters() const;
+	void setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type) noexcept;
 
 private:
     static constexpr const char *class_name = "CallibriCommonParameters";
@@ -47,6 +49,7 @@ private:
     std::vector<Command> mAvailableCommands;
     std::vector<ParamPair> mAvailableParameters;
     unsigned long mSerialNumber;
+	FirmwareVersion mFirmwareVersion;
 
     typename ParamValue<Parameter::HardwareFilterState>::Type mHardwareFilterState;
     typename ParamValue<Parameter::SamplingFrequency>::Type mSamplingFrequency;
