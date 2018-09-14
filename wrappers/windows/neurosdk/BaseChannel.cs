@@ -17,9 +17,9 @@ namespace Neuro
     {
         public IntPtr ChannelPtr { get; protected set; }
 
-        protected BaseChannel(Device devcie)
+        protected BaseChannel(Device device)
         {
-            UnderlyingDevice = devcie;
+            UnderlyingDevice = device;
         }
 
         public abstract T[] ReadData(int offset, int length);

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    internal class NativeAdapter
+    public class NativeAdapter
     {
         public delegate T NativePtrReader<T>(IntPtr nativePtr);
 

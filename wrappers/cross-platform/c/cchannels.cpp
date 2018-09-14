@@ -329,7 +329,7 @@ private:
 };
 
 void BridgeDoubleChannel_lengthChanged(BaseDoubleChannel *channel, std::size_t length) {
-	auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	auto& bridgeChannel = *reinterpret_cast<std::shared_ptr<BridgeDoubleChannelObj> *>(channel);
 	bridgeChannel->mLengthListener.notifyAll(length);
 }
 
@@ -341,18 +341,18 @@ BaseDoubleChannel* create_BridgeDoubleChannel_info(ChannelInfo info,
 	GetTotalLengthFunc get_total_length_func, 
 	GetBufferSizeFunc get_buffer_size_func,
 	GetDeviceFunc get_device_func) {
-	const auto bridgeObject = new BridgeDoubleChannelObj(info,
+	auto bridgeObject = new std::shared_ptr<BridgeDoubleChannelObj>(std::make_shared<BridgeDoubleChannelObj>(info,
 		read_data_func, 
 		get_frequency_func, 
 		set_frequency_func, 
 		add_length_callback_func, 
 		get_total_length_func, 
 		get_buffer_size_func,
-		get_device_func);
+		get_device_func));
 	return reinterpret_cast<BaseDoubleChannel *>(bridgeObject);
 }
 
 void BridgeDoubleChannel_delete(BaseDoubleChannel *channel) {
-	const auto bridgeChannel = reinterpret_cast<BridgeDoubleChannelObj *>(channel);
+	const auto bridgeChannel = reinterpret_cast<std::shared_ptr<BridgeDoubleChannelObj> *>(channel);
 	delete bridgeChannel;
 }

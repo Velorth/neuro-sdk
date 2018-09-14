@@ -160,6 +160,10 @@ std::vector<std::unique_ptr<BleDevice>> BleScannerWin::findDevicesWithFilters(co
                 }
                 auto deviceAddress = getDeviceAddress(btDevicesListPtr, parentDeviceInfoData);
                 auto deviceName = getDeviceName(btDevicesListPtr, parentDeviceInfoData);
+				/*if (deviceName != bleInfo->getName()) {
+					LOG_TRACE_V("Wrong device name: %s", deviceName.c_str());
+					continue;
+				}*/
                 if (mFoundDeviceAddresses.find(deviceAddress) != mFoundDeviceAddresses.end()){
                     LOG_TRACE_V("Device %s already found", deviceAddress.c_str());
                     continue;
