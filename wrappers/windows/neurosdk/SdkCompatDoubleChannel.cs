@@ -25,7 +25,10 @@ namespace Neuro
             _getDeviceFunc = GetDeviceForNative;
             ChannelPtr = create_BridgeDoubleChannel_info(info, _readDataFunc, _getFrequencyFunc, _setFrequencyFunc,
                 _addLengthCallbackFunc, _getTotalLengthFunc, _getBufferSizeFunc, _getDeviceFunc);
+            Info = info;
         }
+
+        public sealed override ChannelInfo Info { get; set; }
 
         ~SdkCompatDoubleChannel()
         {
@@ -43,7 +46,7 @@ namespace Neuro
                 }
                 Marshal.Copy(data, 0, buffer, (int)length);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return SdkError.ErrorUnhandledException;
             }
