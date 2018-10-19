@@ -5,7 +5,7 @@
 
 namespace Neuro {
 
-Device::~Device(){}
+Device::~Device() = default;
 
 void Device::connect(){
     Expects(mImpl != nullptr);

@@ -1,3 +1,9 @@
+tasks.whenTaskAdded { task ->
+    if (task.name.equals("lint")) {
+        task.enabled = false
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
@@ -26,20 +32,13 @@ ext {
     allLicenses = ["Apache-2.0"]
 }
 
-repositories {
-    maven {
-        url 'https://maven.google.com/'
-        name 'Google'
-    }
-}
-
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName currentSdkVersion
         externalNativeBuild {
@@ -48,10 +47,6 @@ android {
                 arguments "-DANDROID_STL=c++_shared"
             }
         }
-    }
-
-    lintOptions {
-        abortOnError false
     }
 
     buildTypes {
@@ -68,7 +63,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 task copyLibs(type: Copy) {

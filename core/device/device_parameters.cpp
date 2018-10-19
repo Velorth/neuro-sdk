@@ -77,6 +77,8 @@ std::string to_string(const Parameter &param){
         return "StimulatorParamPack";
     case Parameter::MotionAssistantParamPack:
         return "MotionAssistantParamPack";
+    case Parameter::FirmwareVersion:
+            return "FirmwareVersion";
     }
     return std::string();
 }

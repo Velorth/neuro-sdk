@@ -2,15 +2,13 @@
 #define BLE_DEVICE_WIN
 
 #include "ble/ble_device.h"
-#include "ble/win/gatt_wrapper.h"
-#include "loop.h"
-#include "task_queue.h"
+#include "winrt/Windows.Devices.Bluetooth.h"
 
 namespace Neuro {
 
 class BleDeviceWin : public BleDevice{
 public:
-    BleDeviceWin(DeviceHandle &&, std::string name, std::string address);
+	BleDeviceWin(unsigned long long address, const std::string &name);
     void connect() override;
     void disconnect() override;
     void close() override;
@@ -20,26 +18,21 @@ public:
     std::string getNetAddress() const override;
 
 private:
-    friend void rxCharacteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
-    friend void statusCharacteristicValueChanged(BTH_LE_GATT_EVENT_TYPE, PVOID, PVOID);
-
-    DeviceHandle mServiceHandle;
     std::string mName;
-    std::string mAddress;
-    BTH_LE_GATT_SERVICE mService;
-    BTH_LE_GATT_CHARACTERISTIC mRxCharacteristic;
-    BTH_LE_GATT_CHARACTERISTIC mTxCharacteristic;
+	unsigned long long mAddress;
+	winrt::Windows::Devices::Bluetooth::BluetoothLEDevice mBluetoothDevice{nullptr};
+    winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService mService{ nullptr };
+    winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mRxCharacteristic{ nullptr };
+	winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mTxCharacteristic{ nullptr };
     bool mHasStatusCharacteristic{false};
-    BTH_LE_GATT_CHARACTERISTIC mStatusCharacteristic;
-    BTH_LE_GATT_DESCRIPTOR mCCCDDescriptor;
+	winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mStatusCharacteristic{ nullptr };
+    winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDescriptor mCCCDDescriptor{ nullptr };
     std::atomic<bool> mIsConnected{false};
-    std::function<void(BTH_LE_GATT_EVENT_TYPE,PVOID,PVOID)> mTxChangedCallback;
-    TaskQueue mDeviceTaskQueue;
-    Loop<void(BleDeviceWin*)> mTaskSpawnLoop;
 
     void performConnect();
+	void onConnected();
     void performDisconnect();
-    void spawnGetDescriptorsTask();
+	void onDisconnected();
 };
 
 }

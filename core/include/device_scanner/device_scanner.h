@@ -17,8 +17,6 @@
 #ifndef NEURO_CONNECTION_H
 #define NEURO_CONNECTION_H
 
-#include <mutex>
-#include <condition_variable>
 #include "device/device.h"
 #include "lib_export.h"
 
@@ -27,10 +25,10 @@ namespace Neuro {
 class BleScanner;
 class BleDevice;
 
-class SDK_SHARED DeviceScanner
+class SDK_SHARED DeviceScanner final
 {
 public:
-    DeviceScanner(std::unique_ptr<BleScanner> deviceScanner);
+    DeviceScanner(std::unique_ptr<BleScanner> device_scanner);
     DeviceScanner(const DeviceScanner&) = delete;
     DeviceScanner& operator=(const DeviceScanner&) = delete;
     ~DeviceScanner();
@@ -43,14 +41,8 @@ public:
     void releaseDevice(std::string name, std::string address);
 
 private:
-    static constexpr const char *class_name = "DeviceScanner";
-    std::shared_ptr<BleScanner> scanner;
-    std::condition_variable stopScanCondition;
-    std::mutex stopScanMutex;
-    std::function<void(DeviceUniquePtr)> deviceFoundCallback;
-    std::function<void(bool)> scanStateChangedCallback;
-
-    DeviceUniquePtr onNewBleDevice(std::unique_ptr<BleDevice>);
+	class Impl;
+	std::unique_ptr<Impl> mImpl;
 };
 
 }

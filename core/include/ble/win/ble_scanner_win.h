@@ -6,16 +6,16 @@
 #include <string>
 #include <set>
 #include "ble/ble_scanner.h"
-#include "loop.h"
-#include "task_queue.h"
+#include "winrt/Windows.Devices.Bluetooth.Advertisement.h"
 
 namespace Neuro {
 
 class BleScannerWin : public BleScanner{
 public:
-    BleScannerWin();
+	BleScannerWin();
     BleScannerWin(const BleScannerWin &) = delete;
     BleScannerWin& operator=(const BleScannerWin &) = delete;
+	~BleScannerWin();
 
     void startScan() override;
     void stopScan() override;
@@ -27,17 +27,18 @@ public:
 
 private:
     static constexpr const char *class_name = "BleScannerWin";
+	using BleWatcherType = winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher;
 
+	BleWatcherType mWatcher;
+	winrt::event_token mReceivedEventToken;
+	winrt::event_token mStoppedEventToken;
     std::atomic<bool> mIsScanning{false};
-    std::vector<std::string> mFilterCollection;
-    std::set<std::string> mFoundDeviceAddresses;
+    std::vector<std::string> mFilterCollection;    
+	std::set<unsigned long long> mFoundDeviceAddresses;
     std::function<void(std::unique_ptr<BleDevice>)> mDeviceFoundCallback;
-    TaskQueue mScanTaskQueue{"ScanTaskQueue"};
-    Loop<void(BleScannerWin*)> mSpawnScanTaskLoop;
 
-    void spawnScanTask();
-    std::vector<std::unique_ptr<BleDevice>> findDevicesWithFilters(const std::vector<std::string> &);
-    void onDeviceFound(std::unique_ptr<BleDevice> &&);
+	void onAdvertisementReceived(const BleWatcherType &watcher, const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs &args);
+    void onDeviceFound(std::unique_ptr<BleDevice> &&) const;
 };
 
 }

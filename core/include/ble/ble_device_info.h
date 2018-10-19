@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
+#include "device/device_type.h"
 
 namespace Neuro {
 
@@ -136,13 +137,6 @@ public:
                 return std::shared_ptr<DeviceGattInfo>();
         }
     }
-};
-
-enum class DeviceType
-{
-    Brainbit,
-    Callibri,
-    Unknown
 };
 
 class BleDeviceInfo
