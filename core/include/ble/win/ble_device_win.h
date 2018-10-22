@@ -21,17 +21,15 @@ private:
     std::string mName;
 	unsigned long long mAddress;
 	winrt::Windows::Devices::Bluetooth::BluetoothLEDevice mBluetoothDevice{nullptr};
+	bool mIsConnected{false};
     winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService mService{ nullptr };
     winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mRxCharacteristic{ nullptr };
 	winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mTxCharacteristic{ nullptr };
     bool mHasStatusCharacteristic{false};
 	winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mStatusCharacteristic{ nullptr };
     winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDescriptor mCCCDDescriptor{ nullptr };
-    std::atomic<bool> mIsConnected{false};
 
-    void performConnect();
 	void onConnected();
-    void performDisconnect();
 	void onDisconnected();
 };
 

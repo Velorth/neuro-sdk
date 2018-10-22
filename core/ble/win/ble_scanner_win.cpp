@@ -27,7 +27,9 @@ BleScannerWin::~BleScannerWin() {
 
 void BleScannerWin::startScan(){
     emulator.startScan();
-	mReceivedEventToken = mWatcher.Received(&BleScannerWin::onAdvertisementReceived);
+	mReceivedEventToken = mWatcher.Received([=](auto&& watcher, auto&& args) {
+		onAdvertisementReceived(std::forward<decltype(watcher)>(watcher), std::forward<decltype(args)>(args));
+	});
 	mWatcher.Start();
     mIsScanning.store(true);
 }
