@@ -29,6 +29,12 @@ private:
 	winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic mStatusCharacteristic{ nullptr };
     winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDescriptor mCCCDDescriptor{ nullptr };
 
+	void findServiceAndChars();
+	void findAllCharacteristics();
+	void setRxNotificationsAndFindTx();
+	void findTxAndStausChars();
+	void findStatusCharacteristic();
+	void setStatusValueChangedNotifications();
 	void onConnected();
 	void onDisconnected();
 };

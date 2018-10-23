@@ -9,6 +9,8 @@ using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattClientCha
 using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic;
 using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs;
 using winrt::Windows::Storage::Streams::DataReader;
+using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristicsResult;
+using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceServicesResult;
 
 namespace Neuro {
 
@@ -41,41 +43,7 @@ void BleDeviceWin::connect() {
 		mBluetoothDevice.ConnectionStatusChanged([=](const BluetoothLEDevice &, auto) {
 			mIsConnected = mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected;
 		});
-		if (mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected) {
-			mService = mBluetoothDevice.GetGattService(guid_from_string(mDeviceInfo->getGattInfo()->deviceServiceUUID()));
-			if (mService == nullptr)
-				return;
-			auto rxChars = mService.GetCharacteristics(guid_from_string(mDeviceInfo->getGattInfo()->rxCharacteristicUUID()));
-			if (rxChars.Size() != 1)
-				return;
-			mRxCharacteristic = rxChars.GetAt(0);
-
-			auto txChars = mService.GetCharacteristics(guid_from_string(mDeviceInfo->getGattInfo()->txCharacteristicUUID()));
-			if (txChars.Size() != 1)
-				return;
-			mTxCharacteristic = txChars.GetAt(0);
-
-			const auto statusCharUUIDString = mDeviceInfo->getGattInfo()->statusCharacteristicUUID();
-			if (!statusCharUUIDString.empty()) {
-				mHasStatusCharacteristic = true;
-				auto statusChars = mService.GetCharacteristicsForUuidAsync(guid_from_string(statusCharUUIDString));
-				if (statusChars.Size() != 1)
-					return;
-				mStatusCharacteristic = statusChars.GetAt(0);
-				/*auto asyncResult = mStatusCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
-				asyncResult.Completed([=](auto...) {
-					mStatusCharacteristic.ValueChanged([=](const GattCharacteristic &, const GattValueChangedEventArgs &args) {
-						auto dataReader = DataReader::FromBuffer(args.CharacteristicValue());
-						std::vector<Byte> statusData(args.CharacteristicValue().Length());
-						dataReader.ReadBytes(statusData);
-					});
-				});*/
-			}
-			else {
-				mHasStatusCharacteristic = false;
-				onConnected();
-			}
-		}
+		findServiceAndChars();
 	});
 }
 
@@ -113,6 +81,94 @@ std::string BleDeviceWin::getName() const {
 
 std::string BleDeviceWin::getNetAddress() const {
     return to_hex_string(mAddress);
+}
+
+void BleDeviceWin::findServiceAndChars() {
+	if (mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected) {
+		auto serviceResult = mBluetoothDevice.GetGattServicesForUuidAsync(guid_from_string(mDeviceInfo->getGattInfo()->deviceServiceUUID()));
+		serviceResult.Completed([=](IAsyncOperation<GattDeviceServicesResult> sender, AsyncStatus) {
+			auto result = sender.GetResults();
+			auto services = result.Services();
+			if (services.Size() != 1) {
+				return;
+			}
+			mService = services.GetAt(0);			
+
+			findAllCharacteristics();
+		});		
+	}
+}
+
+void BleDeviceWin::findAllCharacteristics() {
+	auto rxCharsResult = mService.GetCharacteristicsForUuidAsync(guid_from_string(mDeviceInfo->getGattInfo()->rxCharacteristicUUID()));
+	rxCharsResult.Completed([=](IAsyncOperation<GattCharacteristicsResult> sender, AsyncStatus) {
+		auto result = sender.GetResults();
+		auto rxChars = result.Characteristics();
+		if (rxChars.Size() != 1)
+			return;
+		mRxCharacteristic = rxChars.GetAt(0);
+
+		auto writeDescriptorResult = mRxCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+		writeDescriptorResult.Completed([=](auto...) {
+			setRxNotificationsAndFindTx();
+		});
+	});
+}
+
+void BleDeviceWin::setRxNotificationsAndFindTx() {
+	mRxCharacteristic.ValueChanged([=](const GattCharacteristic &, const GattValueChangedEventArgs &args) {
+		auto dataReader = DataReader::FromBuffer(args.CharacteristicValue());
+		std::vector<Byte> data(args.CharacteristicValue().Length());
+		dataReader.ReadBytes(data);
+		if (dataReceivedCallback) dataReceivedCallback(data);
+	});
+	findTxAndStausChars();
+}
+
+void BleDeviceWin::findTxAndStausChars() {
+	auto txCharsResult = mService.GetCharacteristicsForUuidAsync(guid_from_string(mDeviceInfo->getGattInfo()->txCharacteristicUUID()));
+	txCharsResult.Completed([=](IAsyncOperation<GattCharacteristicsResult> sender, AsyncStatus) {
+		auto result = sender.GetResults();
+		auto txChars = result.Characteristics();
+		if (txChars.Size() != 1)
+			return;
+		mTxCharacteristic = txChars.GetAt(0);
+
+		findStatusCharacteristic();
+	});
+}
+
+void BleDeviceWin::findStatusCharacteristic() {
+	const auto statusCharUUIDString = mDeviceInfo->getGattInfo()->statusCharacteristicUUID();
+	if (!statusCharUUIDString.empty()) {
+		mHasStatusCharacteristic = true;
+		auto getCharsResult = mService.GetCharacteristicsForUuidAsync(guid_from_string(statusCharUUIDString));
+		getCharsResult.Completed([=](IAsyncOperation<GattCharacteristicsResult> sender, AsyncStatus) {
+			auto result = sender.GetResults();
+			auto statusChars = result.Characteristics();
+			if (statusChars.Size() != 1)
+				return;
+			mStatusCharacteristic = statusChars.GetAt(0);
+			auto writeDescriptorResult = mStatusCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+			writeDescriptorResult.Completed([=](auto...) {
+				setStatusValueChangedNotifications();
+			});
+		});
+	}
+	else {
+		mHasStatusCharacteristic = false;
+		onConnected();
+	}
+}
+
+void BleDeviceWin::setStatusValueChangedNotifications() {
+	mStatusCharacteristic.ValueChanged([=](const GattCharacteristic &, const GattValueChangedEventArgs &args) {
+		auto dataReader = DataReader::FromBuffer(args.CharacteristicValue());
+		std::vector<Byte> statusData(args.CharacteristicValue().Length());
+		dataReader.ReadBytes(statusData);
+		if (statusReceivedCallback) statusReceivedCallback(statusData);
+	});
+	onConnected();
 }
 
 void BleDeviceWin::onConnected() {
