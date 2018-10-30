@@ -6,11 +6,6 @@ tasks.whenTaskAdded { task ->
 
 apply plugin: 'com.android.library'
 
-repositories {
-    google()
-    jcenter()
-}
-
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
