@@ -21,6 +21,76 @@
 #include "java_environment.h"
 
 /**
+ * Stimulation parameter type
+ */
+
+template<>
+constexpr const char *jni::java_class_name<Neuro::StimulationParams>() {
+    return "com/neuromd/neurosdk/parameters/types/StimulationParams";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::StimulationParams>() {
+    return "(ILcom/neuromd/neurosdk/parameters/types/StimulatorImpulseDuration;II)V";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::StimulationParams>::java_object(const Neuro::StimulationParams &);
+
+template <>
+struct jni::jni_type<Neuro::StimulationParams>{
+    using type = Neuro::StimulationParams;
+};
+
+/**
+ * MotionAssistant parameter type
+ */
+
+template<>
+constexpr const char *jni::java_class_name<Neuro::MotionAssistantParams>() {
+    return "com/neuromd/neurosdk/parameters/types/MotionAssistantParams";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::MotionAssistantParams>() {
+    return "(IILcom/neuromd/neurosdk/parameters/types/MotionAssistantLimb;II)V";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionAssistantParams &);
+
+template <>
+struct jni::jni_type<Neuro::MotionAssistantParams>{
+    using type = Neuro::MotionAssistantParams;
+};
+
+
+/**
+ * FirmwareVersion parameter type
+ */
+
+template<>
+constexpr const char *jni::java_class_name<Neuro::FirmwareVersion>() {
+    return "com/neuromd/neurosdk/parameters/types/FirmwareVersion";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::FirmwareVersion>() {
+    return "(II)V";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::FirmwareVersion>::java_object(const Neuro::FirmwareVersion &);
+
+template <>
+struct jni::jni_type<Neuro::FirmwareVersion>{
+    using type = Neuro::FirmwareVersion;
+};
+
+/**
  * ADCInput enum
  */
 template<>
@@ -146,6 +216,25 @@ const std::map<std::string, Neuro::MotionAssistantLimb>
 
 
 
+
+/**
+ * StimulatorImpulseDuration enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::StimulatorImpulseDuration>() {
+    return "com/neuromd/neurosdk/parameters/types/StimulatorImpulseDuration";
+}
+
+template<>
+const std::map<Neuro::StimulatorImpulseDuration, std::string>
+        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::StimulatorImpulseDuration>
+        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mNameToEnumMap;
+
+
+
 /**
  * SamplingFrequency enum
  */
@@ -161,6 +250,7 @@ const std::map<Neuro::SamplingFrequency, std::string>
 template<>
 const std::map<std::string, Neuro::SamplingFrequency>
         jni::enum_name_map<Neuro::SamplingFrequency>::mNameToEnumMap;
+
 
 
 std::string getParamTypeName(Neuro::Parameter);

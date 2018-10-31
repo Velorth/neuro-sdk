@@ -76,7 +76,8 @@ jni::enum_name_map<Neuro::Parameter>::mEnumToNameMap = []() {
             {Neuro::Parameter::StimulatorState,          "StimulatorState"},
             {Neuro::Parameter::StimulatorParamPack,      "StimulatorParamPack"},
             {Neuro::Parameter::MotionAssistantState,     "MotionAssistantState"},
-            {Neuro::Parameter::MotionAssistantParamPack, "MotionAssistantParamPack"}
+            {Neuro::Parameter::MotionAssistantParamPack, "MotionAssistantParamPack"},
+            {Neuro::Parameter::FirmwareVersion, "FirmwareVersion"}
     };
 }();
 
@@ -100,7 +101,8 @@ jni::enum_name_map<Neuro::Parameter>::mNameToEnumMap = []() {
             {"StimulatorState",          Neuro::Parameter::StimulatorState},
             {"StimulatorParamPack",      Neuro::Parameter::StimulatorParamPack},
             {"MotionAssistantState",     Neuro::Parameter::MotionAssistantState},
-            {"MotionAssistantParamPack", Neuro::Parameter::MotionAssistantParamPack}
+            {"MotionAssistantParamPack", Neuro::Parameter::MotionAssistantParamPack},
+            {"FirmwareVersion", Neuro::Parameter::FirmwareVersion}
     };
 }();
 
@@ -195,15 +197,18 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
             case Neuro::Parameter::StimulatorState: {
                 return readParam<Neuro::Parameter::StimulatorState>(env, device);
             }
-            /*case Neuro::Parameter::StimulatorParamPack: {
+            case Neuro::Parameter::StimulatorParamPack: {
                 return readParam<Neuro::Parameter::StimulatorParamPack>(env, device);
-            }*/
+            }
             case Neuro::Parameter::MotionAssistantState: {
                 return readParam<Neuro::Parameter::MotionAssistantState>(env, device);
             }
-            /*case Neuro::Parameter::MotionAssistantParamPack: {
+            case Neuro::Parameter::MotionAssistantParamPack: {
                 return readParam<Neuro::Parameter::MotionAssistantParamPack>(env, device);
-            }*/
+            }
+            case Neuro::Parameter::FirmwareVersion: {
+                return readParam<Neuro::Parameter::FirmwareVersion>(env, device);
+            }
             default: {
                 jni::java_throw(env,
                                 "java/lang/UnsupportedOperationException",
@@ -279,15 +284,18 @@ setDeviceParam(JNIEnv *env, Neuro::Device &device, Neuro::Parameter param, jobje
             case Neuro::Parameter::StimulatorState: {
                 return setParam<Neuro::Parameter::StimulatorState>(env, device, valueObj);
             }
-                /*case Neuro::Parameter::StimulatorParamPack: {
-                    return setParam<Neuro::Parameter::StimulatorParamPack>(env, device, valueObj);
-                }*/
+            case Neuro::Parameter::StimulatorParamPack: {
+                return setParam<Neuro::Parameter::StimulatorParamPack>(env, device, valueObj);
+            }
             case Neuro::Parameter::MotionAssistantState: {
                 return setParam<Neuro::Parameter::MotionAssistantState>(env, device, valueObj);
             }
-                /*case Neuro::Parameter::MotionAssistantParamPack: {
-                    return setParam<Neuro::Parameter::MotionAssistantParamPack>(env, device, valueObj);
-                }*/
+            case Neuro::Parameter::MotionAssistantParamPack: {
+                return setParam<Neuro::Parameter::MotionAssistantParamPack>(env, device, valueObj);
+            }
+            case Neuro::Parameter::FirmwareVersion: {
+                return setParam<Neuro::Parameter::FirmwareVersion>(env, device, valueObj);
+            }
             default: {
                 jni::java_throw(env,
                                 "java/lang/UnsupportedOperationException",

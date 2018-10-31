@@ -54,6 +54,11 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::MEMS>(env);
     jni::initJavaObjClass<Neuro::Quaternion>(env);
     jni::initJavaObjClass<Neuro::ElectrodeState>(env);
+    jni::initJavaObjClass<Neuro::MotionAssistantParams>(env);
+    jni::initJavaObjClass<Neuro::MotionAssistantLimb >(env);
+    jni::initJavaObjClass<Neuro::StimulationParams>(env);
+    jni::initJavaObjClass<Neuro::StimulatorImpulseDuration>(env);
+    jni::initJavaObjClass<Neuro::FirmwareVersion>(env);
 
     auto logFactory = LoggerFactory::getInstance();
     logFactory->setLogger(new JniLogger());

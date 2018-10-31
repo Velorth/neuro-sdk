@@ -19,12 +19,17 @@
 
 namespace Neuro {
 
-enum class MotionAssistantLimb: unsigned char{
+enum class MotionAssistantLimb {
+    RightLeg,
+    LeftLeg,
+    RightArm,
+    LeftArm
+};
 
-    RightLeg = 0,
-    LeftLeg = 1,
-    RightArm = 2,
-    LeftArm = 3
+enum class StimulatorImpulseDuration {
+    us60 = 6,
+    us100 = 10,
+    us200 = 20
 };
 
 inline bool parseLimbCode(unsigned char limbByte, MotionAssistantLimb &limb){
@@ -52,6 +57,27 @@ inline bool parseLimbCode(unsigned char limbByte, MotionAssistantLimb &limb){
     }
 }
 
+inline bool parseImpulseDuration(unsigned char impulseDurationValue, StimulatorImpulseDuration &duration){
+
+    switch (impulseDurationValue){
+
+        case static_cast<unsigned char>(StimulatorImpulseDuration::us60):{
+            duration = StimulatorImpulseDuration::us60;
+            return true;
+        }
+        case static_cast<unsigned char>(StimulatorImpulseDuration::us100):{
+            duration = StimulatorImpulseDuration::us100;
+            return true;
+        }
+        case static_cast<unsigned char>(StimulatorImpulseDuration::us200):{
+            duration = StimulatorImpulseDuration::us200;
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
 struct MotionAssistantParams {
     int gyroStart;
     int gyroStop;
@@ -62,7 +88,7 @@ struct MotionAssistantParams {
 
 struct StimulationParams {
     int current;
-    int pulse_duration;
+    StimulatorImpulseDuration pulse_duration;
     int frequency;
     int stimulus_duration;
 };

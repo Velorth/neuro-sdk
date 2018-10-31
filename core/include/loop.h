@@ -27,14 +27,24 @@ public:
         mLoopThread = std::thread([=](){
             while (mThreadRunning.load()) {
                 auto startTime = std::chrono::high_resolution_clock::now();
-                mCallable(args...);
+				try {
+					mCallable(args...);
+				}
+				catch (...) {
+					LOG_ERROR("Exception occured in user-provided loop function");
+				}
                 auto stopTime = std::chrono::high_resolution_clock::now();
-                auto execTime = std::chrono::duration_cast<delay_time_t>(stopTime - startTime);
-                if (execTime < delay){
-                    LOG_TRACE_V("Sleep time: %f, exec time: %f", delay-execTime, execTime);
-                    std::unique_lock<std::mutex> waitLock(mWaitMutex);
-                    mWaitCondition.wait_for(waitLock, delay-execTime, [=]{return !mThreadRunning.load();});
-                }
+				try {
+					auto execTime = std::chrono::duration_cast<delay_time_t>(stopTime - startTime);
+					if (execTime < delay) {
+						LOG_TRACE_V("Sleep time: %f, exec time: %f", delay - execTime, execTime);
+						std::unique_lock<std::mutex> waitLock(mWaitMutex);
+						mWaitCondition.wait_for(waitLock, delay - execTime, [=] {return !mThreadRunning.load(); });
+					}
+				}
+				catch (...) {
+					LOG_ERROR("Exception occured in time-wait section");
+				}
             }
         });
     }

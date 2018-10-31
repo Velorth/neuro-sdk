@@ -1,6 +1,57 @@
 #include "wrappers/device/jni_param_types_wrap.h"
 
 template<>
+template<>
+jni::java_object<Neuro::StimulationParams>::java_object(const Neuro::StimulationParams &params):
+        nativeObj(params){
+    jni::call_in_attached_thread([=](JNIEnv* env){
+        auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                       constructor_signature<Neuro::StimulationParams>());
+        javaObj = make_global_ref_ptr(
+                env->NewObject(object_class,
+                               objectClassConstructor,
+                               params.current,
+                               jni::java_object<Neuro::StimulatorImpulseDuration>(params.pulse_duration),
+                               params.frequency,
+                               params.stimulus_duration));
+    });
+}
+
+template<>
+template<>
+jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionAssistantParams &params):
+        nativeObj(params){
+    jni::call_in_attached_thread([=](JNIEnv* env){
+        auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                       constructor_signature<Neuro::MotionAssistantParams>());
+        javaObj = make_global_ref_ptr(
+                env->NewObject(object_class,
+                               objectClassConstructor,
+                               params.gyroStart,
+                               params.gyroStop,
+                               jni::java_object<Neuro::MotionAssistantLimb>(params.limb),
+                               params.minPause,
+                               params.maxDuration));
+    });
+}
+
+template<>
+template<>
+jni::java_object<Neuro::FirmwareVersion>::java_object(const Neuro::FirmwareVersion &firmware):
+        nativeObj(firmware){
+    jni::call_in_attached_thread([=](JNIEnv* env){
+        auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                       constructor_signature<Neuro::FirmwareVersion>());
+        javaObj = make_global_ref_ptr(
+                env->NewObject(object_class,
+                               objectClassConstructor,
+                               firmware.Version,
+                               firmware.Build
+                ));
+    });
+}
+
+template<>
 const std::map<Neuro::ADCInput, std::string>
         jni::enum_name_map<Neuro::ADCInput>::mEnumToNameMap = []() {
     return std::map<Neuro::ADCInput, std::string>{
@@ -157,6 +208,26 @@ const std::map<std::string, Neuro::MotionAssistantLimb>
 }();
 
 template<>
+const std::map<Neuro::StimulatorImpulseDuration, std::string>
+        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mEnumToNameMap = []() {
+    return std::map<Neuro::StimulatorImpulseDuration, std::string>{
+            {Neuro::StimulatorImpulseDuration::us60, "us60"},
+            {Neuro::StimulatorImpulseDuration::us100,  "us100"},
+            {Neuro::StimulatorImpulseDuration::us200, "us200"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::StimulatorImpulseDuration>
+        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::StimulatorImpulseDuration>{
+            {"us60", Neuro::StimulatorImpulseDuration::us60},
+            {"us100", Neuro::StimulatorImpulseDuration::us100},
+            {"us200", Neuro::StimulatorImpulseDuration::us200}
+    };
+}();
+
+template<>
 const std::map<Neuro::SamplingFrequency, std::string>
         jni::enum_name_map<Neuro::SamplingFrequency>::mEnumToNameMap = []() {
     return std::map<Neuro::SamplingFrequency, std::string>{
@@ -216,6 +287,8 @@ std::string getParamTypeName(Neuro::Parameter param) {
             return "StimulationParams";
         case Neuro::Parameter::MotionAssistantParamPack:
             return "MotionAssistantParams";
+        case Neuro::Parameter::FirmwareVersion:
+            return "FirmwareVersion";
     }
 }
 
