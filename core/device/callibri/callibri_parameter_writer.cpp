@@ -64,4 +64,8 @@ bool CallibriParameterWriter::setMotionAssistantParamPack(typename ParamValue<Pa
     throw std::runtime_error("Not implemented exception");
 }
 
+bool CallibriParameterWriter::setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type){
+    throw std::runtime_error("Unable to set readonly parameter");
+}
+
 }

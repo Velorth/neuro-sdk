@@ -1,3 +1,4 @@
+#include <saturation_cast.h>
 #include "wrappers/device/jni_param_types_wrap.h"
 
 template<>
@@ -11,10 +12,31 @@ jni::java_object<Neuro::StimulationParams>::java_object(const Neuro::Stimulation
                 env->NewObject(object_class,
                                objectClassConstructor,
                                params.current,
-                               jni::java_object<Neuro::StimulatorImpulseDuration>(params.pulse_duration),
+                               static_cast<jobject>(jni::java_object<Neuro::StimulatorImpulseDuration>(params.pulse_duration)),
                                params.frequency,
                                params.stimulus_duration));
     });
+}
+
+template <>
+Neuro::StimulationParams jni::get_java_obj_value<Neuro::StimulationParams>(JNIEnv *env, jobject obj){
+    auto javaClass = jni::java_object<Neuro::StimulationParams>::java_class();
+
+    auto amplitudeMethodId = env->GetMethodID(javaClass, "amplitude", "()I");
+    auto amplitude = env->CallIntMethod(obj, amplitudeMethodId);
+
+    auto methodSignature = std::string("()L") + jni::java_class_name<Neuro::StimulatorImpulseDuration>() + ";";
+    auto pulseDurationMethodId = env->GetMethodID(javaClass, "pulseDuration", methodSignature.c_str());
+    auto pulseDurationObj = env->CallObjectMethod(obj, pulseDurationMethodId);
+    auto pulseDuration = jni::enumFromJavaObj<Neuro::StimulatorImpulseDuration>(env, pulseDurationObj);
+
+    auto frequencyMethodId = env->GetMethodID(javaClass, "frequency", "()I");
+    auto frequency = env->CallIntMethod(obj, frequencyMethodId);
+
+    auto stimulusMethodId = env->GetMethodID(javaClass, "stimulusDuration", "()I");
+    auto stimulusDuration = env->CallIntMethod(obj, stimulusMethodId);
+
+    return Neuro::StimulationParams{amplitude, pulseDuration, frequency, stimulusDuration};
 }
 
 template<>
@@ -29,10 +51,34 @@ jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionA
                                objectClassConstructor,
                                params.gyroStart,
                                params.gyroStop,
-                               jni::java_object<Neuro::MotionAssistantLimb>(params.limb),
+                               static_cast<jobject>(jni::java_object<Neuro::MotionAssistantLimb>(params.limb)),
                                params.minPause,
                                params.maxDuration));
     });
+}
+
+template <>
+Neuro::MotionAssistantParams jni::get_java_obj_value<Neuro::MotionAssistantParams>(JNIEnv *env, jobject obj){
+    auto javaClass = jni::java_object<Neuro::MotionAssistantParams>::java_class();
+
+    auto gyroStartMethodId = env->GetMethodID(javaClass, "gyroStartAngle", "()I");
+    auto gyroStart = env->CallIntMethod(obj, gyroStartMethodId);
+
+    auto gyroStopMethodId = env->GetMethodID(javaClass, "gyroStopAngle", "()I");
+    auto gyroStop = env->CallIntMethod(obj, gyroStopMethodId);
+
+    auto methodSignature = std::string("()L") + jni::java_class_name<Neuro::MotionAssistantLimb>() + ";";
+    auto limbMethodId = env->GetMethodID(javaClass, "limb", methodSignature.c_str());
+    auto limbObj = env->CallObjectMethod(obj, limbMethodId);
+    auto limb = jni::enumFromJavaObj<Neuro::MotionAssistantLimb>(env, limbObj);
+
+    auto minPauseMethodId = env->GetMethodID(javaClass, "minPause", "()I");
+    auto minPause = env->CallIntMethod(obj, minPauseMethodId);
+
+    auto maxDurationMethodId = env->GetMethodID(javaClass, "maxDuration", "()I");
+    auto maxDuration = env->CallIntMethod(obj, maxDurationMethodId);
+
+    return Neuro::MotionAssistantParams{gyroStart, gyroStop, limb, minPause, maxDuration};
 }
 
 template<>
@@ -49,6 +95,19 @@ jni::java_object<Neuro::FirmwareVersion>::java_object(const Neuro::FirmwareVersi
                                firmware.Build
                 ));
     });
+}
+
+template <>
+Neuro::FirmwareVersion jni::get_java_obj_value<Neuro::FirmwareVersion>(JNIEnv *env, jobject obj){
+    auto javaClass = jni::java_object<Neuro::FirmwareVersion>::java_class();
+
+    auto versionMethodId = env->GetMethodID(javaClass, "version", "()I");
+    auto version = env->CallIntMethod(obj, versionMethodId);
+
+    auto buildMethodId = env->GetMethodID(javaClass, "build", "()I");
+    auto build = env->CallIntMethod(obj, buildMethodId);
+
+    return Neuro::FirmwareVersion{saturation_cast<unsigned>(version), saturation_cast<unsigned>(build)};
 }
 
 template<>

@@ -21,6 +21,7 @@ public:
     bool setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type) override;
     bool setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type) override;
     bool setMotionAssistantParamPack(typename ParamValue<Parameter::MotionAssistantParamPack>::Type) override;
+    bool setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type) override;
 };
 
 }

@@ -257,4 +257,11 @@ bool Device::setParam<Parameter::MotionAssistantParamPack>(typename ParamValue<P
     return mImpl->mParamWriter->setMotionAssistantParamPack(value);
 }
 
+template<>
+bool Device::setParam<Parameter::FirmwareVersion>(typename ParamValue<Parameter::FirmwareVersion>::Type value){
+    Expects(mImpl != nullptr);
+    Expects(mImpl->mParamWriter != nullptr);
+    return mImpl->mParamWriter->setFirmwareVersion(value);
+}
+
 }

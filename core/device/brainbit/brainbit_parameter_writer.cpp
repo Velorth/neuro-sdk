@@ -11,7 +11,7 @@ bool BrainbitParameterWriter::setHardwareFilterState(typename ParamValue<Paramet
 }
 
 bool BrainbitParameterWriter::setFirmwareMode(typename ParamValue<Parameter::FirmwareMode>::Type){
-    return false;
+    throw std::runtime_error("Unable to set readonly parameter");
 }
 
 bool BrainbitParameterWriter::setSamplingFrequency(typename ParamValue<Parameter::SamplingFrequency>::Type){
@@ -58,6 +58,8 @@ bool BrainbitParameterWriter::setMotionAssistantParamPack(typename ParamValue<Pa
     throw std::runtime_error("Device parameter not found");
 }
 
-
+bool BrainbitParameterWriter::setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type){
+    throw std::runtime_error("Unable to set readonly parameter");
+}
 
 }

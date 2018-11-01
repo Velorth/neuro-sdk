@@ -40,6 +40,8 @@ public:
     bool setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type) = 0;
     virtual
     bool setMotionAssistantParamPack(typename ParamValue<Parameter::MotionAssistantParamPack>::Type) = 0;
+    virtual
+    bool setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type) = 0;
 };
 
 }

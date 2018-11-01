@@ -38,10 +38,8 @@ template<>
 template<>
 jni::java_object<Neuro::StimulationParams>::java_object(const Neuro::StimulationParams &);
 
-template <>
-struct jni::jni_type<Neuro::StimulationParams>{
-    using type = Neuro::StimulationParams;
-};
+template<>
+Neuro::StimulationParams jni::get_java_obj_value<Neuro::StimulationParams>(JNIEnv *, jobject);
 
 /**
  * MotionAssistant parameter type
@@ -61,10 +59,8 @@ template<>
 template<>
 jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionAssistantParams &);
 
-template <>
-struct jni::jni_type<Neuro::MotionAssistantParams>{
-    using type = Neuro::MotionAssistantParams;
-};
+template<>
+Neuro::MotionAssistantParams jni::get_java_obj_value<Neuro::MotionAssistantParams>(JNIEnv *, jobject);
 
 
 /**
@@ -85,10 +81,9 @@ template<>
 template<>
 jni::java_object<Neuro::FirmwareVersion>::java_object(const Neuro::FirmwareVersion &);
 
-template <>
-struct jni::jni_type<Neuro::FirmwareVersion>{
-    using type = Neuro::FirmwareVersion;
-};
+
+template<>
+Neuro::FirmwareVersion jni::get_java_obj_value<Neuro::FirmwareVersion>(JNIEnv *, jobject);
 
 /**
  * ADCInput enum

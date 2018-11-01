@@ -173,6 +173,8 @@ template<>
 SDK_SHARED bool Device::setParam<Parameter::StimulatorParamPack>(typename ParamValue<Parameter::StimulatorParamPack>::Type);
 template<>
 SDK_SHARED bool Device::setParam<Parameter::MotionAssistantParamPack>(typename ParamValue<Parameter::MotionAssistantParamPack>::Type);
+template<>
+SDK_SHARED bool Device::setParam<Parameter::FirmwareVersion>(typename ParamValue<Parameter::FirmwareVersion>::Type);
 
 }
 
