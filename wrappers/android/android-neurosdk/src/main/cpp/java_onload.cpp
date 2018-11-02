@@ -1,3 +1,4 @@
+#include <wrappers/channels/jni_resistance_channel_wrap.h>
 #include "channels/electrode_state_channel.h"
 #include "wrappers/channels/jni_electrodes_state_channel_wrap.h"
 #include "wrappers/channels/jni_spectrum_channel_wrap.h"
@@ -34,6 +35,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<JniConnectionStatsChannelWrap *>(env);
     jni::initJavaObjClass<JniElectrodesStateChannelWrap *>(env);
     jni::initJavaObjClass<JniSpectrumChannelWrap *>(env);
+    jni::initJavaObjClass<JniResistanceChannelWrap *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo *>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo>(env);
     jni::initJavaObjClass<Neuro::ChannelInfo::Type>(env);

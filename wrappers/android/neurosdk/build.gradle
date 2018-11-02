@@ -45,7 +45,7 @@ dependencies {
 }
 
 task copyJavaClasses(type: Copy) {
-    from 'build/intermediates/bundles/default'
+    from 'build/intermediates/packaged-classes/release'
     include 'classes.jar'
     into '../share/libs'
 }

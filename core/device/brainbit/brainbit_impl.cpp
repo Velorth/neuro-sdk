@@ -249,7 +249,7 @@ void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
 
 void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
     onSignalReceived(std::vector<signal_sample_t>(8));
-    if (data[mCurrentResistChannel] == 0.0 || data[mCurrentResistChannel+4] == 0.0){
+    if (std::abs(data[mCurrentResistChannel]) < 0.001 || std::abs(data[mCurrentResistChannel+4]) < 0.001 ){
         //LOG_ERROR_V("Skip resist, %f, %f, %f, %f, %f, %f, %f, %f", data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
         //LOG_ERROR_V("Current channel: %zd", mCurrentResistChannel);
         return;
