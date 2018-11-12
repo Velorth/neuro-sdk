@@ -62,6 +62,63 @@ bool BrainbitImpl::execute(Command command){
     }
 }
 
+ListenerPtr<void, const std::vector<int> &>
+BrainbitImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	return mBatteryNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<signal_sample_t> &>
+BrainbitImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info) {
+	Expects(info.getType() == ChannelInfo::Type::Signal);
+	auto channels = this->channels();
+	Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+	if (mSignalNotifierMap.find(info.getIndex()) != mSignalNotifierMap.end()) {
+		return mSignalNotifierMap[info.getIndex()].addListener(callback);
+	}
+	throw std::runtime_error("Unable to subscribe signal data notifications");
+}
+
+ListenerPtr<void, const std::vector<resistance_sample_t> &>
+BrainbitImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback, ChannelInfo info) {
+	Expects(info.getType() == ChannelInfo::Type::Resistance);
+	auto channels = this->channels();
+	Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+	if (mResistanceNotifierMap.find(info.getIndex()) != mResistanceNotifierMap.end()) {
+		return mResistanceNotifierMap[info.getIndex()].addListener(callback);
+	}
+	throw std::runtime_error("Unable to subscribe resistance data notifications");
+}
+
+ListenerPtr<void, const std::vector<MEMS> &>
+BrainbitImpl::subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)> callback, ChannelInfo) {
+	throw std::runtime_error("Unable to subscribe MEMES data notifications");
+}
+
+ListenerPtr<void, const std::vector<Quaternion> &>
+BrainbitImpl::subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)> callback, ChannelInfo) {
+	throw std::runtime_error("Unable to subscribe orientation data notifications");
+}
+
+ListenerPtr<void, const std::vector<double> &>
+BrainbitImpl::subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)> callback, ChannelInfo) {
+	throw std::runtime_error("Unable to subscribe respiration data notifications");
+}
+
+ListenerPtr<void, const std::vector<int> &>
+BrainbitImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	return mConnectionStatsNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<int> &>
+BrainbitImpl::subscribePedometerDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	throw std::runtime_error("Unable to subscribe pedometer data notifications");
+}
+
+ListenerPtr<void, const std::vector<ElectrodeState> &>
+BrainbitImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback, ChannelInfo) {
+	throw std::runtime_error("Unable to subscribe electrodes state data notifications");
+}
+
 int BrainbitImpl::batteryChargePercents(){
     return mBatteryPercents;
 }
@@ -76,22 +133,6 @@ std::size_t BrainbitImpl::packetsLost() {
 
 std::size_t BrainbitImpl::packetsReceived() {
     return mPacketCounter.packetsReceived();
-}
-
-const BaseBuffer<signal_sample_t> &BrainbitImpl::signalBuffer() const {
-    return mSignalBuffer;
-}
-
-const BaseBuffer<resp_sample_t> &BrainbitImpl::respirationBuffer() const {
-    throw std::runtime_error("Device does not have respiration buffer");
-}
-
-const BaseBuffer<MEMS> &BrainbitImpl::memsBuffer() const {
-    throw std::runtime_error("Device does not have MEMS buffer");
-}
-
-const BaseBuffer<Quaternion> &BrainbitImpl::orientationBuffer() const {
-    throw std::runtime_error("Device does not have angle buffer");
 }
 
 void BrainbitImpl::initChannels(){

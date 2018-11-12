@@ -18,7 +18,15 @@ private:
     std::unique_ptr<DeviceImpl> mImpl;
 
 public:
+	Device(const Device &) = delete;
+	Device& operator=(const Device &) = delete;
+
+	Device(Device &&) noexcept;
+	Device& operator=(Device &&) noexcept;
+
     ~Device();
+
+	void swap(Device &) noexcept;
 
     void connect();
     void disconnect();

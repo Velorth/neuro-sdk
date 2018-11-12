@@ -7,6 +7,7 @@
 #include "device/handler_chain.h"
 #include "device/handler.h"
 #include "device/packet.h"
+#include "device/packet_sequence.h"
 #include "device/request_scheduler.h"
 
 namespace Neuro {
@@ -34,17 +35,48 @@ public:
     bool isElectrodesAttached() override;
     std::size_t packetsLost() override;
     std::size_t packetsReceived() override;
-    const BaseBuffer<signal_sample_t> &signalBuffer() const override;    
-    const BaseBuffer<resp_sample_t> &respirationBuffer() const override;
-    const BaseBuffer<MEMS> &memsBuffer() const override;    
-    const BaseBuffer<Quaternion> &orientationBuffer() const override;
+
+	ListenerPtr<void, const std::vector<int> &>
+		subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<signal_sample_t> &>
+		subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<resistance_sample_t> &>
+		subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<MEMS> &>
+		subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<Quaternion> &>
+		subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<double> &>
+		subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<int> &>
+		subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<int> &>
+		subscribePedometerDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+
+	ListenerPtr<void, const std::vector<ElectrodeState> &>
+		subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)>, ChannelInfo) override;
 
 private:
     static constexpr const char *class_name = "CallibriImpl";
 
+	PacketSequence<65500> mPacketCounter;
+	Notifier<void, const std::vector<int> &> mBatteryNotifier{ class_name };
+	Notifier<void, const std::vector<signal_sample_t> &> mSignalNotifier{ class_name };
+	Notifier<void, const std::vector<MEMS> &> mMEMSNotifier{ class_name };
+	Notifier<void, const std::vector<Quaternion> &> mOrientationNotifier{ class_name };
+	Notifier<void, const std::vector<double> &> mRespirationNotifier{ class_name };
+	Notifier<void, const std::vector<int> &> mConnectionStatsNotifier{ class_name };
+	Notifier<void, const std::vector<int> &> mPedometerNotifier{ class_name };
+	Notifier<void, const std::vector<ElectrodeState> &> mElectrodesNotifier{ class_name };
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
-    std::shared_ptr<CallibriBufferCollection> mBufferCollection;
     param_changed_callback_t parameterChangedCallback;
 
     void onDataReceived(const ByteBuffer &) override;

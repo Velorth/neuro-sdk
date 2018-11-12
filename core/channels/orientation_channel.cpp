@@ -22,38 +22,38 @@ public:
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
-        try{
+        /*try{
             auto&& buffer = mDevice->mImpl->orientationBuffer();
             return buffer.subscribeLengthChanged(callback);
         }
-        catch(...){
+        catch(...){*/
             return nullptr;
-        }
+        //}
     }
 
     OrientationChannel::data_container readData(data_offset_t offset, data_length_t length) const {
-        auto&& buffer = mDevice->mImpl->orientationBuffer();
-        return buffer.readFill(offset, length, Quaternion{});
+       // auto&& buffer = mDevice->mImpl->orientationBuffer();
+        //return buffer.readFill(offset, length, Quaternion{});
     }
 
     data_length_t totalLength() const noexcept {
-        try {
+        /*try {
             auto&& buffer = mDevice->mImpl->orientationBuffer();
             return buffer.totalLength();
         }
         catch (std::runtime_error &){
             return 0;
-        }
+        }*/
     }
 
     data_length_t bufferSize() const noexcept {
-        try {
+       /* try {
             auto&& buffer = mDevice->mImpl->orientationBuffer();
             return buffer.bufferSize();
         }
         catch (std::runtime_error &){
             return 0;
-        }
+        }*/
     }
 
     std::weak_ptr<Device> underlyingDevice() const noexcept {

@@ -1,11 +1,24 @@
 #include <algorithm>
+#include <vector>
 #include "gsl/gsl_assert"
 #include "device/device.h"
 #include "device/device_impl.h"
 
 namespace Neuro {
 
+Device::Device(Device &&rhs) noexcept : mImpl(std::move(rhs.mImpl)){}
+
+Device& Device::operator=(Device &&rhs) noexcept {
+	this->swap(rhs);
+	return *this;
+}
+
 Device::~Device() = default;
+
+void Device::swap(Device &rhs) noexcept {
+	using std::swap;
+	swap(this->mImpl, rhs.mImpl);
+}
 
 void Device::connect(){
     Expects(mImpl != nullptr);

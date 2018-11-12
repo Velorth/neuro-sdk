@@ -4,13 +4,12 @@
 #include <memory>
 #include "signal/safe_buffer.h"
 #include "common_types.h"
-#include "callibri_buffer.h"
 
 namespace Neuro {
 
 class CallibriCommonParameters;
 
-class CallibriSignalBuffer : public CallibriBuffer<65500> {
+class CallibriSignalBuffer {
 public:
     CallibriSignalBuffer(std::shared_ptr<CallibriCommonParameters>);
     CallibriSignalBuffer(const CallibriSignalBuffer &) = delete;

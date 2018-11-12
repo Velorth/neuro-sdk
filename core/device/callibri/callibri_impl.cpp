@@ -1,6 +1,5 @@
 #include "channels/info/channel_info.h"
 #include "device/device_parameters.h"
-#include "device/callibri/callibri_buffer_collection.h"
 #include "device/callibri/callibri_impl.h"
 #include "device/callibri/callibri_parameter_reader.h"
 #include "device/callibri/callibri_parameter_writer.h"
@@ -25,8 +24,7 @@ CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                                                          buffer_collection),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
-    mCommonParams(common_params),
-    mBufferCollection(buffer_collection){
+    mCommonParams(common_params){
     mRequestHandler->setSendFunction([=](std::shared_ptr<CallibriCommandData> cmd_data){this->sendCommandPacket(cmd_data);});
 }
 
@@ -84,6 +82,51 @@ bool CallibriImpl::execute(Command command){
     }
 }
 
+ListenerPtr<void, const std::vector<int> &>
+CallibriImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	return mBatteryNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<signal_sample_t> &>
+CallibriImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info) {
+	return mSignalNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<resistance_sample_t> &>
+CallibriImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback, ChannelInfo info) {
+	throw std::runtime_error("Unable to subscribe resistance data notifications");
+}
+
+ListenerPtr<void, const std::vector<MEMS> &>
+CallibriImpl::subscribeMEMSDataReceived(std::function<void(const std::vector<MEMS> &)> callback, ChannelInfo) {
+	return mMEMSNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<Quaternion> &>
+CallibriImpl::subscribeOrientationDataReceived(std::function<void(const std::vector<Quaternion> &)> callback, ChannelInfo) {
+	return mOrientationNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<double> &>
+CallibriImpl::subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)> callback, ChannelInfo) {
+	return mRespirationNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<int> &>
+CallibriImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	return mConnectionStatsNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<int> &>
+CallibriImpl::subscribePedometerDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+	return mPedometerNotifier.addListener(callback);
+}
+
+ListenerPtr<void, const std::vector<ElectrodeState> &>
+CallibriImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback, ChannelInfo) {
+	return mElectrodesNotifier.addListener(callback);
+}
+
 int CallibriImpl::batteryChargePercents(){
     auto voltage = requestBattryVoltage();
     return convertVoltageToPercents(voltage);
@@ -119,27 +162,11 @@ bool CallibriImpl::isElectrodesAttached(){
 }
 
 std::size_t CallibriImpl::packetsLost(){
-    return mBufferCollection->packetsLost();
+    return mPacketCounter.packetsLost();
 }
 
 std::size_t CallibriImpl::packetsReceived(){
-    return mBufferCollection->packetsReceived();
-}
-
-const BaseBuffer<signal_sample_t> &CallibriImpl::signalBuffer() const {    
-    return mBufferCollection->signalBuffer().buffer();
-}
-
-const BaseBuffer<resp_sample_t> &CallibriImpl::respirationBuffer() const {    
-    return mBufferCollection->respirationBuffer().buffer();
-}
-
-const BaseBuffer<MEMS> &CallibriImpl::memsBuffer() const {    
-    return mBufferCollection->memsBuffer().buffer();
-}
-
-const BaseBuffer<Quaternion> &CallibriImpl::orientationBuffer() const {
-    return mBufferCollection->orientationBuffer().buffer();
+    return mPacketCounter.packetsReceived();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -282,25 +309,40 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
 void CallibriImpl::onSignalReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
     ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
-    mBufferCollection->signalBuffer().onDataReceived(packetNumber, signalData);
+	if (data.size() < 18)
+		return;
+
+	std::vector<signal_sample_t> samples;
+	for (auto sample = data.begin(); sample != data.end(); sample += 2) {
+		ByteInterpreter<short> shortSample;
+		shortSample.bytes[0] = *sample;
+		shortSample.bytes[1] = *(sample + 1);
+
+		auto adcValue = shortSample.value;
+		double sampleValue = (2.42 / 8388607) * adcValue /
+			intValue(mCommonParams->gain());
+
+		samples.push_back(sampleValue);
+	}
+	//mSignalNotifierMap
 }
 
 void CallibriImpl::onMemsReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
     ByteBuffer memsData(data.begin() + MemsDataShift, data.end());
-    mBufferCollection->memsBuffer().onDataReceived(packetNumber, memsData);
+    //mBufferCollection->memsBuffer().onDataReceived(packetNumber, memsData);
 }
 
 void CallibriImpl::onRespReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
     ByteBuffer respData(data.begin() + RespDataShift, data.end());
-    mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
+    //mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
 }
 
 void CallibriImpl::onOrientationReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
     ByteBuffer orientationData(data.begin() + OrientationDataShift, data.end());
-    mBufferCollection->orientationBuffer().onDataReceived(packetNumber, orientationData);
+   // mBufferCollection->orientationBuffer().onDataReceived(packetNumber, orientationData);
 }
 
 packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){

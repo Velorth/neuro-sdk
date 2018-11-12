@@ -2,7 +2,6 @@
 #define CALLIBRI_PARAMETER_READER_H
 
 #include "callibri_protocol.h"
-#include "callibri_buffer_collection.h"
 #include "device/parameter_reader.h"
 
 namespace Neuro {
@@ -17,8 +16,7 @@ public:
     CallibriParameterReader(std::shared_ptr<BleDevice>,
                             param_changed_callback_t,
                             std::shared_ptr<CallibriCommonParameters>,
-                            std::shared_ptr<CallibriRequestScheduler>,
-                            std::weak_ptr<CallibriBufferCollection>);
+                            std::shared_ptr<CallibriRequestScheduler>);
 
     typename ParamValue<Parameter::SerialNumber>::Type readSerialNumber() const override;
     typename ParamValue<Parameter::HardwareFilterState>::Type readHardwareFilterState() const override;
@@ -41,7 +39,6 @@ private:
 
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
-    std::weak_ptr<CallibriBufferCollection> mBufferCollection;
     FirmwareMode mFirmwareMode;
 
     bool loadDeviceParams() override;
