@@ -2,11 +2,14 @@
 #define CHANNEL_INFO_H
 
 #include <string>
+#include <functional>
+#include <vector>
 #include "common_types.h"
 #include "mems_data.h"
 #include "quaternion.h"
 #include "electrode_state.h"
 #include "lib_export.h"
+#include "event_listener.h"
 
 namespace Neuro {
 
@@ -57,6 +60,7 @@ public:
     ChannelInfo& operator=(const ChannelInfo &) = default;
     ChannelInfo(ChannelInfo &&) = default;
     ChannelInfo& operator=(ChannelInfo &&) = default;
+	~ChannelInfo() = default;
 
     std::string getName() const;
     void setName(std::string &&) noexcept;
@@ -78,60 +82,95 @@ struct ChannelTraits;
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::Signal>{
-    using DataType = std::vector<signal_sample_t>;
+    using DataType = signal_sample_t;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Signal(); }
-};
-
-template <>
-struct ChannelTraits<ChannelInfo::Type::Battery>{
-    using DataType = std::vector<int>;
-    static ChannelInfo defaultInfo(){ return ChannelInfo::Battery(); }
+	static constexpr std::size_t MemoryBufferSize = 150000; //10 minutes for 250 Hz sampling frequency;
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::Resistance>{
-    using DataType = std::vector<resistance_sample_t>;
+    using DataType = resistance_sample_t;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Resistance(); }
+	static constexpr std::size_t MemoryBufferSize = 150000;
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::Respiration>{
-    using DataType = std::vector<double>;
+    using DataType = double;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Respiration(); }
+	static constexpr float SamplingFrequency = 100.0f;
+	static constexpr std::size_t MemoryBufferSize = 60000;
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::MEMS>{
-    using DataType = std::vector<MEMS>;
+    using DataType = MEMS;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::MEMS(); }
+	static constexpr float SamplingFrequency = 100.0f;
+	static constexpr std::size_t MemoryBufferSize = 60000;
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::Orientation>{
-    using DataType = std::vector<Quaternion>;
+    using DataType = Quaternion;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Orientation(); }
+	static constexpr float SamplingFrequency = 100.0f;
+	static constexpr std::size_t MemoryBufferSize = 60000;
+};
+
+template <>
+struct ChannelTraits<ChannelInfo::Type::Pedometer> {
+	using DataType = int;
+	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
+	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
+	static ChannelInfo defaultInfo() { return ChannelInfo::Pedometer(); }
+	static constexpr float SamplingFrequency = 100.0f;
+	static constexpr std::size_t MemoryBufferSize = 60000;
+};
+
+template <>
+struct ChannelTraits<ChannelInfo::Type::Battery> {
+	using DataType = int;
+	using CallbackFunctionType = std::function<void(const DataType &)>;
+	using DataListenerType = ListenerPtr<void, const DataType &>;
+	static ChannelInfo defaultInfo() { return ChannelInfo::Battery(); }
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::ConnectionStats>{
-    using DataType = std::vector<int>;
+    using DataType = int;
+	using CallbackFunctionType = std::function<void(const DataType &)>;
+	using DataListenerType = ListenerPtr<void, const DataType &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::ConnectionStats(); }
 };
 
 template <>
 struct ChannelTraits<ChannelInfo::Type::ElectrodesState>{
-    using DataType = std::vector<ElectrodeState>;
+    using DataType = ElectrodeState;
+	using CallbackFunctionType = std::function<void(const DataType &)>;
+	using DataListenerType = ListenerPtr<void, const DataType &>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::ElectrodesState(); }
 };
 
-template <>
-struct ChannelTraits<ChannelInfo::Type::Pedometer>{
-    using DataType = std::vector<int>;
-    static ChannelInfo defaultInfo(){ return ChannelInfo::Pedometer(); }
-};
 
 template <ChannelInfo::Type InfoType>
-using channel_data_t = typename ChannelTraits<InfoType>::DataType;
+using ChannelDataType = typename ChannelTraits<InfoType>::DataType;
+
+template <ChannelInfo::Type InfoType>
+using ChannelDataCallbackFunctionType = typename ChannelTraits<InfoType>::CallbackFunctionType;
+
+template <ChannelInfo::Type InfoType>
+using ChannelDataListenerType = typename ChannelTraits<InfoType>::DataListenerType;
 
 template <ChannelInfo::Type InfoType>
 ChannelInfo default_channel_info(){

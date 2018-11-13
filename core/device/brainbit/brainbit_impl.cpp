@@ -62,8 +62,8 @@ bool BrainbitImpl::execute(Command command){
     }
 }
 
-ListenerPtr<void, const std::vector<int> &>
-BrainbitImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+ListenerPtr<void, const int &>
+BrainbitImpl::subscribeBatteryDataReceived(std::function<void(const int &)> callback, ChannelInfo) {
 	return mBatteryNotifier.addListener(callback);
 }
 
@@ -104,8 +104,8 @@ BrainbitImpl::subscribeRespirationDataReceived(std::function<void(const std::vec
 	throw std::runtime_error("Unable to subscribe respiration data notifications");
 }
 
-ListenerPtr<void, const std::vector<int> &>
-BrainbitImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+ListenerPtr<void, const int &>
+BrainbitImpl::subscribeConnectionStatsDataReceived(std::function<void(const int &)> callback, ChannelInfo) {
 	return mConnectionStatsNotifier.addListener(callback);
 }
 
@@ -114,8 +114,8 @@ BrainbitImpl::subscribePedometerDataReceived(std::function<void(const std::vecto
 	throw std::runtime_error("Unable to subscribe pedometer data notifications");
 }
 
-ListenerPtr<void, const std::vector<ElectrodeState> &>
-BrainbitImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback, ChannelInfo) {
+ListenerPtr<void, const ElectrodeState &>
+BrainbitImpl::subscribeElectrodesDataReceived(std::function<void(const ElectrodeState &)> callback, ChannelInfo) {
 	throw std::runtime_error("Unable to subscribe electrodes state data notifications");
 }
 

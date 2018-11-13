@@ -36,8 +36,8 @@ public:
     std::size_t packetsLost() override;
     std::size_t packetsReceived() override;
 
-	ListenerPtr<void, const std::vector<int> &>
-		subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+	ListenerPtr<void, const int &>
+		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<signal_sample_t> &>
 		subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) override;
@@ -54,27 +54,27 @@ public:
 	ListenerPtr<void, const std::vector<double> &>
 		subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<int> &>
-		subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+	ListenerPtr<void, const int &>
+		subscribeConnectionStatsDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<int> &>
 		subscribePedometerDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<ElectrodeState> &>
-		subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)>, ChannelInfo) override;
+	ListenerPtr<void, const ElectrodeState &>
+		subscribeElectrodesDataReceived(std::function<void(const ElectrodeState &)>, ChannelInfo) override;
 
 private:
     static constexpr const char *class_name = "CallibriImpl";
 
 	PacketSequence<65500> mPacketCounter;
-	Notifier<void, const std::vector<int> &> mBatteryNotifier{ class_name };
+	Notifier<void, const int &> mBatteryNotifier{ class_name };
 	Notifier<void, const std::vector<signal_sample_t> &> mSignalNotifier{ class_name };
 	Notifier<void, const std::vector<MEMS> &> mMEMSNotifier{ class_name };
 	Notifier<void, const std::vector<Quaternion> &> mOrientationNotifier{ class_name };
 	Notifier<void, const std::vector<double> &> mRespirationNotifier{ class_name };
-	Notifier<void, const std::vector<int> &> mConnectionStatsNotifier{ class_name };
+	Notifier<void, const int &> mConnectionStatsNotifier{ class_name };
 	Notifier<void, const std::vector<int> &> mPedometerNotifier{ class_name };
-	Notifier<void, const std::vector<ElectrodeState> &> mElectrodesNotifier{ class_name };
+	Notifier<void, const ElectrodeState &> mElectrodesNotifier{ class_name };
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
     param_changed_callback_t parameterChangedCallback;

@@ -30,8 +30,8 @@ public:
     std::size_t packetsLost() override;
     std::size_t packetsReceived() override;
 
-	ListenerPtr<void, const std::vector<int> &>
-		subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+	ListenerPtr<void, const int &>
+		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<signal_sample_t> &>
 		subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) override;
@@ -48,14 +48,14 @@ public:
 	ListenerPtr<void, const std::vector<double> &>
 		subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<int> &>
-		subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
+	ListenerPtr<void, const int &>
+		subscribeConnectionStatsDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<int> &>
 		subscribePedometerDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<ElectrodeState> &>
-		subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)>, ChannelInfo) override;
+	ListenerPtr<void, const ElectrodeState &>
+		subscribeElectrodesDataReceived(std::function<void(const ElectrodeState &)>, ChannelInfo) override;
 
 private:
     using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;
@@ -63,10 +63,10 @@ private:
     static constexpr const char *class_name = "BrainbitImpl";
     static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 250 Hz fsam and 4 channels
 
-	Notifier<void, const std::vector<int> &> mBatteryNotifier{ class_name };
+	Notifier<void, const int &> mBatteryNotifier{ class_name };
 	std::unordered_map<std::size_t, Notifier<void, const std::vector<signal_sample_t> &>> mSignalNotifierMap;
 	std::unordered_map<std::size_t, Notifier<void, const std::vector<resistance_sample_t> &>> mResistanceNotifierMap;
-	Notifier<void, const std::vector<int> &> mConnectionStatsNotifier{ class_name };
+	Notifier<void, const int &> mConnectionStatsNotifier{ class_name };
 
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;

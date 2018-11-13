@@ -2,7 +2,7 @@
 #define SPECTRUM_CHANNEL_H
 
 #include <memory>
-#include "base_channel.h"
+#include "data_channels.h"
 #include "lib_export.h"
 
 namespace Neuro {
@@ -20,9 +20,7 @@ public:
     data_container readData(data_offset_t, data_length_t) const override;
     data_length_t totalLength() const noexcept override;
     data_length_t bufferSize() const noexcept override;
-    std::weak_ptr<Device> underlyingDevice() const noexcept override;
     sampling_frequency_t samplingFrequency() const noexcept override;
-    void setSamplingFrequency(sampling_frequency_t) override;
     double hzPerSpectrumSample() const noexcept;
 };
 

@@ -82,8 +82,8 @@ bool CallibriImpl::execute(Command command){
     }
 }
 
-ListenerPtr<void, const std::vector<int> &>
-CallibriImpl::subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+ListenerPtr<void, const int &>
+CallibriImpl::subscribeBatteryDataReceived(std::function<void(const int &)> callback, ChannelInfo) {
 	return mBatteryNotifier.addListener(callback);
 }
 
@@ -112,8 +112,8 @@ CallibriImpl::subscribeRespirationDataReceived(std::function<void(const std::vec
 	return mRespirationNotifier.addListener(callback);
 }
 
-ListenerPtr<void, const std::vector<int> &>
-CallibriImpl::subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)> callback, ChannelInfo) {
+ListenerPtr<void, const int &>
+CallibriImpl::subscribeConnectionStatsDataReceived(std::function<void(const int &)> callback, ChannelInfo) {
 	return mConnectionStatsNotifier.addListener(callback);
 }
 
@@ -122,8 +122,8 @@ CallibriImpl::subscribePedometerDataReceived(std::function<void(const std::vecto
 	return mPedometerNotifier.addListener(callback);
 }
 
-ListenerPtr<void, const std::vector<ElectrodeState> &>
-CallibriImpl::subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)> callback, ChannelInfo) {
+ListenerPtr<void, const ElectrodeState &>
+CallibriImpl::subscribeElectrodesDataReceived(std::function<void(const ElectrodeState &)> callback, ChannelInfo) {
 	return mElectrodesNotifier.addListener(callback);
 }
 

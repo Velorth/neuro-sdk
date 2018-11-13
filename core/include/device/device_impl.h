@@ -8,11 +8,11 @@
 #include "common_types.h"
 #include "task_queue.h"
 #include "event_notifier.h"
+#include "channels/info/channel_info.h"
 
 namespace Neuro {
 
 class BleDevice;
-class ChannelInfo;
 enum class Command;
 enum class Parameter;
 enum class ParamAccess;
@@ -20,9 +20,6 @@ class ParameterReader;
 class ParameterWriter;
 template <typename>
 class BaseBuffer;
-struct MEMS;
-struct Quaternion;
-enum class ElectrodeState;
 
 class DeviceImpl {
 public:
@@ -40,8 +37,8 @@ public:
     virtual std::size_t packetsLost() = 0;
     virtual std::size_t packetsReceived() = 0;
 
-	virtual ListenerPtr<void, const std::vector<int> &>
-    subscribeBatteryDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) = 0;
+	virtual ChannelDataListenerType<ChannelInfo::Type::Battery>
+    subscribeBatteryDataReceived(ChannelDataCallbackFunctionType<ChannelInfo::Type::Battery>, ChannelInfo) = 0;
 
 	virtual ListenerPtr<void, const std::vector<signal_sample_t> &>
     subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) = 0;
@@ -58,14 +55,14 @@ public:
 	virtual ListenerPtr<void, const std::vector<double> &>
     subscribeRespirationDataReceived(std::function<void(const std::vector<double> &)>, ChannelInfo) = 0;
 
-	virtual ListenerPtr<void, const std::vector<int> &>
-    subscribeConnectionStatsDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) = 0;
+	virtual ChannelDataListenerType<ChannelInfo::Type::ConnectionStats>
+    subscribeConnectionStatsDataReceived(ChannelDataCallbackFunctionType<ChannelInfo::Type::ConnectionStats>, ChannelInfo) = 0;
 
 	virtual ListenerPtr<void, const std::vector<int> &>
     subscribePedometerDataReceived(std::function<void(const std::vector<int> &)>, ChannelInfo) = 0;
 
-	virtual ListenerPtr<void, const std::vector<ElectrodeState> &>
-    subscribeElectrodesDataReceived(std::function<void(const std::vector<ElectrodeState> &)>, ChannelInfo) = 0;
+	virtual ChannelDataListenerType<ChannelInfo::Type::ElectrodesState>
+    subscribeElectrodesDataReceived(ChannelDataCallbackFunctionType<ChannelInfo::Type::ElectrodesState>, ChannelInfo) = 0;
 
 protected:    
     std::shared_ptr<BleDevice> mBleDevice;

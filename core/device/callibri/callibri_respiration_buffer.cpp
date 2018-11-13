@@ -16,11 +16,11 @@ void CallibriRespirationBuffer::onDataReceived(packet_number_t number, const Byt
     }
     auto value = respData.value * MSBValue;
 
-    auto packetsLost = mPacketSequence.onNewPacket(number);
+    /*auto packetsLost = mPacketSequence.onNewPacket(number);
     if (packetsLost > 0){
         std::vector<resp_sample_t> zeroSamples(packetsLost, 0.0);
         mRespirationBuffer.append(zeroSamples);
-    }
+    }*/
 
     mRespirationBuffer.append({value});
 }

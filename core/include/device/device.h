@@ -43,19 +43,12 @@ public:
     bool setParam(typename ParamValue<P>::Type value);
 
     template <ChannelInfo::Type Channel>
-    ListenerPtr<void, const channel_data_t<Channel> &>
-    subscribeDataReceived(std::function<void(const channel_data_t<Channel> &)>,
+	ChannelDataListenerType<Channel>
+    subscribeDataReceived(ChannelDataCallbackFunctionType<Channel>,
                           ChannelInfo info = default_channel_info<Channel>());
 
 private:
     friend class DeviceFactory;
-    friend class BatteryChannel;
-    friend class ElectrodeStateChannel;
-    friend class SignalChannel;
-    friend class RespirationChannel;
-    friend class MemsChannel;
-    friend class OrientationChannel;
-    friend class ConnectionStatsChannel;
     Device(std::unique_ptr<DeviceImpl>);
 };
 

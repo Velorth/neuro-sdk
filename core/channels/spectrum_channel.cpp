@@ -15,6 +15,8 @@ public:
     Impl(std::shared_ptr<BaseChannel<double>> source_channel) :
         mSourceChannel(source_channel){
         Expects(mSourceChannel != nullptr);
+
+		SignalChannel channel(std::shared_ptr<Device>(nullptr));
     }
 
     length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
@@ -49,10 +51,6 @@ public:
 
     data_length_t bufferSize() const noexcept {
         return mSourceChannel->bufferSize();
-    }
-
-    std::weak_ptr<Device> underlyingDevice() const noexcept {
-        return mSourceChannel->underlyingDevice();
     }
 
     sampling_frequency_t samplingFrequency() const noexcept {
@@ -97,16 +95,8 @@ data_length_t SpectrumChannel::bufferSize() const noexcept {
     return mImpl->bufferSize();
 }
 
-std::weak_ptr<Device> SpectrumChannel::underlyingDevice() const noexcept {
-    return mImpl->underlyingDevice();
-}
-
 sampling_frequency_t SpectrumChannel::samplingFrequency() const noexcept {
     return mImpl->samplingFrequency();
-}
-
-void SpectrumChannel::setSamplingFrequency(sampling_frequency_t) {
-    throw std::runtime_error("Unable set sampling frequency for spectrum channel. It must be set for source channel.");
 }
 
 double SpectrumChannel::hzPerSpectrumSample() const noexcept {

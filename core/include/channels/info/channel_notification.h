@@ -6,40 +6,40 @@
 namespace Neuro {
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Battery> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Battery>(std::function<void(const channel_data_t<ChannelInfo::Type::Battery> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Battery>
+Device::subscribeDataReceived<ChannelInfo::Type::Battery>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Battery>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Signal> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Signal>(std::function<void(const channel_data_t<ChannelInfo::Type::Signal> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Signal>
+Device::subscribeDataReceived<ChannelInfo::Type::Signal>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Signal>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Resistance> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Resistance>(std::function<void(const channel_data_t<ChannelInfo::Type::Resistance> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Resistance>
+Device::subscribeDataReceived<ChannelInfo::Type::Resistance>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Resistance>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::MEMS> &>
-Device::subscribeDataReceived<ChannelInfo::Type::MEMS>(std::function<void(const channel_data_t<ChannelInfo::Type::MEMS> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::MEMS>
+Device::subscribeDataReceived<ChannelInfo::Type::MEMS>(ChannelDataCallbackFunctionType<ChannelInfo::Type::MEMS>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Orientation> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Orientation>(std::function<void(const channel_data_t<ChannelInfo::Type::Orientation> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Orientation>
+Device::subscribeDataReceived<ChannelInfo::Type::Orientation>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Orientation>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::ElectrodesState> &>
-Device::subscribeDataReceived<ChannelInfo::Type::ElectrodesState>(std::function<void(const channel_data_t<ChannelInfo::Type::ElectrodesState> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::ElectrodesState>
+Device::subscribeDataReceived<ChannelInfo::Type::ElectrodesState>(ChannelDataCallbackFunctionType<ChannelInfo::Type::ElectrodesState>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Respiration> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Respiration>(std::function<void(const channel_data_t<ChannelInfo::Type::Respiration> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Respiration>
+Device::subscribeDataReceived<ChannelInfo::Type::Respiration>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Respiration>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::ConnectionStats> &>
-Device::subscribeDataReceived<ChannelInfo::Type::ConnectionStats>(std::function<void(const channel_data_t<ChannelInfo::Type::ConnectionStats> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::ConnectionStats>
+Device::subscribeDataReceived<ChannelInfo::Type::ConnectionStats>(ChannelDataCallbackFunctionType<ChannelInfo::Type::ConnectionStats>, ChannelInfo);
 
 template <>
-ListenerPtr<void, const channel_data_t<ChannelInfo::Type::Pedometer> &>
-Device::subscribeDataReceived<ChannelInfo::Type::Pedometer>(std::function<void(const channel_data_t<ChannelInfo::Type::Pedometer> &)>, ChannelInfo);
+ChannelDataListenerType<ChannelInfo::Type::Pedometer>
+Device::subscribeDataReceived<ChannelInfo::Type::Pedometer>(ChannelDataCallbackFunctionType<ChannelInfo::Type::Pedometer>, ChannelInfo);
 
 }
 

@@ -5,7 +5,6 @@
 #include "device/brainbit/brainbit_impl.h"
 #include "device/request_scheduler.h"
 #include "device/callibri/callibri_common_parameters.h"
-#include "device/callibri/callibri_buffer_collection.h"
 #include "channels/info/channel_info.h"
 
 namespace Neuro {
@@ -23,8 +22,7 @@ std::unique_ptr<Device, DeviceDeleter> CallibriDeviceFactory::create(std::unique
     auto sharedDevice = std::shared_ptr<BleDevice>(ble_device.release());
     auto requestHandler = std::make_shared<CallibriRequestScheduler>();
     auto commonParams = std::make_shared<CallibriCommonParameters>(requestHandler);
-    auto bufferCollection = std::make_shared<CallibriBufferCollection>();
-    auto callibriImpl = std::make_unique<CallibriImpl>(sharedDevice, requestHandler, commonParams, bufferCollection);
+    auto callibriImpl = std::make_unique<CallibriImpl>(sharedDevice, requestHandler, commonParams);
     auto device = createFromImpl(std::move(callibriImpl));
     Ensures(device != nullptr);
     return device;

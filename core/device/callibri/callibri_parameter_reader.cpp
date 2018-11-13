@@ -10,12 +10,10 @@ namespace Neuro {
 CallibriParameterReader::CallibriParameterReader(std::shared_ptr<BleDevice> ble_device,
                                                  param_changed_callback_t callback,
                                                  std::shared_ptr<CallibriCommonParameters> common_params,
-                                                 std::shared_ptr<CallibriRequestScheduler> request_handler,
-                                                 std::weak_ptr<CallibriBufferCollection> buffer_collection) :
+                                                 std::shared_ptr<CallibriRequestScheduler> request_handler) :
     ParameterReader(ble_device, callback),
     mCommonParameters(common_params),
-    mRequestHandler(request_handler),
-    mBufferCollection(buffer_collection){
+    mRequestHandler(request_handler){
 
 }
 
@@ -215,36 +213,6 @@ bool CallibriParameterReader::initEcho(){
     LOG_ERROR("Unable load device params: firmware mode");
     return false;
 
-}
-
-void CallibriParameterReader::createBuffers(std::vector<CallibriModule> modules){
-    auto bufferCollectionPtr = mBufferCollection.lock();
-    if (!bufferCollectionPtr){
-        throw std::runtime_error("Unable create buffers. Collection ptr is null");
-    }
-
-    if (std::find(modules.begin(), modules.end(), CallibriModule::Signal) != modules.end()
-            && !bufferCollectionPtr->hasSignalBuffer()){
-        auto signalBuffer = std::make_unique<CallibriSignalBuffer>(mCommonParameters);
-        bufferCollectionPtr->setSignalBuffer(std::move(signalBuffer));
-    }
-
-    if (std::find(modules.begin(), modules.end(), CallibriModule::Respiration) != modules.end()
-            && !bufferCollectionPtr->hasRespirationBuffer()){
-        auto respBuffer = std::make_unique<CallibriRespirationBuffer>();
-        bufferCollectionPtr->setRespirationBuffer(std::move(respBuffer));
-    }
-
-    if (std::find(modules.begin(), modules.end(), CallibriModule::MEMS) != modules.end()){
-        if (!bufferCollectionPtr->hasMemsBuffer()){
-            auto memsBuffer = std::make_unique<CallibriMemsBuffer>(mCommonParameters);
-            bufferCollectionPtr->setMemsBuffer(std::move(memsBuffer));
-        }
-        if (!bufferCollectionPtr->hasOrientationBuffer()){
-            auto angleBuffer = std::make_unique<CallibriOrientationBuffer>();
-            bufferCollectionPtr->setOrientationBuffer(std::move(angleBuffer));
-        }
-    }
 }
 
 }

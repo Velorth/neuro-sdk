@@ -3,11 +3,10 @@
 
 #include "signal/safe_buffer.h"
 #include "common_types.h"
-#include "callibri_buffer.h"
 
 namespace Neuro {
 
-class CallibriRespirationBuffer : public CallibriBuffer<65500> {
+class CallibriRespirationBuffer {
 public:
     CallibriRespirationBuffer() = default;
     CallibriRespirationBuffer(const CallibriRespirationBuffer &) = delete;

@@ -4,11 +4,10 @@
 #include "signal/safe_buffer.h"
 #include "channels/info/quaternion.h"
 #include "common_types.h"
-#include "callibri_buffer.h"
 
 namespace Neuro {
 
-class CallibriOrientationBuffer : public CallibriBuffer<65500> {
+class CallibriOrientationBuffer {
 public:
     CallibriOrientationBuffer() = default;
     CallibriOrientationBuffer(const CallibriOrientationBuffer &) = delete;
