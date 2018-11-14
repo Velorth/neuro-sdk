@@ -1,7 +1,6 @@
 #include "gsl/gsl_assert"
 #include "algorithm.h"
 #include <algorithm>
-#include "channels/info/channel_info.h"
 #include "channels/spectrum_channel.h"
 
 namespace Neuro {
@@ -15,11 +14,9 @@ public:
     Impl(std::shared_ptr<BaseChannel<double>> source_channel) :
         mSourceChannel(source_channel){
         Expects(mSourceChannel != nullptr);
-
-		SignalChannel channel(std::shared_ptr<Device>(nullptr));
     }
 
-    length_listener_ptr subscribeLengthChanged(length_callback_t callback) noexcept {
+    LengthListenerPtr subscribeLengthChanged(LengthCallbackType callback) noexcept {
         return mSourceChannel->subscribeLengthChanged(callback);
     }
 
@@ -49,10 +46,6 @@ public:
         return mSourceChannel->totalLength();
     }
 
-    data_length_t bufferSize() const noexcept {
-        return mSourceChannel->bufferSize();
-    }
-
     sampling_frequency_t samplingFrequency() const noexcept {
         return mSourceChannel->samplingFrequency();
     }
@@ -77,8 +70,8 @@ SpectrumChannel::SpectrumChannel(std::shared_ptr<BaseChannel<double>> source_cha
 SpectrumChannel::~SpectrumChannel(){
 }
 
-SpectrumChannel::length_listener_ptr
-SpectrumChannel::subscribeLengthChanged(length_callback_t callback) noexcept {
+SpectrumChannel::LengthListenerPtr
+SpectrumChannel::subscribeLengthChanged(LengthCallbackType callback) noexcept {
     return mImpl->subscribeLengthChanged(callback);
 }
 
@@ -89,10 +82,6 @@ SpectrumChannel::readData(data_offset_t offset, data_length_t length) const {
 
 data_length_t SpectrumChannel::totalLength() const noexcept {
     return mImpl->totalLength();
-}
-
-data_length_t SpectrumChannel::bufferSize() const noexcept {
-    return mImpl->bufferSize();
 }
 
 sampling_frequency_t SpectrumChannel::samplingFrequency() const noexcept {

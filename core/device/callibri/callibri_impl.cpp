@@ -12,16 +12,14 @@ namespace Neuro {
 
 CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                            std::shared_ptr<CallibriRequestScheduler> request_handler,
-                           std::shared_ptr<CallibriCommonParameters> common_params,
-                           std::shared_ptr<CallibriBufferCollection> buffer_collection) :
+                           std::shared_ptr<CallibriCommonParameters> common_params) :
     DeviceImpl(ble_device,
                std::make_unique<CallibriParameterReader>(ble_device,
                                                          [=](Parameter param){
                                                              onParameterChanged(param);
                                                          },
                                                          common_params,
-                                                         request_handler,
-                                                         buffer_collection),
+                                                         request_handler),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
     mCommonParams(common_params){

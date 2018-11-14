@@ -23,8 +23,7 @@ public:
 
     CallibriImpl(std::shared_ptr<BleDevice>,
                  std::shared_ptr<CallibriRequestScheduler>,
-                 std::shared_ptr<CallibriCommonParameters>,
-                 std::shared_ptr<CallibriBufferCollection>);
+                 std::shared_ptr<CallibriCommonParameters>);
 
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;

@@ -109,7 +109,6 @@ bool CallibriParameterReader::loadDeviceParams(){
     LOG_DEBUG("Requesting params");
     try {
         auto modules = mCommonParameters->syncParameters();
-        createBuffers(modules);
         return true;
     }
     catch(std::runtime_error &e){

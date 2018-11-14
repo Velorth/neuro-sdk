@@ -47,7 +47,6 @@ private:
     bool activateApplication();
     bool initAddress();
     bool initEcho();
-    void createBuffers(std::vector<CallibriModule>);
 };
 
 }
