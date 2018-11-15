@@ -1,69 +1,62 @@
-#ifndef DATA_CHANNEL_H
-#define DATA_CHANNEL_H
+#ifndef BASE_CHANNEL_H
+#define BASE_CHANNEL_H
 
-#include "channels/base_channel.h"
+#include <memory>
+#include <vector>
+#include <functional>
+#include "common_types.h"
+#include "info/channel_info.h"
 
 namespace Neuro {
 
-class Device;
+class SDK_SHARED CommonChannelInterface {
+protected:
+    using LengthCallbackType = std::function<void(data_length_t)>;
+    using LengthListenerPtr = ListenerPtr<void, data_length_t>;
 
-template <ChannelInfo::Type ChannelType>
-class DataChannel final : public BaseChannel<typename ChannelTraits<ChannelType>::DataType> {
+    CommonChannelInterface(ChannelInfo &&info) noexcept : mInfo(std::move(info)) {}
+    CommonChannelInterface(const ChannelInfo &info) : mInfo(info) {}
+	CommonChannelInterface(const CommonChannelInterface &) = default;
+	CommonChannelInterface(CommonChannelInterface &&) = default;
+    virtual ~CommonChannelInterface() = default;
+
+	CommonChannelInterface& operator=(const CommonChannelInterface &) = default;
+	CommonChannelInterface& operator=(CommonChannelInterface &&) = default;
+
 public:
-	using ChannelTraits = ChannelTraits<ChannelType>;
-	using DataType = typename ChannelTraits::DataType;
-	using BufferType = typename ChannelTraits::BufferType;
-	using DataListenerType = ChannelDataListenerType<ChannelType>;
-	using DataCallbackType = ChannelDataCallbackFunctionType<ChannelType>;
-	using LengthCallbackType = CommonChannelInterface::LengthCallbackType;
-	using LengthListenerType = CommonChannelInterface::LengthListenerPtr;
-	using DataContainer = typename BaseChannel<DataType>::data_container;
-	using DevicePtr = std::shared_ptr<Device>;
-	using DeviceWeakPtr = std::weak_ptr<Device>;
+    ChannelInfo& info() noexcept {
+        return mInfo;
+    }
 
-	explicit DataChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()) noexcept :
-		BaseChannel(std::move(channel_info)),
-		mDevice(device),
-		mDataListener(device->subscribeDataReceived<ChannelType>(mDataCallaback)) {}
-
-	DataChannel(const DevicePtr &device, ChannelInfo channel_info) :
-		DataChannel(device, std::move(channel_info)) {}
-
-	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept override {
-		return mBuffer.subscribeLengthChanged(callback);
-	}
-
-	data_length_t totalLength() const noexcept override {
-		return mBuffer.totalLength();
-	}
-
-	data_length_t bufferSize() const noexcept {
-		return mBuffer.bufferSize();
-	}
-
-	sampling_frequency_t samplingFrequency() const noexcept override {
-		return ChannelTraits::SamplingFrequency;
-	}
-
-	DataContainer readData(data_offset_t offset, data_length_t length) const override {
-		return mBuffer.readFill(offset, length, DataType{});
-	}
-
-	DeviceWeakPtr underlyingDevice() const noexcept {
-		return mDevice;
-	}
+    virtual LengthListenerPtr subscribeLengthChanged(LengthCallbackType callback) noexcept = 0;
+    virtual data_length_t totalLength() const noexcept = 0;
+    virtual sampling_frequency_t samplingFrequency() const noexcept = 0;
 
 private:
-	BufferType mBuffer;
-	DataCallbackType mDataCallaback{ [=](auto&&... data_args) {
-		mBuffer.append(ChannelTraits::preprocessData(std::forward<decltype(data_args)>(data_args)...));
-	} };
-	DevicePtr mDevice;
-	DataListenerType mDataListener;
+    ChannelInfo mInfo;
 };
 
-template<>
-sampling_frequency_t DataChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept;
+template <typename DataType>
+class DataChannel : public CommonChannelInterface {
+protected:
+    using DataContainer = std::vector<DataType>;
+
+    explicit DataChannel(ChannelInfo &&channel_info) noexcept :
+		CommonChannelInterface(std::move(channel_info)){}
+
+	explicit DataChannel(const ChannelInfo &channel_info) :
+		CommonChannelInterface(channel_info) {}
+
+	DataChannel(const DataChannel &) = default;
+	DataChannel(DataChannel &&) = default;
+
+	DataChannel& operator=(const DataChannel &) = default;
+	DataChannel& operator=(DataChannel &&) = default;
+
+public:
+    virtual ~DataChannel() = default;
+    virtual DataContainer readData(data_offset_t, data_length_t) const = 0;
+};
 
 }
-#endif // DATA_CHANNEL_H
+#endif // BASE_CHANNEL_H

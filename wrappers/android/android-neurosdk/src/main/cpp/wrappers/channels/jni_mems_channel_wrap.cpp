@@ -1,3 +1,4 @@
+#include "device/device.h"
 #include "wrappers/channels/jni_mems_channel_wrap.h"
 #include "saturation_cast.h"
 #include "wrappers/channels/jni_channel_factory.h"
@@ -44,20 +45,6 @@ Java_com_neuromd_neurosdk_channels_MEMSChannel_underlyingDevice(JNIEnv *env, job
     }
     auto deviceWrap = new JniDeviceWrap(devicePtr);
     return jni::java_object<decltype(deviceWrap)>(deviceWrap);
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_MEMSChannel_setSamplingFrequency(JNIEnv *env,
-                                                                       jobject instance,
-                                                                       jfloat frequency) {
-    auto &memsChannelWrap = *extract_pointer<JniMEMSChannelWrap>(env, instance);
-    try {
-        memsChannelWrap->setSamplingFrequency(frequency);
-    }
-    catch (std::runtime_error &e) {
-        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
-        return;
-    }
 }
 
 JNIEXPORT jfloat JNICALL

@@ -31,7 +31,6 @@ if (WIN32)
 			"Debug;Release" FORCE)
 	SET (RELEASE_BUILD_NAME "Release")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /MD")
 else () 
@@ -181,15 +180,8 @@ file(GLOB SHARED_HEADERS_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/include/common_types
 								${CMAKE_CURRENT_SOURCE_DIR}/include/logger.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/task_queue.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/lib_export.h)
-file(GLOB SHARED_HEADERS_CHANNELS 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/base_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/battery_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/connection_stats_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/electrode_state_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/mems_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/orientation_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/resistance_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/respiration_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/signal_channel.h
+file(GLOB SHARED_HEADERS_CHANNELS 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/data_channel.h
+									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/device_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/spectrum_channel.h)
 file(GLOB SHARED_HEADERS_CHANNELS_INFO 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/channel_info.h
 										${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/mems_data.h

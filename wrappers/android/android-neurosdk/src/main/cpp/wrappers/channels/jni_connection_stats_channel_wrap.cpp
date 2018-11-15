@@ -2,7 +2,6 @@
 #include "wrappers/channels/jni_channel_factory.h"
 #include "wrappers/device/jni_device_wrap.h"
 #include "wrappers/channels/jni_connection_stats_channel_wrap.h"
-#include "channels/connection_stats_channel.h"
 
 
 extern "C"
@@ -54,7 +53,7 @@ Java_com_neuromd_neurosdk_channels_ConnectionStatsChannel_setSamplingFrequency(J
                                                                         jfloat frequency) {
     auto &connectionStatsChannelWrap = *extract_pointer<JniConnectionStatsChannelWrap>(env, instance);
     try {
-        connectionStatsChannelWrap->setSamplingFrequency(frequency);
+       // connectionStatsChannelWrap->setSamplingFrequency(frequency);
     }
     catch (std::runtime_error &e) {
         jni::java_throw(env, "java/lang/UnsupportedOperationException", e);

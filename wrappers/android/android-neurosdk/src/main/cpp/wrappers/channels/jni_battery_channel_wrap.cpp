@@ -2,7 +2,6 @@
 #include "wrappers/channels/jni_channel_factory.h"
 #include "wrappers/device/jni_device_wrap.h"
 #include "wrappers/channels/jni_battery_channel_wrap.h"
-#include "channels/battery_channel.h"
 #include "logger.h"
 
 extern "C"
@@ -46,20 +45,6 @@ Java_com_neuromd_neurosdk_channels_BatteryChannel_underlyingDevice(JNIEnv *env, 
     }
     auto deviceWrap = new JniDeviceWrap(devicePtr);
     return jni::java_object<decltype(deviceWrap)>(deviceWrap);;
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_BatteryChannel_setSamplingFrequency(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jfloat frequency) {
-    auto &batteryChannelWrap = *extract_pointer<JniBatteryChannelWrap>(env, instance);
-    try {
-        batteryChannelWrap->setSamplingFrequency(frequency);
-    }
-    catch (std::runtime_error &e) {
-        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
-        return;
-    }
 }
 
 JNIEXPORT jfloat JNICALL

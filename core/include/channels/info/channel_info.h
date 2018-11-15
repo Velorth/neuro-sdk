@@ -88,7 +88,7 @@ struct ChannelTraits<ChannelInfo::Type::Signal>{
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 150000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Signal(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 };
 
 template <>
@@ -98,7 +98,7 @@ struct ChannelTraits<ChannelInfo::Type::Resistance>{
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 150000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Resistance(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 };
 
 template <>
@@ -108,7 +108,7 @@ struct ChannelTraits<ChannelInfo::Type::Respiration>{
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 60000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Respiration(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 	static constexpr float SamplingFrequency = 100.0f;
 };
 
@@ -119,7 +119,7 @@ struct ChannelTraits<ChannelInfo::Type::MEMS>{
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 60000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::MEMS(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 	static constexpr float SamplingFrequency = 100.0f;
 };
 
@@ -130,7 +130,7 @@ struct ChannelTraits<ChannelInfo::Type::Orientation>{
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 60000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Orientation(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 	static constexpr float SamplingFrequency = 100.0f;
 };
 
@@ -141,7 +141,7 @@ struct ChannelTraits<ChannelInfo::Type::Pedometer> {
 	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
 	using BufferType = SafeBuffer<DataType, 60000>;
 	static ChannelInfo defaultInfo() { return ChannelInfo::Pedometer(); }
-	static std::vector<DataType> preprocessData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
 	static constexpr float SamplingFrequency = 100.0f;
 };
 
@@ -152,7 +152,8 @@ struct ChannelTraits<ChannelInfo::Type::Battery> {
 	using DataListenerType = ListenerPtr<void, const DataType &>;
 	using BufferType = SafeBuffer<DataType, 600>;
 	static ChannelInfo defaultInfo() { return ChannelInfo::Battery(); }
-	static std::vector<DataType> preprocessData(const DataType &raw_data) { return { raw_data }; }
+	static std::vector<DataType> forwardData(const DataType &raw_data) { return { raw_data }; }
+	static constexpr float SamplingFrequency = 0.2f;
 };
 
 template <>
@@ -162,7 +163,8 @@ struct ChannelTraits<ChannelInfo::Type::ConnectionStats>{
 	using DataListenerType = ListenerPtr<void, const DataType &>;
 	using BufferType = SafeBuffer<DataType, 600>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::ConnectionStats(); }
-	static std::vector<DataType> preprocessData(const DataType &raw_data) { return { raw_data }; }
+	static std::vector<DataType> forwardData(const DataType &raw_data) { return { raw_data }; }
+	static constexpr float SamplingFrequency = 1.0f;
 };
 
 template <>
@@ -172,7 +174,8 @@ struct ChannelTraits<ChannelInfo::Type::ElectrodesState>{
 	using DataListenerType = ListenerPtr<void, const DataType &>;
 	using BufferType = SafeBuffer<DataType, 600>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::ElectrodesState(); }
-	static std::vector<DataType> preprocessData(const DataType &raw_data) { return { raw_data }; }
+	static std::vector<DataType> forwardData(const DataType &raw_data) { return { raw_data }; }
+	static constexpr float SamplingFrequency = 1.0f;
 };
 
 template <ChannelInfo::Type InfoType>

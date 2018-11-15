@@ -20,6 +20,7 @@
 #include <android/log.h>
 #include "wrappers/device/jni_device_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
+#include "device/device.h"
 #include "device/param_values.h"
 #include "filter/digital_filter.h"
 #include "filter/iir_filter.h"

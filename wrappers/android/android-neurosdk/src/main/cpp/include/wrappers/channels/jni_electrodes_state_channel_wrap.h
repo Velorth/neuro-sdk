@@ -19,9 +19,10 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/electrode_state_channel.h"
+#include "device/device.h"
+#include "channels/device_channel.h"
 
-class JniElectrodesStateChannelWrap : public JniPtrWrap<Neuro::ElectrodeStateChannel> {
+class JniElectrodesStateChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::ElectrodesState>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:

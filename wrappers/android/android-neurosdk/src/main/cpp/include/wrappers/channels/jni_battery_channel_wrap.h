@@ -19,9 +19,10 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/battery_channel.h"
+#include "device/device.h"
+#include "channels/device_channel.h"
 
-class JniBatteryChannelWrap : public JniPtrWrap<Neuro::BatteryChannel> {
+class JniBatteryChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Battery>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:

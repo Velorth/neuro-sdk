@@ -17,11 +17,12 @@
 #ifndef ANDROID_JNI_MEMS_CHANNEL_WRAP_H
 #define ANDROID_JNI_MEMS_CHANNEL_WRAP_H
 
-#include "channels/mems_channel.h"
+#include "channels/device_channel.h"
 #include "wrappers/jni_ptr_wrap.h"
+#include "device/device.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
 
-class JniMEMSChannelWrap : public JniPtrWrap<Neuro::MemsChannel> {
+class JniMEMSChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::MEMS>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:

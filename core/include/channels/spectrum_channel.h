@@ -2,24 +2,23 @@
 #define SPECTRUM_CHANNEL_H
 
 #include <memory>
-#include "base_channel.h"
+#include "data_channel.h"
 #include "lib_export.h"
 
 namespace Neuro {
 
-class SDK_SHARED SpectrumChannel final : public BaseChannel<double> {
+class SDK_SHARED SpectrumChannel final : public DataChannel<double> {
 private:
-    class Impl;
-    std::unique_ptr<Impl> mImpl;
+	std::shared_ptr<DataChannel<double>> mSourceChannel;
 
 public:
-    SpectrumChannel(std::shared_ptr<BaseChannel<double>>);
-    ~SpectrumChannel();
+    SpectrumChannel(std::shared_ptr<DataChannel<double>>);
 
     LengthListenerPtr subscribeLengthChanged(LengthCallbackType) noexcept override;
-    data_container readData(data_offset_t, data_length_t) const override;
+    DataContainer readData(data_offset_t, data_length_t) const override;
     data_length_t totalLength() const noexcept override;
     sampling_frequency_t samplingFrequency() const noexcept override;
+	std::size_t spectrumLength() const noexcept;
     double hzPerSpectrumSample() const noexcept;
 };
 

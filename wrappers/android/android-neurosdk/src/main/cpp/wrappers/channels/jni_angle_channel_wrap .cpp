@@ -46,20 +46,6 @@ Java_com_neuromd_neurosdk_channels_OrientationChannel_underlyingDevice(JNIEnv *e
     return jni::java_object<decltype(deviceWrap)>(deviceWrap);
 }
 
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_OrientationChannel_setSamplingFrequency(JNIEnv *env,
-                                                                       jobject instance,
-                                                                       jfloat frequency) {
-    auto &angleChannelWrap = *extract_pointer<JniOrientationChannelWrap>(env, instance);
-    try {
-        angleChannelWrap->setSamplingFrequency(frequency);
-    }
-    catch (std::runtime_error &e) {
-        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
-        return;
-    }
-}
-
 JNIEXPORT jfloat JNICALL
 Java_com_neuromd_neurosdk_channels_OrientationChannel_samplingFrequency(JNIEnv *env,
                                                                     jobject instance) {

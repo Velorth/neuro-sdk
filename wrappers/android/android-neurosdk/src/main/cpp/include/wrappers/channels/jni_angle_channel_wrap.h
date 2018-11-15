@@ -19,9 +19,10 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/orientation_channel.h"
+#include "device/device.h"
+#include "channels/device_channel.h"
 
-class JniOrientationChannelWrap : public JniPtrWrap<Neuro::OrientationChannel> {
+class JniOrientationChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Orientation>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:

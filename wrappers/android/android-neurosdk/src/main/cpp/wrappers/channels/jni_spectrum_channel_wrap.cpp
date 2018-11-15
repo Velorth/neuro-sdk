@@ -47,31 +47,6 @@ Java_com_neuromd_neurosdk_channels_SpectrumChannel_deleteNative(JNIEnv *env, job
     deleteNativeObject<JniSpectrumChannelWrap>(env, instance);
 }
 
-JNIEXPORT jobject JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    auto devicePtr = spectrumChannelWrap->underlyingDevice().lock();
-    if (!devicePtr){
-        return nullptr;
-    }
-    auto deviceWrap = new JniDeviceWrap(devicePtr);
-    return jni::java_object<decltype(deviceWrap)>(deviceWrap);
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_setSamplingFrequency(JNIEnv *env,
-                                                                       jobject instance,
-                                                                       jfloat frequency) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    try {
-        spectrumChannelWrap->setSamplingFrequency(frequency);
-    }
-    catch (std::runtime_error &e) {
-        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
-        return;
-    }
-}
-
 JNIEXPORT jfloat JNICALL
 Java_com_neuromd_neurosdk_channels_SpectrumChannel_samplingFrequency(JNIEnv *env,
                                                                     jobject instance) {

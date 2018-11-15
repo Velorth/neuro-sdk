@@ -19,9 +19,10 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/respiration_channel.h"
+#include "device/device.h"
+#include "channels/device_channel.h"
 
-class JniRespirationChannelWrap : public JniPtrWrap<Neuro::RespirationChannel> {
+class JniRespirationChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Respiration>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:

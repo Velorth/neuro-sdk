@@ -19,9 +19,10 @@
 
 #include "wrappers/jni_ptr_wrap.h"
 #include "wrappers/channels/jni_channel_info_wrap.h"
-#include "channels/resistance_channel.h"
+#include "device/device.h"
+#include "channels/device_channel.h"
 
-class JniResistanceChannelWrap : public JniPtrWrap<Neuro::ResistanceChannel> {
+class JniResistanceChannelWrap : public JniPtrWrap<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>> {
 public:
     void subscribeLengthChanged(jobject stateChangedSubscriberRef);
 public:
