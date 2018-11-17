@@ -27,6 +27,7 @@
 #include "filter/low_pass_filter.h"
 #include "filter/high_pass_filter.h"
 #include "filter/band_stop_filter.h"
+#include "filter/cascade_filter.h"
 
 
 inline Neuro::ChannelInfo extractInfo(JNIEnv *env, jobject info) {
@@ -50,7 +51,7 @@ inline Neuro::ChannelInfo extractInfo(JNIEnv *env, jobject info) {
     return channelInfo;
 }
 
-inline DSP::DigitalFilterPtr<double> filterFromName(const std::string &filter_name) {
+inline std::unique_ptr<DSP::DigitalFilter<double>> filterFromName(const std::string &filter_name) {
     if (filter_name == "LowPass_1Hz_SF125") {
         return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<1, 2, 125>>>();
     } else if (filter_name == "LowPass_1Hz_SF125_Reverse") {
@@ -94,11 +95,12 @@ inline DSP::DigitalFilterPtr<double> filterFromName(const std::string &filter_na
     }
 }
 
-inline std::vector<DSP::DigitalFilterPtr<double>> createFilters(JNIEnv *env, jobjectArray filterNames) {
+inline auto createCascadeFilterFromArray(JNIEnv *env,
+                                                                               jobjectArray filterNames) {
     auto commandEnumClass = env->FindClass("com/neuromd/neurosdk/channels/Filter");
     auto nameMethodID = env->GetMethodID(commandEnumClass, "name", "()Ljava/lang/String;");
     auto count = env->GetArrayLength(filterNames);
-    std::vector<DSP::DigitalFilterPtr<double>> filters;
+    std::vector<std::unique_ptr<DSP::DigitalFilter<double>>> filters;
     for (auto i = 0; i < count; ++i){
         auto enumObj = env->GetObjectArrayElement(filterNames, i);
         auto nameString = static_cast<jstring>(env->CallObjectMethod(enumObj, nameMethodID));
@@ -107,7 +109,7 @@ inline std::vector<DSP::DigitalFilterPtr<double>> createFilters(JNIEnv *env, job
         env->ReleaseStringUTFChars(nameString, enumName);
         env->DeleteLocalRef(nameString);
     }
-    return filters;
+    return DSP::make_cascade_filter<std::unique_ptr>(std::move(filters));
 }
 
 
@@ -148,8 +150,8 @@ template <typename ChannelWrap>
 jlong createChannelFromDevice(JNIEnv *env, jobject device, jobjectArray filterNames){
     auto &deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
     try{
-        auto filters = createFilters(env, filterNames);
-        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, std::move(filters));
+        auto filter = createCascadeFilterFromArray(env, filterNames);
+        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, std::make_unique<decltype(filter)>(std::move(filter)));
         auto channelWrap = new ChannelWrap(channel);
         return reinterpret_cast<jlong>(channelWrap);
     }
@@ -166,8 +168,8 @@ jlong createChannelFromDevice(JNIEnv *env, jobject device, jobject info, jobject
     auto &deviceWrapPtr = *extract_pointer<JniDeviceWrap>(env, device);
     try{
         auto channelInfo = extractInfo(env, info);
-        auto filters = createFilters(env, filterNames);
-        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, std::move(filters), channelInfo);
+        auto filter = createCascadeFilterFromArray(env, filterNames);
+        auto channel = std::make_shared<typename ChannelWrap::obj_t>(*deviceWrapPtr, std::make_unique<decltype(filter)>(std::move(filter)), channelInfo);
         auto channelWrap = new ChannelWrap(channel);
         return reinterpret_cast<jlong>(channelWrap);
     }

@@ -62,12 +62,6 @@ Java_com_neuromd_neurosdk_channels_SpectrumChannel_hzPerSpectrumSample(JNIEnv *e
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    return saturation_cast<jlong>(spectrumChannelWrap->bufferSize());
-}
-
-JNIEXPORT jlong JNICALL
 Java_com_neuromd_neurosdk_channels_SpectrumChannel_totalLength(JNIEnv *env, jobject instance) {
     auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
     return saturation_cast<jlong>(spectrumChannelWrap->totalLength());

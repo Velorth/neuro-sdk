@@ -47,20 +47,6 @@ Java_com_neuromd_neurosdk_channels_ConnectionStatsChannel_underlyingDevice(JNIEn
     return jni::java_object<decltype(deviceWrap)>(deviceWrap);;
 }
 
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_ConnectionStatsChannel_setSamplingFrequency(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jfloat frequency) {
-    auto &connectionStatsChannelWrap = *extract_pointer<JniConnectionStatsChannelWrap>(env, instance);
-    try {
-       // connectionStatsChannelWrap->setSamplingFrequency(frequency);
-    }
-    catch (std::runtime_error &e) {
-        jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
-        return;
-    }
-}
-
 JNIEXPORT jfloat JNICALL
 Java_com_neuromd_neurosdk_channels_ConnectionStatsChannel_samplingFrequency(JNIEnv *env,
                                                                      jobject instance) {
