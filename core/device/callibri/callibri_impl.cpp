@@ -307,11 +307,11 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
 void CallibriImpl::onSignalReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
     ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
-	if (data.size() < 18)
+	if (signalData.size() < 18)
 		return;
 
 	std::vector<signal_sample_t> samples;
-	for (auto sample = data.begin(); sample != data.end(); sample += 2) {
+	for (auto sample = signalData.begin(); sample != signalData.end(); sample += 2) {
 		ByteInterpreter<short> shortSample;
 		shortSample.bytes[0] = *sample;
 		shortSample.bytes[1] = *(sample + 1);
@@ -322,25 +322,117 @@ void CallibriImpl::onSignalReceived(const ByteBuffer &data){
 
 		samples.push_back(sampleValue);
 	}
-	//mSignalNotifierMap
+	mSignalNotifier.notifyAll(samples);
 }
 
 void CallibriImpl::onMemsReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
     ByteBuffer memsData(data.begin() + MemsDataShift, data.end());
-    //mBufferCollection->memsBuffer().onDataReceived(packetNumber, memsData);
+	constexpr std::size_t MemsDataLength = 16;
+	if (memsData.size() < MemsDataLength)
+		return;
+
+	ByteInterpreter<short> accelX;
+	accelX.bytes[0] = memsData[0];
+	accelX.bytes[1] = memsData[1];
+	auto accelXValue = accelX.value * doubleValue(mCommonParams->accelerometerSens()) / 32767;
+
+	ByteInterpreter<short> accelY;
+	accelY.bytes[0] = memsData[2];
+	accelY.bytes[1] = memsData[3];
+	auto accelYValue = accelY.value * doubleValue(mCommonParams->accelerometerSens()) / 32767;
+
+	ByteInterpreter<short> accelZ;
+	accelZ.bytes[0] = memsData[4];
+	accelZ.bytes[1] = memsData[5];
+	auto accelZValue = accelZ.value * doubleValue(mCommonParams->accelerometerSens()) / 32767;
+
+	ByteInterpreter<short> gyroX;
+	gyroX.bytes[0] = memsData[6];
+	gyroX.bytes[1] = memsData[7];
+	auto gyroXValue = gyroX.value * doubleValue(mCommonParams->gyroscopeSens()) / 32767;
+
+	ByteInterpreter<short> gyroY;
+	gyroY.bytes[0] = memsData[8];
+	gyroY.bytes[1] = memsData[9];
+	auto gyroYValue = gyroY.value * doubleValue(mCommonParams->gyroscopeSens()) / 32767;
+
+	ByteInterpreter<short> gyroZ;
+	gyroZ.bytes[0] = memsData[10];
+	gyroZ.bytes[1] = memsData[11];
+	auto gyroZValue = gyroZ.value * doubleValue(mCommonParams->gyroscopeSens()) / 32767;
+
+	mMEMSNotifier.notifyAll({ MEMS{
+							{accelXValue, accelYValue, accelZValue},
+							{gyroXValue, gyroYValue, gyroZValue}}
+		});
+
 }
 
 void CallibriImpl::onRespReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
-    ByteBuffer respData(data.begin() + RespDataShift, data.end());
-    //mBufferCollection->respirationBuffer().onDataReceived(packetNumber, respData);
+    ByteBuffer respBuffer(data.begin() + RespDataShift, data.end());
+	constexpr std::size_t RespirationDataLength = 3;
+	if (respBuffer.size() < RespirationDataLength)
+		return;
+
+	static_assert(sizeof(long) >= RespirationDataLength,
+		"Data length type does not fit into union value type");
+
+	ByteInterpreter<long> respData;
+	for (std::size_t i = 0; i < RespirationDataLength; ++i) {
+		respData.bytes[i] = respBuffer[i];
+	}
+	constexpr resp_sample_t MSBValue = 0.288e-6;
+	auto value = respData.value * MSBValue;
+	mRespirationNotifier.notifyAll({ value });
 }
 
 void CallibriImpl::onOrientationReceived(const ByteBuffer &data){
     auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
     ByteBuffer orientationData(data.begin() + OrientationDataShift, data.end());
-   // mBufferCollection->orientationBuffer().onDataReceived(packetNumber, orientationData);
+	constexpr std::size_t AngleDataLength = 16;
+	if (orientationData.size() < AngleDataLength)
+		return;
+
+	Quaternion quat;
+	{
+		ByteInterpreter<float> w;
+		w.bytes[0] = orientationData[0];
+		w.bytes[1] = orientationData[1];
+		w.bytes[2] = orientationData[2];
+		w.bytes[3] = orientationData[3];
+		quat.W = w.value;
+	}
+
+	{
+		ByteInterpreter<float> x;
+		x.bytes[0] = orientationData[4];
+		x.bytes[1] = orientationData[5];
+		x.bytes[2] = orientationData[6];
+		x.bytes[3] = orientationData[7];
+		quat.X = x.value;
+	}
+
+	{
+		ByteInterpreter<float> y;
+		y.bytes[0] = orientationData[8];
+		y.bytes[1] = orientationData[9];
+		y.bytes[2] = orientationData[10];
+		y.bytes[3] = orientationData[11];
+		quat.Y = y.value;
+	}
+
+	{
+		ByteInterpreter<float> z;
+		z.bytes[0] = orientationData[12];
+		z.bytes[1] = orientationData[13];
+		z.bytes[2] = orientationData[14];
+		z.bytes[3] = orientationData[15];
+		quat.Z = z.value;
+	}
+
+	mOrientationNotifier.notifyAll({ quat });
 }
 
 packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std::size_t number_pos){

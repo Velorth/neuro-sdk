@@ -99,6 +99,7 @@ struct ChannelTraits<ChannelInfo::Type::Resistance>{
 	using BufferType = SafeBuffer<DataType, 150000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Resistance(); }
 	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static constexpr float SamplingFrequency = 0.0f;
 };
 
 template <>

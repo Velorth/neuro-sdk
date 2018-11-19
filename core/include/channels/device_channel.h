@@ -119,9 +119,6 @@ private:
 template<>
 sampling_frequency_t DeviceChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept;
 
-template<>
-sampling_frequency_t DeviceChannel<ChannelInfo::Type::Resistance>::samplingFrequency() const noexcept;
-
 template<ChannelInfo::Type ChannelType, typename DeviceType, typename ...Args>
 DeviceChannel<ChannelType, DeviceType> make_channel(const std::shared_ptr<DeviceType> &device, Args&&... args) {
 	return DeviceChannel<ChannelType, DeviceType>(device, std::forward<Args>(args)...);
