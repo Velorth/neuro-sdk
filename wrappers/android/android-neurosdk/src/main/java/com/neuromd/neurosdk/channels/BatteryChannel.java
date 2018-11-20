@@ -34,16 +34,11 @@ public class BatteryChannel extends BaseChannel<Integer> {
     @Override
     public native long totalLength();
 
-    @Override
     public native long bufferSize();
 
     @Override
     public native float samplingFrequency();
 
-    @Override
-    public native void setSamplingFrequency(float frequency);
-
-    @Override
     public native Device underlyingDevice();
 
     private static native long create(Device device);

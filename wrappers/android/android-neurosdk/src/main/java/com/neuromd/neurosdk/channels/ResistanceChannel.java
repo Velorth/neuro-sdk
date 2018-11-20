@@ -35,16 +35,11 @@ public class ResistanceChannel extends BaseChannel<Double> {
     @Override
     public native long totalLength();
 
-    @Override
     public native long bufferSize();
 
     @Override
     public native float samplingFrequency();
 
-    @Override
-    public native void setSamplingFrequency(float frequency);
-
-    @Override
     public native Device underlyingDevice();
 
     public native double[] readFast(long offset, long length);

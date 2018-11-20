@@ -48,29 +48,8 @@ public abstract class BaseChannel<SampleType> {
     public abstract long totalLength();
 
     /**
-     * Returns size in samples of internal channel buffer. If there is no internal buffer or it
-     * does not have maximum size this method returns zero
-     * @return Internal buffer size or 0 (zero) if there is no buffer limitations
-     */
-    public abstract long bufferSize();
-
-    /**
      * Returns sampling frequency of data returned by readData() method
      * @return Sampling frequency of data
      */
     public abstract float samplingFrequency();
-
-    /**
-     * Attempts to set sampling frequency for data in channel. Whether it possible or not depends on
-     * implementation of channel. May throw if setting of sampling frequency is impossible
-     * @param frequency New sampling frequency
-     */
-    public abstract void setSamplingFrequency(float frequency);
-
-    /**
-     * Returns device this channel belongs to. May throw if channel does not have representation in
-     * any device
-     * @return Device
-     */
-    public abstract Device underlyingDevice();
 }
