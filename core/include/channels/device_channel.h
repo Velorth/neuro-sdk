@@ -62,24 +62,24 @@ public:
 	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()) noexcept :
 		DataChannel<DataType>(std::move(channel_info)),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback)) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
 
 	DeviceChannel(const DevicePtr &device, const ChannelInfo &channel_info) :
 		DataChannel<DataType>(channel_info),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback)) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
 
 	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()) noexcept :
 		DataChannel<DataType>(std::move(channel_info)),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback)) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
 
 	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, const ChannelInfo &channel_info) :
 		DataChannel<DataType>(channel_info),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback)) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
 
 	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept override {
 		return mBuffer.subscribeLengthChanged(callback);

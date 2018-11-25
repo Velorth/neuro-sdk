@@ -69,9 +69,16 @@ BrainbitImpl::subscribeBatteryDataReceived(std::function<void(const int &)> call
 
 ListenerPtr<void, const std::vector<signal_sample_t> &>
 BrainbitImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info) {
-	Expects(info.getType() == ChannelInfo::Type::Signal);
+	if (info.getType() != ChannelInfo::Type::Signal) {
+        throw std::runtime_error("Wrong ChannelInfo Type value");
+    }
 	auto channels = this->channels();
-	Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+	if (std::find(channels.begin(), channels.end(), info) == channels.end()){
+	    throw std::runtime_error(std::string("Device does not have channel ")+
+                                 info.getName()+
+                                 std::string(" with index ")+
+                                 std::to_string(info.getIndex()));
+	}
 	if (mSignalNotifierMap.find(info.getIndex()) != mSignalNotifierMap.end()) {
 		return mSignalNotifierMap[info.getIndex()].addListener(callback);
 	}
@@ -80,9 +87,16 @@ BrainbitImpl::subscribeSignalDataReceived(std::function<void(const std::vector<s
 
 ListenerPtr<void, const std::vector<resistance_sample_t> &>
 BrainbitImpl::subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)> callback, ChannelInfo info) {
-	Expects(info.getType() == ChannelInfo::Type::Resistance);
+    if (info.getType() != ChannelInfo::Type::Resistance) {
+        throw std::runtime_error("Wrong ChannelInfo Type value");
+    }
 	auto channels = this->channels();
-	Expects(std::find(channels.begin(), channels.end(), info) != channels.end());
+    if (std::find(channels.begin(), channels.end(), info) == channels.end()){
+        throw std::runtime_error(std::string("Device does not have channel ")+
+                                 info.getName()+
+                                 std::string(" with index ")+
+                                 std::to_string(info.getIndex()));
+    }
 	if (mResistanceNotifierMap.find(info.getIndex()) != mResistanceNotifierMap.end()) {
 		return mResistanceNotifierMap[info.getIndex()].addListener(callback);
 	}
