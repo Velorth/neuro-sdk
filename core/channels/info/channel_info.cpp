@@ -85,12 +85,12 @@ std::size_t ChannelInfo::getIndex() const noexcept{
     return mIndex;
 }
 
-bool ChannelInfo::operator==(const ChannelInfo &rhs) const noexcept {
-    return (mType == rhs.mType) && (mName == rhs.mName);
+bool operator==(const ChannelInfo &lhs, const ChannelInfo &rhs){
+    return (lhs.getType() == rhs.getType()) && (lhs.getName() == rhs.getName()) && (lhs.getIndex() == rhs.getIndex());
 }
 
-bool ChannelInfo::operator!=(const ChannelInfo &rhs) const noexcept {
-    return !(*this == rhs);
+bool operator!=(const ChannelInfo &lhs, const ChannelInfo &rhs){
+    return !(lhs == rhs);
 }
 
 }

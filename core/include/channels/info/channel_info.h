@@ -54,7 +54,7 @@ public:
     static ChannelInfo Resistance();
     static ChannelInfo Pedometer();
 
-    ChannelInfo(Type);
+    explicit ChannelInfo(Type);
     ChannelInfo(Type, std::string &&, std::size_t = 0) noexcept;
     ChannelInfo(Type, const std::string &, std::size_t = 0);
     ChannelInfo(const ChannelInfo &) = default;
@@ -69,14 +69,14 @@ public:
     Type getType() const noexcept;
     std::size_t getIndex() const noexcept;
 
-    bool operator==(const ChannelInfo &) const noexcept;
-    bool operator!=(const ChannelInfo &) const noexcept;
-
 private:
     Type mType;
     std::string mName;
     std::size_t mIndex;
 };
+
+bool operator==(const ChannelInfo &, const ChannelInfo &);
+bool operator!=(const ChannelInfo &, const ChannelInfo &);
 
 template <ChannelInfo::Type InfoType>
 struct ChannelTraits;
