@@ -22,7 +22,9 @@ CallibriImpl::CallibriImpl(std::shared_ptr<BleDevice> ble_device,
                                                          request_handler),
                std::make_unique<CallibriParameterWriter>(common_params)),
     mRequestHandler(request_handler),
-    mCommonParams(common_params){
+    mCommonParams(common_params),
+    mBatteryNotificationLoop(&CallibriImpl::updateBatteryValue, std::chrono::seconds(5), this),
+    mElectrodesNotificationLoop(&CallibriImpl::updateElectrodeState, std::chrono::seconds(1), this){
     mRequestHandler->setSendFunction([=](std::shared_ptr<CallibriCommandData> cmd_data){this->sendCommandPacket(cmd_data);});
 }
 
@@ -125,9 +127,19 @@ CallibriImpl::subscribeElectrodesDataReceived(std::function<void(const Electrode
 	return mElectrodesNotifier.addListener(callback);
 }
 
+void CallibriImpl::updateBatteryValue(){
+    auto charge = batteryChargePercents();
+    mBatteryNotifier.notifyAll(charge);
+}
+
 int CallibriImpl::batteryChargePercents(){
     auto voltage = requestBattryVoltage();
     return convertVoltageToPercents(voltage);
+}
+
+void CallibriImpl::updateElectrodeState() {
+    auto isAttached = isElectrodesAttached();
+    mElectrodesNotifier.notifyAll(isAttached ? ElectrodeState::Normal : ElectrodeState::Detached);
 }
 
 bool CallibriImpl::isElectrodesAttached(){
@@ -157,14 +169,6 @@ bool CallibriImpl::isElectrodesAttached(){
         LOG_WARN("Failed get electrode state. Response length is zero");
         throw std::runtime_error("Unable get electrodes state due to connection error");
     }
-}
-
-std::size_t CallibriImpl::packetsLost(){
-    return mPacketCounter.packetsLost();
-}
-
-std::size_t CallibriImpl::packetsReceived(){
-    return mPacketCounter.packetsReceived();
 }
 
 void CallibriImpl::onDataReceived(const ByteBuffer &data){
@@ -305,7 +309,7 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
 }
 
 void CallibriImpl::onSignalReceived(const ByteBuffer &data){
-    auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
+//    auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
     ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
 	if (signalData.size() < 18)
 		return;
@@ -326,7 +330,7 @@ void CallibriImpl::onSignalReceived(const ByteBuffer &data){
 }
 
 void CallibriImpl::onMemsReceived(const ByteBuffer &data){
-    auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
+//    auto packetNumber = extractPacketNumber(data, MemsPacketNumberPos);
     ByteBuffer memsData(data.begin() + MemsDataShift, data.end());
 	constexpr std::size_t MemsDataLength = 16;
 	if (memsData.size() < MemsDataLength)
@@ -370,7 +374,7 @@ void CallibriImpl::onMemsReceived(const ByteBuffer &data){
 }
 
 void CallibriImpl::onRespReceived(const ByteBuffer &data){
-    auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
+//    auto packetNumber = extractPacketNumber(data, RespPacketNumberPos);
     ByteBuffer respBuffer(data.begin() + RespDataShift, data.end());
 	constexpr std::size_t RespirationDataLength = 3;
 	if (respBuffer.size() < RespirationDataLength)
@@ -389,7 +393,7 @@ void CallibriImpl::onRespReceived(const ByteBuffer &data){
 }
 
 void CallibriImpl::onOrientationReceived(const ByteBuffer &data){
-    auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
+//    auto packetNumber = extractPacketNumber(data, AnglePacketNumberPos);
     ByteBuffer orientationData(data.begin() + OrientationDataShift, data.end());
 	constexpr std::size_t AngleDataLength = 16;
 	if (orientationData.size() < AngleDataLength)

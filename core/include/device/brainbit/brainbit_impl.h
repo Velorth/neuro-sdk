@@ -8,6 +8,7 @@
 #include "signal/safe_buffer.h"
 #include "device/packet_sequence.h"
 #include "device/device_parameters.h"
+#include "loop.h"
 
 namespace Neuro {
 
@@ -25,10 +26,6 @@ public:
     std::vector<std::pair<Parameter, ParamAccess>> parameters() const override;
     void setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
-    int batteryChargePercents() override;
-    bool isElectrodesAttached() override;    
-    std::size_t packetsLost() override;
-    std::size_t packetsReceived() override;
 
 	ListenerPtr<void, const int &>
 		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
@@ -78,6 +75,7 @@ private:
     std::size_t mCurrentResistChannel{0};
     std::vector<resistance_sample_t> mResistBuffer;
 	BrainbitParameterSetter mSetter;
+	Loop<void(BrainbitImpl*)> mBatteryNotificationLoop;
 
     void initChannels();
     void onDataReceived(const ByteBuffer &) override;
@@ -96,6 +94,7 @@ private:
     bool execStopResistCommand();
     bool stopAll();
     void sendCommandPacket(std::shared_ptr<BrainbitCommandData>);
+    void notifyBatteryState();
 };
 
 }

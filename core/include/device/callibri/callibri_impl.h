@@ -1,6 +1,7 @@
 #ifndef CALLIBRI_IMPL_H
 #define CALLIBRI_IMPL_H
 
+#include "loop.h"
 #include "callibri_protocol.h"
 #include "callibri_command.h"
 #include "device/device_impl.h"
@@ -13,9 +14,7 @@
 namespace Neuro {
 
 using CallibriRequestScheduler = RequestScheduler<CallibriCommandData>;
-class CallibriPacketHandler;
 class CallibriCommonParameters;
-class CallibriBufferCollection;
 
 class CallibriImpl : public DeviceImpl {
 public:
@@ -30,10 +29,6 @@ public:
     std::vector<ParamPair> parameters() const override;
     void setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
-    int batteryChargePercents() override;
-    bool isElectrodesAttached() override;
-    std::size_t packetsLost() override;
-    std::size_t packetsReceived() override;
 
 	ListenerPtr<void, const int &>
 		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
@@ -65,7 +60,6 @@ public:
 private:
     static constexpr const char *class_name = "CallibriImpl";
 
-	PacketSequence<65500> mPacketCounter;
 	Notifier<void, const int &> mBatteryNotifier{ class_name };
 	Notifier<void, const std::vector<signal_sample_t> &> mSignalNotifier{ class_name };
 	Notifier<void, const std::vector<MEMS> &> mMEMSNotifier{ class_name };
@@ -77,6 +71,8 @@ private:
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
     param_changed_callback_t parameterChangedCallback;
+    Loop<void(CallibriImpl*)> mBatteryNotificationLoop;
+    Loop<void(CallibriImpl*)> mElectrodesNotificationLoop;
 
     void onDataReceived(const ByteBuffer &) override;
     void onStatusDataReceived(const ByteBuffer &) override;
@@ -90,6 +86,10 @@ private:
     void sendCommandPacket(std::shared_ptr<CallibriCommandData>);
     int convertVoltageToPercents(int);
     int requestBattryVoltage();
+    bool isElectrodesAttached();
+    int batteryChargePercents();
+    void updateBatteryValue();
+    void updateElectrodeState();
 
     template <Command Cmd>
     bool sendSimpleCommand(){

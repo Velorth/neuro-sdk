@@ -32,10 +32,6 @@ public:
     virtual std::vector<std::pair<Parameter, ParamAccess>> parameters() const = 0;
     virtual void setParamChangedCallback(std::function<void(Parameter)>) = 0;
     virtual bool execute(Command) = 0;
-    virtual int batteryChargePercents() = 0;
-    virtual bool isElectrodesAttached() = 0;
-    virtual std::size_t packetsLost() = 0;
-    virtual std::size_t packetsReceived() = 0;
 
 	virtual ChannelDataListenerType<ChannelInfo::Type::Battery>
     subscribeBatteryDataReceived(ChannelDataCallbackFunctionType<ChannelInfo::Type::Battery>, ChannelInfo) = 0;

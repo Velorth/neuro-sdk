@@ -17,7 +17,8 @@ BrainbitImpl::BrainbitImpl(std::shared_ptr<BleDevice> ble_device):
 														 mSetter),
                std::make_unique<BrainbitParameterWriter>()),
     mRequestHandler(std::make_unique<BrainbitRequestHandler>(
-                        [=](std::shared_ptr<BrainbitCommandData> cmd){sendCommandPacket(cmd);})){
+                        [=](std::shared_ptr<BrainbitCommandData> cmd){sendCommandPacket(cmd);})),
+    mBatteryNotificationLoop(&BrainbitImpl::notifyBatteryState, std::chrono::seconds(5), this){
     initChannels();
 }
 
@@ -133,20 +134,8 @@ BrainbitImpl::subscribeElectrodesDataReceived(std::function<void(const Electrode
 	throw std::runtime_error("Unable to subscribe electrodes state data notifications");
 }
 
-int BrainbitImpl::batteryChargePercents(){
-    return mBatteryPercents;
-}
-
-bool BrainbitImpl::isElectrodesAttached(){
-    throw std::runtime_error("Device does not support electrodes state request");
-}
-
-std::size_t BrainbitImpl::packetsLost() {
-    return mPacketCounter.packetsLost();
-}
-
-std::size_t BrainbitImpl::packetsReceived() {
-    return mPacketCounter.packetsReceived();
+void BrainbitImpl::notifyBatteryState(){
+    mBatteryNotifier.notifyAll(mBatteryPercents);
 }
 
 void BrainbitImpl::initChannels(){
@@ -223,11 +212,9 @@ void BrainbitImpl::onParameterChanged(Parameter param) {
     }
 }
 
-void BrainbitImpl::parseBattery(const ByteBuffer &status_data){
-    LOG_DEBUG("Parsing battery state");
-    //isCharging = status_data[STATUS_CHARGE_BYTE_POS] & 0x80; //most significant bit in this byte indicates whether battery is charging or not
-    mBatteryPercents = status_data[STATUS_CHARGE_BYTE_POS] & 0x7F; //7 less significant bits indicates charge level in percents
-    LOG_DEBUG_V("Battery state: %d", mBatteryPercents);
+void BrainbitImpl::parseBattery(const ByteBuffer &status_data) {
+    //isCharging = status_data[STATUS_CHARGE_BYTE_POS] & 0x80;
+    mBatteryPercents = status_data[STATUS_CHARGE_BYTE_POS] & 0x7F;
 }
 
 void BrainbitImpl::parseState(BrainbitCommand cmd, const ByteBuffer &status_data){
