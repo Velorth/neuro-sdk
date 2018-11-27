@@ -13,5 +13,6 @@ public enum ParameterType {
     GyroscopeSensitivity,
     Boolean,
     StimulationParams,
-    MotionAssistantParams
+    MotionAssistantParams,
+    FirmwareVersion
 }

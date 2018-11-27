@@ -17,5 +17,6 @@ public enum ParameterName {
     StimulatorState,
     MotionAssistantState,
     StimulatorParamPack,
-    MotionAssistantParamPack
+    MotionAssistantParamPack,
+    FirmwareVersion
 }
