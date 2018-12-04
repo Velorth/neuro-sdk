@@ -1,4 +1,6 @@
 #include "ble/win/ble_device_win.h"
+#include "winrt/Windows.Storage.Streams.h"
+#include "winrt/Windows.Devices.Bluetooth.GenericAttributeProfile.h"
 #include "string_utils.h"
 
 using winrt::Windows::Devices::Bluetooth::BluetoothLEDevice;
