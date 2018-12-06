@@ -6,7 +6,6 @@
 
 using winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs;
 using winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementType;
-using winrt::Windows::Devices::Bluetooth::BluetoothLEDevice;
 
 namespace Neuro {
 

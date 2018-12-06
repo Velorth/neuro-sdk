@@ -2,7 +2,6 @@
 #define SAFE_BUFFER_H
 
 #include <mutex>
-#include "gsl/gsl_assert"
 #include "base_buffer.h"
 #include "unbounded_buffer.h"
 
@@ -20,14 +19,7 @@ public:
 
     void append(const std::vector<SampleType> &data) override {
         std::unique_lock<std::mutex> readLock(mReadMutex);
-#ifndef NDEBUG
-        auto totalLengthBefore = mBuffer.totalLength();
-        auto expectedTotalLength = totalLengthBefore + data.size();
-#endif
         mBuffer.append(data);
-#ifndef NDEBUG
-        Ensures(mBuffer.totalLength() == expectedTotalLength);
-#endif
     }
 
     std::vector<SampleType> readAvailable(std::size_t global_offset, std::size_t length) const override {
@@ -61,8 +53,6 @@ public:
     }
 
 private:
-    static constexpr const char *class_name = "SafeBuffer";
-
     UnboundedBuffer<SampleType, BufferSize> mBuffer;
     mutable std::mutex mReadMutex;
 };

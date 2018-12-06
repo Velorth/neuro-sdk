@@ -128,8 +128,10 @@ CallibriImpl::subscribeElectrodesDataReceived(std::function<void(const Electrode
 }
 
 void CallibriImpl::updateBatteryValue(){
-    auto charge = batteryChargePercents();
-    mBatteryNotifier.notifyAll(charge);
+	if (mBleDevice->getState() == BleDeviceState::Connected) {
+		auto charge = batteryChargePercents();
+		mBatteryNotifier.notifyAll(charge);
+	}
 }
 
 int CallibriImpl::batteryChargePercents(){
@@ -137,9 +139,11 @@ int CallibriImpl::batteryChargePercents(){
     return convertVoltageToPercents(voltage);
 }
 
-void CallibriImpl::updateElectrodeState() {
-    auto isAttached = isElectrodesAttached();
-    mElectrodesNotifier.notifyAll(isAttached ? ElectrodeState::Normal : ElectrodeState::Detached);
+void CallibriImpl::updateElectrodeState() {	
+	if (mBleDevice->getState() == BleDeviceState::Connected) {
+		auto isAttached = isElectrodesAttached();
+		mElectrodesNotifier.notifyAll(isAttached ? ElectrodeState::Normal : ElectrodeState::Detached);
+	}
 }
 
 bool CallibriImpl::isElectrodesAttached(){

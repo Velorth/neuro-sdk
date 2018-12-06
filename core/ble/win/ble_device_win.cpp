@@ -13,6 +13,8 @@ using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChan
 using winrt::Windows::Storage::Streams::DataReader;
 using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristicsResult;
 using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceServicesResult;
+using winrt::Windows::Storage::Streams::DataWriter;
+using winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCommunicationStatus;
 
 namespace Neuro {
 
@@ -67,10 +69,13 @@ void BleDeviceWin::close(){
 }
 
 bool BleDeviceWin::sendCommand(const std::vector<Byte> &commandData){
-    if (!mIsConnected){
+    if (!mIsConnected || mTxCharacteristic == nullptr){
         return false;
     }
-	return false;
+	DataWriter commandWriter;
+	commandWriter.WriteBytes(commandData);
+	const auto writeResult = mTxCharacteristic.WriteValueAsync(commandWriter.DetachBuffer()).get();
+	return writeResult == GattCommunicationStatus::Success;
 }
 
 BleDeviceState BleDeviceWin::getState() const {
@@ -86,19 +91,17 @@ std::string BleDeviceWin::getNetAddress() const {
 }
 
 void BleDeviceWin::findServiceAndChars() {
-	if (mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected) {
-		auto serviceResult = mBluetoothDevice.GetGattServicesForUuidAsync(guid_from_string(mDeviceInfo->getGattInfo()->deviceServiceUUID()));
-		serviceResult.Completed([=](IAsyncOperation<GattDeviceServicesResult> sender, AsyncStatus) {
-			auto result = sender.GetResults();
-			auto services = result.Services();
-			if (services.Size() != 1) {
-				return;
-			}
-			mService = services.GetAt(0);			
+	auto serviceResult = mBluetoothDevice.GetGattServicesForUuidAsync(guid_from_string(mDeviceInfo->getGattInfo()->deviceServiceUUID()));
+	serviceResult.Completed([=](IAsyncOperation<GattDeviceServicesResult> sender, AsyncStatus) {
+		auto result = sender.GetResults();
+		auto services = result.Services();
+		if (services.Size() != 1) {
+			return;
+		}
+		mService = services.GetAt(0);
 
-			findAllCharacteristics();
-		});		
-	}
+		findAllCharacteristics();
+	});
 }
 
 void BleDeviceWin::findAllCharacteristics() {

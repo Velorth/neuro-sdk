@@ -8,6 +8,7 @@
     using CurrentPlatformScanner = Neuro::DeviceScannerZ;
 #elif _WIN32
     #include "ble/win/ble_scanner_win.h"
+	#include "winrt/Windows.Foundation.h"
     using CurrentPlatformScanner = Neuro::BleScannerWin;
 #else
     #error "Unsupported platform"
@@ -25,6 +26,9 @@ namespace Neuro {
 
 #else
     std::unique_ptr<DeviceScanner> createDeviceScanner(){
+#ifdef _WIN32
+		winrt::init_apartment();
+#endif
         auto bleScanner = std::make_unique<CurrentPlatformScanner>();
         auto deviceScanner = std::make_unique<DeviceScanner>(std::move(bleScanner));
         return deviceScanner;

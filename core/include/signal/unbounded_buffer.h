@@ -19,19 +19,7 @@ public:
     }
 
     void append(const std::vector<SampleType> &data) override {
-#ifndef NDEBUG
-        auto dataLengthBefore = mBuffer.dataLength();
-        Expects(dataLengthBefore <= mBuffer.bufferSize());
-        auto expectedDataLength = dataLengthBefore < mBuffer.bufferSize() ?
-                                   dataLengthBefore + data.size() :
-                                   mBuffer.bufferSize();
-        if (expectedDataLength > mBuffer.bufferSize())
-            expectedDataLength = mBuffer.bufferSize();
-#endif
         mBuffer.append(data);
-#ifndef NDEBUG
-        Ensures(mBuffer.dataLength() == expectedDataLength);
-#endif
         mTotalLength += data.size();
         mAvailableLength += data.size();
         if (mAvailableLength >= mBuffer.bufferSize()){

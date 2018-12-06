@@ -1,37 +1,25 @@
 #ifndef TASK_QUEUE_H
 #define TASK_QUEUE_H
 
-#include <atomic>
-#include <thread>
-#include <condition_variable>
-#include <mutex>
-#include <queue>
+#include <functional>
+#include <memory>
 #include <string>
 #include "lib_export.h"
 
 namespace Neuro {
 
-class SDK_SHARED TaskQueue{
+class SDK_SHARED TaskQueue final{
 public:
-    using delay_time_t = std::chrono::duration<double>;
-
-    TaskQueue(std::string name = std::string());
+    TaskQueue(const std::string &name = std::string());
     TaskQueue(const TaskQueue &) = delete;
     TaskQueue& operator=(const TaskQueue &) = delete;
     ~TaskQueue();
 
-    void exec(std::function<void()>);
+    void exec(const std::function<void()> &);
 
 private:
-    static constexpr const char *class_name = "TaskQueue";
-    const std::string mName;
-    std::queue<std::function<void()>> mExecutionQueue;
-    std::atomic<bool> mIsRunning{true};
-    std::mutex mQueueMutex;
-    std::condition_variable mQueueCondition;    
-    std::thread mExecThread;
-
-    void execFunction();
+	struct Impl;
+	std::unique_ptr<Impl> mImpl;
 };
 
 }

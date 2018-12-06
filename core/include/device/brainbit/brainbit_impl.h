@@ -4,7 +4,6 @@
 #include "device/device_impl.h"
 #include "device/request_scheduler.h"
 #include "brainbit_protocol.h"
-#include "brainbit_resistance_buffer.h"
 #include "signal/safe_buffer.h"
 #include "device/packet_sequence.h"
 #include "device/device_parameters.h"
