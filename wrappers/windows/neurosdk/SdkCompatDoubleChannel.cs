@@ -3,37 +3,36 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public abstract class SdkCompatDoubleChannel : BaseChannel<double>
+    public abstract class SdkCompatDoubleChannel : IBaseChannel<double>
     {
         private LengthChangedFunc _lengthCallback;
         private readonly ReadDataFunc _readDataFunc;
         private readonly GetFrequencyFunc _getFrequencyFunc;
-        private readonly SetFrequencyFunc _setFrequencyFunc;
         private readonly AddLengthCallbackFunc _addLengthCallbackFunc;
         private readonly GetTotalLengthFunc _getTotalLengthFunc;
-        private readonly GetBufferSizeFunc _getBufferSizeFunc;
-        private readonly GetDeviceFunc _getDeviceFunc;
 
-        protected SdkCompatDoubleChannel(Device device, ChannelInfo info) : base(device)
+        protected SdkCompatDoubleChannel(Device device, ChannelInfo info)
         {
             _readDataFunc = ReadDataForNative;
             _getFrequencyFunc = GetFrequencyForNative;
-            _setFrequencyFunc = SetFrequencyForNative;
             _addLengthCallbackFunc = AddLengthCallbackForNative;
             _getTotalLengthFunc = GetTotalLengthForNative;
-            _getBufferSizeFunc = GetBufferSizeForNative;
-            _getDeviceFunc = GetDeviceForNative;
-            ChannelPtr = create_BridgeDoubleChannel_info(info, _readDataFunc, _getFrequencyFunc, _setFrequencyFunc,
-                _addLengthCallbackFunc, _getTotalLengthFunc, _getBufferSizeFunc, _getDeviceFunc);
+            ChannelPtr = create_BridgeDoubleChannel_info(info, _readDataFunc, _getFrequencyFunc,
+                _addLengthCallbackFunc, _getTotalLengthFunc);
             Info = info;
         }
-
-        public sealed override ChannelInfo Info { get; set; }
 
         ~SdkCompatDoubleChannel()
         {
             BridgeDoubleChannel_delete(ChannelPtr);
         }
+
+        public event EventHandler<int> LengthChanged;
+        public ChannelInfo Info { get; set; }
+        public abstract int TotalLength { get; }
+        public abstract float SamplingFrequency { get; set; }
+        public IntPtr ChannelPtr { get; }
+        public abstract double[] ReadData(int offset, int length);
 
         private int ReadDataForNative(IntPtr offset, IntPtr length, IntPtr buffer)
         {
@@ -69,20 +68,6 @@ namespace Neuro
             return SdkError.SdkNoError;
         }
 
-        private int SetFrequencyForNative(float frequency)
-        {
-            try
-            {
-                SamplingFrequency = frequency;
-            }
-            catch (Exception)
-            {
-                return SdkError.ErrorUnhandledException;
-            }
-
-            return SdkError.SdkNoError;
-        }
-
         private int AddLengthCallbackForNative(LengthChangedFunc lengthChangedCallback, out IntPtr handle)
         {
             _lengthCallback = lengthChangedCallback;
@@ -111,25 +96,6 @@ namespace Neuro
             return SdkError.SdkNoError;
         }
 
-        private int GetBufferSizeForNative(out IntPtr outBufferSize)
-        {
-            try
-            {
-                outBufferSize = (IntPtr) BufferSize;
-            }
-            catch (Exception)
-            {
-                outBufferSize = (IntPtr) 0;
-                return SdkError.ErrorUnhandledException;
-            }
-
-            return SdkError.SdkNoError;
-        }
-
-        private IntPtr GetDeviceForNative()
-        {
-            return UnderlyingDevice?.DevicePtr ?? (IntPtr)0;
-        }
 
 #if DEBUG
         private const string LibName = "c-neurosdkd.dll";
@@ -144,9 +110,6 @@ namespace Neuro
         delegate int GetFrequencyFunc(out float outFrequency);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        delegate int SetFrequencyFunc(float frequency);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void LengthChangedFunc(IntPtr channelPtr, IntPtr length);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -155,19 +118,11 @@ namespace Neuro
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate int GetTotalLengthFunc(out IntPtr outLength);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        delegate int GetBufferSizeFunc(out IntPtr outBufferSize);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        delegate IntPtr GetDeviceFunc();
-
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_BridgeDoubleChannel_info(ChannelInfo info, ReadDataFunc readDataFunc, GetFrequencyFunc getFrequencyFunc, 
-            SetFrequencyFunc setFrequencyFunc, AddLengthCallbackFunc addLengthCallbackFunc, GetTotalLengthFunc getTotalLengthFunc, 
-            GetBufferSizeFunc getBufferSizeFunc, GetDeviceFunc getDeviceFunc);
+        private static extern IntPtr create_BridgeDoubleChannel_info(ChannelInfo info, ReadDataFunc readDataFunc, GetFrequencyFunc getFrequencyFunc,
+            AddLengthCallbackFunc addLengthCallbackFunc, GetTotalLengthFunc getTotalLengthFunc);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void BridgeDoubleChannel_delete(IntPtr baseDoubleChannel);
-
     }
 }

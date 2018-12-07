@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class BatteryChannel : BaseChannel<int>
+    public sealed class BatteryChannel : IBaseChannel<int>
     {
         private readonly IntPtr _listenerPtr;
 
-        public BatteryChannel(Device device) : base(device)
+        public BatteryChannel(Device device)
         {
             ChannelPtr = create_BatteryChannel(device.DevicePtr);
             if (ChannelPtr == null)
@@ -26,10 +26,10 @@ namespace Neuro
             free_listener_handle(_listenerPtr);
         }
 
-        public override event EventHandler<int> LengthChanged;
-        public override ChannelInfo Info { get; set; }
+        public event EventHandler<int> LengthChanged;
+        public ChannelInfo Info { get; set; }
 
-        public override int TotalLength
+        public int TotalLength
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Neuro
             }
         }
 
-        public override int BufferSize
+        public int BufferSize
         {
             get
             {
@@ -47,17 +47,18 @@ namespace Neuro
             }
         }
 
-        public override float SamplingFrequency
+        public float SamplingFrequency
         {
             get
             {
                 SdkError.ThrowIfError(BatteryChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(BatteryChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
-        public override int[] ReadData(int offset, int length)
+        public IntPtr ChannelPtr { get; }
+
+        public int[] ReadData(int offset, int length)
         {
             if (length <= 0)
             {
@@ -104,10 +105,7 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int BatteryChannel_get_sampling_frequency(IntPtr batteryChannelPtr, out float samplingFrequency);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int BatteryChannel_set_sampling_frequency(IntPtr batteryChannelPtr, float samplingFrequency);
-
+        
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int BatteryChannel_add_length_callback(IntPtr batteryChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
 

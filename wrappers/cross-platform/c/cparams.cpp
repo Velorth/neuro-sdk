@@ -265,7 +265,7 @@ ret_code device_read_StimulatorParamPack(Device *device_ptr, StimulationParams* 
 		const auto value = device->readParam<Neuro::Parameter::StimulatorParamPack>();
 		out_stimul_params->current = value.current;
 		out_stimul_params->frequency = value.frequency;
-		out_stimul_params->pulse_duration = value.pulse_duration;
+		out_stimul_params->pulse_duration = static_cast<int>(value.pulse_duration);
 		out_stimul_params->stimulus_duration = value.stimulus_duration;
 		return SDK_NO_ERROR;
 	}
@@ -531,7 +531,12 @@ ret_code device_set_StimulatorParamPack(Device *device_ptr, StimulationParams st
 		Neuro::StimulationParams params{};
 		params.current = stimul_params.current;
 		params.frequency = stimul_params.frequency;
-		params.pulse_duration = stimul_params.pulse_duration;
+		Neuro::StimulatorImpulseDuration pulseWidth;
+		if (!Neuro::parseImpulseDuration(stimul_params.pulse_duration, pulseWidth)) {
+			set_sdk_last_error("Wront stimul duration code");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		params.pulse_duration = pulseWidth;
 		params.stimulus_duration = stimul_params.stimulus_duration;
 		device->setParam<Neuro::Parameter::StimulatorParamPack>(params);
 		return SDK_NO_ERROR;

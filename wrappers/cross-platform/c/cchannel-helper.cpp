@@ -5,12 +5,12 @@ extern "C"
 
 #include "cchannel-helper.h"
 #include "filter/iir_filter.h"
-#include "filter/band_pass_filter.h"
+#include "filter/cascade_filter.h"
 #include "filter/band_stop_filter.h"
 #include "filter/high_pass_filter.h"
 #include "filter/low_pass_filter.h"
 #include "event_listener.h"
-#include "channels/base_channel.h"
+#include "channels/data_channel.h"
 #include "sdk_error.h"
 
 void free_listener_handle(ListenerHandle *handle) {
@@ -18,7 +18,7 @@ void free_listener_handle(ListenerHandle *handle) {
 	delete handlePtr;
 }
 
-DSP::DigitalFilterPtr<double> createFilter(Filter filter) {
+std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filter) {
 	if (filter == LowPass_1Hz_SF125) {
 		return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<1, 2, 125>>>();
 	}
@@ -79,8 +79,8 @@ DSP::DigitalFilterPtr<double> createFilter(Filter filter) {
 	throw std::runtime_error("Filter is not supported");
 }
 
-std::vector<DSP::DigitalFilterPtr<double>> getFilters(Filter *filters, size_t filter_count) {
-	std::vector<DSP::DigitalFilterPtr<double>> digitalFilters;
+std::unique_ptr<DSP::DigitalFilter<double>>  getCompoundFilter(Filter *filters, size_t filter_count) {
+	std::vector<std::unique_ptr<DSP::DigitalFilter<double>>> digitalFilters;
 	digitalFilters.reserve(filter_count);
 	for (size_t i = 0; i != filter_count; ++i) {
 		try {
@@ -90,21 +90,8 @@ std::vector<DSP::DigitalFilterPtr<double>> getFilters(Filter *filters, size_t fi
 			continue;
 		}
 	}
-	return digitalFilters;
-}
-
-int readBufferSize(const Neuro::CommonChannelInterface &channel, size_t* out_buffer_size) {
-	try {
-		*out_buffer_size = channel.bufferSize();
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
+	auto cascadeFilter = DSP::make_cascade_filter<std::unique_ptr>(std::move(digitalFilters));
+	return std::make_unique<decltype(cascadeFilter)>(std::move(cascadeFilter));
 }
 
 int readTotalLength(const Neuro::CommonChannelInterface &channel, size_t* out_length) {
@@ -124,20 +111,6 @@ int readTotalLength(const Neuro::CommonChannelInterface &channel, size_t* out_le
 int readSamplingFrequency(const Neuro::CommonChannelInterface &channel, float* out_frequency) {
 	try {
 		*out_frequency = channel.samplingFrequency();
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-int setSamplingFrequency(Neuro::CommonChannelInterface &channel, float frequency) {
-	try {
-		channel.setSamplingFrequency(frequency);
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

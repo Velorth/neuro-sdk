@@ -49,7 +49,7 @@ namespace Neuro
         private const string LibName = "c-neurosdk.dll";
 #endif
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.LPStr)]
+        [return: MarshalAs(UnmanagedType.I4)]
         private static extern int sdk_last_error_msg(StringBuilder msgBuffer, uint bufferLength);
     }
 }

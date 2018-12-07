@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class ResistanceChannel : BaseChannel<double>
+    public sealed class ResistanceChannel : IBaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
 
-        public ResistanceChannel(Device device) : base(device)
+        public ResistanceChannel(Device device)
         {
             ChannelPtr = create_ResistanceChannel(device.DevicePtr);
             if (ChannelPtr == null)
@@ -19,7 +19,7 @@ namespace Neuro
             Info = info;
         }
 
-        public ResistanceChannel(Device device, ChannelInfo info) : base(device)
+        public ResistanceChannel(Device device, ChannelInfo info)
         {
             ChannelPtr = create_ResistanceChannel_info(device.DevicePtr, info);
             if (ChannelPtr == null)
@@ -36,10 +36,10 @@ namespace Neuro
             free_listener_handle(_listenerPtr);
         }
 
-        public override event EventHandler<int> LengthChanged;
-        public override ChannelInfo Info { get; set; }
+        public event EventHandler<int> LengthChanged;
+        public ChannelInfo Info { get; set; }
 
-        public override int TotalLength
+        public int TotalLength
         {
             get
             {
@@ -48,7 +48,7 @@ namespace Neuro
             }
         }
 
-        public override int BufferSize
+        public int BufferSize
         {
             get
             {
@@ -57,17 +57,18 @@ namespace Neuro
             }
         }
 
-        public override float SamplingFrequency
+        public float SamplingFrequency
         {
             get
             {
                 SdkError.ThrowIfError(ResistanceChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(ResistanceChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
-        public override double[] ReadData(int offset, int length)
+        public IntPtr ChannelPtr { get; }
+
+        public double[] ReadData(int offset, int length)
         {
             if (length <= 0)
             {
@@ -105,13 +106,7 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_ResistanceChannel_info(IntPtr devicePtr, ChannelInfo info);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_ResistanceChannel_info_filters(IntPtr devicePtr, ChannelInfo info, Filter[] filtersArray, IntPtr filterCount);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_ResistanceChannel_filters(IntPtr devicePtr, Filter[] filtersArray, IntPtr filterCount);
-
+        
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void ResistanceChannel_delete(IntPtr resistanceChannelPtr);
 
@@ -123,10 +118,7 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int ResistanceChannel_get_sampling_frequency(IntPtr resistanceChannelPtr, out float samplingFrequency);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_set_sampling_frequency(IntPtr resistanceChannelPtr, float samplingFrequency);
-
+        
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int ResistanceChannel_add_length_callback(IntPtr resistanceChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
 

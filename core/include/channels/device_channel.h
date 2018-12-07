@@ -44,7 +44,7 @@ struct RawStrategy final : public ChannelStrategy<DataContainer> {
 };
 
 template <ChannelInfo::Type ChannelType, typename DeviceType = Device>
-class DeviceChannel final : public DataChannel<ChannelDataType<ChannelType>> {
+class SDK_SHARED DeviceChannel final : public DataChannel<ChannelDataType<ChannelType>> {
 public:
 	using ChannelTraits = ChannelTraits<ChannelType>;
 	using DataType = ChannelDataType<ChannelType>;
@@ -59,7 +59,7 @@ public:
 	using DevicePtr = std::shared_ptr<DeviceType>;
 	using DeviceWeakPtr = std::weak_ptr<DeviceType>;
 
-	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()) noexcept :
+	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
 		DataChannel<DataType>(std::move(channel_info)),
 		mDevice(device),
 		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
@@ -69,7 +69,7 @@ public:
 		mDevice(device),
 		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
 
-	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()) noexcept :
+	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
 		DataChannel<DataType>(std::move(channel_info)),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),

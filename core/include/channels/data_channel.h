@@ -37,7 +37,7 @@ private:
 };
 
 template <typename DataType>
-class DataChannel : public CommonChannelInterface {
+class SDK_SHARED DataChannel : public CommonChannelInterface {
 protected:
     using DataContainer = std::vector<DataType>;
 

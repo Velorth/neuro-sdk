@@ -3,14 +3,14 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class SignalChannel : BaseChannel<double>
+    public sealed class SignalChannel : IBaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
 
-        public SignalChannel(Device device) : base(device)
+        public SignalChannel(Device device)
         {
             ChannelPtr = create_SignalChannel(device.DevicePtr);
-            if (ChannelPtr == null)
+            if (ChannelPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
@@ -19,10 +19,10 @@ namespace Neuro
             Info = info;
         }
 
-        public SignalChannel(Device device, ChannelInfo info) : base(device)
+        public SignalChannel(Device device, ChannelInfo info)
         {
             ChannelPtr = create_SignalChannel_info(device.DevicePtr, info);
-            if (ChannelPtr == null)
+            if (ChannelPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
@@ -30,10 +30,10 @@ namespace Neuro
             Info = info;
         }
 
-        public SignalChannel(Device device, ChannelInfo info, Filter[] filters) : base(device)
+        public SignalChannel(Device device, ChannelInfo info, Filter[] filters)
         {
             ChannelPtr = create_SignalChannel_info_filters(device.DevicePtr, info, filters, (IntPtr)filters.Length);
-            if (ChannelPtr == null)
+            if (ChannelPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
@@ -41,10 +41,10 @@ namespace Neuro
             Info = info;
         }
 
-        public SignalChannel(Device device, Filter[] filters) : base(device)
+        public SignalChannel(Device device, Filter[] filters)
         {
             ChannelPtr = create_SignalChannel_filters(device.DevicePtr, filters, (IntPtr)filters.Length);
-            if (ChannelPtr == null)
+            if (ChannelPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
@@ -59,10 +59,10 @@ namespace Neuro
             free_listener_handle(_listenerPtr);
         }
 
-        public override event EventHandler<int> LengthChanged;
-        public override ChannelInfo Info { get; set; }
+        public event EventHandler<int> LengthChanged;
+        public ChannelInfo Info { get; set; }
 
-        public override int TotalLength
+        public int TotalLength
         {
             get
             {
@@ -71,7 +71,7 @@ namespace Neuro
             }
         }
 
-        public override int BufferSize
+        public int BufferSize
         {
             get
             {
@@ -80,17 +80,18 @@ namespace Neuro
             }
         }
 
-        public override float SamplingFrequency
+        public float SamplingFrequency
         {
             get
             {
                 SdkError.ThrowIfError(SignalChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
             }
-            set => SdkError.ThrowIfError(SignalChannel_set_sampling_frequency(ChannelPtr, value));
         }
 
-        public override double[] ReadData(int offset, int length)
+        public IntPtr ChannelPtr { get; }
+
+        public double[] ReadData(int offset, int length)
         {
             if (length <= 0)
             {
@@ -146,10 +147,7 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SignalChannel_get_sampling_frequency(IntPtr signalChannelPtr, out float samplingFrequency);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int SignalChannel_set_sampling_frequency(IntPtr signalChannelPtr, float samplingFrequency);
-
+        
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SignalChannel_add_length_callback(IntPtr signalChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
 
