@@ -8,7 +8,8 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Neuro</RootNamespace>
-    <AssemblyName>net-neurosdk</AssemblyName>
+    <AssemblyName Condition="'$(Configuration)' == 'Release'">net-neurosdk</AssemblyName>
+    <AssemblyName Condition="'$(Configuration)' == 'Debug'">net-neurosdkd</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -77,32 +78,56 @@
     <Compile Include="ResistanceChannel.cs" />
     <Compile Include="SignalChannel.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Content Include="$(NEUROSDK)\wrappers\c\$(Platform)\c-neurosdk.dll">
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Content Include="$(NEUROSDK_64)\c-neurosdk.dll">
       <Link>c-neurosdk.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(NEUROSDK)\wrappers\c\$(Platform)\neurosdk.dll">
+    <Content Include="$(NEUROSDK_64)\neurosdk.dll">
       <Link>neurosdk.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <Content Include="$(NEUROSDK)\wrappers\c\$(Platform)\c-neurosdkd.dll">
+  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Content Include="$(NEUROSDK_64)\c-neurosdkd.dll">
       <Link>c-neurosdkd.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(NEUROSDK)\wrappers\c\$(Platform)\neurosdkd.dll">
+    <Content Include="$(NEUROSDK_64)\neurosdkd.dll">
+      <Link>neurosdkd.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <Content Include="$(NEUROSDK_86)\c-neurosdk.dll">
+      <Link>c-neurosdk.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(NEUROSDK_86)\neurosdk.dll">
+      <Link>neurosdk.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <Content Include="$(NEUROSDK_86)\c-neurosdkd.dll">
+      <Link>c-neurosdkd.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(NEUROSDK_86)\neurosdkd.dll">
       <Link>neurosdkd.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>del /S /Q "%25NEUROSDK%25\wrappers\.net\$(PlatformName)\$(ConfigurationName)\*.*"
-xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\wrappers\.net\$(PlatformName)\$(ConfigurationName)\"</PostBuildEvent>
+
+  <PropertyGroup Condition="'$(PlatformName)'=='x64'">
+    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_64%25"</PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>if not exist "%25NEUROSDK%25\wrappers\.net" mkdir "%25NEUROSDK%25\wrappers\.net\$(ConfigurationName)"</PreBuildEvent>
+  
+  <PropertyGroup Condition="'$(PlatformName)'=='x86'">
+    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_64%25"</PostBuildEvent>
   </PropertyGroup>
+
 </Project>
