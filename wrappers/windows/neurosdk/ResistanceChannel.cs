@@ -6,6 +6,7 @@ namespace Neuro
     public sealed class ResistanceChannel : IBaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
+        private readonly LengthChangedFunc _lengthChangedFunc;
 
         public ResistanceChannel(Device device)
         {
@@ -14,7 +15,9 @@ namespace Neuro
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+
+            _lengthChangedFunc = OnTotalLengthChanged;
+            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr));
             SdkError.ThrowIfError(ResistanceChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
@@ -26,7 +29,9 @@ namespace Neuro
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out _listenerPtr));
+
+            _lengthChangedFunc = OnTotalLengthChanged;
+            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr));
             Info = info;
         }
 
@@ -88,6 +93,11 @@ namespace Neuro
             {
                 Marshal.FreeHGlobal(bufferPtr);
             }
+        }
+
+        private void OnTotalLengthChanged(IntPtr channelPtr, IntPtr length)
+        {
+            LengthChanged?.Invoke(this, (int)length);
         }
 
 #if DEBUG

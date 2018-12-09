@@ -6,6 +6,7 @@ namespace Neuro
     public sealed class BatteryChannel : IBaseChannel<int>
     {
         private readonly IntPtr _listenerPtr;
+        private readonly LengthChangedFunc _lengthChangedFunc;
 
         public BatteryChannel(Device device)
         {
@@ -14,7 +15,9 @@ namespace Neuro
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
-            SdkError.ThrowIfError(BatteryChannel_add_length_callback(ChannelPtr, (channelPtr, length) => { LengthChanged?.Invoke(this, (int)length); }, out var listener));
+
+            _lengthChangedFunc = OnTotalLengthChanged;
+            SdkError.ThrowIfError(BatteryChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out var listener));
             _listenerPtr = listener;
             SdkError.ThrowIfError(BatteryChannel_get_info(ChannelPtr, out var info));
             Info = info;
@@ -78,6 +81,11 @@ namespace Neuro
             {
                 Marshal.FreeHGlobal(bufferPtr);
             }
+        }
+
+        private void OnTotalLengthChanged(IntPtr channelPtr, IntPtr length)
+        {
+            LengthChanged?.Invoke(this, (int)length);
         }
 
 #if DEBUG

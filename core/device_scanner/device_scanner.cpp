@@ -68,6 +68,9 @@ public:
 		}
 		scanner->setFilter(filter);
 		auto scannerCallback = [=](std::unique_ptr<BleDevice> bleDevice) {
+			if (!scanner->isScanning())
+				return;
+
 			auto deviceName = bleDevice->getName();
 			auto deviceAddress = bleDevice->getNetAddress();
 			auto neuroDevice = onNewBleDevice(std::move(bleDevice));

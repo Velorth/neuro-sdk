@@ -193,10 +193,19 @@ int SignalChannel_get_buffer_size(SignalChannel* channel, size_t* out_buffer_siz
 }
 
 ResistanceChannel* create_ResistanceChannel_info(Device* device_ptr, ChannelInfo info) {
-	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	Neuro::ChannelInfo channelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index);
-	const auto channelPtr = new std::shared_ptr<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>>(std::make_shared<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>>(device, channelInfo));
-	return reinterpret_cast<ResistanceChannel *>(channelPtr);
+	try {
+		auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+		Neuro::ChannelInfo channelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index);
+		const auto channelPtr = new std::shared_ptr<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>>(std::make_shared<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>>(device, channelInfo));
+		return reinterpret_cast<ResistanceChannel *>(channelPtr);
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return nullptr;
+	}
+	catch (...) {
+		return nullptr;
+	}
 }
 
 void ResistanceChannel_delete(ResistanceChannel* channel) {

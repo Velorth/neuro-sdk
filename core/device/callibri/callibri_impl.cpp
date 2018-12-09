@@ -141,8 +141,11 @@ int CallibriImpl::batteryChargePercents(){
 
 void CallibriImpl::updateElectrodeState() {	
 	if (mBleDevice->getState() == BleDeviceState::Connected) {
-		auto isAttached = isElectrodesAttached();
-		mElectrodesNotifier.notifyAll(isAttached ? ElectrodeState::Normal : ElectrodeState::Detached);
+		auto channels = mCommonParams->availableChannels();
+		if (std::find_if(channels.begin(), channels.end(), [](const auto &channel) { return channel.getType() == ChannelInfo::Type::ElectrodesState; }) != channels.end()) {
+			const auto isAttached = isElectrodesAttached();
+			mElectrodesNotifier.notifyAll(isAttached ? ElectrodeState::Normal : ElectrodeState::Detached);
+		}
 	}
 }
 
