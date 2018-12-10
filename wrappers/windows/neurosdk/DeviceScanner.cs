@@ -6,7 +6,7 @@ namespace Neuro
 {
     public class DeviceScanner
     {
-        private readonly IntPtr _scannerPtr = create_device_scanner();
+        private readonly IntPtr _scannerPtr;
 
         public event EventHandler<bool> ScanStateChanged;
         public event EventHandler<Device> DeviceFound;
@@ -16,10 +16,11 @@ namespace Neuro
 
         public DeviceScanner()
         {
+            _scannerPtr = create_device_scanner();
             Debug.Assert(_scannerPtr != null);
             if (_scannerPtr == null)
             {
-                throw new SystemException("Unable to retreive BLE device scanner instance");
+                throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
 
             _deviceFoundFunc = OnDeviceFound;

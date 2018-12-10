@@ -13,7 +13,7 @@ AppCopyright=NeuroMD
 AppPublisherURL=http://www.neuromd.com
 AppSupportURL=http://www.neuromd.com
 
-VersionInfoVersion=1.3
+VersionInfoVersion=1.3.1
 VersionInfoCompany=NeuroMD
 VersionInfoCopyright=NeuroMD
 VersionInfoDescription=NeuroMD Software development kit 
@@ -55,6 +55,22 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
 [Code]
 var
   DataDirPage: TInputDirWizardPage;
+
+function NeedsAddPath(Param: string): boolean;
+var
+  OrigPath: string;
+begin
+  if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
+    'SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
+    'Path', OrigPath)
+  then begin
+    Result := True;
+    exit;
+  end;
+  { look for the path with leading and trailing semicolon }
+  { Pos() returns 0 if not found }
+  Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+end;
 
 procedure InitializeWizard;
 begin

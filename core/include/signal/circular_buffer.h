@@ -79,65 +79,65 @@ CircularBuffer<SampleType, BufferSize>::operator=(const CircularBuffer &rhs) {
 template<typename SampleType, std::size_t BufferSize>
 void
 CircularBuffer<SampleType, BufferSize>::append(const std::vector<SampleType> &dataContainer){
-    const SampleType *data = dataContainer.data();
-    auto length = dataContainer.size();
-    if (length == 0)
-        return;
+	const SampleType *data = dataContainer.data();
+	auto length = dataContainer.size();
+	if (length == 0)
+		return;
 
-    //if data length is greater than buffer maximum size
-    //we should shift start position of data to write
-    //last RING_BUFFER_SIZE samples from input array to buffer
-    if (length > mBufferSize)
-    {
-        data += length - mBufferSize;
-        length = mBufferSize;
-    }
+	//if data length is greater than buffer maximum size
+	//we should shift start position of data to write
+	//last RING_BUFFER_SIZE samples from input array to buffer
+	if (length > mBufferSize)
+	{
+		data += length - mBufferSize;
+		length = mBufferSize;
+	}
 
-    auto newHead = mHead;
-    auto newTail = mDataLength > 0 ? mTail + length : mTail + length - 1;
+	auto newHead = mHead;
+	auto newTailDistance = mDataLength > 0 ? std::distance(mBufferArray.begin(), mTail) + length : std::distance(mBufferArray.begin(), mTail) + length - 1;
+	decltype(mTail) newTail;
+	//Situation where appended data don't exceed buffer at end
+	//Tail still is to the left from the end
+	//Just adding data from old tail to new
+	if (newTailDistance < mBufferArray.size())
+	{
+		std::copy(data, data + length, mDataLength > 0 ? mTail + 1 : mTail);
+		newTail = mBufferArray.begin() + newTailDistance;
+		//Now we must check were is old head relative to old tail
+		//If head to the right from the tail it means that tail is
+		//one position before head, because if tail exceeded buffer size
+		//in the past, it's moved head to position after itself,
+		//and now we have same situation, we must move head to position
+		//1 sample after tail
+		if (mTail < mHead)
+		{
+			newHead = newTail + 1;
+		}
+	}
+	//In case when new tail exceeds buffer end position in memory,
+	//we should move it to start of buffer with offset equals to
+	//exceeded samples count.
+	else
+	{
+		auto overflow = newTailDistance - mBufferArray.size() + 1;
+		auto beforeBufferEnd = length - overflow;
 
-    //Situation where appended data don't exceed buffer at end
-    //Tail still is to the left from the end
-    //Just adding data from old tail to new
-    if (newTail < mBufferArray.end())
-    {
-        std::copy(data, data+length, mDataLength > 0 ? mTail + 1 : mTail);
+		newTail = mBufferArray.begin() + overflow - 1;
 
-        //Now we must check were is old head relative to old tail
-        //If head to the right from the tail it means that tail is
-        //one position before head, because if tail exceeded buffer size
-        //in the past, it's moved head to position after itself,
-        //and now we have same situation, we must move head to position
-        //1 sample after tail
-        if (mTail < mHead)
-        {
-            newHead = newTail + 1;
-        }
-    }
-    //In case when new tail exceeds buffer end position in memory,
-    //we should move it to start of buffer with offset equals to
-    //exceeded samples count.
-    else
-    {
-        auto overflow = newTail - mBufferArray.end() + 1;
-        auto beforeBufferEnd = length - overflow;
+		if (beforeBufferEnd > 0) {
+			std::copy(data, data + beforeBufferEnd, mTail + 1);
+		}
 
-        newTail = mBufferArray.begin() + overflow - 1;
+		std::copy(data + beforeBufferEnd, data + beforeBufferEnd + overflow, mBufferArray.begin());
 
-        if (beforeBufferEnd > 0){
-            std::copy(data, data + beforeBufferEnd, mTail + 1);
-        }
+		//Head can't be before tail in this case
+		newHead = newTail + 1;
+	}
+	mTail = newTail;
+	mHead = newHead;
 
-        std::copy(data + beforeBufferEnd, data + beforeBufferEnd+overflow, mBufferArray.begin());
-
-        //Head can't be before tail in this case
-        newHead = newTail + 1;
-    }
-    mTail = newTail;
-    mHead = newHead;
-
-    mDataLength += length;
-    if (mDataLength > mBufferSize) mDataLength = mBufferSize;
+	mDataLength += length;
+	if (mDataLength > mBufferSize) mDataLength = mBufferSize;
 }
 
 template<typename SampleType, std::size_t BufferSize>

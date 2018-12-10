@@ -69,6 +69,7 @@
     <Compile Include="ChannelInfo.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceScanner.cs" />
+    <Compile Include="DeviceTraits.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="NativeAdapter.cs" />
     <Compile Include="Parameters.cs" />
@@ -78,7 +79,6 @@
     <Compile Include="ResistanceChannel.cs" />
     <Compile Include="SignalChannel.cs" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <Content Include="$(NEUROSDK_64)\c-neurosdk.dll">
       <Link>c-neurosdk.dll</Link>
@@ -99,7 +99,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <Content Include="$(NEUROSDK_86)\c-neurosdk.dll">
       <Link>c-neurosdk.dll</Link>
@@ -121,13 +120,10 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <PropertyGroup Condition="'$(PlatformName)'=='x64'">
     <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_64%25"</PostBuildEvent>
   </PropertyGroup>
-  
   <PropertyGroup Condition="'$(PlatformName)'=='x86'">
-    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_64%25"</PostBuildEvent>
+    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_86%25"</PostBuildEvent>
   </PropertyGroup>
-
 </Project>

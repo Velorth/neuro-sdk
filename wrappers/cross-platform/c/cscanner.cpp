@@ -6,9 +6,15 @@ extern "C"
 #include "device_scanner/scanner_factory.h"
 
 DeviceScanner* create_device_scanner() {
-	auto scanner = Neuro::createDeviceScanner();
-	const auto scanner_ptr = new decltype(scanner)(std::move(scanner));
-	return reinterpret_cast<DeviceScanner *>(scanner_ptr);
+	try {
+		auto scanner = Neuro::createDeviceScanner();
+		const auto scanner_ptr = new decltype(scanner)(std::move(scanner));
+		return reinterpret_cast<DeviceScanner *>(scanner_ptr);
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return nullptr;
+	}
 }
 
 void scanner_delete(DeviceScanner *scanner_ptr) {

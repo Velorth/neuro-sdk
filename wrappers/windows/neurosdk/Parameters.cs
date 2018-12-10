@@ -187,7 +187,8 @@ namespace Neuro
                     };
                     SetParamValue = (device, value) =>
                     {
-
+                        var name = (string) value;
+                        SdkError.ThrowIfError(device_set_Name(device.DevicePtr, name));
                     };
                     break;
                 case Parameter.State:
@@ -196,6 +197,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_State(device.DevicePtr, out var state));
                         return state;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var state = (DeviceState)value;
+                        SdkError.ThrowIfError(device_set_State(device.DevicePtr, state));
                     };
                     break;
                 case Parameter.Address:
@@ -206,6 +212,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_Address(device.DevicePtr, addressBuffer, (IntPtr)addressBuffer.Capacity));
                         return addressBuffer.ToString();
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var address = (string)value;
+                        SdkError.ThrowIfError(device_set_Address(device.DevicePtr, address));
+                    };
                     break;
                 case Parameter.SerialNumber:
                     Type = typeof(string);
@@ -215,6 +226,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_SerialNumber(device.DevicePtr, stringBuilder, (IntPtr)stringBuilder.Capacity));
                         return stringBuilder.ToString();
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var serial = (string)value;
+                        SdkError.ThrowIfError(device_set_SerialNumber(device.DevicePtr, serial));
+                    };
                     break;
                 case Parameter.HardwareFilterState:
                     Type = typeof(bool);
@@ -222,6 +238,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_HardwareFilterState(device.DevicePtr, out var isEnabled));
                         return isEnabled;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var filterState = (bool)value;
+                        SdkError.ThrowIfError(device_set_HardwareFilterState(device.DevicePtr, filterState));
                     };
                     break;
                 case Parameter.FirmwareMode:
@@ -231,6 +252,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_FirmwareMode(device.DevicePtr, out var firmwareMode));
                         return firmwareMode;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var firmwareMode = (FirmwareMode)value;
+                        SdkError.ThrowIfError(device_set_FirmwareMode(device.DevicePtr, firmwareMode));
+                    };
                     break;
                 case Parameter.SamplingFrequency:
                     Type = typeof(SamplingFrequency);
@@ -238,6 +264,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_SamplingFrequency(device.DevicePtr, out var samplingFrequency));
                         return samplingFrequency;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var samplingFrequency = (SamplingFrequency)value;
+                        SdkError.ThrowIfError(device_set_SamplingFrequency(device.DevicePtr, samplingFrequency));
                     };
                     break;
                 case Parameter.Gain:
@@ -247,6 +278,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_Gain(device.DevicePtr, out var gain));
                         return gain;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var gain = (Gain)value;
+                        SdkError.ThrowIfError(device_set_Gain(device.DevicePtr, gain));
+                    };
                     break;
                 case Parameter.Offset:
                     Type = typeof(byte);
@@ -254,6 +290,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_Offset(device.DevicePtr, out var offset));
                         return offset;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var offset = (byte)value;
+                        SdkError.ThrowIfError(device_set_Offset(device.DevicePtr, offset));
                     };
                     break;
                 case Parameter.ExternalSwitchState:
@@ -263,6 +304,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_ExternalSwitchState(device.DevicePtr, out var externalSwitchInput));
                         return externalSwitchInput;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var externalSwitch = (ExternalSwitchInput)value;
+                        SdkError.ThrowIfError(device_set_ExternalSwitchState(device.DevicePtr, externalSwitch));
+                    };
                     break;
                 case Parameter.ADCInputState:
                     Type = typeof(ADCInput);
@@ -270,6 +316,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_ADCInputState(device.DevicePtr, out var adcInput));
                         return adcInput;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var adcInput = (ADCInput)value;
+                        SdkError.ThrowIfError(device_set_ADCInputState(device.DevicePtr, adcInput));
                     };
                     break;
                 case Parameter.AccelerometerSens:
@@ -279,6 +330,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_AccelerometerSens(device.DevicePtr, out var accelerometerSensitivity));
                         return accelerometerSensitivity;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var accelerometerSensitivity = (AccelerometerSensitivity)value;
+                        SdkError.ThrowIfError(device_set_AccelerometerSens(device.DevicePtr, accelerometerSensitivity));
+                    };
                     break;
                 case Parameter.GyroscopeSens:
                     Type = typeof(GyroscopeSensitivity);
@@ -286,6 +342,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_GyroscopeSens(device.DevicePtr, out var gyroscopeSensitivity));
                         return gyroscopeSensitivity;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var gyroscopeSensitivity = (GyroscopeSensitivity)value;
+                        SdkError.ThrowIfError(device_set_GyroscopeSens(device.DevicePtr, gyroscopeSensitivity));
                     };
                     break;
                 case Parameter.StimulatorState:
@@ -295,6 +356,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_StimulatorState(device.DevicePtr, out var isEnabled));
                         return isEnabled;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var stimulatorState = (bool)value;
+                        SdkError.ThrowIfError(device_set_StimulatorState(device.DevicePtr, stimulatorState));
+                    };
                     break;
                 case Parameter.MotionAssistantState:
                     Type = typeof(bool);
@@ -302,6 +368,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_MotionAssistantState(device.DevicePtr, out var isEnabled));
                         return isEnabled;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var motionAssistantState = (bool)value;
+                        SdkError.ThrowIfError(device_set_MotionAssistantState(device.DevicePtr, motionAssistantState));
                     };
                     break;
                 case Parameter.StimulatorParamPack:
@@ -311,6 +382,11 @@ namespace Neuro
                         SdkError.ThrowIfError(device_read_StimulatorParamPack(device.DevicePtr, out var stimulationParams));
                         return stimulationParams;
                     };
+                    SetParamValue = (device, value) =>
+                    {
+                        var stimulationParams = (StimulationParams)value;
+                        SdkError.ThrowIfError(device_set_StimulatorParamPack(device.DevicePtr, stimulationParams));
+                    };
                     break;
                 case Parameter.MotionAssistantParamPack:
                     Type = typeof(MotionAssistantParams);
@@ -318,6 +394,11 @@ namespace Neuro
                     {
                         SdkError.ThrowIfError(device_read_MotionAssistantParamPack(device.DevicePtr, out var motionAssistantParams));
                         return motionAssistantParams;
+                    };
+                    SetParamValue = (device, value) =>
+                    {
+                        var motionAssistantParams = (MotionAssistantParams)value;
+                        SdkError.ThrowIfError(device_set_MotionAssistantParamPack(device.DevicePtr, motionAssistantParams));
                     };
                     break;
                 default:
