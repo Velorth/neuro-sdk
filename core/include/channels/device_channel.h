@@ -44,7 +44,7 @@ struct RawStrategy final : public ChannelStrategy<DataContainer> {
 };
 
 template <ChannelInfo::Type ChannelType, typename DeviceType = Device>
-class SDK_SHARED DeviceChannel final : public DataChannel<ChannelDataType<ChannelType>> {
+class DeviceChannel final : public DataChannel<ChannelDataType<ChannelType>> {
 public:
 	using ChannelTraits = ChannelTraits<ChannelType>;
 	using DataType = ChannelDataType<ChannelType>;
@@ -117,7 +117,7 @@ private:
 };
 
 template<>
-sampling_frequency_t DeviceChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept;
+SDK_SHARED sampling_frequency_t DeviceChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept;
 
 template<ChannelInfo::Type ChannelType, typename DeviceType, typename ...Args>
 DeviceChannel<ChannelType, DeviceType> make_channel(const std::shared_ptr<DeviceType> &device, Args&&... args) {

@@ -7,19 +7,19 @@
 
 namespace Neuro {
 
-class SDK_SHARED SpectrumChannel final : public DataChannel<double> {
+class SpectrumChannel final : public DataChannel<double> {
 private:
 	std::shared_ptr<DataChannel<double>> mSourceChannel;
 
 public:
-    SpectrumChannel(std::shared_ptr<DataChannel<double>>);
+	SDK_SHARED SpectrumChannel(std::shared_ptr<DataChannel<double>>);
 
-    LengthListenerPtr subscribeLengthChanged(LengthCallbackType) noexcept override;
-    DataContainer readData(data_offset_t, data_length_t) const override;
-    data_length_t totalLength() const noexcept override;
-    sampling_frequency_t samplingFrequency() const noexcept override;
-	std::size_t spectrumLength() const noexcept;
-    double hzPerSpectrumSample() const noexcept;
+	SDK_SHARED LengthListenerPtr subscribeLengthChanged(LengthCallbackType) noexcept override;
+	SDK_SHARED DataContainer readData(data_offset_t, data_length_t) const override;
+	SDK_SHARED data_length_t totalLength() const noexcept override;
+	SDK_SHARED sampling_frequency_t samplingFrequency() const noexcept override;
+	SDK_SHARED std::size_t spectrumLength() const noexcept;
+	SDK_SHARED double hzPerSpectrumSample() const noexcept;
 };
 
 }

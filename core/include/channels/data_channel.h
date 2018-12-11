@@ -9,7 +9,7 @@
 
 namespace Neuro {
 
-class SDK_SHARED CommonChannelInterface {
+class CommonChannelInterface {
 protected:
     using LengthCallbackType = std::function<void(data_length_t)>;
     using LengthListenerPtr = ListenerPtr<void, data_length_t>;
@@ -24,20 +24,20 @@ protected:
 	CommonChannelInterface& operator=(CommonChannelInterface &&) = default;
 
 public:
-    ChannelInfo& info() noexcept {
+	ChannelInfo& info() noexcept {
         return mInfo;
     }
 
-    virtual LengthListenerPtr subscribeLengthChanged(LengthCallbackType callback) noexcept = 0;
-    virtual data_length_t totalLength() const noexcept = 0;
-    virtual sampling_frequency_t samplingFrequency() const noexcept = 0;
+	virtual LengthListenerPtr subscribeLengthChanged(LengthCallbackType callback) noexcept = 0;
+	virtual data_length_t totalLength() const noexcept = 0;
+	virtual sampling_frequency_t samplingFrequency() const noexcept = 0;
 
 private:
     ChannelInfo mInfo;
 };
 
 template <typename DataType>
-class SDK_SHARED DataChannel : public CommonChannelInterface {
+class DataChannel : public CommonChannelInterface {
 protected:
     using DataContainer = std::vector<DataType>;
 
@@ -54,8 +54,8 @@ protected:
 	DataChannel& operator=(DataChannel &&) = default;
 
 public:
-    virtual ~DataChannel() = default;
-    virtual DataContainer readData(data_offset_t, data_length_t) const = 0;
+	virtual ~DataChannel() = default;
+	virtual DataContainer readData(data_offset_t, data_length_t) const = 0;
 };
 
 }

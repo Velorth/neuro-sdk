@@ -5,7 +5,7 @@
 namespace Neuro {
 
 template<>
-sampling_frequency_t DeviceChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept {
+SDK_SHARED sampling_frequency_t DeviceChannel<ChannelInfo::Type::Signal>::samplingFrequency() const noexcept {
 	try {
 		auto frequency = mDevice->readParam<Parameter::SamplingFrequency>();
 		return static_cast<float>(intValue(frequency));
