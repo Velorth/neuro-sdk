@@ -40,12 +40,14 @@ public:
 
 private:
     using BufferType = std::array<SampleType, BufferSize>;
+	using BufferIterator = typename BufferType::iterator;
 
     static constexpr const char *class_name = "CircularBuffer";
 
     BufferType mBufferArray;
-    typename BufferType::iterator mHead;
-    typename BufferType::iterator mTail;
+    BufferIterator mHead;
+	BufferIterator mTail;
+	BufferIterator mBufferBegin{ mBufferArray.begin() };
     static constexpr std::size_t mBufferSize = BufferSize;
     std::size_t mDataLength{0};
 };
@@ -173,16 +175,17 @@ CircularBuffer<SampleType, BufferSize>::read(std::size_t head_offset, std::size_
         throw std::runtime_error("Offset and length are out of range");
     }
 
-    auto readStart = mHead + head_offset;
-    if (readStart >= mBufferArray.end()) {
-        auto fromEnd = readStart - mBufferArray.end() + 1;
-        auto shiftedReadStart = mBufferArray.begin() + fromEnd - 1;
+	auto readStartDistance = std::distance(mBufferBegin, mHead) + head_offset;
+    if (readStartDistance >= mBufferArray.size()) {
+        auto fromEndDistance = readStartDistance - mBufferArray.size() + 1;
+        auto shiftedReadStart = mBufferArray.begin() + fromEndDistance - 1;
         std::copy(shiftedReadStart, shiftedReadStart+length, outVector.begin());
     }
     else {
-        auto readEnd = readStart + length - 1;
-        if (readEnd >= mBufferArray.end()) {
-            auto fromEnd = readEnd - mBufferArray.end() + 1;
+        auto readEndDistance = readStartDistance + length - 1;
+		auto readStart = mHead + head_offset;
+        if (readEndDistance >= mBufferArray.size()) {
+            auto fromEnd = readEndDistance - mBufferArray.size() + 1;
             auto beforeBufferEnd = length - fromEnd;
             std::copy(readStart, readStart+beforeBufferEnd, outVector.begin());
             std::copy(mBufferArray.begin(),
