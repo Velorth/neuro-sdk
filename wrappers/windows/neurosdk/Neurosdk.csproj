@@ -77,51 +77,11 @@
     <Compile Include="ResistanceChannel.cs" />
     <Compile Include="SignalChannel.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <Content Include="$(NEUROSDK_64)\c-neurosdk.dll">
-      <Link>c-neurosdk.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NEUROSDK_64)\neurosdk.dll">
-      <Link>neurosdk.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <Content Include="$(NEUROSDK_64)\c-neurosdkd.dll">
-      <Link>c-neurosdkd.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NEUROSDK_64)\neurosdkd.dll">
-      <Link>neurosdkd.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Any CPU'">
-    <Content Include="$(NEUROSDK_86)\c-neurosdk.dll">
-      <Link>c-neurosdk.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NEUROSDK_86)\neurosdk.dll">
-      <Link>neurosdk.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Any CPU'">
-    <Content Include="$(NEUROSDK_86)\c-neurosdkd.dll">
-      <Link>c-neurosdkd.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(NEUROSDK_86)\neurosdkd.dll">
-      <Link>neurosdkd.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(PlatformName)'=='x64'">
     <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_64%25"</PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(PlatformName)'=='Any CPU'">
+  <PropertyGroup Condition="'$(PlatformName)'=='AnyCPU'">
     <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK_86%25"</PostBuildEvent>
   </PropertyGroup>
 </Project>
