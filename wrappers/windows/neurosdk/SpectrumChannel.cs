@@ -3,27 +3,28 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class ResistanceChannel : IBaseChannel<double>
+    public class SpectrumChannel : IBaseChannel<double>
     {
         private readonly IntPtr _listenerPtr;
         private readonly LengthChangedFunc _lengthChangedFunc;
 
-        public ResistanceChannel(Device device, ChannelInfo info)
+        public SpectrumChannel(IBaseChannel<double> channel)
         {
-            ChannelPtr = create_ResistanceChannel_info(device.DevicePtr, info);
+            ChannelPtr = create_SpectrumChannel(channel.ChannelPtr);
             if (ChannelPtr == null)
             {
                 throw new InvalidOperationException(SdkError.LastErrorMessage);
             }
 
             _lengthChangedFunc = OnTotalLengthChanged;
-            SdkError.ThrowIfError(ResistanceChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr));
+            SdkError.ThrowIfError(SpectrumChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr));
+            SdkError.ThrowIfError(SpectrumChannel_get_info(ChannelPtr, out var info));
             Info = info;
         }
 
-        ~ResistanceChannel()
+        ~SpectrumChannel()
         {
-            ResistanceChannel_delete(ChannelPtr);
+            SpectrumChannel_delete(ChannelPtr);
             free_listener_handle(_listenerPtr);
         }
 
@@ -34,7 +35,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_total_length(ChannelPtr, out var length));
+                SdkError.ThrowIfError(SpectrumChannel_get_total_length(ChannelPtr, out var length));
                 return (int)length;
             }
         }
@@ -43,7 +44,7 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_buffer_size(ChannelPtr, out var size));
+                SdkError.ThrowIfError(SpectrumChannel_get_buffer_size(ChannelPtr, out var size));
                 return (int)size;
             }
         }
@@ -52,8 +53,17 @@ namespace Neuro
         {
             get
             {
-                SdkError.ThrowIfError(ResistanceChannel_get_sampling_frequency(ChannelPtr, out var frequency));
+                SdkError.ThrowIfError(SpectrumChannel_get_sampling_frequency(ChannelPtr, out var frequency));
                 return frequency;
+            }
+        }
+
+        public double HzPerSpectrumSample
+        {
+            get
+            {
+                SdkError.ThrowIfError(SpectrumChannel_get_hz_per_spectrum_sample(ChannelPtr, out var frequencyStep));
+                return frequencyStep;
             }
         }
 
@@ -70,7 +80,7 @@ namespace Neuro
             try
             {
                 SdkError.ThrowIfError(
-                    ResistanceChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
+                    SpectrumChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
                 var buffer = new double[length];
                 Marshal.Copy(bufferPtr, buffer, 0, length);
                 return buffer;
@@ -92,33 +102,36 @@ namespace Neuro
         private const string LibName = "c-neurosdk.dll";
 #endif
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void free_listener_handle(IntPtr resistanceChannelPtr);
+        private static extern void free_listener_handle(IntPtr spectrumChannelPtr);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void LengthChangedFunc(IntPtr channelPtr, IntPtr length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_ResistanceChannel_info(IntPtr devicePtr, ChannelInfo info);
-        
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void ResistanceChannel_delete(IntPtr resistanceChannelPtr);
+        private static extern IntPtr create_SpectrumChannel(IntPtr channelPtr);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_get_info(IntPtr resistanceChannelPtr, out ChannelInfo info);
+        private static extern void SpectrumChannel_delete(IntPtr spectrumChannelPtr);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_read_data(IntPtr resistanceChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
+        private static extern int SpectrumChannel_get_info(IntPtr spectrumChannelPtr, out ChannelInfo info);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_get_sampling_frequency(IntPtr resistanceChannelPtr, out float samplingFrequency);
-        
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_add_length_callback(IntPtr resistanceChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
+        private static extern int SpectrumChannel_read_data(IntPtr spectrumChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_get_total_length(IntPtr resistanceChannelPtr, out IntPtr totalLength);
+        private static extern int SpectrumChannel_get_sampling_frequency(IntPtr spectrumChannelPtr, out float samplingFrequency);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ResistanceChannel_get_buffer_size(IntPtr resistanceChannelPtr, out IntPtr bufferSize);
+        private static extern int SpectrumChannel_get_hz_per_spectrum_sample(IntPtr spectrumChannelPtr, out double hzPerSample);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SpectrumChannel_add_length_callback(IntPtr spectrumChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SpectrumChannel_get_total_length(IntPtr spectrumChannelPtr, out IntPtr totalLength);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SpectrumChannel_get_buffer_size(IntPtr spectrumChannelPtr, out IntPtr bufferSize);
     }
 }

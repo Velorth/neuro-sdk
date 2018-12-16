@@ -5,6 +5,7 @@ extern "C"
 
 #include "device/device.h"
 #include "channels/device_channel.h"
+#include "channels/spectrum_channel.h"
 #include "cchannel-helper.h"
 #include "event_notifier.h"
 #include "sdk_error.h"
@@ -259,6 +260,82 @@ int ResistanceChannel_get_total_length(ResistanceChannel* channel, size_t* out_l
 int ResistanceChannel_get_buffer_size(ResistanceChannel* channel, size_t* out_buffer_size) {
 	auto& resistanceChannel = *reinterpret_cast<std::shared_ptr<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Resistance>> *>(channel);
 	return readBufferSize(*resistanceChannel, out_buffer_size);
+}
+
+SpectrumChannel* create_SpectrumChannel(BaseDoubleChannel *signal_channel) {
+	auto& channel = *reinterpret_cast<std::shared_ptr<Neuro::DataChannel<double>> *>(signal_channel);
+	try {
+		const auto channelPtr = new std::shared_ptr<Neuro::SpectrumChannel>(std::make_shared<Neuro::SpectrumChannel>(channel));
+		return reinterpret_cast<SpectrumChannel *>(channelPtr);
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return nullptr;
+	}
+	catch (...) {
+		return nullptr;
+	}
+}
+void SpectrumChannel_delete(SpectrumChannel* channel) {
+	const auto spectrumChannel = reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	delete spectrumChannel;
+}
+int SpectrumChannel_get_info(SpectrumChannel* channel, ChannelInfo* out_info) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	return getChannelInfo(*spectrumChannel, out_info);
+}
+
+int SpectrumChannel_read_data(SpectrumChannel* channel, size_t offset, size_t length, double* out_buffer) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	return readChannelData(*spectrumChannel, offset, length, out_buffer);
+}
+
+int SpectrumChannel_get_sampling_frequency(SpectrumChannel* channel, float* out_frequency) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	return readSamplingFrequency(*spectrumChannel, out_frequency);
+}
+
+int SpectrumChannel_get_hz_per_spectrum_sample(SpectrumChannel* channel, double* out_step) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	try {
+		*out_step = spectrumChannel->hzPerSpectrumSample();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int SpectrumChannel_add_length_callback(SpectrumChannel* channel, void(* callback)(SpectrumChannel*, size_t),
+	ListenerHandle* handle) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	try {
+		auto listener = spectrumChannel->subscribeLengthChanged([channel, callback](size_t new_length) {
+			if (callback != nullptr) callback(channel, new_length);
+		});
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int SpectrumChannel_get_total_length(SpectrumChannel* channel, size_t* out_length) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	return readTotalLength(*spectrumChannel, out_length);
 }
 
 struct BridgeDoubleChannelObj : Neuro::DataChannel<double> {
