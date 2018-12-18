@@ -67,6 +67,15 @@ namespace Neuro
             }
         }
 
+        public int SpectrumLength
+        {
+            get
+            {
+                SdkError.ThrowIfError(SpectrumChannel_get_spectrum_length(ChannelPtr, out var spectrumLength));
+                return (int)spectrumLength;
+            }
+        }
+
         public IntPtr ChannelPtr { get; }
 
         public double[] ReadData(int offset, int length)
@@ -76,13 +85,13 @@ namespace Neuro
                 return new double[0];
             }
 
-            var bufferPtr = Marshal.AllocHGlobal(length * sizeof(double));
+            var bufferPtr = Marshal.AllocHGlobal(SpectrumLength * sizeof(double));
             try
             {
                 SdkError.ThrowIfError(
                     SpectrumChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
-                var buffer = new double[length];
-                Marshal.Copy(bufferPtr, buffer, 0, length);
+                var buffer = new double[SpectrumLength];
+                Marshal.Copy(bufferPtr, buffer, 0, SpectrumLength);
                 return buffer;
             }
             finally
@@ -127,6 +136,9 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SpectrumChannel_add_length_callback(IntPtr spectrumChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SpectrumChannel_get_spectrum_length(IntPtr spectrumChannelPtr, out IntPtr spectrumLength);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SpectrumChannel_get_total_length(IntPtr spectrumChannelPtr, out IntPtr totalLength);

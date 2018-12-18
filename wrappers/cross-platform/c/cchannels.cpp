@@ -287,7 +287,22 @@ int SpectrumChannel_get_info(SpectrumChannel* channel, ChannelInfo* out_info) {
 
 int SpectrumChannel_read_data(SpectrumChannel* channel, size_t offset, size_t length, double* out_buffer) {
 	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
-	return readChannelData(*spectrumChannel, offset, length, out_buffer);
+	try {
+		auto data = spectrumChannel->readData(offset, length);
+		if (data.size() != spectrumChannel->spectrumLength()) {
+			set_sdk_last_error("Read data length is not equal to spectrum length");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		std::copy(data.begin(), data.end(), out_buffer);
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
 int SpectrumChannel_get_sampling_frequency(SpectrumChannel* channel, float* out_frequency) {
@@ -336,6 +351,21 @@ int SpectrumChannel_add_length_callback(SpectrumChannel* channel, void(* callbac
 int SpectrumChannel_get_total_length(SpectrumChannel* channel, size_t* out_length) {
 	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
 	return readTotalLength(*spectrumChannel, out_length);
+}
+
+int SpectrumChannel_get_spectrum_length(SpectrumChannel* channel, size_t* out_spectrum_length) {
+	auto& spectrumChannel = *reinterpret_cast<std::shared_ptr<Neuro::SpectrumChannel> *>(channel);
+	try {
+		*out_spectrum_length = spectrumChannel->spectrumLength();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
 struct BridgeDoubleChannelObj : Neuro::DataChannel<double> {

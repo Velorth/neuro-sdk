@@ -78,6 +78,7 @@ SDK_SHARED int SpectrumChannel_get_sampling_frequency(SpectrumChannel *channel, 
 SDK_SHARED int SpectrumChannel_get_hz_per_spectrum_sample(SpectrumChannel* channel, double* out_step);
 SDK_SHARED int SpectrumChannel_add_length_callback(SpectrumChannel *channel, void(*callback)(SpectrumChannel *, size_t), ListenerHandle *handle);
 SDK_SHARED int SpectrumChannel_get_total_length(SpectrumChannel *channel, size_t *out_length);
+SDK_SHARED int SpectrumChannel_get_spectrum_length(SpectrumChannel *channel, size_t *out_spectrum_length);
 
 typedef int(*ReadDataFunc)(size_t offset, size_t length, double *out_buffer);
 typedef int(*GetFrequencyFunc)(float * out_frequency);
