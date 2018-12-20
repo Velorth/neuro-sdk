@@ -15,71 +15,64 @@
  */
 
 
+#include <android/log.h>
 #include "wrappers/device/jni_device_wrap.h"
-#include "device_scanner/scanner_factory.h"
-#include "wrappers/scan_state_callback.h"
-#include "wrappers/jni_connection_callback.h"
+#include "wrappers/jni_device_scanner_wrap.h"
 #include "logger.h"
 
 extern "C"
 {
 
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_DeviceScanner_create(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jobject appContext) {
-    auto neuroConnectionPtr = Neuro::createDeviceScanner(appContext).release();
-    auto globalSubscriberRef = env->NewGlobalRef(
-            instance);
-    neuroConnectionPtr->subscribeScanStateChanged(
-            [globalSubscriberRef](bool isScanning) {
-                auto log = LoggerFactory::getCurrentPlatformLogger();
-                log->debug("[%s] On scan state changed", __FUNCTION__);
-                javaOnScanStateChanged(globalSubscriberRef, isScanning);
-            });
-    neuroConnectionPtr->subscribeDeviceFound(
-            [globalSubscriberRef](Neuro::DeviceUniquePtr device) {
-                //here we have to pass heap allocated shared_ptr to callback function
-                //to be sure that shared_ptr and object, managed by it will be alive
-                //as long as managed code needs
-                auto log = LoggerFactory::getCurrentPlatformLogger();
-                log->debug("[%s] On device found", __FUNCTION__);
-                deviceFoundCallback<JniDeviceWrap>(globalSubscriberRef, std::move(device));
-            });
-    return reinterpret_cast<jlong>(neuroConnectionPtr);
+Java_com_neuromd_neurosdk_DeviceScanner_create(JNIEnv *env, jobject instance, jobject appContext) {
+    try {
+        auto scanner = std::shared_ptr<Neuro::DeviceScanner>(Neuro::createDeviceScanner(appContext));
+        auto channelWrap = new JniDeviceScannerWrap(scanner);
+        return reinterpret_cast<jlong>(channelWrap);
+    }
+    catch (std::exception &e){
+        __android_log_print(ANDROID_LOG_ERROR, "CreateDeviceScanner",
+                            "Error creating scanner: %s", e.what());
+        jni::java_throw(env, "java/lang/IllegalArgumentException", e);
+        return 0;
+    }
+}
+
+JNIEXPORT void
+JNICALL
+Java_com_neuromd_neurosdk_DeviceScanner_init(JNIEnv *env, jobject instance) {
+
+    auto deviceScannerWrap = extract_pointer<JniDeviceScannerWrap>(env, instance);
+    deviceScannerWrap->subscribeScanStateChanged(
+            find_notifier<decltype(deviceScannerWrap)>(instance, "scanStateChanged"));
+    deviceScannerWrap->subscribeDeviceFound(
+            find_notifier<decltype(deviceScannerWrap)>(instance, "deviceFound"));
 }
 
 JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_DeviceScanner_deleteNative(JNIEnv *env,
-                                                                        jobject instance,
-                                                                        jlong objPtr) {
-    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
-    delete neuroConnection;
+Java_com_neuromd_neurosdk_DeviceScanner_deleteNative(JNIEnv *env, jobject instance) {
+    deleteNativeObject<JniDeviceScannerWrap>(env, instance);
 }
 
 JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_DeviceScanner_startScan__JI(JNIEnv *env, jobject instance,
-                                                             jlong objPtr, jint timeout) {
-    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
-    neuroConnection->startScan(timeout);
+Java_com_neuromd_neurosdk_DeviceScanner_startScan(JNIEnv *env, jobject instance, jint timeout) {
+    auto &deviceScannerWrap = *extract_pointer<JniDeviceScannerWrap>(env, instance);
+    deviceScannerWrap->startScan(timeout);
 }
 
 JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_DeviceScanner_stopScan__J(JNIEnv *env, jobject instance,
-                                                           jlong objPtr) {
-    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
-    neuroConnection->stopScan();
+Java_com_neuromd_neurosdk_DeviceScanner_stopScan(JNIEnv *env, jobject instance) {
+    auto &deviceScannerWrap = *extract_pointer<JniDeviceScannerWrap>(env, instance);
+    deviceScannerWrap->stopScan();
 }
 
 JNIEXPORT jobject JNICALL
-Java_com_neuromd_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobject instance,
-                                                                   jlong objPtr,
-                                                                   jstring address_) {
+Java_com_neuromd_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobject instance, jstring address_) {
     const char *address = env->GetStringUTFChars(address_, 0);
 
-    auto neuroConnection = reinterpret_cast<Neuro::DeviceScanner *>(objPtr);
+    auto &deviceScannerWrap = *extract_pointer<JniDeviceScannerWrap>(env, instance);
 
-    auto devicePtr = neuroConnection->findDeviceByAddress(address);
+    auto devicePtr = deviceScannerWrap->findDeviceByAddress(address);
     if (!devicePtr) return NULL;
 
     auto device = new JniDeviceWrap(std::move(devicePtr));
@@ -89,4 +82,31 @@ Java_com_neuromd_neurosdk_DeviceScanner_findDeviceByAddress(JNIEnv *env, jobject
     return deviceWrapObj;
 }
 
+}
+
+void JniDeviceScannerWrap::subscribeScanStateChanged(jobject stateChangedSubscriberRef) {
+    scanStateChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
+    std::weak_ptr<jni::jobject_t> weakReference = scanStateChangedGlobalSubscriberRef;
+    mScanStateListener = this->object->subscribeScanStateChanged([weakReference](auto isScanning){
+        jni::call_in_attached_thread([&weakReference, &isScanning](auto env){
+            sendNotification<bool>(env, weakReference, isScanning);
+        });
+    });
+}
+
+void JniDeviceScannerWrap::subscribeDeviceFound(jobject deviceFoundSubscriberRef) {
+    deviceFoundGlobalSubscriberRef = jni::make_global_ref_ptr(deviceFoundSubscriberRef);
+    std::weak_ptr<jni::jobject_t> weakReference = deviceFoundGlobalSubscriberRef;
+    mDeviceFoundListener = this->object->subscribeDeviceFound([weakReference](auto devicePtr){
+        jni::call_in_attached_thread([&weakReference, &devicePtr](auto env){
+            auto subscriberRef = weakReference.lock();
+            if (!subscriberRef)
+                return;
+
+            auto device = new JniDeviceWrap(std::move(devicePtr));
+            jni::java_object<decltype(device)> deviceWrapObj(device);
+            callJavaSendNotification(env, subscriberRef.get(), static_cast<jobject>(deviceWrapObj));
+            env->DeleteLocalRef(deviceWrapObj);
+        });
+    });
 }

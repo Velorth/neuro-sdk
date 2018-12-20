@@ -18,6 +18,7 @@ package com.neuromd.neurosdk;
 
 import android.content.Context;
 
+import com.neuromd.common.Assert;
 import com.neuromd.common.SubscribersNotifier;
 
 /**
@@ -44,11 +45,14 @@ public class DeviceScanner {
      */
     public DeviceScanner(Context context) {
         mNativeObjPtr = create(context);
+        Assert.ensures(mNativeObjPtr != 0,
+                "Device scanner native object is null");
+        init();
     }
 
     public void finalize() throws Throwable {
         if (mNativeObjPtr != 0) {
-            deleteNative(mNativeObjPtr);
+            deleteNative();
             mNativeObjPtr = 0;
         }
         super.finalize();
@@ -59,36 +63,18 @@ public class DeviceScanner {
      *
      * @param timeout Duration of scanning. Less or equal to zero for infinity
      */
-    public void startScan(int timeout) {
-        startScan(mNativeObjPtr, timeout);
-    }
+    public native void startScan(int timeout);
 
     /**
      * Stops device scan process
      */
-    public void stopScan() {
-        stopScan(mNativeObjPtr);
-    }
+    public native void stopScan();
 
-    public Device getDeviceByAddress(String address){
-        return findDeviceByAddress(mNativeObjPtr, address);
-    }
-
-    private void onDeviceFound(Device device) {
-        deviceFound.sendNotification(this, device);
-    }
-
-    private void onScanStateChanged(boolean isScanning) {
-        scanStateChanged.sendNotification(this, isScanning);
-    }
+    public native Device findDeviceByAddress(String address);
 
     private native long create(Context appContext);
 
-    private native void deleteNative(long objPtr);
+    private native void init();
 
-    private native void startScan(long objPtr, int timeout);
-
-    private native void stopScan(long objPtr);
-
-    private native Device findDeviceByAddress(long objPtr, String address);
+    private native void deleteNative();
 }

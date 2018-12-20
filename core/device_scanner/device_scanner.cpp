@@ -74,15 +74,8 @@ public:
 			auto deviceName = bleDevice->getName();
 			auto deviceAddress = bleDevice->getNetAddress();
 			auto neuroDevice = onNewBleDevice(std::move(bleDevice));
-			if (neuroDevice) {
-				if (this->deviceFoundCallback) {
-					try {
-						this->deviceFoundCallback(std::move(neuroDevice));
-					}
-					catch (std::exception &e) {
-						LOG_ERROR_V("Error occured in user-defined DeviceFound callback function: %s", e.what());
-					}
-				}
+			if (neuroDevice) {				
+				mDeviceFoundNotifier.notifyAll(std::move(neuroDevice));				
 			}
 		};
 		scanner->subscribeDeviceFound(scannerCallback);
@@ -101,10 +94,7 @@ public:
 
 		scanner->startScan();
 		LOG_DEBUG_V("Notifying scan state changed: %s", scanner->isScanning() ? "TRUE" : "FALSE");
-		std::thread([=] {
-			if (this->scanStateChangedCallback)
-				scanStateChangedCallback(scanner->isScanning());
-		}).detach();
+		mScanStateNotifier.notifyAll(scanner->isScanning());
 
 		if (timeout > std::chrono::seconds(0)) {
 			std::thread([=] {
@@ -113,8 +103,7 @@ public:
 				if (cvStatus == std::cv_status::timeout) {
 					LOG_DEBUG("Scan timeout");
 					scanner->stopScan();
-					if (this->scanStateChangedCallback)
-						scanStateChangedCallback(scanner->isScanning());
+					mScanStateNotifier.notifyAll(scanner->isScanning());
 					return;
 				}
 			}).detach();
@@ -125,17 +114,9 @@ public:
 		std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
 		stopScanCondition.notify_all();
 		scanner->stopScan();
-		std::thread([=] {
-			if (this->scanStateChangedCallback)
-				scanStateChangedCallback(scanner->isScanning());
-		}).detach();
+		mScanStateNotifier.notifyAll(scanner->isScanning());
 	}
-	void subscribeDeviceFound(std::function<void(DeviceUniquePtr)> device_found_callback) {
-		deviceFoundCallback = device_found_callback;
-	}
-	void subscribeScanStateChanged(std::function<void(bool)> scan_state_changed_callback) {
-		scanStateChangedCallback = scan_state_changed_callback;
-	}
+
 	DeviceUniquePtr findDeviceByAddress(std::string address) {
 		auto bleDevice = scanner->getDeviceByAddress(address);
 		if (!bleDevice) {
@@ -152,8 +133,6 @@ private:
 	std::shared_ptr<BleScanner> scanner;
 	std::condition_variable stopScanCondition;
 	std::mutex stopScanMutex;
-	std::function<void(DeviceUniquePtr)> deviceFoundCallback;
-	std::function<void(bool)> scanStateChangedCallback;
 
 	DeviceUniquePtr onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
 		switch (ble_device->getDeviceType()) {
@@ -165,6 +144,10 @@ private:
 			throw std::runtime_error("Unable to create device of unknown type");
 		}
 	}
+
+public:
+	Notifier<void, DeviceSharedPtr> mDeviceFoundNotifier{ class_name };
+	Notifier<void, bool> mScanStateNotifier{ class_name };
 };
 
 DeviceScanner::DeviceScanner(std::unique_ptr<BleScanner> device_scanner):
@@ -181,12 +164,12 @@ void DeviceScanner::stopScan(){
 	mImpl->stopScan();
 }
 
-void DeviceScanner::subscribeDeviceFound(function<void(std::unique_ptr<Device, DeviceDeleter>)> device_found_callback){
-	mImpl->subscribeDeviceFound(device_found_callback);
+ListenerPtr<void, DeviceSharedPtr> DeviceScanner::subscribeDeviceFound(function<void(std::shared_ptr<Device>)> device_found_callback){
+	return mImpl->mDeviceFoundNotifier.addListener(device_found_callback);
 }
 
-void DeviceScanner::subscribeScanStateChanged(function<void(bool)> scan_state_changed_callback){
-	mImpl->subscribeScanStateChanged(scan_state_changed_callback);
+ListenerPtr<void, bool> DeviceScanner::subscribeScanStateChanged(function<void(bool)> scan_state_changed_callback) {
+	return mImpl->mScanStateNotifier.addListener(scan_state_changed_callback);
 }
 
 std::unique_ptr<Device, DeviceDeleter> DeviceScanner::findDeviceByAddress(std::string address){

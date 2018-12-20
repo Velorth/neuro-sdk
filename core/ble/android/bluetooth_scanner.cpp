@@ -154,8 +154,15 @@ namespace Neuro {
     void BluetoothScannerJni::onDeviceFound(jobject bluetoothDevice) {
         LOG_TRACE("On device found function");
         std::unique_ptr<BleDeviceJni> bleDevice(new BleDeviceJni(bluetoothDevice, appContext));
+        try {
         if (deviceFoundCallback) deviceFoundCallback(std::move(bleDevice));
-
+        }
+        catch (std::exception &e){
+            LOG_ERROR_V("Exception in callback function: %s", e.what());
+        }
+        catch (...){
+            LOG_ERROR("Unhandled exception in callback function");
+        }
     }
 
     void BluetoothScannerJni::releaseDevice(std::string name, std::string address) {

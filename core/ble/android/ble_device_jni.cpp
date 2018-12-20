@@ -47,6 +47,8 @@ BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) :
         LOG_TRACE("Constructor");
         appContext = env->NewGlobalRef(context);
 
+        javaStateClass = (jclass)env->NewGlobalRef(env->FindClass(
+                "com/neuromd/bleconnection/device/BleDeviceState"));
         //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
         //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
         //class constructor
@@ -90,6 +92,7 @@ BleDeviceJni::~BleDeviceJni() {
             auto subscribeMethod = env->GetMethodID(bleDeviceClass, "subscribeDeviceEvents",
                                                     "(Lcom/neuromd/bleconnection/device/BleDeviceCallback;)V");
             env->CallVoidMethod(javaBleDevice, subscribeMethod, NULL);
+            env->DeleteGlobalRef(javaStateClass);
             env->DeleteGlobalRef(javaBleDevice);
             env->DeleteGlobalRef(appContext);
             LOG_TRACE("Destructor EXIT");
@@ -210,8 +213,6 @@ BleDeviceState BleDeviceJni::getState() const {
 
         BleDeviceState state;
         if (javaState != NULL) {
-            auto javaStateClass = env->FindClass(
-                        "com/neuromd/bleconnection/device/DeviceGattInfo");
             auto javaStateGetCodeMethod = env->GetMethodID(javaStateClass, "getIntCode", "()I");
             auto stateCode = env->CallIntMethod(javaState, javaStateGetCodeMethod);
             state = parseBleDeviceState(stateCode);

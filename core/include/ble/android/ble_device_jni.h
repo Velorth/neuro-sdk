@@ -61,6 +61,7 @@ namespace Neuro {
 
         jobject javaBleDevice;
         jobject appContext;
+        jclass javaStateClass{nullptr};
     };
 
 }
