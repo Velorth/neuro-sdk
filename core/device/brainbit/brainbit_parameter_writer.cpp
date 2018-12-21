@@ -42,14 +42,6 @@ bool BrainbitParameterWriter::setGyroscopeSens(typename ParamValue<Parameter::Gy
     throw std::runtime_error("Device parameter not found");
 }
 
-bool BrainbitParameterWriter::setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type){
-    throw std::runtime_error("Device parameter not found");
-}
-
-bool BrainbitParameterWriter::setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type){
-    throw std::runtime_error("Device parameter not found");
-}
-
 bool BrainbitParameterWriter::setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type){
     throw std::runtime_error("Device parameter not found");
 }

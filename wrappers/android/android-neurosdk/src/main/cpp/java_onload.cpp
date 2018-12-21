@@ -1,4 +1,5 @@
 #include <wrappers/channels/jni_resistance_channel_wrap.h>
+#include <wrappers/jni_device_scanner_wrap.h>
 #include "wrappers/channels/jni_electrodes_state_channel_wrap.h"
 #include "wrappers/channels/jni_spectrum_channel_wrap.h"
 #include "wrappers/channels/jni_connection_stats_channel_wrap.h"
@@ -25,6 +26,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<bool>(env);
     jni::initJavaObjClass<unsigned char>(env);
     jni::initJavaObjClass<std::string>(env);
+    jni::initJavaObjClass<JniDeviceScannerWrap *>(env);
     jni::initJavaObjClass<JniDeviceWrap *>(env);
     jni::initJavaObjClass<JniBatteryChannelWrap *>(env);
     jni::initJavaObjClass<JniSignalChannelWrap *>(env);

@@ -72,13 +72,8 @@ struct ParamValue<Parameter::GyroscopeSens>{
 };
 
 template<>
-struct ParamValue<Parameter::StimulatorState>{
-    using Type = bool;
-};
-
-template<>
-struct ParamValue<Parameter::MotionAssistantState>{
-    using Type = bool;
+struct ParamValue<Parameter::StimulatorAndMAState>{
+    using Type = StimulatorDeviceState;
 };
 
 template<>
@@ -126,9 +121,7 @@ SDK_SHARED typename ParamValue<Parameter::AccelerometerSens>::Type Device::readP
 template<>
 SDK_SHARED typename ParamValue<Parameter::GyroscopeSens>::Type Device::readParam<Parameter::GyroscopeSens>() const;
 template<>
-SDK_SHARED typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const;
-template<>
-SDK_SHARED typename ParamValue<Parameter::MotionAssistantState>::Type Device::readParam<Parameter::MotionAssistantState>() const;
+SDK_SHARED typename ParamValue<Parameter::StimulatorAndMAState>::Type Device::readParam<Parameter::StimulatorAndMAState>() const;
 template<>
 SDK_SHARED typename ParamValue<Parameter::StimulatorParamPack>::Type Device::readParam<Parameter::StimulatorParamPack>() const;
 template<>
@@ -165,10 +158,6 @@ template<>
 SDK_SHARED bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Parameter::AccelerometerSens>::Type);
 template<>
 SDK_SHARED bool Device::setParam<Parameter::GyroscopeSens>(typename ParamValue<Parameter::GyroscopeSens>::Type);
-template<>
-SDK_SHARED bool Device::setParam<Parameter::StimulatorState>(typename ParamValue<Parameter::StimulatorState>::Type);
-template<>
-SDK_SHARED bool Device::setParam<Parameter::MotionAssistantState>(typename ParamValue<Parameter::MotionAssistantState>::Type);
 template<>
 SDK_SHARED bool Device::setParam<Parameter::StimulatorParamPack>(typename ParamValue<Parameter::StimulatorParamPack>::Type);
 template<>

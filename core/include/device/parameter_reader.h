@@ -41,9 +41,7 @@ public:
     virtual
     typename ParamValue<Parameter::GyroscopeSens>::Type readGyroscopeSens() const = 0;
     virtual
-    typename ParamValue<Parameter::StimulatorState>::Type readStimulatorState() const = 0;
-    virtual
-    typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const = 0;
+    typename ParamValue<Parameter::StimulatorAndMAState>::Type readStimulatorAndMAState() const = 0;
     virtual
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const = 0;
     virtual

@@ -67,14 +67,29 @@ CallibriParameterReader::readGyroscopeSens() const {
     return mCommonParameters->gyroscopeSens();
 }
 
-typename ParamValue<Parameter::StimulatorState>::Type
-CallibriParameterReader::readStimulatorState() const {
-    throw std::runtime_error("Not implemented");
-}
+typename ParamValue<Parameter::StimulatorAndMAState>::Type
+CallibriParameterReader::readStimulatorAndMAState() const {
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_SH_AND_STIM_STATE);
+    mRequestHandler->sendRequest(cmdData);
+    cmdData->wait();
 
-typename ParamValue<Parameter::MotionAssistantState>::Type
-CallibriParameterReader::readMotionAssistantState() const {
-    throw std::runtime_error("Not implemented");
+    if (cmdData->getError()!=CallibriError::NO_ERROR) {
+        LOG_ERROR("Failed to receive stimulator state");
+        if (cmdData->getError() == CallibriError::ERR_NO_CMD) {
+            throw std::runtime_error("Device does not have stimulator state param");
+        }
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseLength = cmdData->getResponseLength();
+    LOG_DEBUG_V("Response length: %zd", responseLength);
+    if (responseLength < 2){
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseData = cmdData->getResponseData();
+    return StimulatorDeviceState{static_cast<StimulatorDeviceState::State>(responseData[0]),
+                                 static_cast<StimulatorDeviceState::State>(responseData[1])};
 }
 
 typename ParamValue<Parameter::StimulatorParamPack>::Type

@@ -48,14 +48,6 @@ bool CallibriParameterWriter::setGyroscopeSens(typename ParamValue<Parameter::Gy
     return mCommonParameters->setGyroscopeSens(value);
 }
 
-bool CallibriParameterWriter::setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type){
-    throw std::runtime_error("Not implemented exception");
-}
-
-bool CallibriParameterWriter::setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type){
-    throw std::runtime_error("Not implemented exception");
-}
-
 bool CallibriParameterWriter::setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type){
     throw std::runtime_error("Not implemented exception");
 }

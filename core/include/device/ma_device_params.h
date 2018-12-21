@@ -78,6 +78,17 @@ inline bool parseImpulseDuration(unsigned char impulseDurationValue, StimulatorI
     }
 }
 
+struct StimulatorDeviceState{
+    enum class State{
+        NoParams = 0,
+        Disabled = 1,
+        Enabled = 2
+    };
+
+    State StimulatorState;
+    State MAState;
+};
+
 struct MotionAssistantParams {
     int gyroStart;
     int gyroStop;

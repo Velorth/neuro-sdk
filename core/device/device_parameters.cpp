@@ -69,10 +69,8 @@ std::string to_string(const Parameter &param){
         return "AccelerometerSens";
     case Parameter::GyroscopeSens:
         return "GyroscopeSens";
-    case Parameter::StimulatorState:
-        return "StimulatorState";
-    case Parameter::MotionAssistantState:
-        return "MotionAssistantState";
+    case Parameter::StimulatorAndMAState:
+        return "StimulatorAndMAState";
     case Parameter::StimulatorParamPack:
         return "StimulatorParamPack";
     case Parameter::MotionAssistantParamPack:

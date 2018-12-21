@@ -47,8 +47,7 @@ enum class Parameter {
     ADCInputState,
     AccelerometerSens,
     GyroscopeSens,
-    StimulatorState,
-    MotionAssistantState,
+    StimulatorAndMAState,
     StimulatorParamPack,
     MotionAssistantParamPack,
 	FirmwareVersion

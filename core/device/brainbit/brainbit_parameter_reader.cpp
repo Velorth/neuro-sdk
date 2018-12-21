@@ -60,13 +60,8 @@ BrainbitParameterReader::readGyroscopeSens() const {
     throw std::runtime_error("Attempt to read unsupported parameter");
 }
 
-typename ParamValue<Parameter::StimulatorState>::Type
-BrainbitParameterReader::readStimulatorState() const {
-    throw std::runtime_error("Attempt to read unsupported parameter");
-}
-
-typename ParamValue<Parameter::MotionAssistantState>::Type
-BrainbitParameterReader::readMotionAssistantState() const {
+typename ParamValue<Parameter::StimulatorAndMAState>::Type
+BrainbitParameterReader::readStimulatorAndMAState() const {
     throw std::runtime_error("Attempt to read unsupported parameter");
 }
 

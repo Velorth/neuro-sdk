@@ -20,8 +20,7 @@ public:
     typename ParamValue<Parameter::ADCInputState>::Type readADCInputState() const override;
     typename ParamValue<Parameter::AccelerometerSens>::Type readAccelerometerSens() const override;
     typename ParamValue<Parameter::GyroscopeSens>::Type readGyroscopeSens() const override;
-    typename ParamValue<Parameter::StimulatorState>::Type readStimulatorState() const override;
-    typename ParamValue<Parameter::MotionAssistantState>::Type readMotionAssistantState() const override;
+    typename ParamValue<Parameter::StimulatorAndMAState>::Type readStimulatorAndMAState() const override;
     typename ParamValue<Parameter::StimulatorParamPack>::Type readStimulatorParamPack() const override;
     typename ParamValue<Parameter::MotionAssistantParamPack>::Type readMotionAssistantParamPack() const override;
 	typename ParamValue<Parameter::FirmwareVersion>::Type readFirmwareVersion() const override;

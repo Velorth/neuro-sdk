@@ -101,17 +101,10 @@ typename ParamValue<Parameter::AccelerometerSens>::Type Device::readParam<Parame
 }
 
 template<>
-typename ParamValue<Parameter::StimulatorState>::Type Device::readParam<Parameter::StimulatorState>() const {
+typename ParamValue<Parameter::StimulatorAndMAState>::Type Device::readParam<Parameter::StimulatorAndMAState>() const {
     Expects(mImpl != nullptr);
     Expects(mImpl->mParamReader != nullptr);
-    return mImpl->mParamReader->readStimulatorState();
-}
-
-template<>
-typename ParamValue<Parameter::MotionAssistantState>::Type Device::readParam<Parameter::MotionAssistantState>() const {
-    Expects(mImpl != nullptr);
-    Expects(mImpl->mParamReader != nullptr);
-    return mImpl->mParamReader->readMotionAssistantState();
+    return mImpl->mParamReader->readStimulatorAndMAState();
 }
 
 template<>
@@ -227,20 +220,6 @@ bool Device::setParam<Parameter::AccelerometerSens>(typename ParamValue<Paramete
     Expects(mImpl != nullptr);
     Expects(mImpl->mParamWriter != nullptr);
     return mImpl->mParamWriter->setAccelerometerSens(value);
-}
-
-template<>
-bool Device::setParam<Parameter::StimulatorState>(typename ParamValue<Parameter::StimulatorState>::Type value){
-    Expects(mImpl != nullptr);
-    Expects(mImpl->mParamWriter != nullptr);
-    return mImpl->mParamWriter->setStimulatorState(value);
-}
-
-template<>
-bool Device::setParam<Parameter::MotionAssistantState>(typename ParamValue<Parameter::MotionAssistantState>::Type value){
-    Expects(mImpl != nullptr);
-    Expects(mImpl->mParamWriter != nullptr);
-    return mImpl->mParamWriter->setMotionAssistantState(value);
 }
 
 template<>

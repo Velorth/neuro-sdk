@@ -33,10 +33,6 @@ public:
     virtual
     bool setGyroscopeSens(typename ParamValue<Parameter::GyroscopeSens>::Type) = 0;
     virtual
-    bool setStimulatorState(typename ParamValue<Parameter::StimulatorState>::Type) = 0;
-    virtual
-    bool setMotionAssistantState(typename ParamValue<Parameter::MotionAssistantState>::Type) = 0;
-    virtual
     bool setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type) = 0;
     virtual
     bool setMotionAssistantParamPack(typename ParamValue<Parameter::MotionAssistantParamPack>::Type) = 0;
