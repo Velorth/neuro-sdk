@@ -20,10 +20,10 @@
 namespace Neuro {
 
 enum class MotionAssistantLimb {
-    RightLeg,
-    LeftLeg,
-    RightArm,
-    LeftArm
+    RightLeg = 0,
+    LeftLeg = 1,
+    RightArm = 2,
+    LeftArm = 3
 };
 
 enum class StimulatorImpulseDuration {

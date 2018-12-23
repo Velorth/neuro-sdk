@@ -41,6 +41,21 @@ Neuro::StimulationParams jni::get_java_obj_value<Neuro::StimulationParams>(JNIEn
 
 template<>
 template<>
+jni::java_object<Neuro::StimulatorDeviceState>::java_object(const Neuro::StimulatorDeviceState &device_state):
+        nativeObj(device_state){
+    jni::call_in_attached_thread([=](JNIEnv* env){
+        auto objectClassConstructor = env->GetMethodID(object_class, "<init>",
+                                                       constructor_signature<Neuro::StimulatorDeviceState>());
+        javaObj = make_global_ref_ptr(
+                env->NewObject(object_class,
+                               objectClassConstructor,
+                               static_cast<jobject>(jni::java_object<Neuro::StimulatorDeviceState::State>(device_state.StimulatorState)),
+                               static_cast<jobject>(jni::java_object<Neuro::StimulatorDeviceState::State>(device_state.MAState))));
+    });
+}
+
+template<>
+template<>
 jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionAssistantParams &params):
         nativeObj(params){
     jni::call_in_attached_thread([=](JNIEnv* env){
@@ -287,6 +302,26 @@ const std::map<std::string, Neuro::StimulatorImpulseDuration>
 }();
 
 template<>
+const std::map<Neuro::StimulatorDeviceState::State, std::string>
+        jni::enum_name_map<Neuro::StimulatorDeviceState::State>::mEnumToNameMap = []() {
+    return std::map<Neuro::StimulatorDeviceState::State, std::string>{
+            {Neuro::StimulatorDeviceState::State::NoParams , "NoParams"},
+            {Neuro::StimulatorDeviceState::State::Disabled,  "Disabled"},
+            {Neuro::StimulatorDeviceState::State::Enabled, "Enabled"}
+    };
+}();
+
+template<>
+const std::map<std::string, Neuro::StimulatorDeviceState::State>
+        jni::enum_name_map<Neuro::StimulatorDeviceState::State>::mNameToEnumMap = []() {
+    return std::map<std::string, Neuro::StimulatorDeviceState::State>{
+            {"NoParams", Neuro::StimulatorDeviceState::State::NoParams},
+            {"Disabled", Neuro::StimulatorDeviceState::State::Disabled},
+            {"Enabled", Neuro::StimulatorDeviceState::State::Enabled}
+    };
+}();
+
+template<>
 const std::map<Neuro::SamplingFrequency, std::string>
         jni::enum_name_map<Neuro::SamplingFrequency>::mEnumToNameMap = []() {
     return std::map<Neuro::SamplingFrequency, std::string>{
@@ -321,9 +356,9 @@ std::string getParamTypeName(Neuro::Parameter param) {
         case Neuro::Parameter::SerialNumber:
             return "String";
         case Neuro::Parameter::HardwareFilterState:
-        case Neuro::Parameter::StimulatorState:
-        case Neuro::Parameter::MotionAssistantState:
             return "Boolean";
+        case Neuro::Parameter::StimulatorAndMAState:
+            return "StimulatorDeviceState";
         case Neuro::Parameter::Offset:
             return "Byte";
         case Neuro::Parameter::ExternalSwitchState:

@@ -14,8 +14,7 @@ public enum ParameterName {
     ADCInputState,
     AccelerometerSens,
     GyroscopeSens,
-    StimulatorState,
-    MotionAssistantState,
+    StimulatorAndMAState,
     StimulatorParamPack,
     MotionAssistantParamPack,
     FirmwareVersion

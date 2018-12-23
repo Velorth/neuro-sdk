@@ -14,5 +14,6 @@ public enum ParameterType {
     Boolean,
     StimulationParams,
     MotionAssistantParams,
+    StimulatorDeviceState,
     FirmwareVersion
 }

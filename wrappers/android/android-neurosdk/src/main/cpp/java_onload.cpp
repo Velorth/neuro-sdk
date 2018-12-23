@@ -61,6 +61,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     jni::initJavaObjClass<Neuro::MotionAssistantLimb >(env);
     jni::initJavaObjClass<Neuro::StimulationParams>(env);
     jni::initJavaObjClass<Neuro::StimulatorImpulseDuration>(env);
+    jni::initJavaObjClass<Neuro::StimulatorDeviceState>(env);
+    jni::initJavaObjClass<Neuro::StimulatorDeviceState::State>(env);
     jni::initJavaObjClass<Neuro::FirmwareVersion>(env);
 
     auto logFactory = LoggerFactory::getInstance();

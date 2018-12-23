@@ -42,6 +42,24 @@ template<>
 Neuro::StimulationParams jni::get_java_obj_value<Neuro::StimulationParams>(JNIEnv *, jobject);
 
 /**
+ * StimulatorDeviceState parameter type
+ */
+
+template<>
+constexpr const char *jni::java_class_name<Neuro::StimulatorDeviceState>() {
+    return "com/neuromd/neurosdk/parameters/types/StimulatorDeviceState";
+}
+
+template<>
+constexpr const char *jni::constructor_signature<Neuro::StimulatorDeviceState>() {
+    return "(Lcom/neuromd/neurosdk/parameters/types/StimulatorDeviceState$State;Lcom/neuromd/neurosdk/parameters/types/StimulatorDeviceState$State;)V";
+}
+
+template<>
+template<>
+jni::java_object<Neuro::StimulatorDeviceState>::java_object(const Neuro::StimulatorDeviceState &);
+
+/**
  * MotionAssistant parameter type
  */
 
@@ -228,6 +246,22 @@ template<>
 const std::map<std::string, Neuro::StimulatorImpulseDuration>
         jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mNameToEnumMap;
 
+
+/**
+ * StimulatorDeviceState enum
+ */
+template<>
+constexpr const char *jni::java_class_name<Neuro::StimulatorDeviceState::State>() {
+    return "com/neuromd/neurosdk/parameters/types/StimulatorDeviceState$State";
+}
+
+template<>
+const std::map<Neuro::StimulatorDeviceState::State, std::string>
+        jni::enum_name_map<Neuro::StimulatorDeviceState::State>::mEnumToNameMap;
+
+template<>
+const std::map<std::string, Neuro::StimulatorDeviceState::State>
+        jni::enum_name_map<Neuro::StimulatorDeviceState::State>::mNameToEnumMap;
 
 
 /**

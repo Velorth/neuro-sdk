@@ -83,7 +83,7 @@ CallibriParameterReader::readStimulatorAndMAState() const {
 
     auto responseLength = cmdData->getResponseLength();
     LOG_DEBUG_V("Response length: %zd", responseLength);
-    if (responseLength < 2){
+    if (responseLength < COLIBRI_STIM_STATE_PARAMS_DATA_LENGTH){
         throw std::runtime_error("Callibri protocol error");
     }
 
@@ -94,12 +94,60 @@ CallibriParameterReader::readStimulatorAndMAState() const {
 
 typename ParamValue<Parameter::StimulatorParamPack>::Type
 CallibriParameterReader::readStimulatorParamPack() const {
-    throw std::runtime_error("Not implemented");
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_STIM_PARAM);
+    mRequestHandler->sendRequest(cmdData);
+    cmdData->wait();
+
+    if (cmdData->getError()!=CallibriError::NO_ERROR) {
+        LOG_ERROR("Failed to receive stimulator params");
+        if (cmdData->getError() == CallibriError::ERR_NO_CMD) {
+            throw std::runtime_error("Device does not have stimulator params");
+        }
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseLength = cmdData->getResponseLength();
+    LOG_DEBUG_V("Response length: %zd", responseLength);
+    if (responseLength < COLIBRI_STIM_PARAMS_DATA_LENGTH){
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseData = cmdData->getResponseData();
+    ByteInterpreter<unsigned short> stimulDuration;
+    stimulDuration.bytes[0] = responseData[4];
+    stimulDuration.bytes[1] = responseData[5];
+    return StimulationParams{responseData[1],
+                             static_cast<StimulatorImpulseDuration>(responseData[2]),
+                             responseData[3],
+                             stimulDuration.value};
 }
 
 typename ParamValue<Parameter::MotionAssistantParamPack>::Type
 CallibriParameterReader::readMotionAssistantParamPack() const {
-    throw std::runtime_error("Not implemented");
+    auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::GET_SH_PARAM);
+    mRequestHandler->sendRequest(cmdData);
+    cmdData->wait();
+
+    if (cmdData->getError()!=CallibriError::NO_ERROR) {
+        LOG_ERROR("Failed to receive MA params");
+        if (cmdData->getError() == CallibriError::ERR_NO_CMD) {
+            throw std::runtime_error("Device does not have MA params");
+        }
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseLength = cmdData->getResponseLength();
+    LOG_DEBUG_V("Response length: %zd", responseLength);
+    if (responseLength < COLIBRI_SH_PARAMS_DATA_LENGTH){
+        throw std::runtime_error("Callibri protocol error");
+    }
+
+    auto responseData = cmdData->getResponseData();
+    return MotionAssistantParams{responseData[1],
+                                 responseData[2],
+                                 static_cast<MotionAssistantLimb >(responseData[3]),
+                                 responseData[4] * 10,
+                             0};
 }
 
 typename ParamValue<Parameter::FirmwareVersion>::Type
