@@ -117,7 +117,7 @@ CallibriParameterReader::readStimulatorParamPack() const {
     stimulDuration.bytes[0] = responseData[4];
     stimulDuration.bytes[1] = responseData[5];
     return StimulationParams{responseData[1],
-                             static_cast<StimulatorImpulseDuration>(responseData[2]),
+                             responseData[2]*10,
                              responseData[3],
                              stimulDuration.value};
 }
@@ -146,8 +146,7 @@ CallibriParameterReader::readMotionAssistantParamPack() const {
     return MotionAssistantParams{responseData[1],
                                  responseData[2],
                                  static_cast<MotionAssistantLimb >(responseData[3]),
-                                 responseData[4] * 10,
-                             0};
+                                 responseData[4] * 10};
 }
 
 typename ParamValue<Parameter::FirmwareVersion>::Type

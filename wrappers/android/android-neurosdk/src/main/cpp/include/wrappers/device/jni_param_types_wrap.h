@@ -31,7 +31,7 @@ constexpr const char *jni::java_class_name<Neuro::StimulationParams>() {
 
 template<>
 constexpr const char *jni::constructor_signature<Neuro::StimulationParams>() {
-    return "(ILcom/neuromd/neurosdk/parameters/types/StimulatorImpulseDuration;II)V";
+    return "(IIII)V";
 }
 
 template<>
@@ -70,7 +70,7 @@ constexpr const char *jni::java_class_name<Neuro::MotionAssistantParams>() {
 
 template<>
 constexpr const char *jni::constructor_signature<Neuro::MotionAssistantParams>() {
-    return "(IILcom/neuromd/neurosdk/parameters/types/MotionAssistantLimb;II)V";
+    return "(IILcom/neuromd/neurosdk/parameters/types/MotionAssistantLimb;I)V";
 }
 
 template<>
@@ -229,22 +229,6 @@ const std::map<std::string, Neuro::MotionAssistantLimb>
 
 
 
-
-/**
- * StimulatorImpulseDuration enum
- */
-template<>
-constexpr const char *jni::java_class_name<Neuro::StimulatorImpulseDuration>() {
-    return "com/neuromd/neurosdk/parameters/types/StimulatorImpulseDuration";
-}
-
-template<>
-const std::map<Neuro::StimulatorImpulseDuration, std::string>
-        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mEnumToNameMap;
-
-template<>
-const std::map<std::string, Neuro::StimulatorImpulseDuration>
-        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mNameToEnumMap;
 
 
 /**

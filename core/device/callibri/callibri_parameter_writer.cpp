@@ -56,7 +56,7 @@ bool CallibriParameterWriter::setStimulatorParamPack(typename ParamValue<Paramet
     impulseWidth.value = saturation_cast<unsigned short>(stimulationParams.stimulus_duration);
     cmdData->setRequestData({1,
                              saturation_cast<Byte>(stimulationParams.current),
-                             saturation_cast<Byte>(stimulationParams.pulse_duration),
+                             saturation_cast<Byte>(stimulationParams.pulse_width/10),
                              saturation_cast<Byte>(stimulationParams.frequency),
                              impulseWidth.bytes[0],
                              impulseWidth.bytes[1]});

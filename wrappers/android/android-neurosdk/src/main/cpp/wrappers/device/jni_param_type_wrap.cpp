@@ -12,7 +12,7 @@ jni::java_object<Neuro::StimulationParams>::java_object(const Neuro::Stimulation
                 env->NewObject(object_class,
                                objectClassConstructor,
                                params.current,
-                               static_cast<jobject>(jni::java_object<Neuro::StimulatorImpulseDuration>(params.pulse_duration)),
+                               params.pulse_width,
                                params.frequency,
                                params.stimulus_duration));
     });
@@ -25,10 +25,8 @@ Neuro::StimulationParams jni::get_java_obj_value<Neuro::StimulationParams>(JNIEn
     auto amplitudeMethodId = env->GetMethodID(javaClass, "amplitude", "()I");
     auto amplitude = env->CallIntMethod(obj, amplitudeMethodId);
 
-    auto methodSignature = std::string("()L") + jni::java_class_name<Neuro::StimulatorImpulseDuration>() + ";";
-    auto pulseDurationMethodId = env->GetMethodID(javaClass, "pulseDuration", methodSignature.c_str());
-    auto pulseDurationObj = env->CallObjectMethod(obj, pulseDurationMethodId);
-    auto pulseDuration = jni::enumFromJavaObj<Neuro::StimulatorImpulseDuration>(env, pulseDurationObj);
+    auto pulseDurationMethodId = env->GetMethodID(javaClass, "pulseWidth", "()I");
+    auto pulseDuration = env->CallIntMethod(obj, pulseDurationMethodId);
 
     auto frequencyMethodId = env->GetMethodID(javaClass, "frequency", "()I");
     auto frequency = env->CallIntMethod(obj, frequencyMethodId);
@@ -67,8 +65,7 @@ jni::java_object<Neuro::MotionAssistantParams>::java_object(const Neuro::MotionA
                                params.gyroStart,
                                params.gyroStop,
                                static_cast<jobject>(jni::java_object<Neuro::MotionAssistantLimb>(params.limb)),
-                               params.minPause,
-                               params.maxDuration));
+                               params.minPause));
     });
 }
 
@@ -90,10 +87,7 @@ Neuro::MotionAssistantParams jni::get_java_obj_value<Neuro::MotionAssistantParam
     auto minPauseMethodId = env->GetMethodID(javaClass, "minPause", "()I");
     auto minPause = env->CallIntMethod(obj, minPauseMethodId);
 
-    auto maxDurationMethodId = env->GetMethodID(javaClass, "maxDuration", "()I");
-    auto maxDuration = env->CallIntMethod(obj, maxDurationMethodId);
-
-    return Neuro::MotionAssistantParams{gyroStart, gyroStop, limb, minPause, maxDuration};
+    return Neuro::MotionAssistantParams{gyroStart, gyroStop, limb, minPause};
 }
 
 template<>
@@ -281,25 +275,6 @@ const std::map<std::string, Neuro::MotionAssistantLimb>
     };
 }();
 
-template<>
-const std::map<Neuro::StimulatorImpulseDuration, std::string>
-        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mEnumToNameMap = []() {
-    return std::map<Neuro::StimulatorImpulseDuration, std::string>{
-            {Neuro::StimulatorImpulseDuration::us60, "us60"},
-            {Neuro::StimulatorImpulseDuration::us100,  "us100"},
-            {Neuro::StimulatorImpulseDuration::us200, "us200"}
-    };
-}();
-
-template<>
-const std::map<std::string, Neuro::StimulatorImpulseDuration>
-        jni::enum_name_map<Neuro::StimulatorImpulseDuration>::mNameToEnumMap = []() {
-    return std::map<std::string, Neuro::StimulatorImpulseDuration>{
-            {"us60", Neuro::StimulatorImpulseDuration::us60},
-            {"us100", Neuro::StimulatorImpulseDuration::us100},
-            {"us200", Neuro::StimulatorImpulseDuration::us200}
-    };
-}();
 
 template<>
 const std::map<Neuro::StimulatorDeviceState::State, std::string>

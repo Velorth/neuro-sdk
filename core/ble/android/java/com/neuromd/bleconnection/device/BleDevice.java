@@ -234,7 +234,6 @@ public class BleDevice {
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.v("JavaBleDevice", String.format("Characteristic onWrite status: %d", status));
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.e("JavaBleDevice", "Characteristic write error");
                 mConnectionState = BleDeviceState.ERROR;
@@ -326,7 +325,6 @@ public class BleDevice {
      */
     private void onStatusCharacteristicChanged(BluetoothGattCharacteristic statusCharacteristic) {
         final byte[] statusData = statusCharacteristic.getValue();
-        Log.v("JavaBleDevice", "On status characteristic changed");
         if (mDeviceCallback != null) {
             mDeviceCallback.onStatusReceived(statusData);
         }
@@ -494,8 +492,6 @@ public class BleDevice {
             Log.e("JavaBleDevice", "Cannot send command. Device is disconnected");
             return false;
         }
-
-        Log.v("JavaBleDevice", "Sending command");
 
         mTxCharacteristic.setValue(cmdArray);
         mTxCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);

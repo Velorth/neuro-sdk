@@ -26,12 +26,6 @@ enum class MotionAssistantLimb {
     LeftArm = 3
 };
 
-enum class StimulatorImpulseDuration {
-    us60 = 6,
-    us100 = 10,
-    us200 = 20
-};
-
 inline bool parseLimbCode(unsigned char limbByte, MotionAssistantLimb &limb){
 
     switch (limbByte){
@@ -57,27 +51,6 @@ inline bool parseLimbCode(unsigned char limbByte, MotionAssistantLimb &limb){
     }
 }
 
-inline bool parseImpulseDuration(unsigned char impulseDurationValue, StimulatorImpulseDuration &duration){
-
-    switch (impulseDurationValue){
-
-        case static_cast<unsigned char>(StimulatorImpulseDuration::us60):{
-            duration = StimulatorImpulseDuration::us60;
-            return true;
-        }
-        case static_cast<unsigned char>(StimulatorImpulseDuration::us100):{
-            duration = StimulatorImpulseDuration::us100;
-            return true;
-        }
-        case static_cast<unsigned char>(StimulatorImpulseDuration::us200):{
-            duration = StimulatorImpulseDuration::us200;
-            return true;
-        }
-        default:
-            return false;
-    }
-}
-
 struct StimulatorDeviceState{
     enum class State{
         NoParams = 0,
@@ -94,12 +67,11 @@ struct MotionAssistantParams {
     int gyroStop;
     MotionAssistantLimb limb;
     int minPause;
-    int maxDuration;
 };
 
 struct StimulationParams {
     int current;
-    int pulse_duration;
+    int pulse_width;
     int frequency;
     int stimulus_duration;
 };

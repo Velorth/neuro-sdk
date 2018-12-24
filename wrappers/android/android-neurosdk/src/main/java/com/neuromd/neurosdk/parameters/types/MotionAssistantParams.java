@@ -5,18 +5,15 @@ public final class MotionAssistantParams {
     private int mGyroStop;
     private MotionAssistantLimb mLimb;
     private int mMinPause;
-    private int mMaxDuration;
 
     public MotionAssistantParams(int gyroAngleStart,
                                  int gyroAngleStop,
                                  MotionAssistantLimb limb,
-                                 int minPause,
-                                 int maxDuration){
+                                 int minPause){
         mGyroStart = gyroAngleStart;
         mGyroStop = gyroAngleStop;
         mLimb = limb;
         mMinPause = minPause;
-        mMaxDuration = maxDuration;
     }
 
     public int gyroStartAngle(){
@@ -35,10 +32,6 @@ public final class MotionAssistantParams {
         return mMinPause;
     }
 
-    public int maxDuration(){
-        return mMaxDuration;
-    }
-
     public void setGyroStartAngle(int gyroStart){
         mGyroStart = gyroStart;
     }
@@ -53,9 +46,5 @@ public final class MotionAssistantParams {
 
     public void setMinPause(int minPause){
         mMinPause = minPause;
-    }
-
-    public void setMaxDuration(int maxDuration){
-        mMaxDuration = maxDuration;
     }
 }
