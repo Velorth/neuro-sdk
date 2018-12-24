@@ -99,7 +99,7 @@ struct MotionAssistantParams {
 
 struct StimulationParams {
     int current;
-    StimulatorImpulseDuration pulse_duration;
+    int pulse_duration;
     int frequency;
     int stimulus_duration;
 };

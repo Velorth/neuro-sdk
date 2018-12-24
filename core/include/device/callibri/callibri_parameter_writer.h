@@ -2,6 +2,7 @@
 #define CALLIBRI_PARAMETER_WRITER_H
 
 #include "device/parameter_writer.h"
+#include "device/callibri/callibri_common_parameters.h"
 
 namespace Neuro {
 
@@ -9,7 +10,7 @@ class CallibriCommonParameters;
 
 class CallibriParameterWriter : public ParameterWriter {
 public:
-    CallibriParameterWriter(std::shared_ptr<CallibriCommonParameters>);
+    CallibriParameterWriter(std::shared_ptr<CallibriCommonParameters>, std::shared_ptr<CallibriRequestScheduler>);
 
     bool setSerialNumber(typename ParamValue<Parameter::SerialNumber>::Type) override;
     bool setHardwareFilterState(typename ParamValue<Parameter::HardwareFilterState>::Type) override;
@@ -27,6 +28,7 @@ public:
 
 private:
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
+    std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
 };
 
 }
