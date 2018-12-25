@@ -175,6 +175,8 @@ std::vector<CallibriModule> CallibriCommonParameters::syncParameters(){
     if (featuresFlags&0x04){
         mAvailableCommands.push_back(Command::EnableMotionAssistant);
         mAvailableCommands.push_back(Command::StartStimulation);
+        mAvailableCommands.push_back(Command::DisableMotionAssistant);
+        mAvailableCommands.push_back(Command::StopStimulation);
         mAvailableParameters.push_back({Parameter::StimulatorAndMAState, ParamAccess::Read});
         mAvailableParameters.push_back({Parameter::MotionAssistantParamPack, ParamAccess::ReadWrite});
         mAvailableParameters.push_back({Parameter::StimulatorParamPack, ParamAccess::ReadWrite});

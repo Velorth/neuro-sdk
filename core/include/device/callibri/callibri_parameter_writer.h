@@ -27,6 +27,7 @@ public:
     bool setFirmwareVersion(typename ParamValue<Parameter::FirmwareVersion>::Type) override;
 
 private:
+    static constexpr const char *class_name = "CallibriParamWriter";
     std::shared_ptr<CallibriCommonParameters> mCommonParameters;
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
 };

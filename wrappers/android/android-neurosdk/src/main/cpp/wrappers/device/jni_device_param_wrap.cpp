@@ -33,7 +33,9 @@ jni::enum_name_map<Neuro::Command>::mEnumToNameMap = []() {
             {Neuro::Command::StartRespiration,      "StartRespiration"},
             {Neuro::Command::StopRespiration,       "StopRespiration"},
             {Neuro::Command::StartStimulation,      "StartStimulation"},
+            {Neuro::Command::StopStimulation,       "StopStimulation"},
             {Neuro::Command::EnableMotionAssistant, "EnableMotionAssistant"},
+            {Neuro::Command::DisableMotionAssistant,"DisableMotionAssistant"},
             {Neuro::Command::FindMe,                "FindMe"}
     };
 }();
@@ -51,7 +53,9 @@ jni::enum_name_map<Neuro::Command>::mNameToEnumMap = []() {
             {"StartRespiration",      Neuro::Command::StartRespiration},
             {"StopRespiration",       Neuro::Command::StopRespiration},
             {"StartStimulation",      Neuro::Command::StartStimulation},
+            {"StopStimulation",       Neuro::Command::StopStimulation},
             {"EnableMotionAssistant", Neuro::Command::EnableMotionAssistant},
+            {"DisableMotionAssistant",Neuro::Command::DisableMotionAssistant},
             {"FindMe",                Neuro::Command::FindMe}
     };
 }();

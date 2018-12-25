@@ -71,8 +71,14 @@ bool CallibriImpl::execute(Command command){
     case Command::EnableMotionAssistant:{
         return sendSimpleCommand<Command::EnableMotionAssistant>();
     }
+    case Command::DisableMotionAssistant:{
+        return sendSimpleCommand<Command::DisableMotionAssistant>();
+    }
     case Command::StartStimulation:{
         return sendSimpleCommand<Command::StartStimulation>();
+    }
+    case Command::StopStimulation:{
+        return sendSimpleCommand<Command::StopStimulation>();
     }
     case Command::FindMe:{
         return sendSimpleCommand<Command::FindMe>();

@@ -398,8 +398,14 @@ CallibriCommand toCallibriCommand(){
     case Command::StartStimulation:{
         return CallibriCommand::START_STIM;
     }
+    case Command::StopStimulation:{
+        return CallibriCommand::STOP_STIM;
+    }
     case Command::EnableMotionAssistant:{
         return CallibriCommand::SH_START;
+    }
+    case Command::DisableMotionAssistant:{
+        return CallibriCommand::SH_STOP;
     }
     case Command::FindMe:{
         return CallibriCommand::FIND_ME;

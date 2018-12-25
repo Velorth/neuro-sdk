@@ -17,6 +17,8 @@ std::string to_string(const Command &command){
     switch(command){
     case Command::EnableMotionAssistant:
         return "EnableMotionAssistant";
+    case Command::DisableMotionAssistant:
+        return "DisableMotionAssistant";
     case Command::FindMe:
         return "FindMe";
     case Command::StartMEMS:
@@ -29,6 +31,8 @@ std::string to_string(const Command &command){
         return "StartSignal";
     case Command::StartStimulation:
         return "StartStimulation";
+    case Command::StopStimulation:
+        return "StopStimulation";
     case Command::StopMEMS:
         return "StopMEMS";
     case Command::StopResist:

@@ -97,7 +97,7 @@ public:
 		mScanStateNotifier.notifyAll(scanner->isScanning());
 
 		if (timeout > std::chrono::seconds(0)) {
-			std::thread([=] {
+			mStopScanQueue.exec([=] {
 				std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
 				auto cvStatus = stopScanCondition.wait_for(stopScanLock, timeout);
 				if (cvStatus == std::cv_status::timeout) {
@@ -106,7 +106,7 @@ public:
 					mScanStateNotifier.notifyAll(scanner->isScanning());
 					return;
 				}
-			}).detach();
+			});
 		}
 	}
 	void stopScan() {
@@ -133,6 +133,7 @@ private:
 	std::shared_ptr<BleScanner> scanner;
 	std::condition_variable stopScanCondition;
 	std::mutex stopScanMutex;
+	TaskQueue mStopScanQueue{"StopScanQueue"};
 
 	DeviceUniquePtr onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
 		switch (ble_device->getDeviceType()) {

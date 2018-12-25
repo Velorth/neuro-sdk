@@ -116,10 +116,11 @@ CallibriParameterReader::readStimulatorParamPack() const {
     ByteInterpreter<unsigned short> stimulDuration;
     stimulDuration.bytes[0] = responseData[4];
     stimulDuration.bytes[1] = responseData[5];
-    return StimulationParams{responseData[1],
+    StimulationParams stimulationParams{responseData[1],
                              responseData[2]*10,
                              responseData[3],
                              stimulDuration.value};
+    return stimulationParams;
 }
 
 typename ParamValue<Parameter::MotionAssistantParamPack>::Type
