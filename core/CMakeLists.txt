@@ -207,7 +207,14 @@ file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/sign
 ############################
 if (UNIX)
   if (APPLE)
-	message(FATAL_ERROR "NOT IMPLEMENTED")
+    install(TARGETS neurosdk DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share)
+    install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include)
+	install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/channels)
+	install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/channels/info)
+	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device)
+	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device_scanner)
+	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/filter)
+	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/signal)
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf

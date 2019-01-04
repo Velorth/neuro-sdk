@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-#include "ble_device_objc.h"
+#include "ble/ios/ble_device_objc.h"
 
+namespace Neuro {
+    
 NCBleDevice::NCBleDevice(CBPeripheral* device, CBCentralManager* central, CBScannerDelegate* scanDelegate):
+    BleDevice(BleDeviceInfo::fromDeviceName([[device name]cStringUsingEncoding:NSASCIIStringEncoding])),
     hardwareDevice(device),
     scanner(central),
     scannerDelegate(scanDelegate)
@@ -26,8 +29,7 @@ NCBleDevice::NCBleDevice(CBPeripheral* device, CBCentralManager* central, CBScan
     [scannerDelegate setDeviceDisconnectedCallback:device callback:^{onDeviceDisconnected();}];
     [scannerDelegate setDeviceConnectionErrorCallback:device callback:^{onDeviceError();}];
     
-    deviceInfo = DeviceInfo::fromDeviceName([[device name]cStringUsingEncoding:NSASCIIStringEncoding]);
-    deviceDelegate = [[CBDeviceDelegate alloc] initWithGattInfo:deviceInfo->getGattInfo()];
+    deviceDelegate = [[CBDeviceDelegate alloc] initWithGattInfo:mDeviceInfo->getGattInfo()];
 }
 
 NCBleDevice::~NCBleDevice()
@@ -55,9 +57,10 @@ void NCBleDevice::close()
     [scanner cancelPeripheralConnection:hardwareDevice];
 }
 
-bool NCBleDevice::sendCommand(void* command_data, size_t length)
+bool NCBleDevice::sendCommand(const std::vector<Byte> &commandData)
 {
-    return [deviceDelegate sendMessage: command_data length:length];
+    auto bufferCopy = commandData;
+    return [deviceDelegate sendMessage: bufferCopy.data() length:bufferCopy.size()];
 }
 
 std::string NCBleDevice::getName() const
@@ -72,28 +75,23 @@ std::string NCBleDevice::getNetAddress() const
     return std::string([[[hardwareDevice identifier] UUIDString] cStringUsingEncoding:NSASCIIStringEncoding]);
 }
 
-void NCBleDevice::setDeviceCallback(std::shared_ptr<DeviceCommInterface> callbackInterface)
-{
-    NSLog(@"Set callback");
-    deviceCallback = callbackInterface;
-    [deviceDelegate setCommunicationCallbacks:callbackInterface];
-}
-
 void NCBleDevice::onDeviceConnected()
 {
     NSLog(@"Device connected");
     hardwareDevice.delegate = deviceDelegate;
-    deviceCallback->onConnected();
+    deviceStateChangedCallback(BleDeviceState::Connected, BleDeviceError::NoError);
     [hardwareDevice discoverServices:nil];
 }
 
 void NCBleDevice::onDeviceDisconnected()
 {
     NSLog(@"Device disconnected");
-    deviceCallback->onDisconnected();
+    deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::NoError);
 }
 
 void NCBleDevice::onDeviceError()
 {
-    deviceCallback->onBleDeviceError();
+    deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::GeneralConnectionError);
+}
+    
 }

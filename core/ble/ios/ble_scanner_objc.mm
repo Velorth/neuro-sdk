@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#include "ble_scanner_objc.h"
-#include "ble_device_objc.h"
+#include "ble/ios/ble_scanner_objc.h"
+#include "ble/ios/ble_device_objc.h"
 
 using std::shared_ptr;
 using std::vector;
 using std::string;
+
+namespace Neuro {
 
 NCBleScanner::NCBleScanner():
     scanner(nullptr),
@@ -98,3 +100,4 @@ bool NCBleScanner::isScanning()
     return [scanner isScanning];
 }
 
+}

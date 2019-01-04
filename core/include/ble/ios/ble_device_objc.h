@@ -30,19 +30,18 @@ public:
     NCBleDevice& operator=(const NCBleDevice&) = delete;
     ~NCBleDevice();
     
-    void connect();
-    void disconnect();
-    void close();
-    bool sendCommand(void*, size_t);
-    std::string getName() const;
-    std::string getNetAddress() const;
-    void setDeviceCallback(std::shared_ptr<DeviceCommInterface> callbackInterface);
+    void connect() override;
+    void disconnect() override;
+    void close() override;
+    bool sendCommand(const std::vector<Byte> &commandData) override;
+    BleDeviceState getState() const override;
+    std::string getName() const override;
+    std::string getNetAddress() const override;
 private:
     CBPeripheral* hardwareDevice;
     CBCentralManager* scanner;
     CBDeviceDelegate* deviceDelegate;
     CBScannerDelegate* scannerDelegate;
-    std::shared_ptr<DeviceCommInterface> deviceCallback;
     
     void onDeviceConnected();
     void onDeviceDisconnected();
