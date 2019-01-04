@@ -88,7 +88,6 @@ public:
 
 	template <class Rep, class Period>
 	void startScan(std::chrono::duration<Rep, Period> timeout) {
-		LOG_DEBUG("Start scan");
 		if (scanner->isScanning())
 			stopScan();
 
@@ -99,13 +98,16 @@ public:
 		if (timeout > std::chrono::seconds(0)) {
 			mStopScanQueue.exec([=] {
 				std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
-				auto cvStatus = stopScanCondition.wait_for(stopScanLock, timeout);
-				if (cvStatus == std::cv_status::timeout) {
-					LOG_DEBUG("Scan timeout");
-					scanner->stopScan();
-					mScanStateNotifier.notifyAll(scanner->isScanning());
-					return;
-				}
+                if (scanner->isScanning()) {
+                    auto cvStatus = stopScanCondition.wait_for(stopScanLock, timeout);
+                    if (cvStatus == std::cv_status::timeout) {
+                        LOG_DEBUG("Scan timeout");
+                        scanner->stopScan();
+                        LOG_DEBUG_V("Notifying scan state changed: %s", scanner->isScanning() ? "TRUE" : "FALSE");
+                        mScanStateNotifier.notifyAll(scanner->isScanning());
+                        return;
+                    }
+                }
 			});
 		}
 	}
@@ -114,6 +116,7 @@ public:
 		std::unique_lock<std::mutex> stopScanLock(stopScanMutex);
 		stopScanCondition.notify_all();
 		scanner->stopScan();
+        LOG_DEBUG_V("Notifying scan state changed: %s", scanner->isScanning() ? "TRUE" : "FALSE");
 		mScanStateNotifier.notifyAll(scanner->isScanning());
 	}
 
