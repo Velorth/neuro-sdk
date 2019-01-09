@@ -184,6 +184,8 @@ file(GLOB SHARED_HEADERS_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/include/common_types
 								${CMAKE_CURRENT_SOURCE_DIR}/include/lib_export.h)
 file(GLOB SHARED_HEADERS_CHANNELS 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/data_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/device_channel.h
+									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/bipolar_channel.h
+									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/filtered_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/spectrum_channel.h)
 file(GLOB SHARED_HEADERS_CHANNELS_INFO 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/channel_info.h
 										${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/mems_data.h
