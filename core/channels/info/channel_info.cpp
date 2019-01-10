@@ -85,6 +85,17 @@ std::size_t ChannelInfo::getIndex() const noexcept{
     return mIndex;
 }
 
+void ChannelInfo::swap(ChannelInfo& rhs) noexcept {
+	using std::swap;
+	swap(mType, rhs.mType);
+	swap(mName, rhs.mName);
+	swap(mIndex, rhs.mIndex);
+}
+
+void swap(ChannelInfo &lhs, ChannelInfo &rhs) noexcept {
+	lhs.swap(rhs);
+}
+
 bool operator==(const ChannelInfo &lhs, const ChannelInfo &rhs){
     return (lhs.getType() == rhs.getType()) && (lhs.getName() == rhs.getName()) && (lhs.getIndex() == rhs.getIndex());
 }

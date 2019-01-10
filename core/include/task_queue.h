@@ -13,6 +13,8 @@ public:
     TaskQueue(const std::string &name = std::string());
     TaskQueue(const TaskQueue &) = delete;
     TaskQueue& operator=(const TaskQueue &) = delete;
+	TaskQueue(TaskQueue &&) noexcept;
+	TaskQueue& operator=(TaskQueue &&) noexcept;
     ~TaskQueue();
 
     void exec(const std::function<void()> &);

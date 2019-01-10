@@ -29,7 +29,9 @@ namespace Neuro
         StartRespiration,
         StopRespiration,
         StartStimulation,
+        StopStimulation,
         EnableMotionAssistant,
+        DisableMotionAssistant,
         FindMe
     }
 
@@ -55,8 +57,7 @@ namespace Neuro
         ADCInputState,
         AccelerometerSens,
         GyroscopeSens,
-        StimulatorState,
-        MotionAssistantState,
+        StimulatorAndMAState,
         StimulatorParamPack,
         MotionAssistantParamPack
     }
@@ -136,12 +137,26 @@ namespace Neuro
         Sens2000Grad
     }
 
-    enum MotionAssistantLimb
+    public enum MotionAssistantLimb
     {
         RightLeg,
         LeftLeg,
         RightArm,
         LeftArm
+    }
+
+    public enum StimulationDeviceState
+    {
+        StateNoParams,
+        StateDisabled,
+        StateEnabled
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct StimulatorAndMAState
+    {
+        public StimulationDeviceState StimulatorState;
+        public StimulationDeviceState MAState;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -151,14 +166,13 @@ namespace Neuro
         public int GyroStop;
         public MotionAssistantLimb Limb;
         public int MinPause;
-        public int MaxDuration;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct StimulationParams
     {
         public int Current;
-        public int PulseDuration;
+        public int PulseWidth;
         public int Frequency;
         public int StimulusDuration;
     }
@@ -349,31 +363,14 @@ namespace Neuro
                         SdkError.ThrowIfError(device_set_GyroscopeSens(device.DevicePtr, gyroscopeSensitivity));
                     };
                     break;
-                case Parameter.StimulatorState:
-                    Type = typeof(bool);
+                case Parameter.StimulatorAndMAState:
+                    Type = typeof(StimulationDeviceState);
                     ReadParamValue = device =>
                     {
-                        SdkError.ThrowIfError(device_read_StimulatorState(device.DevicePtr, out var isEnabled));
-                        return isEnabled;
+                        SdkError.ThrowIfError(device_read_StimulatorAndMAState(device.DevicePtr, out var state));
+                        return state;
                     };
-                    SetParamValue = (device, value) =>
-                    {
-                        var stimulatorState = (bool)value;
-                        SdkError.ThrowIfError(device_set_StimulatorState(device.DevicePtr, stimulatorState));
-                    };
-                    break;
-                case Parameter.MotionAssistantState:
-                    Type = typeof(bool);
-                    ReadParamValue = device =>
-                    {
-                        SdkError.ThrowIfError(device_read_MotionAssistantState(device.DevicePtr, out var isEnabled));
-                        return isEnabled;
-                    };
-                    SetParamValue = (device, value) =>
-                    {
-                        var motionAssistantState = (bool)value;
-                        SdkError.ThrowIfError(device_set_MotionAssistantState(device.DevicePtr, motionAssistantState));
-                    };
+                    SetParamValue = (device, value) => throw new InvalidOperationException("Unable to set parameter stimulation and MA state. Use appropriate command to change state");
                     break;
                 case Parameter.StimulatorParamPack:
                     Type = typeof(StimulationParams);
@@ -452,10 +449,7 @@ namespace Neuro
         private static extern int device_read_GyroscopeSens(IntPtr devicePtr, out GyroscopeSensitivity outGuroSens);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_StimulatorState(IntPtr devicePtr, out bool outIsEnabled);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_read_MotionAssistantState(IntPtr devicePtr, out bool outIsEnabled);
+        private static extern int device_read_StimulatorAndMAState(IntPtr devicePtr, out StimulatorAndMAState outIsEnabled);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_read_StimulatorParamPack(IntPtr devicePtr, out StimulationParams outStimulParams);
@@ -503,12 +497,6 @@ namespace Neuro
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_set_GyroscopeSens(IntPtr devicePtr, GyroscopeSensitivity gyroSens);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_set_StimulatorState(IntPtr devicePtr, bool isEnabled);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int device_set_MotionAssistantState(IntPtr devicePtr, bool isEnabled);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_set_StimulatorParamPack(IntPtr devicePtr, StimulationParams stimulParams);

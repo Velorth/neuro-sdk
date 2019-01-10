@@ -28,6 +28,10 @@ public:
         return mInfo;
     }
 
+	const ChannelInfo& info() const noexcept {
+		return mInfo;
+	}
+
 	virtual LengthListenerPtr subscribeLengthChanged(LengthCallbackType callback) noexcept = 0;
 	virtual data_length_t totalLength() const noexcept = 0;
 	virtual sampling_frequency_t samplingFrequency() const noexcept = 0;
@@ -36,10 +40,16 @@ private:
     ChannelInfo mInfo;
 };
 
-template <typename DataType>
+template <typename DataT>
 class DataChannel : public CommonChannelInterface {
+public:
+	using DataType = DataT;
+	using DataContainer = std::vector<DataType>;
+
+	virtual ~DataChannel() = default;
+	virtual DataContainer readData(data_offset_t, data_length_t) const = 0;
+
 protected:
-    using DataContainer = std::vector<DataType>;
 
     explicit DataChannel(ChannelInfo &&channel_info) noexcept :
 		CommonChannelInterface(std::move(channel_info)){}
@@ -52,10 +62,6 @@ protected:
 
 	DataChannel& operator=(const DataChannel &) = default;
 	DataChannel& operator=(DataChannel &&) = default;
-
-public:
-	virtual ~DataChannel() = default;
-	virtual DataContainer readData(data_offset_t, data_length_t) const = 0;
 };
 
 }

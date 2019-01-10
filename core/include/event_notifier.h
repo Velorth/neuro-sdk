@@ -19,6 +19,9 @@ public:
     Notifier(std::string name = std::string()):
         mName(name){}
 
+	Notifier(Notifier &&rhs) = default;
+	Notifier& operator=(Notifier &&rhs) = default;
+
     listener_ptr addListener(std::function<R(Args...)> callback){
         auto listenerPtr = std::make_shared<listener_t>(callback);
         mListenerCollection.push_back(listenerPtr);

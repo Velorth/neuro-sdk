@@ -17,7 +17,9 @@ typedef enum _Command {
 	CommandStartRespiration,
 	CommandStopRespiration,
 	CommandStartStimulation,
+	CommandStopStimulation,
 	CommandEnableMotionAssistant,
+	CommandDisableMotionAssistant,
 	CommandFindMe
 }Command;
 

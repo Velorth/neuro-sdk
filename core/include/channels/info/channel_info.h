@@ -68,6 +68,7 @@ public:
     void setName(const std::string &);
     Type getType() const noexcept;
     std::size_t getIndex() const noexcept;
+	void swap(ChannelInfo &rhs) noexcept;
 
 private:
     Type mType;
@@ -75,6 +76,7 @@ private:
     std::size_t mIndex;
 };
 
+void swap(ChannelInfo &, ChannelInfo &) noexcept;
 bool operator==(const ChannelInfo &, const ChannelInfo &);
 bool operator!=(const ChannelInfo &, const ChannelInfo &);
 

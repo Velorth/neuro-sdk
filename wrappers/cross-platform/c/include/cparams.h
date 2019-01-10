@@ -65,6 +65,17 @@ typedef enum _GyroscopeSensitivity{
 	GyroscopeSens2000Grad
 } GyroscopeSensitivity;
 
+typedef enum class _StimulationDeviceState {
+	StateNoParams,
+	StateDisabled,
+	StateEnabled
+} StimulationDeviceState;
+
+typedef struct _StimulatorAndMAState {
+	StimulationDeviceState StimulatorState;
+	StimulationDeviceState MAState;
+} StimulatorAndMaState;
+
 typedef enum _MotionAssistantLimb {
 
 	MotionAssistantLimbRightLeg,
@@ -78,12 +89,11 @@ typedef struct _MotionAssistantParams {
 	int gyroStop;
 	MotionAssistantLimb limb;
 	int minPause;
-	int maxDuration;
 } MotionAssistantParams;
 
 typedef struct _StimulationParams {
 	int current;
-	int pulse_duration;
+	int pulse_width;
 	int frequency;
 	int stimulus_duration;
 } StimulationParams;
@@ -101,8 +111,7 @@ SDK_SHARED int device_read_ExternalSwitchState(Device *, ExternalSwitchInput *ou
 SDK_SHARED int device_read_ADCInputState(Device *, ADCInput *out_adc_input);
 SDK_SHARED int device_read_AccelerometerSens(Device *, AccelerometerSensitivity *out_accel_sens);
 SDK_SHARED int device_read_GyroscopeSens(Device *, GyroscopeSensitivity *out_guro_sens);
-SDK_SHARED int device_read_StimulatorState(Device *, bool *out_is_enabled);
-SDK_SHARED int device_read_MotionAssistantState(Device *, bool *out_is_enabled);
+SDK_SHARED int device_read_StimulatorAndMAState(Device *, StimulatorAndMaState *out_state);
 SDK_SHARED int device_read_StimulatorParamPack(Device *, StimulationParams *out_stimul_params);
 SDK_SHARED int device_read_MotionAssistantParamPack(Device *, MotionAssistantParams *out_ma_params);
 
@@ -119,8 +128,6 @@ SDK_SHARED int device_set_ExternalSwitchState(Device *, ExternalSwitchInput ext_
 SDK_SHARED int device_set_ADCInputState(Device *, ADCInput adc_input);
 SDK_SHARED int device_set_AccelerometerSens(Device *, AccelerometerSensitivity accel_sens);
 SDK_SHARED int device_set_GyroscopeSens(Device *, GyroscopeSensitivity gyro_sens);
-SDK_SHARED int device_set_StimulatorState(Device *, bool is_enabled);
-SDK_SHARED int device_set_MotionAssistantState(Device *, bool is_enabled);
 SDK_SHARED int device_set_StimulatorParamPack(Device *, StimulationParams stimul_params);
 SDK_SHARED int device_set_MotionAssistantParamPack(Device *, MotionAssistantParams ma_params);
 

@@ -5,6 +5,7 @@ extern "C"
 
 #include "device/device.h"
 #include "channels/device_channel.h"
+#include "channels/bipolar_channel.h"
 #include "channels/spectrum_channel.h"
 #include "cchannel-helper.h"
 #include "event_notifier.h"
@@ -191,6 +192,77 @@ int SignalChannel_get_total_length(SignalChannel* channel, size_t* out_length) {
 int SignalChannel_get_buffer_size(SignalChannel* channel, size_t* out_buffer_size) {
 	auto& signalChannel = *reinterpret_cast<std::shared_ptr<Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Signal>> *>(channel);
 	return readBufferSize(*signalChannel, out_buffer_size);
+}
+
+BipolarDoubleChannel* create_BipolarDoubleChannel(BaseDoubleChannel *first, BaseDoubleChannel *second) {
+	auto& firstShared = *reinterpret_cast<std::shared_ptr<Neuro::DataChannel<double>> *>(first);
+	auto& secondShared = *reinterpret_cast<std::shared_ptr<Neuro::DataChannel<double>> *>(second);
+	try {
+		auto bipolarChannel = Neuro::make_bipolar_from_ptrs(firstShared, secondShared);
+		using BipolarChannelType = decltype(bipolarChannel);
+		const auto channelPtr = new std::shared_ptr<BipolarChannelType>(new BipolarChannelType(std::move(bipolarChannel)));
+		return reinterpret_cast<BipolarDoubleChannel *>(channelPtr);
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return nullptr;
+	}
+	catch (...) {
+		return nullptr;
+	}
+}
+
+void BipolarDoubleChannel_delete(BipolarDoubleChannel *channel) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	const auto bipolarChannel = reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	delete bipolarChannel;
+}
+
+int BipolarDoubleChannel_get_info(BipolarDoubleChannel * channel, ChannelInfo * out_info) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	auto& bipolarChannel = *reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	return getChannelInfo(*bipolarChannel, out_info);
+}
+
+int BipolarDoubleChannel_read_data(BipolarDoubleChannel *channel, size_t offset, size_t length, double *out_buffer) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	auto& bipolarChannel = *reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	return readChannelData(*bipolarChannel, offset, length, out_buffer);
+}
+
+int BipolarDoubleChannel_get_sampling_frequency(BipolarDoubleChannel* channel, float* out_frequency) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	auto& bipolarChannel = *reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	return readSamplingFrequency(*bipolarChannel, out_frequency);
+}
+
+int BipolarDoubleChannel_add_length_callback(BipolarDoubleChannel *channel, void(*callback)(BipolarDoubleChannel *, size_t), ListenerHandle* handle) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	auto& bipolarChannel = *reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	try {
+		auto listener = bipolarChannel->subscribeLengthChanged([channel, callback](size_t new_length) {
+			if (callback != nullptr) callback(channel, new_length);
+		});
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int BipolarDoubleChannel_get_total_length(BipolarDoubleChannel* channel, size_t* out_length) {
+	using BipolarChannelType = Neuro::BipolarChannel<Neuro::DataChannel<double>>;
+	auto& bipolarChannel = *reinterpret_cast<std::shared_ptr<BipolarChannelType> *>(channel);
+	return readTotalLength(*bipolarChannel, out_length);
 }
 
 ResistanceChannel* create_ResistanceChannel_info(Device* device_ptr, ChannelInfo info) {

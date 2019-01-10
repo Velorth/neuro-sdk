@@ -13,11 +13,6 @@ extern "C"
 #include "channels/data_channel.h"
 #include "sdk_error.h"
 
-void free_listener_handle(ListenerHandle *handle) {
-	auto handlePtr = reinterpret_cast<Neuro::ListenerPtr<void(size_t)> *>(handle);
-	delete handlePtr;
-}
-
 std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filter) {
 	if (filter == LowPass_1Hz_SF125) {
 		return std::make_unique<DSP::IIRForwardFilter<DSP::LowPass<1, 2, 125>>>();
@@ -94,49 +89,3 @@ std::unique_ptr<DSP::DigitalFilter<double>>  getCompoundFilter(Filter *filters, 
 	return std::make_unique<decltype(cascadeFilter)>(std::move(cascadeFilter));
 }
 
-int readTotalLength(const Neuro::CommonChannelInterface &channel, size_t* out_length) {
-	try {
-		*out_length = channel.totalLength();
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-int readSamplingFrequency(const Neuro::CommonChannelInterface &channel, float* out_frequency) {
-	try {
-		*out_frequency = channel.samplingFrequency();
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-int getChannelInfo(Neuro::CommonChannelInterface &channel, ChannelInfo *out_frequency) {
-	try {
-		auto channelInfo = channel.info();
-		ChannelInfo info;
-		strcpy(info.name, channelInfo.getName().c_str());
-		info.type = static_cast<ChannelType>(channelInfo.getType());
-		info.index = channelInfo.getIndex();
-		*out_frequency = info;
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}

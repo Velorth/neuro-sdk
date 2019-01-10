@@ -13,8 +13,8 @@ SDK_SHARED std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filte
 
 SDK_SHARED std::unique_ptr<DSP::DigitalFilter<double>> getCompoundFilter(Filter *filters, size_t filter_count);
 
-template <typename T>
-int readChannelData(const Neuro::DataChannel<T> &channel, size_t offset, size_t length, T *out_buffer) {
+template <typename Channel>
+int readChannelData(const Channel &channel, size_t offset, size_t length, typename Channel::DataType *out_buffer) {
 	try {
 		auto data = channel.readData(offset, length);
 		if (data.size() > length) {
@@ -48,10 +48,54 @@ SDK_SHARED int readBufferSize(const Channel &channel, size_t* out_buffer_size) {
 	}
 }
 
-SDK_SHARED int readTotalLength(const Neuro::CommonChannelInterface &channel, size_t* out_length);
+template <typename Channel>
+int readTotalLength(const Channel &channel, size_t* out_length) {
+	try {
+		*out_length = channel.totalLength();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
 
-SDK_SHARED int readSamplingFrequency(const Neuro::CommonChannelInterface &channel, float* out_frequency);
+template <typename Channel>
+int readSamplingFrequency(const Channel &channel, float* out_frequency) {
+	try {
+		*out_frequency = channel.samplingFrequency();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
 
-SDK_SHARED int getChannelInfo(Neuro::CommonChannelInterface &channel, ChannelInfo *out_frequency);
+template <typename Channel>
+int getChannelInfo(Channel &channel, ChannelInfo *out_frequency) {
+	try {
+		auto channelInfo = channel.info();
+		ChannelInfo info;
+		strcpy(info.name, channelInfo.getName().c_str());
+		info.type = static_cast<ChannelType>(channelInfo.getType());
+		info.index = channelInfo.getIndex();
+		*out_frequency = info;
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
 
 #endif

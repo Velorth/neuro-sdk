@@ -3,12 +3,14 @@
 
 #include "lib_export.h"
 #include "cdevice.h"
+#include "clistener.h"
 #include <stdbool.h>
 #include <stddef.h>
 
 typedef struct _BaseDoubleChannel BaseDoubleChannel;
 typedef struct _BatteryChannel BatteryChannel;
 typedef struct _SignalChannel SignalChannel;
+typedef struct _BipolarChannel BipolarDoubleChannel;
 typedef struct _ResistanceChannel ResistanceChannel;
 typedef struct _SpectrumChannel SpectrumChannel;
 typedef void* ListenerHandle;
@@ -37,8 +39,6 @@ typedef enum _Filter {
 	BandStop_45_55Hz_SF250
 } Filter;
 
-SDK_SHARED void free_listener_handle(ListenerHandle *handle);
-
 SDK_SHARED BatteryChannel* create_BatteryChannel(Device *device_ptr);
 SDK_SHARED void BatteryChannel_delete(BatteryChannel *channel);
 SDK_SHARED int BatteryChannel_get_info(BatteryChannel *channel, ChannelInfo *out_info);
@@ -59,6 +59,14 @@ SDK_SHARED int SignalChannel_get_sampling_frequency(SignalChannel *channel, floa
 SDK_SHARED int SignalChannel_add_length_callback(SignalChannel *channel, void(*callback)(SignalChannel *, size_t), ListenerHandle *handle);
 SDK_SHARED int SignalChannel_get_total_length(SignalChannel *channel, size_t *out_length);
 SDK_SHARED int SignalChannel_get_buffer_size(SignalChannel *channel, size_t *out_buffer_size);
+
+SDK_SHARED BipolarDoubleChannel* create_BipolarDoubleChannel(BaseDoubleChannel *first, BaseDoubleChannel *second);
+SDK_SHARED void BipolarDoubleChannel_delete(BipolarDoubleChannel *channel);
+SDK_SHARED int BipolarDoubleChannel_get_info(BipolarDoubleChannel *channel, ChannelInfo *out_info);
+SDK_SHARED int BipolarDoubleChannel_read_data(BipolarDoubleChannel *channel, size_t offset, size_t length, double *out_buffer);
+SDK_SHARED int BipolarDoubleChannel_get_sampling_frequency(BipolarDoubleChannel *channel, float * out_frequency);
+SDK_SHARED int BipolarDoubleChannel_add_length_callback(BipolarDoubleChannel *channel, void(*callback)(BipolarDoubleChannel *, size_t), ListenerHandle *handle);
+SDK_SHARED int BipolarDoubleChannel_get_total_length(BipolarDoubleChannel *channel, size_t *out_length);
 
 SDK_SHARED ResistanceChannel* create_ResistanceChannel_info(Device *device_ptr, ChannelInfo info);
 SDK_SHARED void ResistanceChannel_delete(ResistanceChannel *channel);

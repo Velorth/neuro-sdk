@@ -70,6 +70,10 @@ TaskQueue::TaskQueue(const std::string &name):
 	mImpl(std::make_unique<Impl>(name)){
 }
 
+TaskQueue::TaskQueue(TaskQueue &&) noexcept = default;
+
+TaskQueue& TaskQueue::operator=(TaskQueue &&) noexcept = default;
+
 TaskQueue::~TaskQueue() = default;
 
 void TaskQueue::exec(const std::function<void()> &task_function){

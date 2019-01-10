@@ -10,16 +10,16 @@
 namespace Neuro {
 
 template <typename Channel>
-std::string bipolarChannelInfo(const Channel &first, const Channel &second) {
+ChannelInfo bipolarChannelInfo(const Channel &first, const Channel &second) {
 	return ChannelInfo(ChannelInfo::Type::Custom, first.info().getName() + std::string("-") + second.info().getName());
 }
 
-template <typename Channel, typename DataT>
+template <typename Channel>
 class BipolarChannel final {
 public:
 	using LengthCallbackType = std::function<void(data_length_t)>;
 	using LengthListenerType = ListenerPtr<void, data_length_t>;
-	using DataType = DataT;
+	using DataType = typename Channel::DataType;
 	using DataContainer = std::vector<DataType>;
 
 	BipolarChannel(std::shared_ptr<Channel> first, std::shared_ptr<Channel> second):
@@ -31,8 +31,29 @@ public:
 		mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
 		mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
 	}
-	
+
+	BipolarChannel(const BipolarChannel &rhs) :
+		mInfo(rhs.mInfo),
+		mFirst(rhs.mFirst),
+		mSecond(rhs.mSecond) {
+		mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+	}
+
+	BipolarChannel(BipolarChannel &&rhs) noexcept = default;
+
+	~BipolarChannel() = default;
+
+	BipolarChannel& operator=(BipolarChannel rhs) {
+		swap(rhs);
+		return *this;
+	}
+
 	ChannelInfo& info() noexcept {
+		return mInfo;
+	}
+
+	const ChannelInfo& info() const noexcept {
 		return mInfo;
 	}
 
@@ -54,8 +75,18 @@ public:
 		if (firstData.size() != secondData.size()) {
 			throw std::runtime_error("Channels returned data arrays of different lengthes");
 		}
-		std::transform(firstData.begin(), firstData.end(), secondData.begin(), std::minus<DataType>());
+		std::transform(firstData.begin(), firstData.end(), secondData.begin(), firstData.begin(), std::minus<DataType>());
 		return firstData;
+	}
+
+	void swap(BipolarChannel &rhs) noexcept {
+		using std::swap;
+		swap(mInfo, rhs.mInfo);
+		swap(mLengthNotifier, rhs.mLengthNotifier);
+		swap(mFirst, rhs.mFirst);
+		swap(mSecond, rhs.mSecond);
+		swap(mFirstLengthListener, rhs.mFirstLengthListener);
+		swap(mSecondLengthListener, rhs.mSecondLengthListener);
 	}
 
 private:
@@ -76,7 +107,7 @@ private:
 	}
 
 	data_length_t minimumLength() const noexcept {
-		return std::min(mFirst->totalLength(), mSecond->totalLength);
+		return std::min(mFirst->totalLength(), mSecond->totalLength());
 	}
 
 	void onDataLengthChanged() {
@@ -85,9 +116,13 @@ private:
 };
 
 template <typename Channel>
+void swap(BipolarChannel<Channel> &lhs, BipolarChannel<Channel> &rhs) noexcept {
+	lhs.swap(rhs);
+}
+
+template <typename Channel>
 auto make_bipolar(Channel&& first, Channel&& second) {
-	using DataType = typename Channel::DataType;
-	return BipolarChannel<Channel, DataType>(
+	return BipolarChannel<Channel>(
 		std::make_shared<Channel>(std::forward<Channel>(first)),
 		std::make_shared<Channel>(std::forward<Channel>(second))
 		);
@@ -95,11 +130,10 @@ auto make_bipolar(Channel&& first, Channel&& second) {
 
 template <typename ChannelPtr>
 auto make_bipolar_from_ptrs(ChannelPtr&& first, ChannelPtr&& second) {
-	using Channel = typename ChannelPtr::element_type;
-	using DataType = typename Channel::DataType;
-	return BipolarChannel<Channel, DataType>(
-		std::forward<Channel>(first), 
-		std::forward<Channel>(second)
+	using Channel = typename std::remove_reference_t<ChannelPtr>::element_type;
+	return BipolarChannel<Channel>(
+		std::forward<ChannelPtr>(first), 
+		std::forward<ChannelPtr>(second)
 		);
 }
 

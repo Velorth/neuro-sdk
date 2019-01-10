@@ -227,27 +227,12 @@ ret_code device_read_GyroscopeSens(Device *device_ptr, GyroscopeSensitivity* out
 	}
 }
 
-ret_code device_read_StimulatorState(Device *device_ptr, bool* out_is_enabled) {
+ret_code device_read_StimulatorAndMAState(Device *device_ptr, StimulatorAndMaState* out_state) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		const auto value = device->readParam<Neuro::Parameter::StimulatorState>();
-		*out_is_enabled = value;
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-ret_code device_read_MotionAssistantState(Device *device_ptr, bool* out_is_enabled) {
-	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	try {
-		const auto value = device->readParam<Neuro::Parameter::MotionAssistantState>();
-		*out_is_enabled = value;
+		const auto value = device->readParam<Neuro::Parameter::StimulatorAndMAState>();
+		out_state->MAState = static_cast<StimulationDeviceState>(value.MAState);
+		out_state->StimulatorState = static_cast<StimulationDeviceState>(value.StimulatorState);
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -265,7 +250,7 @@ ret_code device_read_StimulatorParamPack(Device *device_ptr, StimulationParams* 
 		const auto value = device->readParam<Neuro::Parameter::StimulatorParamPack>();
 		out_stimul_params->current = value.current;
 		out_stimul_params->frequency = value.frequency;
-		out_stimul_params->pulse_duration = static_cast<int>(value.pulse_duration);
+		out_stimul_params->pulse_width = static_cast<int>(value.pulse_width);
 		out_stimul_params->stimulus_duration = value.stimulus_duration;
 		return SDK_NO_ERROR;
 	}
@@ -285,7 +270,6 @@ ret_code device_read_MotionAssistantParamPack(Device *device_ptr, MotionAssistan
 		out_ma_params->gyroStart = value.gyroStart;
 		out_ma_params->gyroStop = value.gyroStop;
 		out_ma_params->limb = static_cast<MotionAssistantLimb>(value.limb);
-		out_ma_params->maxDuration = value.maxDuration;
 		out_ma_params->minPause = value.minPause;
 		return SDK_NO_ERROR;
 	}
@@ -495,48 +479,13 @@ ret_code device_set_GyroscopeSens(Device *device_ptr, GyroscopeSensitivity gyro_
 	}
 }
 
-ret_code device_set_StimulatorState(Device *device_ptr, bool is_enabled) {
-	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	try {
-		device->setParam<Neuro::Parameter::StimulatorState>(is_enabled);
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
-ret_code device_set_MotionAssistantState(Device *device_ptr, bool is_enabled) {
-	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-	try {
-		device->setParam<Neuro::Parameter::MotionAssistantState>(is_enabled);
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}
-
 ret_code device_set_StimulatorParamPack(Device *device_ptr, StimulationParams stimul_params) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		Neuro::StimulationParams params{};
 		params.current = stimul_params.current;
 		params.frequency = stimul_params.frequency;
-		Neuro::StimulatorImpulseDuration pulseWidth;
-		if (!Neuro::parseImpulseDuration(stimul_params.pulse_duration, pulseWidth)) {
-			set_sdk_last_error("Wront stimul duration code");
-			return ERROR_EXCEPTION_WITH_MESSAGE;
-		}
-		params.pulse_duration = pulseWidth;
+		params.pulse_width = stimul_params.pulse_width;
 		params.stimulus_duration = stimul_params.stimulus_duration;
 		device->setParam<Neuro::Parameter::StimulatorParamPack>(params);
 		return SDK_NO_ERROR;
@@ -557,7 +506,6 @@ ret_code device_set_MotionAssistantParamPack(Device *device_ptr, MotionAssistant
 		params.gyroStart = ma_params.gyroStart;
 		params.gyroStop = ma_params.gyroStop;
 		params.limb = static_cast<Neuro::MotionAssistantLimb>(ma_params.limb);
-		params.maxDuration = ma_params.maxDuration;
 		params.minPause = ma_params.minPause;
 		device->setParam<Neuro::Parameter::MotionAssistantParamPack>(params);
 		return SDK_NO_ERROR;

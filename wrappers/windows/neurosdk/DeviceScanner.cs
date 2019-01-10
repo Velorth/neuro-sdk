@@ -11,6 +11,8 @@ namespace Neuro
         public event EventHandler<bool> ScanStateChanged;
         public event EventHandler<Device> DeviceFound;
 
+        private readonly IntPtr _scanStateListenerPtr;
+        private readonly IntPtr _deviceFoundListenerPtr;
         private readonly DeviceFoundCallbackFunc _deviceFoundFunc;
         private readonly ScanStateCallbackFunc _scanStateFunc;
 
@@ -25,12 +27,14 @@ namespace Neuro
 
             _deviceFoundFunc = OnDeviceFound;
             _scanStateFunc = OnScanStateChanged;
-            SdkError.ThrowIfError(scanner_set_scan_state_callback(_scannerPtr, _scanStateFunc));
-            SdkError.ThrowIfError(scanner_set_device_found_callback(_scannerPtr, _deviceFoundFunc));
+            SdkError.ThrowIfError(scanner_set_scan_state_callback(_scannerPtr, _scanStateFunc, out _scanStateListenerPtr));
+            SdkError.ThrowIfError(scanner_set_device_found_callback(_scannerPtr, _deviceFoundFunc, out _deviceFoundListenerPtr));
         }
 
         ~DeviceScanner()
         {
+            free_listener_handle(_scanStateListenerPtr);
+            free_listener_handle(_deviceFoundListenerPtr);
             scanner_delete(_scannerPtr);
         }
 
@@ -84,6 +88,9 @@ namespace Neuro
 #else
         private const string LibName = "c-neurosdk.dll";
 #endif
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void free_listener_handle(IntPtr bipolarChannelPtr);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void DeviceFoundCallbackFunc(IntPtr parameter);
 
@@ -103,10 +110,10 @@ namespace Neuro
         private static extern int scanner_stop_scan(IntPtr scannerPtr);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int scanner_set_device_found_callback(IntPtr scannerPtr, DeviceFoundCallbackFunc deviceFoundCallback);
+        private static extern int scanner_set_device_found_callback(IntPtr scannerPtr, DeviceFoundCallbackFunc deviceFoundCallback, out IntPtr listenerHandle);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int scanner_set_scan_state_callback(IntPtr scannerPtr, ScanStateCallbackFunc scanStateCallback);
+        private static extern int scanner_set_scan_state_callback(IntPtr scannerPtr, ScanStateCallbackFunc scanStateCallback, out IntPtr listenerHandle);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr scanner_get_device_by_address(IntPtr scannerPtr, [MarshalAs(UnmanagedType.LPStr)] string address);

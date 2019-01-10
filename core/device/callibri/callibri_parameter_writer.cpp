@@ -1,4 +1,3 @@
-#include <saturation_cast.h>
 #include "device/callibri/callibri_parameter_writer.h"
 
 namespace Neuro {
@@ -53,11 +52,11 @@ bool CallibriParameterWriter::setGyroscopeSens(typename ParamValue<Parameter::Gy
 bool CallibriParameterWriter::setStimulatorParamPack(typename ParamValue<Parameter::StimulatorParamPack>::Type stimulationParams){
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SET_STIM_PARAM);
     ByteInterpreter<unsigned short> stimulDuration;
-    stimulDuration.value = saturation_cast<unsigned short>(stimulationParams.stimulus_duration);
+    stimulDuration.value = static_cast<unsigned short>(stimulationParams.stimulus_duration);
     cmdData->setRequestData({1,
-                             saturation_cast<Byte>(stimulationParams.current),
-                             saturation_cast<Byte>(stimulationParams.pulse_width/10),
-                             saturation_cast<Byte>(stimulationParams.frequency),
+                             static_cast<Byte>(stimulationParams.current),
+                             static_cast<Byte>(stimulationParams.pulse_width/10),
+                             static_cast<Byte>(stimulationParams.frequency),
                              stimulDuration.bytes[0],
                              stimulDuration.bytes[1]});
     mRequestHandler->sendRequest(cmdData);
@@ -68,10 +67,10 @@ bool CallibriParameterWriter::setStimulatorParamPack(typename ParamValue<Paramet
 bool CallibriParameterWriter::setMotionAssistantParamPack(typename ParamValue<Parameter::MotionAssistantParamPack>::Type maParams){
     auto cmdData = std::make_shared<CallibriCommandData>(CallibriCommand::SET_SH_PARAM);
     cmdData->setRequestData({0,
-                             saturation_cast<Byte>(maParams.gyroStart),
-                             saturation_cast<Byte>(maParams.gyroStop),
+                             static_cast<Byte>(maParams.gyroStart),
+                             static_cast<Byte>(maParams.gyroStop),
                              static_cast<Byte>(maParams.limb),
-                             saturation_cast<Byte>(maParams.minPause / 10)
+                             static_cast<Byte>(maParams.minPause / 10)
                             });
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();

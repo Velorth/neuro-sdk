@@ -52,15 +52,20 @@ int scanner_stop_scan(DeviceScanner *scanner_ptr) {
 	}
 }
 
-int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback)(Device*)) {
+int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback)(Device*), ListenerHandle* handle) {
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
-		scanner->subscribeDeviceFound([callback](auto device) {
+		auto listener = scanner->subscribeDeviceFound([callback](auto device) {
 			const auto device_raw_ptr = new Neuro::DeviceSharedPtr(std::move(device));
 			if (callback != nullptr) {
 				callback(reinterpret_cast<Device *>(device_raw_ptr));
 			}
 		});
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -72,14 +77,19 @@ int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback
 	}
 }
 
-int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(bool)) {
+int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(bool), ListenerHandle *handle) {
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
-		scanner->subscribeScanStateChanged([callback](bool is_scanning) {
+		auto listener = scanner->subscribeScanStateChanged([callback](bool is_scanning) {
 			if (callback != nullptr) {
 				callback(is_scanning);
 			}
-		});
+		}); 
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
