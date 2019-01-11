@@ -1,7 +1,12 @@
 #ifndef DATA_CHANNEL_H
 #define DATA_CHANNEL_H
 
-#include "channels/data_channel.h"
+
+#include <memory>
+#include <vector>
+#include <functional>
+#include "common_types.h"
+#include "info/channel_info.h"
 #include "filter/digital_filter.h"
 
 namespace Neuro {
@@ -44,48 +49,56 @@ struct RawStrategy final : public ChannelStrategy<DataContainer> {
 };
 
 template <ChannelInfo::Type ChannelType, typename DeviceType = Device>
-class DeviceChannel final : public DataChannel<ChannelDataType<ChannelType>> {
+class DeviceChannel final {
 public:
 	using ChannelTraits = ChannelTraits<ChannelType>;
 	using DataType = ChannelDataType<ChannelType>;
 	using BufferType = typename ChannelTraits::BufferType;
 	using DataListenerType = ChannelDataListenerType<ChannelType>;
 	using DataCallbackType = ChannelDataCallbackFunctionType<ChannelType>;
-	using LengthCallbackType = CommonChannelInterface::LengthCallbackType;
-	using LengthListenerType = CommonChannelInterface::LengthListenerPtr;
-	using DataContainer = typename DataChannel<DataType>::DataContainer;
+	using LengthCallbackType = std::function<void(data_length_t)>;
+	using LengthListenerType = ListenerPtr<void, data_length_t>;
+	using DataContainer = std::vector<DataType>;
 	using DataStrategyPtr = std::unique_ptr<ChannelStrategy<DataContainer>>;
 	using FilterPtr = std::unique_ptr<DSP::DigitalFilter<DataType>>;
 	using DevicePtr = std::shared_ptr<DeviceType>;
 	using DeviceWeakPtr = std::weak_ptr<DeviceType>;
 
 	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
-		DataChannel<DataType>(std::move(channel_info)),
+		mInfo(std::move(channel_info)),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
 
 	DeviceChannel(const DevicePtr &device, const ChannelInfo &channel_info) :
-		DataChannel<DataType>(channel_info),
+		mInfo(channel_info),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
 
 	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
-		DataChannel<DataType>(std::move(channel_info)),
+		mInfo(std::move(channel_info)),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
 
 	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, const ChannelInfo &channel_info) :
-		DataChannel<DataType>(channel_info),
+		mInfo(channel_info),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),
-		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, this->info())) {}
+		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
 
-	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept override {
+	ChannelInfo& info() noexcept {
+		return mInfo;
+	}
+
+	const ChannelInfo& info() const noexcept {
+		return mInfo;
+	}
+
+	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept {
 		return mBuffer.subscribeLengthChanged(callback);
 	}
 
-	data_length_t totalLength() const noexcept override {
+	data_length_t totalLength() const noexcept {
 		return mBuffer.totalLength();
 	}
 
@@ -93,11 +106,11 @@ public:
 		return mBuffer.bufferSize();
 	}
 
-	sampling_frequency_t samplingFrequency() const noexcept override {
+	sampling_frequency_t samplingFrequency() const noexcept {
 		return ChannelTraits::SamplingFrequency;
 	}
 
-	DataContainer readData(data_offset_t offset, data_length_t length) const override {
+	DataContainer readData(data_offset_t offset, data_length_t length) const {
 		return mBuffer.readFill(offset, length, DataType{});
 	}
 
@@ -106,6 +119,7 @@ public:
 	}
 
 private:
+	ChannelInfo mInfo;
 	DataStrategyPtr mDataStrategy{std::make_unique<RawStrategy<DataContainer>>()};
 	BufferType mBuffer;
 	DataCallbackType mDataCallaback{ [=](auto&&... data_args) {

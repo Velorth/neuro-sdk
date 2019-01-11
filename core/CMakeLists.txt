@@ -182,8 +182,7 @@ file(GLOB SHARED_HEADERS_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/include/common_types
 								${CMAKE_CURRENT_SOURCE_DIR}/include/logger.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/task_queue.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/lib_export.h)
-file(GLOB SHARED_HEADERS_CHANNELS 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/data_channel.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/device_channel.h
+file(GLOB SHARED_HEADERS_CHANNELS 	${CMAKE_CURRENT_SOURCE_DIR}/include/channels/device_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/bipolar_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/filtered_channel.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/channels/spectrum_channel.h)
@@ -200,9 +199,9 @@ file(GLOB SHARED_HEADERS_DEVICE ${CMAKE_CURRENT_SOURCE_DIR}/include/device/devic
 file(GLOB SHARED_HEADERS_DEVSCAN 	${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/device_scanner.h
 									${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/scanner_factory.h)
 file(GLOB SHARED_HEADERS_FILTERS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/filter/*.h)
+file(GLOB SHARED_HEADERS_ALG ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/algorithm.h)
 file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
 #########################
-
 
 ############################
 ##LINK AND INSTALL SECTION##
@@ -216,6 +215,7 @@ if (UNIX)
 	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device)
 	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device_scanner)
 	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/filter)
+	install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include)
 	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/signal)
   else (APPLE)
     ## Check for Debian GNU/Linux
@@ -244,6 +244,7 @@ if (UNIX)
             add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVSCAN} ${DISTRIBUTION_DIR}/include/device_scanner)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/filter)
             add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_FILTERS} ${DISTRIBUTION_DIR}/include/filter)
+			add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_ALG} ${DISTRIBUTION_DIR}/include)
             file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/signal)
             add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_SIGNAL} ${DISTRIBUTION_DIR}/include/signal)
         else (ANDROID)
@@ -261,6 +262,7 @@ if (WIN32)
 	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${NEUROSDK}/include/device)
 	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${NEUROSDK}/include/device_scanner)
 	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/include/filter)
+	install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/include)
 	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${NEUROSDK}/include/signal)
     install(FILES $<TARGET_PDB_FILE:neurosdk> DESTINATION ${NEUROSDK} OPTIONAL)
 endif (WIN32)
