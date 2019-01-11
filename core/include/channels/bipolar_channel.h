@@ -28,16 +28,16 @@ public:
 		mSecond(std::move(second)) {	
 		checkPreconditions();
 
-		mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
-		mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mFirstLengthListener = mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mSecondLengthListener = mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
 	}
 
 	BipolarChannel(const BipolarChannel &rhs) :
 		mInfo(rhs.mInfo),
 		mFirst(rhs.mFirst),
 		mSecond(rhs.mSecond) {
-		mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
-		mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mFirstLengthListener = mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mSecondLengthListener = mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
 	}
 
 	BipolarChannel(BipolarChannel &&rhs) noexcept = default;
