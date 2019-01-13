@@ -10,7 +10,6 @@ extern "C"
 #include "filter/high_pass_filter.h"
 #include "filter/low_pass_filter.h"
 #include "event_listener.h"
-#include "channels/data_channel.h"
 #include "sdk_error.h"
 
 std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filter) {

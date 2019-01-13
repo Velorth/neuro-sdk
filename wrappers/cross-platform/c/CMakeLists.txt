@@ -23,13 +23,13 @@ endif (WIN32)
 #####################
 
 
+
 ########################
 ##BUILD CONFIG SECTION##
 ########################
 if (WIN32) 
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /MD")
 else () 
-
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall -pedantic_errors")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti")
 endif (WIN32)

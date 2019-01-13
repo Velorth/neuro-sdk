@@ -5,9 +5,83 @@ extern "C"{
 #include "sdk_error.h"
 }
 
-#include <filter/digital_filter.h>
-#include <channels/data_channel.h>
+
+#include <memory>
+#include "filter/digital_filter.h"
 #include "cchannels.h"
+#include "common_types.h"
+#include "event_listener.h"
+
+struct AnyChannelWrapper {
+	using LengthCallbackType = std::function<void(Neuro::data_length_t)>;
+	using LengthListenerType = Neuro::ListenerPtr<void, Neuro::data_length_t>;
+
+	virtual ~AnyChannelWrapper() = default;
+	virtual ChannelInfo& info() noexcept = 0;
+	virtual const ChannelInfo& info() const noexcept = 0;
+	virtual LengthListenerType subscribeLengthChanged(LengthCallbackType) noexcept = 0;
+	virtual Neuro::data_length_t totalLength() const noexcept = 0;
+	virtual Neuro::sampling_frequency_t samplingFrequency() const noexcept = 0;
+};
+
+template <typename DataT>
+struct DataChannelWrapper : public AnyChannelWrapper {
+	using DataType = DataT;
+	using DataContainer = std::vector<DataType>;
+
+	virtual ~DataChannelWrapper() = default;
+	virtual DataContainer readData(Neuro::data_offset_t offset, Neuro::data_length_t length) const = 0;
+};
+
+template <typename Channel>
+struct SpecificChannelWrapper : public DataChannelWrapper<typename Channel::DataType> {
+	using LengthCallbackType = AnyChannelWrapper::LengthCallbackType;
+	using LengthListenerType = AnyChannelWrapper::LengthListenerType;
+	using DataType = typename Channel::DataType;
+	using DataContainer = typename DataChannelWrapper<DataType>::DataContainer;
+
+	explicit SpecificChannelWrapper(std::shared_ptr<Channel> channel):mChannelPtr(channel){}
+
+	ChannelInfo& info() noexcept override {
+		return mChannelPtr->info();
+	}
+
+	const ChannelInfo& info() const noexcept override {
+		return mChannelPtr->info();
+	}
+
+	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept override {
+		return mChannelPtr->subscribeLengthChanged(callback);
+	}
+
+	Neuro::data_length_t totalLength() const noexcept override {
+		return mChannelPtr->totalLength();
+	}
+
+	Neuro::sampling_frequency_t samplingFrequency() const noexcept override {
+		return mChannelPtr->samplingFrequency();
+	}
+
+	DataContainer readData(Neuro::data_offset_t offset, Neuro::data_length_t length) const override {
+		return mChannelPtr->readData(offset, length);
+	}
+
+protected:
+	std::shared_ptr<Channel> channelPtr() const noexcept {
+		return mChannelPtr;
+	}
+
+private:
+	std::shared_ptr<Channel> mChannelPtr;
+};
+
+template <typename CType, typename ChannelPtr>
+CType* getCObjectPtr(const ChannelPtr& channelPtr) {
+	using ChannelWrap = SpecificChannelWrapper<typename ChannelPtr::element_type>;
+	using ChannelWrapPtr = std::shared_ptr<ChannelWrap>;
+	auto channelWrapPtr = new ChannelWrapPtr(new ChannelWrap(channelPtr));
+	return reinterpret_cast<CType *>(channelWrapPtr);
+}
 
 SDK_SHARED std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filter);
 
