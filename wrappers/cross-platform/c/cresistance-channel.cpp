@@ -29,5 +29,5 @@ ResistanceDoubleChannel* create_ResistanceChannel_info(Device* device_ptr, Chann
 
 int ResistanceChannel_get_buffer_size(ResistanceDoubleChannel* channel, size_t* out_buffer_size) {
 	auto& resistanceChannel = *reinterpret_cast<ResistanceChannelWrapPtr *>(channel);
-	return readBufferSize(*resistanceChannel, out_buffer_size);
+	return readBufferSize(*resistanceChannel->channelPtr(), out_buffer_size);
 }

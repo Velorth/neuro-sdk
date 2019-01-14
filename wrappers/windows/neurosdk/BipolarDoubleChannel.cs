@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class BipolarDoubleChannel : IBaseChannel<double>
+    public sealed class BipolarDoubleChannel : DataChannel<double>
     {
         private readonly IntPtr _listenerPtr;
         private readonly LengthChangedFunc _lengthChangedFunc;
 
-        public BipolarDoubleChannel(IBaseChannel<double> first, IBaseChannel<double> second)
+        public BipolarDoubleChannel(DataChannel<double> first, DataChannel<double> second)
         {
             ChannelPtr = create_BipolarDoubleChannel(first.ChannelPtr, second.ChannelPtr);
             if (ChannelPtr == IntPtr.Zero)

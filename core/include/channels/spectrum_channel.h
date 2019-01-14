@@ -23,6 +23,14 @@ public:
 		mSourceChannel(source_channel) {
 	}
 
+	ChannelInfo& info() noexcept {
+		return mInfo;
+	}
+
+	const ChannelInfo& info() const noexcept {
+		return mInfo;
+	}
+
 	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept {
 		return mSourceChannel->subscribeLengthChanged(callback);
 	}

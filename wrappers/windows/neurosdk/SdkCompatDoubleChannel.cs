@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public abstract class SdkCompatDoubleChannel : IBaseChannel<double>
+    public abstract class SdkCompatDoubleChannel : DataChannel<double>
     {
         private LengthChangedFunc _lengthCallback;
         private readonly ReadDataFunc _readDataFunc;

@@ -3,17 +3,17 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public interface ICommonChannelInterface
+    public interface IChannel
     {
         event EventHandler<int> LengthChanged;
+        IntPtr ChannelPtr { get; }
         ChannelInfo Info { get; set; }
         int TotalLength { get; }
         float SamplingFrequency { get; }
     }
 
-    public interface IBaseChannel<out T> : ICommonChannelInterface
+    public interface IDataChannel<out T> : IChannel
     {
-        IntPtr ChannelPtr { get; }
         T[] ReadData(int offset, int length);
     }
 }

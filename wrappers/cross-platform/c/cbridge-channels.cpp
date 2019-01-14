@@ -20,6 +20,14 @@ struct BridgeDoubleChannelObj : DataChannelWrapper<double> {
 
 	friend void BridgeDoubleChannel_lengthChanged(BridgeDoubleChannel *, std::size_t);
 
+	Neuro::ChannelInfo& info() noexcept override {
+		return mChannelInfo;
+	}
+
+	const Neuro::ChannelInfo& info() const noexcept override {
+		return mChannelInfo;
+	}
+
 	LengthListenerType subscribeLengthChanged(LengthCallbackType callback) noexcept override {
 		mAddLengthCallbackFunc(BridgeDoubleChannel_lengthChanged, &mListenHandle);
 		return mLengthListener.addListener(callback);

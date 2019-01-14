@@ -62,15 +62,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseChannel.cs" />
+    <Compile Include="ChannelInterface.cs" />
     <Compile Include="BatteryChannel.cs" />
     <Compile Include="BipolarDoubleChannel.cs" />
     <Compile Include="ChannelInfo.cs" />
+    <Compile Include="ChannelWrapper.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceScanner.cs" />
     <Compile Include="DeviceTraits.cs" />
     <Compile Include="Filters.cs" />
-    <Compile Include="NativeAdapter.cs" />
+    <Compile Include="NativeArrayMarshaler.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SdkCompatDoubleChannel.cs" />

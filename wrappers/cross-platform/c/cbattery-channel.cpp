@@ -27,6 +27,6 @@ BatteryIntChannel* create_BatteryIntChannel(Device *device_ptr) {
 }
 
 int BatteryIntChannel_get_buffer_size(BatteryIntChannel* channel, size_t* out_buffer_size) {
-	const auto batteryChannel = reinterpret_cast<BatteryChannelWrapPtr *>(channel);
-	return readBufferSize(*batteryChannel, out_buffer_size);
+	auto& batteryChannel = *reinterpret_cast<BatteryChannelWrapPtr *>(channel);
+	return readBufferSize(*batteryChannel->channelPtr(), out_buffer_size);
 }

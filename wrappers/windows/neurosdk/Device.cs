@@ -35,7 +35,7 @@ namespace Neuro
             get
             {
                 SdkError.ThrowIfError(device_available_channels(DevicePtr, out var nativeArray));
-                return NativeAdapter.MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount, NativeAdapter.NativeStructPtrReader<ChannelInfo>);
+                return new NativeArrayMarshaler<ChannelInfo>().MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount);
             }
         }
 
@@ -44,7 +44,7 @@ namespace Neuro
             get
             {
                 SdkError.ThrowIfError(device_available_commands(DevicePtr, out var nativeArray));
-                return NativeAdapter.MarshalArray(nativeArray.CmdArray, nativeArray.CmdArraySize, NativeAdapter.NativeEnumPtrReader<Command>);
+                return new NativeArrayMarshaler<Command>().MarshalArray(nativeArray.CmdArray, nativeArray.CmdArraySize);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Neuro
             get
             {
                 SdkError.ThrowIfError(device_available_parameters(DevicePtr, out var nativeArray));
-                return NativeAdapter.MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount, NativeAdapter.NativeStructPtrReader<ParamInfo>);
+                return new NativeArrayMarshaler<ParamInfo>().MarshalArray(nativeArray.InfoArray, nativeArray.InfoCount);
             }
         }
 

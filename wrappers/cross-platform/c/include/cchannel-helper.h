@@ -8,6 +8,7 @@ extern "C"{
 
 #include <memory>
 #include "filter/digital_filter.h"
+#include "channels/info/channel_info.h"
 #include "cchannels.h"
 #include "common_types.h"
 #include "event_listener.h"
@@ -17,8 +18,8 @@ struct AnyChannelWrapper {
 	using LengthListenerType = Neuro::ListenerPtr<void, Neuro::data_length_t>;
 
 	virtual ~AnyChannelWrapper() = default;
-	virtual ChannelInfo& info() noexcept = 0;
-	virtual const ChannelInfo& info() const noexcept = 0;
+	virtual Neuro::ChannelInfo& info() noexcept = 0;
+	virtual const Neuro::ChannelInfo& info() const noexcept = 0;
 	virtual LengthListenerType subscribeLengthChanged(LengthCallbackType) noexcept = 0;
 	virtual Neuro::data_length_t totalLength() const noexcept = 0;
 	virtual Neuro::sampling_frequency_t samplingFrequency() const noexcept = 0;
@@ -42,11 +43,11 @@ struct SpecificChannelWrapper : public DataChannelWrapper<typename Channel::Data
 
 	explicit SpecificChannelWrapper(std::shared_ptr<Channel> channel):mChannelPtr(channel){}
 
-	ChannelInfo& info() noexcept override {
+	Neuro::ChannelInfo& info() noexcept override {
 		return mChannelPtr->info();
 	}
 
-	const ChannelInfo& info() const noexcept override {
+	const Neuro::ChannelInfo& info() const noexcept override {
 		return mChannelPtr->info();
 	}
 
@@ -66,7 +67,6 @@ struct SpecificChannelWrapper : public DataChannelWrapper<typename Channel::Data
 		return mChannelPtr->readData(offset, length);
 	}
 
-protected:
 	std::shared_ptr<Channel> channelPtr() const noexcept {
 		return mChannelPtr;
 	}

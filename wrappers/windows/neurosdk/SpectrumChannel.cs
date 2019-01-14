@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class SpectrumChannel : IBaseChannel<double>
+    public class SpectrumChannel : DataChannel<double>
     {
         private readonly IntPtr _listenerPtr;
         private readonly LengthChangedFunc _lengthChangedFunc;
 
-        public SpectrumChannel(IBaseChannel<double> channel)
+        public SpectrumChannel(DataChannel<double> channel)
         {
             ChannelPtr = create_SpectrumChannel(channel.ChannelPtr);
             if (ChannelPtr == null)
