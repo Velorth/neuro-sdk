@@ -13,6 +13,8 @@ public:
     using param_changed_callback_t = std::function<void(Parameter)>;
 
     ParameterReader(std::shared_ptr<BleDevice>, param_changed_callback_t);
+    ParameterReader(const ParameterReader &) = delete;
+    ParameterReader& operator=(const ParameterReader &) = delete;
     virtual ~ParameterReader() = default;
 
     void requestConnect();
@@ -51,6 +53,8 @@ public:
 
 private:
     static constexpr const char *class_name = "ParameterReader";
+
+    ListenerPtr<void, BleDeviceState, BleDeviceError> mBleStateListener;
 
     std::shared_ptr<BleDevice> mBleDevice;
     DeviceState mState{DeviceState::Disconnected};

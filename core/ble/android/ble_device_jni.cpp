@@ -52,13 +52,13 @@ BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) :
         //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
         //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
         //class constructor
-        auto gattInfo = mDeviceInfo->getGattInfo();
+        auto gattInfo = getGattInfo()->getGattInfo();
         auto gattInfoWrapClass = env->FindClass(
                     "com/neuromd/bleconnection/device/DeviceGattInfo");
         auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");
         auto gattInfoWrapper = env->NewObject(gattInfoWrapClass,
                                               gattInfoWrapConstructor,
-                                              (jlong) gattInfo.get());
+                                              reinterpret_cast<jlong>(new std::shared_ptr<DeviceGattInfo>(gattInfo)));
 
         auto bleDeviceClass = env->FindClass("com/neuromd/bleconnection/device/BleDevice");
         auto bleDeviceConstructor = env->GetMethodID(bleDeviceClass, "<init>",
@@ -227,23 +227,23 @@ BleDeviceState BleDeviceJni::getState() const {
 }
 
 void BleDeviceJni::onConnected() {
-    deviceStateChangedCallback(BleDeviceState::Connected, BleDeviceError::NoError);
+    notifyStateChanged(BleDeviceState::Connected, BleDeviceError::NoError);
 }
 
 void BleDeviceJni::onDisconnected() {
-    deviceStateChangedCallback(BleDeviceState::Disconnected, BleDeviceError::NoError);
+    notifyStateChanged(BleDeviceState::Disconnected, BleDeviceError::NoError);
 }
 
 void BleDeviceJni::onError(BleDeviceError error) {
-    deviceStateChangedCallback(BleDeviceState::Error, error);
+    notifyStateChanged(BleDeviceState::Error, error);
 }
 
 void BleDeviceJni::onDataReceived(const std::vector<Byte> &data) {
-    dataReceivedCallback(data);
+    notifyDataReceived(data);
 }
 
 void BleDeviceJni::onStatusReceived(const std::vector<Byte> &status) {
-    statusReceivedCallback(status);
+    notifyStatusReceived(status);
 }
 
 }

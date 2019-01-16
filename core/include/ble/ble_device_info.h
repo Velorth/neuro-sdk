@@ -139,7 +139,7 @@ public:
     }
 };
 
-class BleDeviceInfo
+class BleDeviceInfo final
 {
 public:
     ~BleDeviceInfo(){}

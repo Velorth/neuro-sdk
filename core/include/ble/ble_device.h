@@ -21,6 +21,7 @@
 #include <functional>
 #include "ble_device_info.h"
 #include "common_types.h"
+#include "event_notifier.h"
 
 namespace Neuro {
 
@@ -73,9 +74,6 @@ public:
     BleDevice(const BleDevice&) = delete;
     BleDevice& operator=(const BleDevice&) = delete;
     virtual ~BleDevice(){
-        deviceStateChangedCallback = nullptr;
-        dataReceivedCallback = nullptr;
-        statusReceivedCallback = nullptr;
     }
 
     bool operator==(const BleDevice &other){
@@ -91,27 +89,40 @@ public:
     virtual std::string getName() const = 0;
     virtual std::string getNetAddress() const = 0;
 
-    DeviceType getDeviceType() const {
-        return mDeviceInfo->getDeviceType();
+    std::shared_ptr<BleDeviceInfo> getGattInfo() const {
+        return mDeviceInfo;
     }
 
-    void setStateChangedCallback(state_changed_callback_t callback){
-        deviceStateChangedCallback = callback;
+    ListenerPtr<void, BleDeviceState, BleDeviceError> subscribeConnectionStateChanged(state_changed_callback_t callback){
+        return mDeviceStateChangedCallback.addListener(callback);
     }
 
-    void setDataReceivedCallback(data_received_callback_t callback){
-        dataReceivedCallback = callback;
+    ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(data_received_callback_t callback){
+        return mDataReceivedCallback.addListener(callback);
     }
 
-    void setStatusReceivedCallback(status_received_callback_t callback){
-        statusReceivedCallback = callback;
+    ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(status_received_callback_t callback){
+        return mStatusReceivedCallback.addListener(callback);
     }
 
 protected:
-    std::unique_ptr<BleDeviceInfo> mDeviceInfo;
-    state_changed_callback_t deviceStateChangedCallback;
-    data_received_callback_t dataReceivedCallback;
-    status_received_callback_t statusReceivedCallback;
+    void notifyStateChanged(BleDeviceState state, BleDeviceError error){
+        mDeviceStateChangedCallback.notifyAll(state, error);
+    }
+
+    void notifyDataReceived(const std::vector<Byte> &data){
+        mDataReceivedCallback.notifyAll(data);
+    }
+
+    void notifyStatusReceived(const std::vector<Byte> &status){
+        mStatusReceivedCallback.notifyAll(status);
+    }
+
+private:
+    std::shared_ptr<BleDeviceInfo> mDeviceInfo;
+    Notifier<void, BleDeviceState, BleDeviceError> mDeviceStateChangedCallback;
+    Notifier<void, const std::vector<Byte> &> mDataReceivedCallback;
+    Notifier<void, const std::vector<Byte> &> mStatusReceivedCallback;
 };
 
 }

@@ -32,6 +32,12 @@ public class DeviceGattInfo {
         mNativeObjectPtr = nativeObjectPtr;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        deleteGattInfo(mNativeObjectPtr);
+        super.finalize();
+    }
+
     /**
      * Returns UUID for main service of BLE device
      *
@@ -95,6 +101,8 @@ public class DeviceGattInfo {
 
         return uuid;
     }
+
+    private native void deleteGattInfo(long deviceInfoPtr);
 
     private native String getDeviceServiceUUID(long deviceInfoPtr);
 
