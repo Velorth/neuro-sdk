@@ -38,7 +38,7 @@ public:
     virtual void releaseDevice(std::string name, std::string address) = 0;
 
 protected:
-    EmulatorClient emulator;
+    //EmulatorClient emulator;
 };
 
 }

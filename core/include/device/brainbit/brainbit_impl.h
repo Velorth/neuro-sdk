@@ -57,7 +57,6 @@ private:
     using BrainbitRequestHandler = RequestScheduler<BrainbitCommandData>;
 
     static constexpr const char *class_name = "BrainbitImpl";
-    static constexpr std::size_t SignalBufferSize = 360000; //10 minutes for 250 Hz fsam and 4 channels
 
 	Notifier<void, const int &> mBatteryNotifier{ class_name };
 	std::unordered_map<std::size_t, Notifier<void, const std::vector<signal_sample_t> &>> mSignalNotifierMap;
@@ -67,8 +66,6 @@ private:
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;
     int mBatteryPercents{0};
-    SafeBuffer<signal_sample_t, SignalBufferSize> mSignalBuffer;
-    PacketSequence<2048> mPacketCounter;
     param_changed_callback_t parameterChangedCallback;
     std::vector<ChannelInfo> mChannels;
     std::size_t mCurrentResistChannel{0};
@@ -86,6 +83,7 @@ private:
     void parseSignalData(const ByteBuffer &);
     void onSignalReceived(const std::vector<signal_sample_t> &);
     void onResistanceReceived(const std::vector<resistance_sample_t> &);
+    void onResistanceCalculated(resistance_sample_t value);
     bool execStartSignalCommand();
     bool execStopSignalCommand();
     bool startResist();

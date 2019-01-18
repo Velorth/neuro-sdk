@@ -220,6 +220,10 @@ jobject readDeviceParam(JNIEnv *env, const Neuro::Device &device, Neuro::Paramet
         jni::java_throw(env, "java/lang/UnsupportedOperationException", e);
         return nullptr;
     }
+    catch (...){
+        jni::java_throw(env, "java/lang/UnsupportedOperationException");
+        return nullptr;
+    }
 }
 
 template <Neuro::Parameter Param>
