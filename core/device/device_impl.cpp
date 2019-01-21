@@ -20,7 +20,7 @@ void DeviceImpl::disconnect(){
 
 void DeviceImpl::subscribeDataReceived() {
     Expects(mBleDevice != nullptr);
-    mBleDevice->setDataReceivedCallback([=](auto&& data) {
+    mDataReceivedListener = mBleDevice->subscribeDataReceived([=](auto&& data) {
         mDataReceivedQueue.exec([=](){
             onDataReceived(std::forward<decltype(data)>(data));
         });
@@ -29,7 +29,7 @@ void DeviceImpl::subscribeDataReceived() {
 
 void DeviceImpl::subscribeStatusReceived() {
     Expects(mBleDevice != nullptr);
-    mBleDevice->setStatusReceivedCallback([=](auto&& data) {
+    mStatusReceivedListener = mBleDevice->subscribeStatusReceived([=](auto&& data) {
         mStatusReceivedQueue.exec([=](){
             onStatusDataReceived(std::forward<decltype(data)>(data));
         });

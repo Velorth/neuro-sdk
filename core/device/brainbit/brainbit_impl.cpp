@@ -219,11 +219,11 @@ void BrainbitImpl::parseBattery(const ByteBuffer &status_data) {
 
 void BrainbitImpl::parseState(BrainbitCommand cmd, const ByteBuffer &status_data){
     LOG_DEBUG_V("Device new state: %d, previous state: %d", static_cast<int>(cmd), static_cast<int>(mBrainbitState));
-    if (mBrainbitState != cmd){
-        LOG_DEBUG("Processing response");
+//    if (mBrainbitState != cmd){
+ //       LOG_DEBUG("Processing response");
         mBrainbitState = cmd;
         mRequestHandler->onCommandResponse(cmd, status_data.data()+1, status_data.size()-1);
-    }
+  //  }
 }
 
 void BrainbitImpl::parseVersion(const ByteBuffer &status_data) {
@@ -235,7 +235,6 @@ void BrainbitImpl::parseVersion(const ByteBuffer &status_data) {
 void BrainbitImpl::parseSignalData(const ByteBuffer &data){
     auto packetNumber = static_cast<unsigned short>(data[0]) << 3 | static_cast<unsigned short>(data[1]) >> 5;
     auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
-    LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
 
     constexpr static double K = 2.4 / (0xFFFFF * 6);
 
@@ -280,7 +279,6 @@ void BrainbitImpl::parseSignalData(const ByteBuffer &data){
 }
 
 void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
-    mSignalBuffer.append(data);
     for (auto& info : mChannels){
         if (info.getType() == ChannelInfo::Type::Signal){
             std::vector<signal_sample_t> channelSamples{data[info.getIndex()], data[info.getIndex()+4]};
@@ -291,42 +289,38 @@ void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
 
 void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
     onSignalReceived(std::vector<signal_sample_t>(8));
-    if (std::abs(data[mCurrentResistChannel]) < 0.001 || std::abs(data[mCurrentResistChannel+4]) < 0.001 ){
-        LOG_ERROR_V("Skip resist, %f, %f, %f, %f, %f, %f, %f, %f", data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
-        LOG_ERROR_V("Current channel: %zd", mCurrentResistChannel);
+    if (std::abs(data[mCurrentResistChannel]) == 0.0 || std::abs(data[mCurrentResistChannel+4]) == 0.0 ){
         return;
     }
     mResistBuffer.push_back(data[mCurrentResistChannel]);
     mResistBuffer.push_back(data[mCurrentResistChannel+4]);
-    if (mResistBuffer.size() >= 100){
+    if (mResistBuffer.size() >= 100) {
         double res = 0;
-        bool overflow = false;
-        for (std::size_t r = 20; r < mResistBuffer.size(); r++)
-        {
-            res += mResistBuffer[r];
-            if (mResistBuffer[r] == 400000000.0)
-                overflow = true;
-        }
-        if (overflow == false)
-        {
-            double midle = res / (mResistBuffer.size() - 20);
-            res = 0;
-            for (std::size_t r = 20; r < mResistBuffer.size(); r++){
-                res += std::abs(mResistBuffer[r] - midle);
+        for (std::size_t r = 20; r < mResistBuffer.size(); r++) {
+            if (mResistBuffer[r] >= std::abs(0.4)) {
+                onResistanceCalculated(std::numeric_limits<double>::infinity());
+                return;
             }
-            res = res / (mResistBuffer.size() - 20) / 24e-9;
-            res = std::abs(res / 2);
+            res += mResistBuffer[r];
         }
-        else
-        {
-            res = std::numeric_limits<double>::max();
+
+        double average = res / (mResistBuffer.size() - 20);
+        res = 0;
+        for (std::size_t r = 20; r < mResistBuffer.size(); r++) {
+            res += std::abs(mResistBuffer[r] - average);
         }
-        mResistBuffer.clear();
-        mResistanceNotifierMap[mCurrentResistChannel].notifyAll({res});
-        auto nextChannel = mCurrentResistChannel + 1;
-        mCurrentResistChannel = nextChannel > 3 ? 0 : nextChannel;
-        execStartResistCommand(mCurrentResistChannel);
+        res = res / (mResistBuffer.size() - 20) / 24e-9;
+        res = std::abs(res / 2);
+        onResistanceCalculated(res);
     }
+}
+
+
+void BrainbitImpl::onResistanceCalculated(const resistance_sample_t value) {
+    mResistBuffer.clear();
+    mResistanceNotifierMap[mCurrentResistChannel].notifyAll({value});
+    mCurrentResistChannel =  (mCurrentResistChannel + 1) % 4;
+    execStartResistCommand(mCurrentResistChannel);
 }
 
 bool BrainbitImpl::execStartSignalCommand(){
@@ -357,7 +351,8 @@ bool BrainbitImpl::startResist(){
         return true;
     }
 
-    if (!execStartResistCommand(0) || mBrainbitState != BrainbitCommand::CMD_RESIST){
+    mCurrentResistChannel = 0;
+    if (!execStartResistCommand(mCurrentResistChannel) || mBrainbitState != BrainbitCommand::CMD_RESIST){
         LOG_ERROR("Failed send start resist command.");
         return false;
     }
@@ -375,8 +370,8 @@ bool BrainbitImpl::execStartResistCommand(std::size_t channel_index){
             requestData[i] = 0b10010001;
         }
     }
-    requestData[4] = 0b00000010;
-    requestData[5] = 0b00000010;
+    requestData[4] = static_cast<Byte>(1) << channel_index;
+    requestData[5] = requestData[4];
     cmdData->setRequestData(requestData);
     mRequestHandler->sendRequest(cmdData);
     cmdData->wait();

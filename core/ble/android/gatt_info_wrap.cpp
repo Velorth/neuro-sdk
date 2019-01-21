@@ -20,6 +20,15 @@
 
 extern "C"
 {
+
+JNIEXPORT void JNICALL
+Java_com_neuromd_bleconnection_device_DeviceGattInfo_deleteGattInfo(JNIEnv *env,
+                                                                          jobject instance,
+                                                                          jlong deviceInfoPtr) {
+    auto gattInfo = reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
+    delete gattInfo;
+}
+
 /**
  * Get DeviceService UUID
  */
@@ -27,7 +36,7 @@ JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getDeviceServiceUUID(JNIEnv *env,
                                                                               jobject instance,
                                                                               jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
+    auto& gattInfo = *reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     auto deviceServiceUUID = gattInfo->deviceServiceUUID();
     return env->NewStringUTF(deviceServiceUUID.c_str());
 }
@@ -39,7 +48,7 @@ JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getRxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
+    auto& gattInfo = *reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     auto rxCharUUID = gattInfo->rxCharacteristicUUID();
     return env->NewStringUTF(rxCharUUID.c_str());
 }
@@ -51,7 +60,7 @@ JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getTxCharacteristicUUID(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
+    auto& gattInfo = *reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     auto txCharUUID = gattInfo->txCharacteristicUUID();
     return env->NewStringUTF(txCharUUID.c_str());
 }
@@ -63,7 +72,7 @@ JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getStatusCharacteristicUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
+    auto& gattInfo = *reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     auto statusCharUUID = gattInfo->statusCharacteristicUUID();
     return env->NewStringUTF(statusCharUUID.c_str());
 }
@@ -75,7 +84,7 @@ JNIEXPORT jstring JNICALL
 Java_com_neuromd_bleconnection_device_DeviceGattInfo_getGenericAccessServiceUUID(JNIEnv *env,
                                                                                      jobject instance,
                                                                                      jlong deviceInfoPtr) {
-    auto gattInfo = (Neuro::DeviceGattInfo *) deviceInfoPtr;
+    auto& gattInfo = *reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     auto genericServiceUUID = gattInfo->genericAccessUUID();
     return env->NewStringUTF(genericServiceUUID.c_str());
 }

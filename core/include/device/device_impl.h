@@ -71,6 +71,9 @@ private:
     friend class Device;
     static constexpr const char *class_name = "DeviceImpl";
 
+    ListenerPtr<void, const std::vector<Byte> &> mDataReceivedListener;
+    ListenerPtr<void, const std::vector<Byte> &> mStatusReceivedListener;
+
     std::unique_ptr<ParameterReader> mParamReader;
     std::unique_ptr<ParameterWriter> mParamWriter;
     TaskQueue mDataReceivedQueue{"DataReceived"};

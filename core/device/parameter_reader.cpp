@@ -40,7 +40,7 @@ typename ParamValue<Parameter::Address>::Type ParameterReader::readAddress() con
 }
 
 void ParameterReader::subscribeBleDeviceStateChanged() {
-   mBleDevice->setStateChangedCallback([=](BleDeviceState state, BleDeviceError error){
+   mBleStateListener = mBleDevice->subscribeConnectionStateChanged([=](BleDeviceState state, BleDeviceError error){
        onBleDeviceStateChanged(state, error);
    });
 }

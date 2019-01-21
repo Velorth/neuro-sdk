@@ -34,7 +34,7 @@ void EmulatedDevice::connect(){
                     deviceSocket.reset(new Net::UdpSocket(mPort));
                     if (deviceSocket){
                         deviceSocket->setDataReceivedCallback([=](Net::ByteBuffer data, std::string, Net::PortNumberType){
-                            dataReceivedCallback(data);
+                            notifyDataReceived(data);
                         });
                     }
                     waitCondition.notify_all();
@@ -57,10 +57,10 @@ void EmulatedDevice::connect(){
                 if (waitCondition.wait_for(waitLock, std::chrono::seconds(3)) == std::cv_status::timeout ||
                         !deviceSocket){
                     mState = BleDeviceState::Disconnected;
-                    std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
+                    notifyStateChanged(mState, parseBleErrorType(0));
                 }else{
                     mState = BleDeviceState::Connected;
-                    std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
+                    notifyStateChanged(mState, parseBleErrorType(0));
                 }
             }
         }
@@ -69,7 +69,7 @@ void EmulatedDevice::connect(){
             assert(false);
         }
         mState = BleDeviceState::Disconnected;
-        std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
+        notifyStateChanged(mState, parseBleErrorType(0));
     }).detach();
 }
 
@@ -105,7 +105,7 @@ void EmulatedDevice::disconnect(){
             return;
         }
         mState = BleDeviceState::Disconnected;
-        std::thread([=](){deviceStateChangedCallback(mState, parseBleErrorType(0));}).detach();
+        notifyStateChanged(mState, parseBleErrorType(0));
     }).detach();
 }
 

@@ -46,7 +46,7 @@ namespace Neuro {
     }
 
     void BluetoothScannerJni::startScan() {
-        emulator.startScan();
+        //emulator.startScan();
         jni::call_in_attached_thread([=](auto env) {
             LOG_TRACE("Start scan");
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
@@ -60,7 +60,7 @@ namespace Neuro {
     }
 
     void BluetoothScannerJni::stopScan() {
-        emulator.stopScan();
+        //emulator.stopScan();
         jni::call_in_attached_thread([=](auto env) {
             LOG_TRACE("Stop scan");
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
@@ -72,9 +72,9 @@ namespace Neuro {
 
     std::unique_ptr<BleDevice> BluetoothScannerJni::getDeviceByAddress(std::string address) {
 
-        auto emulatedDevice = emulator.getDeviceByAddress(address);
-        if (emulatedDevice)
-            return emulatedDevice;
+        //auto emulatedDevice = emulator.getDeviceByAddress(address);
+        //if (emulatedDevice)
+        //    return emulatedDevice;
 
         return jni::call_in_attached_thread([=](auto env) {
             auto scannerClass = env->GetObjectClass(javaScannerInstance);
@@ -103,7 +103,7 @@ namespace Neuro {
     }
 
     void BluetoothScannerJni::setFilter(std::vector<std::string> filterList) {
-        emulator.setFilter(filterList);
+        //emulator.setFilter(filterList);
         jni::call_in_attached_thread([=](auto env) {
             //Creating filter object
             auto filterClass = env->FindClass("com/neuromd/bleconnection/device/DeviceFilter");
@@ -128,7 +128,7 @@ namespace Neuro {
 
     void BluetoothScannerJni::subscribeDeviceFound(
             std::function<void(std::unique_ptr<BleDevice>)> callbackFunction){
-        emulator.subscribeDeviceFound(callbackFunction);
+        //emulator.subscribeDeviceFound(callbackFunction);
         deviceFoundCallback = callbackFunction;
 
         jni::call_in_attached_thread([=](auto env) {
@@ -167,7 +167,7 @@ namespace Neuro {
 
     void BluetoothScannerJni::releaseDevice(std::string name, std::string address) {
 
-        emulator.releaseDevice(name, address);
+        //emulator.releaseDevice(name, address);
 
         jni::call_in_attached_thread([=](auto env) {
             auto deviceName = env->NewStringUTF(name.c_str());

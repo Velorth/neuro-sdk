@@ -139,7 +139,7 @@ private:
 	TaskQueue mStopScanQueue{"StopScanQueue"};
 
 	DeviceUniquePtr onNewBleDevice(std::unique_ptr<BleDevice> ble_device) {
-		switch (ble_device->getDeviceType()) {
+		switch (ble_device->getGattInfo()->getDeviceType()) {
 		case DeviceType::Brainbit:
 			return BrainbitDeviceFactory().create(std::move(ble_device));
 		case DeviceType::Callibri:
