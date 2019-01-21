@@ -235,7 +235,6 @@ void BrainbitImpl::parseVersion(const ByteBuffer &status_data) {
 void BrainbitImpl::parseSignalData(const ByteBuffer &data){
     auto packetNumber = static_cast<unsigned short>(data[0]) << 3 | static_cast<unsigned short>(data[1]) >> 5;
     auto buttonStateChanged = static_cast<bool>(data[1] & 0x10);
-    LOG_TRACE_V("Signal packet received: %d, button state changed: %d", packetNumber, static_cast<int>(buttonStateChanged));
 
     constexpr static double K = 2.4 / (0xFFFFF * 6);
 
@@ -291,10 +290,8 @@ void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
 void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
     onSignalReceived(std::vector<signal_sample_t>(8));
     if (std::abs(data[mCurrentResistChannel]) == 0.0 || std::abs(data[mCurrentResistChannel+4]) == 0.0 ){
-        LOG_DEBUG_V("Skip resist, %f, %f, %f, %f, %f, %f, %f, %f", data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
         return;
     }
-    LOG_DEBUG_V("%f, %f, %f, %f, %f, %f, %f, %f", data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
     mResistBuffer.push_back(data[mCurrentResistChannel]);
     mResistBuffer.push_back(data[mCurrentResistChannel+4]);
     if (mResistBuffer.size() >= 100) {
@@ -321,7 +318,6 @@ void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &
 
 void BrainbitImpl::onResistanceCalculated(const resistance_sample_t value) {
     mResistBuffer.clear();
-    LOG_ERROR_V("Channel: %zd, Resistance, %e", mCurrentResistChannel, value);
     mResistanceNotifierMap[mCurrentResistChannel].notifyAll({value});
     mCurrentResistChannel =  (mCurrentResistChannel + 1) % 4;
     execStartResistCommand(mCurrentResistChannel);
