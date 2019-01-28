@@ -105,36 +105,31 @@ namespace Neuro
             ParameterChanged?.Invoke(this, parameter);
         }
 
-#if DEBUG
-        private const string LibName = "c-neurosdkd.dll";
-#else
-        private const string LibName = "c-neurosdk.dll";
-#endif
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void DeviceParamChangedFunc(IntPtr devicePtr, Parameter parameter);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_connect(IntPtr devicePtr);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_disconnect(IntPtr devicePtr);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void device_delete(IntPtr devicePtr);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_available_channels(IntPtr devicePtr, out ChannelInfoArray infoArray);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_available_commands(IntPtr devicePtr, out CommandArray cmdArray);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_available_parameters(IntPtr devicePtr, out ParamInfoArray infoArray);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_execute(IntPtr devicePtr, Command command);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_subscribe_param_changed(IntPtr devicePtr, DeviceParamChangedFunc callback);
     }
 }

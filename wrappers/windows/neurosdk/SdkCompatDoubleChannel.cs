@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public abstract class SdkCompatDoubleChannel : DataChannel<double>
+    public abstract class SdkCompatDoubleChannel : IDataChannel<double>
     {
         private LengthChangedFunc _lengthCallback;
         private readonly ReadDataFunc _readDataFunc;
@@ -24,7 +24,7 @@ namespace Neuro
 
         ~SdkCompatDoubleChannel()
         {
-            BridgeDoubleChannel_delete(ChannelPtr);
+            AnyChannel_delete(ChannelPtr);
         }
 
         public event EventHandler<int> LengthChanged;
@@ -97,12 +97,6 @@ namespace Neuro
         }
 
 
-#if DEBUG
-        private const string LibName = "c-neurosdkd.dll";
-#else
-        private const string LibName = "c-neurosdk.dll";
-#endif
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate int ReadDataFunc(IntPtr offset, IntPtr length, IntPtr buffer);
 
@@ -118,11 +112,11 @@ namespace Neuro
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate int GetTotalLengthFunc(out IntPtr outLength);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_BridgeDoubleChannel_info(ChannelInfo info, ReadDataFunc readDataFunc, GetFrequencyFunc getFrequencyFunc,
             AddLengthCallbackFunc addLengthCallbackFunc, GetTotalLengthFunc getTotalLengthFunc);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void BridgeDoubleChannel_delete(IntPtr baseDoubleChannel);
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void AnyChannel_delete(IntPtr baseDoubleChannel);
     }
 }

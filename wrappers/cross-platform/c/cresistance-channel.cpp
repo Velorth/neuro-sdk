@@ -11,7 +11,7 @@ using ResistanceChannelType = Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Res
 using ResistanceChannelWrap = SpecificChannelWrapper<ResistanceChannelType>;
 using ResistanceChannelWrapPtr = std::shared_ptr<ResistanceChannelWrap>;
 
-ResistanceDoubleChannel* create_ResistanceChannel_info(Device* device_ptr, ChannelInfo info) {
+ResistanceDoubleChannel* create_ResistanceDoubleChannel_info(Device* device_ptr, ChannelInfo info) {
 	try {
 		auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 		Neuro::ChannelInfo channelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index);
@@ -27,7 +27,7 @@ ResistanceDoubleChannel* create_ResistanceChannel_info(Device* device_ptr, Chann
 	}
 }
 
-int ResistanceChannel_get_buffer_size(ResistanceDoubleChannel* channel, size_t* out_buffer_size) {
+int ResistanceDoubleChannel_get_buffer_size(ResistanceDoubleChannel* channel, size_t* out_buffer_size) {
 	auto& resistanceChannel = *reinterpret_cast<ResistanceChannelWrapPtr *>(channel);
 	return readBufferSize(*resistanceChannel->channelPtr(), out_buffer_size);
 }

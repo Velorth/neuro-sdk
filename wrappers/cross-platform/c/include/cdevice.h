@@ -94,6 +94,16 @@ typedef struct _ChanInfoArray{
 	size_t info_count;
 } ChannelInfoArray;
 
+typedef struct _DoubleDataArray {
+	double *data_array;
+	size_t samples_count;
+} DoubleDataArray;
+
+typedef struct _IntDataArray {
+	int *data_array;
+	size_t samples_count;
+} IntDataArray;
+
 SDK_SHARED int device_connect(Device *);
 SDK_SHARED int device_disconnect(Device *);
 SDK_SHARED void device_delete(Device *);
@@ -101,6 +111,12 @@ SDK_SHARED int device_available_channels(const Device *, ChannelInfoArray *);
 SDK_SHARED int device_available_commands(const Device *, CommandArray *);
 SDK_SHARED int device_available_parameters(const Device *, ParamInfoArray *);
 SDK_SHARED int device_execute(Device *, Command); 
-SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Device*, Parameter));
+SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Device*, Parameter, void *), void *user_data);
+//SDK_SHARED int device_subscribe_double_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, DoubleDataArray, void *), void *user_data);
+//SDK_SHARED int device_subscribe_int_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, IntDataArray, void *), void *user_data);
+SDK_SHARED void free_ParamInfoArray(ParamInfoArray);
+SDK_SHARED void free_ChannelInfoArray(ChannelInfoArray);
+SDK_SHARED void free_DoubleDataArray(DoubleDataArray);
+SDK_SHARED void free_IntDataArray(IntDataArray);
 
 #endif // CDEVICE_H

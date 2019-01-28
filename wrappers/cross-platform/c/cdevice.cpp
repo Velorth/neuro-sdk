@@ -191,12 +191,12 @@ ret_code device_execute(Device *device_ptr, Command cmd) {
 	}
 }
 
-ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Device*, Parameter)) {
+ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Device*, Parameter, void *), void *user_data) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		device->setParamChangedCallback([device_ptr, callback](auto param) {
+		device->setParamChangedCallback([device_ptr, callback, user_data](auto param) {
 			if (callback != nullptr) {
-				callback(device_ptr, static_cast<Parameter>(param));
+				callback(device_ptr, static_cast<Parameter>(param), user_data);
 			}
 		});
 		return SDK_NO_ERROR;
@@ -208,5 +208,44 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Devi
 	catch (...) {
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
+}
+
+/*int device_subscribe_double_channel_data_received(Device *device_ptr, ChannelInfo channel_info,	void(*callback)(Device*, ChannelInfo, DoubleDataArray, void*), void* user_data) {
+	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+	try {
+		device->setData([device_ptr, callback, user_data](auto param) {
+			if (callback != nullptr) {
+				callback(device_ptr, static_cast<Parameter>(param), user_data);
+			}
+		});
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+int device_subscribe_int_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, IntDataArray, void*),
+	void* user_data) {
+	
+}*/
+
+void free_ParamInfoArray(ParamInfoArray param_info) {
+	free(param_info.info_array);
+}
+void free_ChannelInfoArray(ChannelInfoArray channel_info) {
+	free(channel_info.info_array);
+}
+
+void free_DoubleDataArray(DoubleDataArray data_array) {
+	free(data_array.data_array);
+}
+
+void free_IntDataArray(IntDataArray data_array) {
+	free(data_array.data_array);
 }
 

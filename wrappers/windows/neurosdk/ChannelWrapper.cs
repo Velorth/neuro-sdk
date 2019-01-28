@@ -3,6 +3,20 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
+    internal class SdkLib
+    {
+#if AnyCPU
+        private const string Platform = "x86";
+#elif X64
+        private const string Platform = "x64";
+#endif
+
+#if DEBUG
+        public const string LibName = "c-neurosdk-" + Platform + "d.dll";
+#else
+        public const string LibName = "c-neurosdk-" + Platform + ".dll";
+#endif
+    }
     internal class AnyChannel
     {
         private readonly IntPtr _listenerPtr;
@@ -48,44 +62,41 @@ namespace Neuro
 
             ChannelPtr = channelPtr;
             _lengthChangedFunc = OnTotalLengthChanged;
-            SdkError.ThrowIfError(AnyChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr));
+            SdkError.ThrowIfError(AnyChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr, IntPtr.Zero));
         }
 
         ~AnyChannel()
         {
-            AnyChannel_delete(ChannelPtr);
             free_listener_handle(_listenerPtr);
+            AnyChannel_delete(ChannelPtr);
         }
 
-        private void OnTotalLengthChanged(IntPtr channelPtr, IntPtr length)
+        private void OnTotalLengthChanged(IntPtr channelPtr, IntPtr length, IntPtr userData)
         {
+            if (channelPtr != ChannelPtr) return;
+
             LengthChanged?.Invoke(this, (int)length);
         }
 
-#if DEBUG
-        private const string LibName = "c-neurosdkd.dll";
-#else
-        private const string LibName = "c-neurosdk.dll";
-#endif
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void free_listener_handle(IntPtr anyChannelPtr);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        delegate void LengthChangedFunc(IntPtr anyChannelPtr, IntPtr length);
+        delegate void LengthChangedFunc(IntPtr anyChannelPtr, IntPtr length, IntPtr userData);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void AnyChannel_delete(IntPtr anyChannelPtr);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int AnyChannel_get_info(IntPtr anyChannelPtr, out ChannelInfo info);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int AnyChannel_get_sampling_frequency(IntPtr anyChannelPtr, out float samplingFrequency);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int AnyChannel_add_length_callback(IntPtr anyChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle);
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int AnyChannel_add_length_callback(IntPtr anyChannelPtr, LengthChangedFunc callback, out IntPtr listenerHandle, IntPtr userData);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int AnyChannel_get_total_length(IntPtr anyChannelPtr, out IntPtr totalLength);
     }
 
@@ -151,16 +162,11 @@ namespace Neuro
 
     internal class NativeDataReadFunction
     {
-#if DEBUG
-        private const string LibName = "c-neurosdkd.dll";
-#else
-        private const string LibName = "c-neurosdk.dll";
-#endif
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int IntChannel_read_data(IntPtr signalChannelPtr, IntPtr offset, IntPtr length,
             IntPtr buffer);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int DoubleChannel_read_data(IntPtr signalChannelPtr, IntPtr offset, IntPtr length,
             IntPtr buffer);
     }

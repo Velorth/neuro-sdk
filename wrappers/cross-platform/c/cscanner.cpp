@@ -52,13 +52,13 @@ int scanner_stop_scan(DeviceScanner *scanner_ptr) {
 	}
 }
 
-int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback)(Device*), ListenerHandle* handle) {
+int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback)(DeviceScanner *, Device*, void *), ListenerHandle* handle, void *user_data) {
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
-		auto listener = scanner->subscribeDeviceFound([callback](auto device) {
+		auto listener = scanner->subscribeDeviceFound([scanner_ptr, callback, user_data](auto device) {
 			const auto device_raw_ptr = new Neuro::DeviceSharedPtr(std::move(device));
 			if (callback != nullptr) {
-				callback(reinterpret_cast<Device *>(device_raw_ptr));
+				callback(scanner_ptr, reinterpret_cast<Device *>(device_raw_ptr), user_data);
 			}
 		});
 		if (listener == nullptr) {
@@ -77,12 +77,12 @@ int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback
 	}
 }
 
-int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(bool), ListenerHandle *handle) {
+int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(DeviceScanner *, bool, void*), ListenerHandle *handle, void *user_data) {
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
-		auto listener = scanner->subscribeScanStateChanged([callback](bool is_scanning) {
+		auto listener = scanner->subscribeScanStateChanged([scanner_ptr, callback, user_data](bool is_scanning) {
 			if (callback != nullptr) {
-				callback(is_scanning);
+				callback(scanner_ptr, is_scanning, user_data);
 			}
 		}); 
 		if (listener == nullptr) {

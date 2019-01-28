@@ -3,7 +3,7 @@
 
 #include "cchannels.h"
 
-typedef struct _SpectrumChannel SpectrumDoubleChannel;
+typedef struct _SpectrumDoubleChannel SpectrumDoubleChannel;
 
 SDK_SHARED SpectrumDoubleChannel* create_SpectrumDoubleChannel(DoubleChannel *);
 SDK_SHARED int SpectrumDoubleChannel_get_hz_per_spectrum_sample(SpectrumDoubleChannel* channel, double* out_step);

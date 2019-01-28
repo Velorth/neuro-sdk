@@ -40,7 +40,7 @@ typedef enum _Filter {
 SDK_SHARED void AnyChannel_delete(AnyChannel *channel);
 SDK_SHARED int AnyChannel_get_info(AnyChannel *channel, ChannelInfo *out_info);
 SDK_SHARED int AnyChannel_get_sampling_frequency(AnyChannel *channel, float * out_frequency);
-SDK_SHARED int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChannel *, size_t), ListenerHandle *handle);
+SDK_SHARED int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChannel *, size_t, void *), ListenerHandle *handle, void *user_data);
 SDK_SHARED int AnyChannel_get_total_length(AnyChannel *channel, size_t *out_length);
 
 SDK_SHARED int IntChannel_read_data(IntChannel *channel, size_t offset, size_t length, int *out_buffer);

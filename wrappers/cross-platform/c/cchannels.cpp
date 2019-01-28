@@ -24,11 +24,11 @@ int AnyChannel_get_sampling_frequency(AnyChannel* channel, float* out_frequency)
 	return readSamplingFrequency(*anyChannel, out_frequency);
 }
 
-int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChannel *, size_t), ListenerHandle* handle) {
+int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChannel *, size_t, void *), ListenerHandle* handle, void *user_data) {
 	auto& anyChannel = *reinterpret_cast<AnyChannelWrapperPtr *>(channel);
 	try {
-		auto listener = anyChannel->subscribeLengthChanged([channel, callback](size_t new_length) {
-			if (callback != nullptr) callback(channel, new_length);
+		auto listener = anyChannel->subscribeLengthChanged([channel, callback, user_data](size_t new_length) {
+			if (callback != nullptr) callback(channel, new_length, user_data);
 		});
 		if (listener == nullptr) {
 			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");

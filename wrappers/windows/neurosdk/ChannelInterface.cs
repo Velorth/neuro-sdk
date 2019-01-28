@@ -7,7 +7,7 @@ namespace Neuro
     {
         event EventHandler<int> LengthChanged;
         IntPtr ChannelPtr { get; }
-        ChannelInfo Info { get; set; }
+        ChannelInfo Info { get; }
         int TotalLength { get; }
         float SamplingFrequency { get; }
     }

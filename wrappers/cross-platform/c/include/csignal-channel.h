@@ -3,7 +3,7 @@
 
 #include "cchannels.h"
 
-typedef struct _SignalChannel SignalDoubleChannel;
+typedef struct _SignalDoubleChannel SignalDoubleChannel;
 
 SDK_SHARED SignalDoubleChannel* create_SignalDoubleChannel(Device *device_ptr);
 SDK_SHARED SignalDoubleChannel* create_SignalDoubleChannel_info(Device *device_ptr, ChannelInfo info);

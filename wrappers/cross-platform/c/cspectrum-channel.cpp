@@ -13,7 +13,7 @@ using SpectrumChannelType = Neuro::SpectrumChannel<DoubleChannelWrap>;
 using SpectrumChannelWrap = SpecificChannelWrapper<SpectrumChannelType>;
 using SpectrumWrapPtr = std::shared_ptr<SpectrumChannelWrap>;
 
-SpectrumDoubleChannel* create_SpectrumChannel(DoubleChannel *double_channel) {
+SpectrumDoubleChannel* create_SpectrumDoubleChannel(DoubleChannel *double_channel) {
 	auto& channel = *reinterpret_cast<DoubleChannelWrapPtr *>(double_channel);
 	try {
 		const auto channelPtr = std::make_shared<SpectrumChannelType>(channel);

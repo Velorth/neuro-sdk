@@ -153,14 +153,14 @@ int readSamplingFrequency(const Channel &channel, float* out_frequency) {
 }
 
 template <typename Channel>
-int getChannelInfo(Channel &channel, ChannelInfo *out_frequency) {
+int getChannelInfo(Channel &channel, ChannelInfo *out_info) {
 	try {
 		auto channelInfo = channel.info();
 		ChannelInfo info;
 		strcpy(info.name, channelInfo.getName().c_str());
 		info.type = static_cast<ChannelType>(channelInfo.getType());
 		info.index = channelInfo.getIndex();
-		*out_frequency = info;
+		*out_info = info;
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -171,5 +171,6 @@ int getChannelInfo(Channel &channel, ChannelInfo *out_frequency) {
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
 }
+
 
 #endif

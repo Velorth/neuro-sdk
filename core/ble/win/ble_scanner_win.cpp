@@ -25,7 +25,6 @@ BleScannerWin::~BleScannerWin() {
 }
 
 void BleScannerWin::startScan(){
-    emulator.startScan();
 	mReceivedEventToken = mWatcher.Received([=](auto&& watcher, auto&& args) {
 		onAdvertisementReceived(std::forward<decltype(watcher)>(watcher), std::forward<decltype(args)>(args));
 	});
@@ -34,7 +33,6 @@ void BleScannerWin::startScan(){
 }
 
 void BleScannerWin::stopScan(){
-    emulator.stopScan();
 	if (mReceivedEventToken) {
 		mWatcher.Received(mReceivedEventToken);
 	}
@@ -42,25 +40,24 @@ void BleScannerWin::stopScan(){
 }
 
 std::unique_ptr<BleDevice> BleScannerWin::getDeviceByAddress(std::string address){
-    return emulator.getDeviceByAddress(address);
+
+	//mFoundDeviceAddresses.find(address);
+    return nullptr;
 }
 
 void BleScannerWin::setFilter(std::vector<std::string> nameFilter){
-    emulator.setFilter(nameFilter);
     mFilterCollection = nameFilter;
 }
 
 void BleScannerWin::subscribeDeviceFound(std::function<void (std::unique_ptr<BleDevice>)> callback){
-    emulator.subscribeDeviceFound(callback);
     mDeviceFoundCallback = callback;
 }
 
 bool BleScannerWin::isScanning(){
-    return emulator.isScanning() || mIsScanning.load();
+    return mIsScanning.load();
 }
 
 void BleScannerWin::releaseDevice(std::string name, std::string address){
-    emulator.releaseDevice(name, address);
     LOG_DEBUG_V("Release device %s [%s]", name.c_str(), address.c_str());
 	//mFoundDeviceAddresses.erase(mFoundDeviceAddresses.find(address));
 }
