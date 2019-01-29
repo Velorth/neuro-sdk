@@ -30,7 +30,7 @@ public:
     virtual std::vector<ChannelInfo> channels() const = 0;
     virtual std::vector<Command> commands() const = 0;
     virtual std::vector<std::pair<Parameter, ParamAccess>> parameters() const = 0;
-    virtual void setParamChangedCallback(std::function<void(Parameter)>) = 0;
+    virtual ListenerPtr<void, Parameter> setParamChangedCallback(std::function<void(Parameter)>) = 0;
     virtual bool execute(Command) = 0;
 
 	virtual ChannelDataListenerType<ChannelInfo::Type::Battery>

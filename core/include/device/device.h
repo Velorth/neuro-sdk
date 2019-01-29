@@ -34,7 +34,9 @@ public:
     std::vector<Command> commands() const;
     std::vector<ParamPair> parameters() const;
     bool execute(Command);
-    void setParamChangedCallback(std::function<void(Parameter)>);
+
+    ListenerPtr<void, Parameter> 
+	setParamChangedCallback(std::function<void(Parameter)>);
 
     template <Parameter P>
     typename ParamValue<P>::Type readParam() const;

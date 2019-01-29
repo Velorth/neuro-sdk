@@ -44,8 +44,8 @@ std::vector<ParamPair > BrainbitImpl::parameters() const {
 		{ Parameter::FirmwareVersion, ParamAccess::Read } };
 }
 
-void BrainbitImpl::setParamChangedCallback(param_changed_callback_t callback) {
-    parameterChangedCallback = callback;
+ListenerPtr<void, Parameter> BrainbitImpl::setParamChangedCallback(param_changed_callback_t callback) {
+    return mParameterChangedNotifier.addListener(callback);
 }
 
 bool BrainbitImpl::execute(Command command){
@@ -207,9 +207,7 @@ void BrainbitImpl::onStatusDataReceived(const ByteBuffer &status_data){
 }
 
 void BrainbitImpl::onParameterChanged(Parameter param) {
-    if (parameterChangedCallback){
-        parameterChangedCallback(param);
-    }
+	mParameterChangedNotifier.notifyAll(param);
 }
 
 void BrainbitImpl::parseBattery(const ByteBuffer &status_data) {

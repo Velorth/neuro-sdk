@@ -27,7 +27,7 @@ public:
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;
     std::vector<ParamPair> parameters() const override;
-    void setParamChangedCallback(param_changed_callback_t) override;
+    ListenerPtr<void, Parameter> setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
 
 	ListenerPtr<void, const int &>
@@ -70,7 +70,7 @@ private:
 	Notifier<void, const ElectrodeState &> mElectrodesNotifier{ class_name };
     std::shared_ptr<CallibriRequestScheduler> mRequestHandler;
     std::shared_ptr<CallibriCommonParameters> mCommonParams;
-    param_changed_callback_t parameterChangedCallback;
+	Notifier<void, Parameter> mParameterChangedNotifier;
     Loop<void(CallibriImpl*)> mBatteryNotificationLoop;
     Loop<void(CallibriImpl*)> mElectrodesNotificationLoop;
 

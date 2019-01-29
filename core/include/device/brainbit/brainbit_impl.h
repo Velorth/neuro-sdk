@@ -23,7 +23,7 @@ public:
     std::vector<ChannelInfo> channels() const override;
     std::vector<Command> commands() const override;
     std::vector<std::pair<Parameter, ParamAccess>> parameters() const override;
-    void setParamChangedCallback(param_changed_callback_t) override;
+	ListenerPtr<void, Parameter> setParamChangedCallback(param_changed_callback_t) override;
     bool execute(Command) override;
 
 	ListenerPtr<void, const int &>
@@ -66,7 +66,7 @@ private:
     std::unique_ptr<BrainbitRequestHandler> mRequestHandler;
     BrainbitCommand mBrainbitState;
     int mBatteryPercents{0};
-    param_changed_callback_t parameterChangedCallback;
+    Notifier<void, Parameter> mParameterChangedNotifier;
     std::vector<ChannelInfo> mChannels;
     std::size_t mCurrentResistChannel{0};
     std::vector<resistance_sample_t> mResistBuffer;

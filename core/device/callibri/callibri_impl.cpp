@@ -40,8 +40,8 @@ std::vector<ParamPair> CallibriImpl::parameters() const {
     return mCommonParams->availableParameters();
 }
 
-void CallibriImpl::setParamChangedCallback(param_changed_callback_t callback) {
-   parameterChangedCallback = callback;
+ListenerPtr<void, Parameter> CallibriImpl::setParamChangedCallback(param_changed_callback_t callback) {
+   return mParameterChangedNotifier.addListener(callback);
 }
 
 bool CallibriImpl::execute(Command command){
@@ -460,9 +460,7 @@ packet_number_t CallibriImpl::extractPacketNumber(const ByteBuffer &packet, std:
 }
 
 void CallibriImpl::onParameterChanged(Parameter param) {
-    if (parameterChangedCallback){
-        parameterChangedCallback(param);
-    }
+	mParameterChangedNotifier.notifyAll(param);
 }
 
 void CallibriImpl::sendCommandPacket(std::shared_ptr<CallibriCommandData> commandData){

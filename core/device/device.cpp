@@ -50,8 +50,8 @@ bool Device::execute(Command cmd) {
     return mImpl->execute(cmd);
 }
 
-void Device::setParamChangedCallback(std::function<void(Parameter)> callback) {
-    mImpl->setParamChangedCallback(callback);
+ListenerPtr<void, Parameter>  Device::setParamChangedCallback(std::function<void(Parameter)> callback) {
+    return mImpl->setParamChangedCallback(callback);
 }
 
 Device::Device(std::unique_ptr<DeviceImpl> impl) :
