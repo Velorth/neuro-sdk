@@ -4,6 +4,7 @@
 #include "lib_export.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include "clistener.h"
 
 typedef struct _Device Device;
 
@@ -111,10 +112,11 @@ SDK_SHARED int device_available_channels(const Device *, ChannelInfoArray *);
 SDK_SHARED int device_available_commands(const Device *, CommandArray *);
 SDK_SHARED int device_available_parameters(const Device *, ParamInfoArray *);
 SDK_SHARED int device_execute(Device *, Command); 
-SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Device*, Parameter, void *), void *user_data);
-//SDK_SHARED int device_subscribe_double_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, DoubleDataArray, void *), void *user_data);
-//SDK_SHARED int device_subscribe_int_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, IntDataArray, void *), void *user_data);
+SDK_SHARED int device_subscribe_param_changed(Device*, void(*)(Device*, Parameter, void *), ListenerHandle *, void *user_data);
+SDK_SHARED int device_subscribe_double_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, DoubleDataArray, void *), ListenerHandle *, void *user_data);
+SDK_SHARED int device_subscribe_int_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, IntDataArray, void *), ListenerHandle *, void *user_data);
 SDK_SHARED void free_ParamInfoArray(ParamInfoArray);
+SDK_SHARED void free_CommandArray(CommandArray);
 SDK_SHARED void free_ChannelInfoArray(ChannelInfoArray);
 SDK_SHARED void free_DoubleDataArray(DoubleDataArray);
 SDK_SHARED void free_IntDataArray(IntDataArray);

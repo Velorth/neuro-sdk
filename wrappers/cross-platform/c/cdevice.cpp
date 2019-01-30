@@ -1,3 +1,5 @@
+#include "clistener.h"
+
 extern "C"
 {
 #include "cdevice.h"
@@ -191,14 +193,19 @@ ret_code device_execute(Device *device_ptr, Command cmd) {
 	}
 }
 
-ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Device*, Parameter, void *), void *user_data) {
+ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Device*, Parameter, void *), ListenerHandle *handle, void *user_data) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		device->setParamChangedCallback([device_ptr, callback, user_data](auto param) {
+		auto listener = device->setParamChangedCallback([device_ptr, callback, user_data](auto param) {
 			if (callback != nullptr) {
 				callback(device_ptr, static_cast<Parameter>(param), user_data);
 			}
 		});
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -210,14 +217,63 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Devi
 	}
 }
 
-/*int device_subscribe_double_channel_data_received(Device *device_ptr, ChannelInfo channel_info,	void(*callback)(Device*, ChannelInfo, DoubleDataArray, void*), void* user_data) {
+template <Neuro::ChannelInfo::Type ChannelType, typename DataArray>
+auto setArrayDataListener(const Neuro::DeviceSharedPtr &device, Device *device_ptr, ChannelInfo info, void(*callback)(Device*, ChannelInfo, DataArray, void*), void* user_data) {
+	auto listener = device->subscribeDataReceived<ChannelType>([device_ptr, callback, info, user_data](const auto &data) {
+		if (callback != nullptr) {
+			DataArray dataArray;
+			using  TargetDataType = std::remove_pointer_t<decltype(dataArray.data_array)>;
+			dataArray.samples_count = data.size();
+			const auto memorySize = dataArray.samples_count * sizeof(TargetDataType);
+			dataArray.data_array = reinterpret_cast<TargetDataType *>(malloc(memorySize));
+			std::copy(data.begin(), data.end(), dataArray.data_array);
+			callback(device_ptr, info, dataArray, user_data);
+		}
+	});
+	if (listener == nullptr) {
+		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
+	}
+	return reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+}
+
+template <Neuro::ChannelInfo::Type ChannelType, typename DataArray>
+auto setDataListener(const Neuro::DeviceSharedPtr &device, Device *device_ptr, ChannelInfo info, void(*callback)(Device*, ChannelInfo, DataArray, void*), void* user_data) {
+	auto listener = device->subscribeDataReceived<ChannelType>([device_ptr, callback, info, user_data](const auto &data) {
+		if (callback != nullptr) {
+			DataArray dataArray;
+			using  TargetDataType = std::remove_pointer_t<decltype(dataArray.data_array)>;
+			dataArray.samples_count = 1;
+			const auto memorySize = dataArray.samples_count * sizeof(TargetDataType);
+			dataArray.data_array = reinterpret_cast<TargetDataType *>(malloc(memorySize));
+			dataArray.data_array[0] = data;
+			callback(device_ptr, info, dataArray, user_data);
+		}
+	});
+	if (listener == nullptr) {
+		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
+	}
+	return reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+}
+
+int device_subscribe_double_channel_data_received(Device *device_ptr, ChannelInfo channel_info,	void(*callback)(Device*, ChannelInfo, DoubleDataArray, void*), ListenerHandle *handle, void* user_data) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		device->setData([device_ptr, callback, user_data](auto param) {
-			if (callback != nullptr) {
-				callback(device_ptr, static_cast<Parameter>(param), user_data);
-			}
-		});
+		switch (channel_info.type) {
+		case ChannelTypeSignal: {
+			*handle = setArrayDataListener<Neuro::ChannelInfo::Type::Signal, DoubleDataArray>(device, device_ptr, channel_info, callback, user_data);
+			break;
+		}
+		case ChannelTypeRespiration: {
+			*handle = setArrayDataListener<Neuro::ChannelInfo::Type::Respiration, DoubleDataArray>(device, device_ptr, channel_info, callback, user_data);
+			break;
+		}
+		case ChannelTypeResistance: {
+			*handle = setArrayDataListener<Neuro::ChannelInfo::Type::Resistance, DoubleDataArray>(device, device_ptr, channel_info, callback, user_data);
+			break;
+		}
+		default:
+			throw std::runtime_error(std::string("Device doesn't have channel double channel ") + std::string(channel_info.name));
+		}
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -229,14 +285,36 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Devi
 	}
 }
 
-int device_subscribe_int_channel_data_received(Device*, ChannelInfo, void(*)(Device*, ChannelInfo, IntDataArray, void*),
-	void* user_data) {
-	
-}*/
+int device_subscribe_int_channel_data_received(Device* device_ptr, ChannelInfo channel_info, void(*callback)(Device*, ChannelInfo, IntDataArray, void*), ListenerHandle *handle, void* user_data) {
+	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+	try {
+		switch (channel_info.type) {
+		case ChannelTypeBattery: {
+			*handle = setDataListener<Neuro::ChannelInfo::Type::Battery, IntDataArray>(device, device_ptr, channel_info, callback, user_data);
+			break;
+		}
+		default:
+			throw std::runtime_error(std::string("Device doesn't have channel double channel") + std::string(channel_info.name));
+		}
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
+void free_CommandArray(CommandArray command_array) {
+	free(command_array.cmd_array);
+}
 
 void free_ParamInfoArray(ParamInfoArray param_info) {
 	free(param_info.info_array);
 }
+
 void free_ChannelInfoArray(ChannelInfoArray channel_info) {
 	free(channel_info.info_array);
 }

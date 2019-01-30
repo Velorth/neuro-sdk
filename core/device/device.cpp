@@ -59,7 +59,6 @@ Device::Device(std::unique_ptr<DeviceImpl> impl) :
     Ensures(mImpl != nullptr);
 }
 
-
 void libDeviceDeleter(Device *device_ptr){
     delete device_ptr;
 }

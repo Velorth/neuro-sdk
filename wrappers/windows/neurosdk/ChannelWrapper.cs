@@ -79,7 +79,7 @@ namespace Neuro
         }
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void free_listener_handle(IntPtr anyChannelPtr);
+        private static extern void free_listener_handle(IntPtr listenerHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void LengthChangedFunc(IntPtr anyChannelPtr, IntPtr length, IntPtr userData);

@@ -86,7 +86,7 @@ namespace Neuro
         }
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void free_listener_handle(IntPtr bipolarChannelPtr);
+        private static extern void free_listener_handle(IntPtr listenerHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void DeviceFoundCallbackFunc(IntPtr scaner, IntPtr device, IntPtr userData);
