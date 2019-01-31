@@ -11,7 +11,9 @@ namespace Neuro {
 
 BleScannerWin::BleScannerWin() {
 	mStoppedEventToken = mWatcher.Stopped([=](const BleWatcherType &, auto args) {
+		std::unique_lock<std::mutex> stopLock(mStopScanMutex);
 		mIsScanning.store(false);
+		mStopScanCondition.notify_all();
 	});
 }
 
@@ -25,6 +27,7 @@ BleScannerWin::~BleScannerWin() {
 }
 
 void BleScannerWin::startScan(){
+	mFoundDeviceAddresses.clear();
 	mReceivedEventToken = mWatcher.Received([=](auto&& watcher, auto&& args) {
 		onAdvertisementReceived(std::forward<decltype(watcher)>(watcher), std::forward<decltype(args)>(args));
 	});
@@ -33,10 +36,12 @@ void BleScannerWin::startScan(){
 }
 
 void BleScannerWin::stopScan(){
+	std::unique_lock<std::mutex> stopLock(mStopScanMutex);
 	if (mReceivedEventToken) {
 		mWatcher.Received(mReceivedEventToken);
-	}
+	}	
 	mWatcher.Stop();
+	mStopScanCondition.wait(stopLock);
 }
 
 std::unique_ptr<BleDevice> BleScannerWin::getDeviceByAddress(std::string address){

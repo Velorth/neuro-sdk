@@ -86,7 +86,7 @@ ret_code device_connect(Device *device_ptr) {
 ret_code device_disconnect(Device *device_ptr) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
-		device->connect();
+		device->disconnect();
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

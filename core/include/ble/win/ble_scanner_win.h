@@ -2,6 +2,8 @@
 #define BLE_SCANNER_WIN
 
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 #include <memory>
 #include <string>
 #include <set>
@@ -29,6 +31,8 @@ private:
     static constexpr const char *class_name = "BleScannerWin";
 	using BleWatcherType = winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher;
 
+	std::mutex mStopScanMutex;
+	std::condition_variable mStopScanCondition;
 	BleWatcherType mWatcher;
 	winrt::event_token mReceivedEventToken;
 	winrt::event_token mStoppedEventToken;

@@ -45,9 +45,17 @@ void BleDeviceWin::connect() {
 	asyncOperation.Completed([=](IAsyncOperation<BluetoothLEDevice> const& sender, AsyncStatus) {
 		mBluetoothDevice = sender.GetResults();
 		mBluetoothDevice.ConnectionStatusChanged([=](const BluetoothLEDevice &, auto) {
-			mIsConnected = mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected;
+			const auto isConnected = mBluetoothDevice.ConnectionStatus() == BluetoothConnectionStatus::Connected;
+			if (mIsConnected && !isConnected) {
+				onDisconnected();
+			}
+			else if (!mIsConnected && isConnected) {
+				findServiceAndChars();
+			}
 		});
-		findServiceAndChars();
+		if (!mIsConnected) {
+			mBluetoothDevice.GetGattServicesAsync();//force connect
+		}
 	});
 }
 
@@ -56,11 +64,6 @@ void BleDeviceWin::disconnect(){
         return;
     }
 
-	mBluetoothDevice = nullptr;
-	mService = nullptr;
-	mTxCharacteristic = nullptr;
-	mRxCharacteristic = nullptr;
-	mStatusCharacteristic = nullptr;
 	onDisconnected();
 }
 
@@ -183,6 +186,20 @@ void BleDeviceWin::onConnected() {
 
 void BleDeviceWin::onDisconnected() {
 	mIsConnected = false;
+	
+	mTxCharacteristic = nullptr;
+	mRxCharacteristic = nullptr;
+	mStatusCharacteristic = nullptr;
+
+	if (mService != nullptr) {
+		mService.Close();
+		mService = nullptr;
+	}
+	
+	if (mBluetoothDevice != nullptr) {
+		mBluetoothDevice.Close();
+		mBluetoothDevice = nullptr;
+	}
 	notifyStateChanged(BleDeviceState::Disconnected, BleDeviceError::NoError);
 }
 
