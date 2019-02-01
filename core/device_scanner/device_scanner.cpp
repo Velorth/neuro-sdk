@@ -82,10 +82,6 @@ public:
 		
 	}
 
-	~Impl() {
-		stopScan();
-	}
-
 	template <class Rep, class Period>
 	void startScan(std::chrono::duration<Rep, Period> timeout) {
 		if (scanner->isScanning())
@@ -131,9 +127,10 @@ public:
 	void releaseDevice(std::string name, std::string address) {
 		scanner->releaseDevice(name, address);
 	}
+	
+	std::shared_ptr<BleScanner> scanner;
 private:
 	static constexpr const char *class_name = "DeviceScanner";
-	std::shared_ptr<BleScanner> scanner;
 	std::condition_variable stopScanCondition;
 	std::mutex stopScanMutex;
 	TaskQueue mStopScanQueue{"StopScanQueue"};
@@ -180,8 +177,8 @@ std::unique_ptr<Device, DeviceDeleter> DeviceScanner::findDeviceByAddress(std::s
 	return mImpl->findDeviceByAddress(address);
 }
 
-void DeviceScanner::releaseDevice(std::string name, std::string address) {
-	mImpl->releaseDevice(name, address);
+bool DeviceScanner::isScanning() const noexcept {
+	return mImpl->scanner->isScanning();
 }
 
 }

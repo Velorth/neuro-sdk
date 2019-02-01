@@ -48,14 +48,18 @@ namespace Neuro
             SdkError.ThrowIfError(scanner_stop_scan(_scannerPtr));
         }
 
+        public bool IsScanning
+        {
+            get
+            {
+                SdkError.ThrowIfError(scanner_is_scanning(_scannerPtr, out var isScanning));
+                return isScanning;
+            }
+        }
+
         public Device GetDeviceByAddress(string address)
         {
             return new Device(scanner_get_device_by_address(_scannerPtr, address));
-        }
-
-        public void ReleaseDevice(string name, string address)
-        {
-            SdkError.ThrowIfError(scanner_release_device(_scannerPtr, name, address));
         }
 
         private void OnDeviceFound(IntPtr scaner, IntPtr devicePtr, IntPtr userData)
@@ -107,6 +111,9 @@ namespace Neuro
         private static extern int scanner_stop_scan(IntPtr scannerPtr);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int scanner_is_scanning(IntPtr scannerPtr, out bool isScanning);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int scanner_set_device_found_callback(IntPtr scannerPtr, DeviceFoundCallbackFunc deviceFoundCallback, out IntPtr listenerHandle, IntPtr userData);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
@@ -114,8 +121,5 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr scanner_get_device_by_address(IntPtr scannerPtr, [MarshalAs(UnmanagedType.LPStr)] string address);
-
-        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int scanner_release_device(IntPtr scannerPtr, [MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] string address);
     }
 }

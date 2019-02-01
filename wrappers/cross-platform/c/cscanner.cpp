@@ -52,6 +52,21 @@ int scanner_stop_scan(DeviceScanner *scanner_ptr) {
 	}
 }
 
+int scanner_is_scanning(DeviceScanner *scanner_ptr, bool *out_is_scanning) {
+	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
+	try {
+		*out_is_scanning = scanner->isScanning();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
 int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback)(DeviceScanner *, Device*, void *), ListenerHandle* handle, void *user_data) {
 	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
 	try {
@@ -120,17 +135,3 @@ Device* scanner_get_device_by_address(DeviceScanner *scanner_ptr, const char *ad
 	}
 }
 
-int scanner_release_device(DeviceScanner *scanner_ptr, const char *name, const char *address) {
-	auto& scanner = *reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);
-	try {
-		scanner->releaseDevice(name, address);
-		return SDK_NO_ERROR;
-	}
-	catch (std::exception &e) {
-		set_sdk_last_error(e.what());
-		return ERROR_EXCEPTION_WITH_MESSAGE;
-	}
-	catch (...) {
-		return ERROR_UNHANDLED_EXCEPTION;
-	}
-}

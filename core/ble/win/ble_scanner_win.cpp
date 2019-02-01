@@ -6,6 +6,7 @@
 
 using winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementReceivedEventArgs;
 using winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementType;
+using winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcherStatus;
 
 namespace Neuro {
 
@@ -37,6 +38,10 @@ void BleScannerWin::startScan(){
 
 void BleScannerWin::stopScan(){
 	std::unique_lock<std::mutex> stopLock(mStopScanMutex);
+	const auto status = mWatcher.Status();
+	if (status != BluetoothLEAdvertisementWatcherStatus::Started)
+		return;
+
 	if (mReceivedEventToken) {
 		mWatcher.Received(mReceivedEventToken);
 	}	

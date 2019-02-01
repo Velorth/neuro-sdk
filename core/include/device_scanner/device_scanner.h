@@ -38,7 +38,7 @@ public:
 	ListenerPtr<void, DeviceSharedPtr> subscribeDeviceFound(std::function<void(DeviceSharedPtr)>);
 	ListenerPtr<void, bool> subscribeScanStateChanged(std::function<void(bool)>);
     DeviceUniquePtr findDeviceByAddress(std::string address);
-    void releaseDevice(std::string name, std::string address);
+	bool isScanning() const noexcept;
 
 private:
 	class Impl;
