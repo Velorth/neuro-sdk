@@ -26,6 +26,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.neuromd.bleconnection.device.DeviceFilter;
 import com.neuromd.bleconnection.device.DeviceFoundCallback;
@@ -40,11 +41,13 @@ public abstract class BleDeviceScanner {
      * List of found devices
      * It must be thread safe because onLeScan callback may be called from different threads
      */
-    private final List<BluetoothDevice> mDevices = Collections.synchronizedList(new ArrayList<BluetoothDevice>());
+    private final List<BluetoothDevice> mDevices = new ArrayList<>();
 
     private DeviceFilter mFilter;
 
     private DeviceFoundCallback mDeviceFoundCallback;
+
+    private ReentrantLock mDeviceListLock = new ReentrantLock();
 
     protected BluetoothAdapter mBluetoothAdapter;
 
@@ -55,15 +58,6 @@ public abstract class BleDeviceScanner {
      */
     public void setFilter(DeviceFilter filter) {
         mFilter = filter;
-    }
-
-    /**
-     * Get list of found devices
-     *
-     * @return found BrainBit devices list
-     */
-    public List<BluetoothDevice> getDevices() {
-        return mDevices;
     }
 
     /**
@@ -114,7 +108,13 @@ public abstract class BleDeviceScanner {
      */
     public void reset() {
         Log.v("BleDeviceScanner", "reset");
-        mDevices.clear();
+        mDeviceListLock.lock();
+        try {
+            mDevices.clear();
+        }
+        finally{
+            mDeviceListLock.unlock();
+        }
     }
 
     public void subscribeDeviceFound(DeviceFoundCallback callback) {
@@ -164,14 +164,15 @@ public abstract class BleDeviceScanner {
         //different devices. Sometimes leScanCallback hits multiple times for the same device
         if (deviceAlreadyFound(device)) return;
 
-        mDevices.add(device);
-        if (mDeviceFoundCallback != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mDeviceFoundCallback.onDeviceFound(device);
-                }
-            }).start();
+        mDeviceListLock.lock();
+        try {
+            mDevices.add(device);
+            if (mDeviceFoundCallback != null) {
+                mDeviceFoundCallback.onDeviceFound(device);
+            }
+        }
+        finally{
+            mDeviceListLock.unlock();
         }
     }
 
@@ -182,35 +183,22 @@ public abstract class BleDeviceScanner {
      * @return True if device already in list
      */
     private boolean deviceAlreadyFound(BluetoothDevice newDevice) {
-        if (mDevices.isEmpty()) {
-            Log.v("BleDeviceList", "List is empty");
-            return false;
-        }
-        for (BluetoothDevice device : mDevices) {
-            if (device.getName().equals(newDevice.getName())) {
-                if (device.getAddress().equals(newDevice.getAddress()))
-                    return true;
+        mDeviceListLock.lock();
+        try {
+            if (mDevices.isEmpty()) {
+                Log.v("BleDeviceList", "List is empty");
+                return false;
             }
-        }
-        return false;
-    }
-
-    protected void releaseDevice(String name, String address){
-        if (mDevices.isEmpty()) {
-            Log.v("BleDeviceList", "List is empty");
-            return;
-        }
-        int devIndex = -1;
-        for (BluetoothDevice device : mDevices) {
-            if (device.getName().equals(name)) {
-                if (device.getAddress().equals(address)) {
-                    devIndex = mDevices.indexOf(device);
-                    break;
+            for (BluetoothDevice device : mDevices) {
+                if (device.getName().equals(newDevice.getName())) {
+                    if (device.getAddress().equals(newDevice.getAddress()))
+                        return true;
                 }
             }
+            return false;
         }
-        if (devIndex >= 0){
-            mDevices.remove(devIndex);
+        finally{
+            mDeviceListLock.unlock();
         }
     }
 }
