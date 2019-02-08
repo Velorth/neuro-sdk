@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <vector>
-#include "gsl/gsl_assert"
 #include "device/device.h"
 #include "device/device_impl.h"
 
@@ -21,32 +20,26 @@ void Device::swap(Device &rhs) noexcept {
 }
 
 void Device::connect(){
-    Expects(mImpl != nullptr);
     mImpl->connect();
 }
 
 void Device::disconnect(){
-    Expects(mImpl != nullptr);
     mImpl->disconnect();
 }
 
 std::vector<ChannelInfo> Device::channels() const {
-    Expects(mImpl != nullptr);
     return mImpl->channels();
 }
 
 std::vector<Command> Device::commands() const {
-    Expects(mImpl != nullptr);
     return mImpl->commands();
 }
 
 std::vector<ParamPair> Device::parameters() const {
-    Expects(mImpl != nullptr);
     return mImpl->parameters();
 }
 
 bool Device::execute(Command cmd) {
-    Expects(mImpl != nullptr);
     return mImpl->execute(cmd);
 }
 
@@ -56,7 +49,6 @@ ListenerPtr<void, Parameter>  Device::setParamChangedCallback(std::function<void
 
 Device::Device(std::unique_ptr<DeviceImpl> impl) :
     mImpl(std::move(impl)) {
-    Ensures(mImpl != nullptr);
 }
 
 void libDeviceDeleter(Device *device_ptr){

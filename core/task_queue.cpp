@@ -1,4 +1,3 @@
-#include "gsl/gsl_assert"
 #include <atomic>
 #include <thread>
 #include <condition_variable>
@@ -22,7 +21,9 @@ struct TaskQueue::Impl final {
 	Impl(const std::string &name):
 		mName(name), 
 		mExecThread([=]() { execFunction(); }) {
-		Ensures(mExecThread.joinable()); 
+		if(!mExecThread.joinable()) {
+			throw std::runtime_error("Task execution thread is not joinable");
+		}
 	}
 
 	~Impl() {

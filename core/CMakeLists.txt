@@ -1,14 +1,36 @@
 cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 
-if (WIN32)
+if (UNIX)
+  if (APPLE)
+    
+  else (APPLE)
+    ## Check for Debian GNU/Linux
+    find_file (DEBIAN_FOUND debian_version debconf.conf
+      PATHS /etc
+      )
+    if (DEBIAN_FOUND)
+    
+    else(DEBIAN_FOUND)
+        if (ANDROID)
+            set (TARGET_PLATFORM ${CMAKE_ANDROID_ARCH_ABI})
+            set (PLATFORM_SUFFIX "")
+        else (ANDROID)
+            message(SEND_ERROR "Operating system is not supported")
+        endif (ANDROID)
+    endif (DEBIAN_FOUND)    
+  endif (APPLE)
+endif (UNIX)
+if (WIN32)  
     if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-		set (TARGET_PLATFORM "x86")		
-	else ()
-		set (TARGET_PLATFORM "x64")		
-	endif()	
-	SET (NEUROSDK $ENV{NEUROSDK})
-	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+        set (TARGET_PLATFORM "x86")     
+    else ()
+        set (TARGET_PLATFORM "x64")     
+    endif()
+        set (PLATFORM_SUFFIX -${TARGET_PLATFORM})
 endif (WIN32)
+
+SET (NEUROSDK $ENV{NEUROSDK}/${TARGET_PLATFORM})
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # project name and supported languages
 project(neurosdk-${TARGET_PLATFORM} VERSION 1.3.1 LANGUAGES CXX)
@@ -17,7 +39,6 @@ project(neurosdk-${TARGET_PLATFORM} VERSION 1.3.1 LANGUAGES CXX)
 ##DEFINES SECTION##
 ###################
 add_definitions(-DLIBNEUROSDK_LIBRARY)
-add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)
 if (WIN32)    
     add_definitions(-DEXPORT_SYMBOLS)
 endif (WIN32)
@@ -49,10 +70,12 @@ endif()
 ##INCLUDE PATHS SECTION##
 #########################
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/gsl/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/network)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include)
+if (ANDROID)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support)
+endif()
 #############################
 
 
@@ -68,7 +91,7 @@ file(GLOB HEADER_FILES_DEVSCAN ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanne
 file(GLOB HEADER_FILES_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
 file(GLOB HEADER_FILES_UTILS_NET ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/*.h)
 file(GLOB_RECURSE HEADER_FILES_UTILS_DSP ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/*.h)
-file(GLOB HEADER_FILES_UTILS_GSL ${CMAKE_CURRENT_SOURCE_DIR}/../utils/gsl/include/gsl/*)
+file(GLOB HEADER_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap/*.h)
 
 if (UNIX)
   if (APPLE)
@@ -110,6 +133,7 @@ file(GLOB_RECURSE SOURCE_FILES_CHANNELS ${CMAKE_CURRENT_SOURCE_DIR}/channels/*.c
 file(GLOB_RECURSE SOURCE_FILES_DEVICE ${CMAKE_CURRENT_SOURCE_DIR}/device/*.cpp)
 file(GLOB SOURCE_FILES_DEVSCAN ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/*.cpp)
 file(GLOB SOURCE_FILES_UTILS_NET ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/*.cpp)
+file(GLOB SOURCE_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/*.cpp)
 
 if (UNIX)
   if (APPLE)
@@ -144,7 +168,7 @@ if (WIN32)
 endif (WIN32)
 ##################
 
-add_library(neurosdk-${TARGET_PLATFORM} SHARED ${SOURCE_FILES_COMMON} 
+add_library(neurosdk${PLATFORM_SUFFIX} SHARED ${SOURCE_FILES_COMMON} 
 							${SOURCE_FILES_BLE}  
 							${SOURCE_FILES_BLE_OS}
 							${SOURCE_FILES_BLE_EMUL} 
@@ -154,6 +178,7 @@ add_library(neurosdk-${TARGET_PLATFORM} SHARED ${SOURCE_FILES_COMMON}
 							${SOURCE_FILES_DEVSCAN_OS} 
 							${SOURCE_FILES_UTILS_NET}  
 							${SOURCE_FILES_UTILS_NET_OS}
+                            ${SOURCE_FILES_CWRAP}
 							${SOURCE_FILES_UTILS_JNI}
 							${HEADER_FILES_COMMON} 
 							${HEADER_FILES_BLE} 
@@ -167,7 +192,7 @@ add_library(neurosdk-${TARGET_PLATFORM} SHARED ${SOURCE_FILES_COMMON}
 							${HEADER_FILES_UTILS_NET}
 							${HEADER_FILES_UTILS_NET_OS}
 							${HEADER_FILES_UTILS_DSP}
-							${HEADER_FILES_UTILS_GSL}
+                            ${HEADER_FILES_CWRAP}
 							${HEADER_FILES_UTILS_JNI})
 
 ##########################
@@ -200,6 +225,7 @@ file(GLOB SHARED_HEADERS_DEVSCAN 	${CMAKE_CURRENT_SOURCE_DIR}/include/device_sca
 file(GLOB SHARED_HEADERS_FILTERS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/filter/*.h)
 file(GLOB SHARED_HEADERS_ALG ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/algorithm.h)
 file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
+file(GLOB SHARED_HEADERS_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap/*.h)
 #########################
 
 ############################
@@ -207,15 +233,7 @@ file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/sign
 ############################
 if (UNIX)
   if (APPLE)
-    install(TARGETS neurosdk DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share)
-    install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include)
-	install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/channels)
-	install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/channels/info)
-	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device)
-	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/device_scanner)
-	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/filter)
-	install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include)
-	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../share/include/signal)
+
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf
@@ -226,26 +244,6 @@ if (UNIX)
     else(DEBIAN_FOUND)    	
 		if (ANDROID)
     		target_link_libraries(neurosdk android)
-    		set(DISTRIBUTION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../wrappers/android/share)
-
-    		file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/${ANDROID_ABI})
-    		add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:neurosdk> ${DISTRIBUTION_DIR}/${ANDROID_ABI})
-
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_COMMON} ${DISTRIBUTION_DIR}/include)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS} ${DISTRIBUTION_DIR}/include/channels)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/channels/info)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_CHANNELS_INFO} ${DISTRIBUTION_DIR}/include/channels/info)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVICE} ${DISTRIBUTION_DIR}/include/device)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/device_scanner)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_DEVSCAN} ${DISTRIBUTION_DIR}/include/device_scanner)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/filter)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_FILTERS} ${DISTRIBUTION_DIR}/include/filter)
-			add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_ALG} ${DISTRIBUTION_DIR}/include)
-            file(MAKE_DIRECTORY ${DISTRIBUTION_DIR}/include/signal)
-            add_custom_command(TARGET neurosdk POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHARED_HEADERS_SIGNAL} ${DISTRIBUTION_DIR}/include/signal)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
 		endif (ANDROID)
@@ -253,16 +251,18 @@ if (UNIX)
   endif (APPLE)
 endif (UNIX)
 if (WIN32) 	
-    target_link_libraries(neurosdk-${TARGET_PLATFORM} WindowsApp)
-    install(TARGETS neurosdk-${TARGET_PLATFORM} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM})
-    install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include)
-	install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/channels)
-	install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/channels/info)
-	install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/device)
-	install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/device_scanner)
-	install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/filter)
-	install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include)
-	install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${NEUROSDK}/${TARGET_PLATFORM}/include/signal)
-    install(FILES $<TARGET_PDB_FILE:neurosdk-${TARGET_PLATFORM}> DESTINATION ${NEUROSDK}/${TARGET_PLATFORM} OPTIONAL)
+    target_link_libraries(neurosdk${PLATFORM_SUFFIX} WindowsApp)
 endif (WIN32)
+
+install(TARGETS neurosdk${PLATFORM_SUFFIX} DESTINATION ${NEUROSDK})
+install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${NEUROSDK}/include)
+install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${NEUROSDK}/include/channels)
+install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${NEUROSDK}/include/channels/info)
+install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${NEUROSDK}/include/device)
+install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${NEUROSDK}/include/device_scanner)
+install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/include/filter)
+install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/include)
+install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${NEUROSDK}/include/signal)
+install(FILES ${SHARED_HEADERS_CWRAP} DESTINATION ${NEUROSDK}/include/c-wrap)
+install(FILES $<TARGET_PDB_FILE:neurosdk${PLATFORM_SUFFIX}> DESTINATION ${NEUROSDK} OPTIONAL)
 ##################

@@ -79,6 +79,7 @@
     <Compile Include="SdkCompatDoubleChannel.cs" />
     <Compile Include="SdkError.cs" />
     <Compile Include="ResistanceChannel.cs" />
+    <Compile Include="SdkLib.cs" />
     <Compile Include="SignalChannel.cs" />
     <Compile Include="SpectrumChannel.cs" />
   </ItemGroup>

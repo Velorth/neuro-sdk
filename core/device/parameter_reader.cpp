@@ -1,4 +1,3 @@
-#include "gsl/gsl_assert"
 #include "device/parameter_reader.h"
 #include "ble/ble_device.h"
 #include "logger.h"
@@ -9,24 +8,19 @@ ParameterReader::ParameterReader(std::shared_ptr<BleDevice> ble_device,
                                  param_changed_callback_t callback):
     mBleDevice(ble_device),
     parameterChangedCallback(callback){
-    Ensures(mBleDevice != nullptr);
-    Ensures(parameterChangedCallback != nullptr);
     subscribeBleDeviceStateChanged();
 }
 
 void ParameterReader::requestConnect(){
-    Expects(mBleDevice != nullptr);
     mBleDevice->connect();
 }
 
 void ParameterReader::requestDisconnect(){
-    Expects(mBleDevice != nullptr);
     mPendingDisconnectRequest = true;
     mBleDevice->disconnect();
 }
 
 typename ParamValue<Parameter::Name>::Type ParameterReader::readName() const {
-    Expects(mBleDevice != nullptr);
     return mBleDevice->getName();
 }
 
@@ -35,7 +29,6 @@ ParamValue<Parameter::State>::Type ParameterReader::readState() const {
 }
 
 typename ParamValue<Parameter::Address>::Type ParameterReader::readAddress() const {
-    Expects(mBleDevice != nullptr);
     return mBleDevice->getNetAddress();
 }
 

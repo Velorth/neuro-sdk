@@ -6,7 +6,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
-#include "gsl/gsl_assert"
 #include "logger.h"
 
 namespace Neuro {
@@ -23,7 +22,6 @@ public:
     Loop(Callable callable, delay_time_t delay, Args... args):
         mCallable(callable),
         mDelay(delay){
-        Expects(mCallable != nullptr);
         mLoopThread = std::thread([=](){
             while (mThreadRunning.load()) {
                 auto startTime = std::chrono::high_resolution_clock::now();
