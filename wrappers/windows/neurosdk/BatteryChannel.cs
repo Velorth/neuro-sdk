@@ -5,11 +5,13 @@ namespace Neuro
 {
     public sealed class BatteryChannel : IDataChannel<int>
     {
+        private readonly Device _device; //store device reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
         private readonly DataChannel<int> _dataChannel;
 
         public BatteryChannel(Device device)
         {
+            _device = device;
             _anyChannel = new AnyChannel(create_BatteryIntChannel(device.DevicePtr));
             _dataChannel = new DataChannel<int>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);

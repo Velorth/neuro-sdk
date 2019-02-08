@@ -5,11 +5,13 @@ namespace Neuro
 {
     public class SpectrumChannel : IDataChannel<double>
     {
+        private readonly IDataChannel<double> _sourceChannel; //store source channel reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
         private readonly DataChannel<double> _dataChannel;
 
         public SpectrumChannel(IDataChannel<double> channel)
         {
+            _sourceChannel = channel;
             _anyChannel = new AnyChannel(create_SpectrumDoubleChannel(channel.ChannelPtr));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);

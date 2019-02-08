@@ -5,11 +5,15 @@ namespace Neuro
 {
     public sealed class BipolarDoubleChannel : IDataChannel<double>
     {
+        private readonly IDataChannel<double> _firstSourceChannel; //store source channels reference to prevent its deletion
+        private readonly IDataChannel<double> _secondSourceChannel;
         private readonly AnyChannel _anyChannel;
         private readonly DataChannel<double> _dataChannel;
 
         public BipolarDoubleChannel(IDataChannel<double> first, IDataChannel<double> second)
         {
+            _firstSourceChannel = first;
+            _secondSourceChannel = second;
             _anyChannel = new AnyChannel(create_BipolarDoubleChannel(first.ChannelPtr, second.ChannelPtr));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);

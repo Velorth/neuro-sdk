@@ -17,16 +17,16 @@ namespace Neuro
         public const string LibName = "c-neurosdk-" + Platform + ".dll";
 #endif
     }
-    internal class AnyChannel
+    public class AnyChannel
     {
         private readonly IntPtr _listenerPtr;
         private readonly LengthChangedFunc _lengthChangedFunc;
 
-        internal event EventHandler<int> LengthChanged;
+        public event EventHandler<int> LengthChanged;
 
-        internal IntPtr ChannelPtr { get; }
+        public IntPtr ChannelPtr { get; }
 
-        internal ChannelInfo Info
+        public ChannelInfo Info
         {
             get
             {
@@ -35,7 +35,7 @@ namespace Neuro
             }
         }
 
-        internal int TotalLength
+        public int TotalLength
         {
             get
             {
@@ -44,7 +44,7 @@ namespace Neuro
             }
         }
 
-        internal float SamplingFrequency
+        public float SamplingFrequency
         {
             get
             {
@@ -53,7 +53,7 @@ namespace Neuro
             }
         }
 
-        internal AnyChannel(IntPtr channelPtr)
+        public AnyChannel(IntPtr channelPtr)
         {
             if (channelPtr == null)
             {
@@ -100,18 +100,18 @@ namespace Neuro
         private static extern int AnyChannel_get_total_length(IntPtr anyChannelPtr, out IntPtr totalLength);
     }
 
-    internal sealed class DataChannel<T>
+    public sealed class DataChannel<T>
     {
         private readonly NativeChannelDataReader<T> _channelDataReader;
         private readonly AnyChannel _anyChannel;
 
-        internal DataChannel(AnyChannel channel)
+        public DataChannel(AnyChannel channel)
         {
             _anyChannel = channel;
             _channelDataReader = new NativeChannelDataReader<T>();
         }
 
-        internal T[] ReadData(int offset, int length)
+        public T[] ReadData(int offset, int length)
         {
             return length > 0 ? _channelDataReader.ReadChannelData(_anyChannel.ChannelPtr, offset, length) : new T[0];
         }

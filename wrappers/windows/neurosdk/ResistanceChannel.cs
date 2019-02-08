@@ -5,11 +5,13 @@ namespace Neuro
 {
     public sealed class ResistanceChannel : IDataChannel<double>
     {
+        private readonly Device _device; //store device reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
         private readonly DataChannel<double> _dataChannel;
 
         public ResistanceChannel(Device device, ChannelInfo info)
         {
+            _device = device;
             _anyChannel = new AnyChannel(create_ResistanceDoubleChannel_info(device.DevicePtr, info));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);

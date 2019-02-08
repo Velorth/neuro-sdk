@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    internal class NativeArrayMarshaler<T>
+    public class NativeArrayMarshaler<T>
     {
         private readonly IMarshaler _marshaler;
 
-        internal NativeArrayMarshaler()
+        public NativeArrayMarshaler()
         {
             _marshaler = typeof(T).IsPrimitive ? (IMarshaler) new PrimitiveMarshaller() : new StructEnumMarshaller();
         }
