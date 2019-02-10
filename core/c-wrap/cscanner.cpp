@@ -5,6 +5,19 @@ extern "C"
 }
 #include "device_scanner/scanner_factory.h"
 
+#ifdef __ANDROID__
+DeviceScanner* create_device_scanner(jobject context) {
+	try {
+		auto scanner = Neuro::createDeviceScanner(context);
+		const auto scanner_ptr = new decltype(scanner)(std::move(scanner));
+		return reinterpret_cast<DeviceScanner *>(scanner_ptr);
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return nullptr;
+	}
+}
+#else
 DeviceScanner* create_device_scanner() {
 	try {
 		auto scanner = Neuro::createDeviceScanner();
@@ -16,6 +29,7 @@ DeviceScanner* create_device_scanner() {
 		return nullptr;
 	}
 }
+#endif
 
 void scanner_delete(DeviceScanner *scanner_ptr) {
 	const auto scanner_unique = reinterpret_cast<std::unique_ptr<Neuro::DeviceScanner> *>(scanner_ptr);

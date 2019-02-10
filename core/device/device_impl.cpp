@@ -18,7 +18,7 @@ void DeviceImpl::disconnect(){
 void DeviceImpl::subscribeDataReceived() {
     mDataReceivedListener = mBleDevice->subscribeDataReceived([=](auto&& data) {
         mDataReceivedQueue.exec([=](){
-            onDataReceived(std::forward<decltype(data)>(data));
+            this->onDataReceived(std::forward<decltype(data)>(data));
         });
     });
 }
@@ -26,7 +26,7 @@ void DeviceImpl::subscribeDataReceived() {
 void DeviceImpl::subscribeStatusReceived() {
     mStatusReceivedListener = mBleDevice->subscribeStatusReceived([=](auto&& data) {
         mStatusReceivedQueue.exec([=](){
-            onStatusDataReceived(std::forward<decltype(data)>(data));
+			this->onStatusDataReceived(std::forward<decltype(data)>(data));
         });
     });
 }

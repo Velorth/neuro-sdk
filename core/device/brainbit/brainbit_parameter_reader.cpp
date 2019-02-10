@@ -77,7 +77,7 @@ BrainbitParameterReader::readMotionAssistantParamPack() const {
 
 typename ParamValue<Parameter::FirmwareVersion>::Type
 BrainbitParameterReader::readFirmwareVersion() const {
-	return mSetter.FirmwareVersion;
+	return mSetter.mFirmwareVersion;
 }
 
 bool BrainbitParameterReader::loadDeviceParams(){

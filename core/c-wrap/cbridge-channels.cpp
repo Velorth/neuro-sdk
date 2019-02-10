@@ -6,6 +6,8 @@ extern "C"
 #include "cchannel-helper.h"
 #include "channels/info/channel_info.h"
 
+void BridgeDoubleChannel_lengthChanged(BridgeDoubleChannel *channel, std::size_t length);
+
 struct BridgeDoubleChannelObj : DataChannelWrapper<double> {
 	BridgeDoubleChannelObj(ChannelInfo info, 
 		ReadDataFunc read_data_func,

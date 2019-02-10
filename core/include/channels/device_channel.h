@@ -51,9 +51,9 @@ struct RawStrategy final : public ChannelStrategy<DataContainer> {
 template <ChannelInfo::Type ChannelType, typename DeviceType = Device>
 class DeviceChannel final {
 public:
-	using ChannelTraits = ChannelTraits<ChannelType>;
+	using DeviceChannelTraits = ChannelTraits<ChannelType>;
 	using DataType = ChannelDataType<ChannelType>;
-	using BufferType = typename ChannelTraits::BufferType;
+	using BufferType = typename DeviceChannelTraits::BufferType;
 	using DataListenerType = ChannelDataListenerType<ChannelType>;
 	using DataCallbackType = ChannelDataCallbackFunctionType<ChannelType>;
 	using LengthCallbackType = std::function<void(data_length_t)>;
@@ -64,7 +64,7 @@ public:
 	using DevicePtr = std::shared_ptr<DeviceType>;
 	using DeviceWeakPtr = std::weak_ptr<DeviceType>;
 
-	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
+	explicit DeviceChannel(const DevicePtr &device, ChannelInfo &&channel_info = DeviceChannelTraits::defaultInfo()):
 		mInfo(std::move(channel_info)),
 		mDevice(device),
 		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
@@ -74,7 +74,7 @@ public:
 		mDevice(device),
 		mDataListener(device->template subscribeDataReceived<ChannelType>(mDataCallaback, mInfo)) {}
 
-	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = ChannelTraits::defaultInfo()):
+	DeviceChannel(const DevicePtr &device, FilterPtr &&filter, ChannelInfo &&channel_info = DeviceChannelTraits::defaultInfo()):
 		mInfo(std::move(channel_info)),
 		mDataStrategy(std::make_unique<FilterStrategy<DataContainer>>(std::move(filter))),
 		mDevice(device),
@@ -107,7 +107,7 @@ public:
 	}
 
 	sampling_frequency_t samplingFrequency() const noexcept {
-		return ChannelTraits::SamplingFrequency;
+		return DeviceChannelTraits::SamplingFrequency;
 	}
 
 	DataContainer readData(data_offset_t offset, data_length_t length) const {
@@ -123,7 +123,7 @@ private:
 	DataStrategyPtr mDataStrategy{std::make_unique<RawStrategy<DataContainer>>()};
 	BufferType mBuffer;
 	DataCallbackType mDataCallaback{ [=](auto&&... data_args) {
-		auto rawData = ChannelTraits::forwardData(std::forward<decltype(data_args)>(data_args)...);
+		auto rawData = DeviceChannelTraits::forwardData(std::forward<decltype(data_args)>(data_args)...);
 		mBuffer.append(mDataStrategy->processData(rawData));
 	} };
 	DevicePtr mDevice;

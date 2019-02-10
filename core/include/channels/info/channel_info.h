@@ -59,8 +59,8 @@ public:
     ChannelInfo(Type, const std::string &, std::size_t = 0);
     ChannelInfo(const ChannelInfo &) = default;
     ChannelInfo& operator=(const ChannelInfo &) = default;
-    ChannelInfo(ChannelInfo &&) = default;
-    ChannelInfo& operator=(ChannelInfo &&) = default;
+    ChannelInfo(ChannelInfo &&) noexcept = default;
+    ChannelInfo& operator=(ChannelInfo &&) noexcept = default;
 	~ChannelInfo() = default;
 
     std::string getName() const;

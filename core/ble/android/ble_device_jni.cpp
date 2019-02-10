@@ -52,7 +52,7 @@ BleDeviceJni::BleDeviceJni(jobject bluetoothDevice, jobject context) :
         //we need pass gattInfo to java BleDevice class constructor and we have java wrapper for
         //GattInfo class, so creating wrapper class from GattInfo class and passing it to java BleDevice
         //class constructor
-        auto gattInfo = getGattInfo()->getGattInfo();
+        auto gattInfo = this->getGattInfo()->getGattInfo();
         auto gattInfoWrapClass = env->FindClass(
                     "com/neuromd/bleconnection/device/DeviceGattInfo");
         auto gattInfoWrapConstructor = env->GetMethodID(gattInfoWrapClass, "<init>", "(J)V");

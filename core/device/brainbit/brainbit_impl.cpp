@@ -226,8 +226,8 @@ void BrainbitImpl::parseState(BrainbitCommand cmd, const ByteBuffer &status_data
 
 void BrainbitImpl::parseVersion(const ByteBuffer &status_data) {
 	LOG_DEBUG("Parsing firmware version");
-	mSetter.FirmwareVersion = FirmwareVersion{ status_data[STATUS_VERSION_BYTE_POS], 0 };
-	LOG_DEBUG_V("Firmware version: %d", mSetter.FirmwareVersion);
+	mSetter.mFirmwareVersion = FirmwareVersion{ status_data[STATUS_VERSION_BYTE_POS], 0 };
+	LOG_DEBUG_V("Firmware version: %d", mSetter.mFirmwareVersion);
 }
 
 void BrainbitImpl::parseSignalData(const ByteBuffer &data){

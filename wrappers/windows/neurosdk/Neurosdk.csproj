@@ -85,9 +85,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(PlatformName)'=='x64'">
-    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\x64"</PostBuildEvent>
+    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\windows\x64"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(PlatformName)'=='AnyCPU'">
-    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\x86"</PostBuildEvent>
+    <PostBuildEvent>xcopy /E /Y "$(TargetDir)*.*" "%25NEUROSDK%25\windows\x86"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -1,39 +1,35 @@
 cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
 
+# project name and supported languages
+project(neurosdk VERSION 1.4.0 LANGUAGES CXX)
+
+if (ANDROID)
+  set (TARGET_PLATFORM ${CMAKE_ANDROID_ARCH_ABI})
+  set (PLATFORM_SUFFIX "")
+  set (TARGET_OS android)
+else (ANDROID)
 if (UNIX)
+
   if (APPLE)
     
   else (APPLE)
-    ## Check for Debian GNU/Linux
-    find_file (DEBIAN_FOUND debian_version debconf.conf
-      PATHS /etc
-      )
-    if (DEBIAN_FOUND)
-    
-    else(DEBIAN_FOUND)
-        if (ANDROID)
-            set (TARGET_PLATFORM ${CMAKE_ANDROID_ARCH_ABI})
-            set (PLATFORM_SUFFIX "")
-        else (ANDROID)
-            message(SEND_ERROR "Operating system is not supported")
-        endif (ANDROID)
-    endif (DEBIAN_FOUND)    
+
   endif (APPLE)
-endif (UNIX)
-if (WIN32)  
+else (UNIX)
+  if (WIN32)  
     if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
         set (TARGET_PLATFORM "x86")     
     else ()
         set (TARGET_PLATFORM "x64")     
     endif()
         set (PLATFORM_SUFFIX -${TARGET_PLATFORM})
-endif (WIN32)
+        set (TARGET_OS windows)
+  endif (WIN32)
+endif (UNIX)
+endif (ANDROID)
 
-SET (NEUROSDK $ENV{NEUROSDK}/${TARGET_PLATFORM})
+SET (NEUROSDK $ENV{NEUROSDK}/${TARGET_OS}/${TARGET_PLATFORM})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# project name and supported languages
-project(neurosdk-${TARGET_PLATFORM} VERSION 1.3.1 LANGUAGES CXX)
 
 ###################
 ##DEFINES SECTION##
@@ -56,7 +52,8 @@ if (WIN32)
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /MD")
 else () 
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-std=c++14 -Wall -fexceptions -fno-rtti -pedantic-errors")
+  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fexceptions -fno-rtti -pedantic-errors")
 	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif (WIN32)
 
@@ -150,7 +147,7 @@ if (UNIX)
     	file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
     	file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
     else(DEBIAN_FOUND)
-		if (ANDROID) 
+		    if (ANDROID) 
     		file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/android/*.cpp)
     		file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
     		file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
@@ -240,10 +237,10 @@ if (UNIX)
       PATHS /etc
       )
     if (DEBIAN_FOUND)
-    	target_link_libraries(neurosdk bluetooth gattlib)
+    	target_link_libraries(neurosdk${PLATFORM_SUFFIX} bluetooth gattlib)
     else(DEBIAN_FOUND)    	
 		if (ANDROID)
-    		target_link_libraries(neurosdk android)
+    		target_link_libraries(neurosdk${PLATFORM_SUFFIX} android)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
 		endif (ANDROID)
@@ -264,5 +261,7 @@ install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/include/filter)
 install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/include)
 install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${NEUROSDK}/include/signal)
 install(FILES ${SHARED_HEADERS_CWRAP} DESTINATION ${NEUROSDK}/include/c-wrap)
+if (WIN32)  
 install(FILES $<TARGET_PDB_FILE:neurosdk${PLATFORM_SUFFIX}> DESTINATION ${NEUROSDK} OPTIONAL)
+endif (WIN32)
 ##################

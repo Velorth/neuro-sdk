@@ -14,7 +14,7 @@ namespace Neuro {
 class BrainbitImpl : public DeviceImpl {
 public:
 	struct BrainbitParameterSetter {
-		FirmwareVersion FirmwareVersion{0};
+		FirmwareVersion mFirmwareVersion{0, 0};
 	};
 
     using param_changed_callback_t = std::function<void(Parameter)>;
