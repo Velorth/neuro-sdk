@@ -24,14 +24,12 @@ import android.util.Log;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.neuromd.bleconnection.device.DeviceFilter;
 import com.neuromd.bleconnection.device.DeviceFoundCallback;
 import com.neuromd.bleconnection.exceptions.BluetoothAdapterException;
-import com.neuromd.bleconnection.exceptions.BluetoothPermissionException;
 
 /**
  * Parent class for device scanners from different android API
@@ -90,10 +88,9 @@ public abstract class BleDeviceScanner {
     /**
      * Starts search for ble devices
      *
-     * @throws BluetoothPermissionException
      * @throws BluetoothAdapterException
      */
-    public abstract void startScan(Context context) throws BluetoothPermissionException, BluetoothAdapterException;
+    public abstract void startScan(Context context) throws BluetoothAdapterException;
 
     /**
      * Cancels device search

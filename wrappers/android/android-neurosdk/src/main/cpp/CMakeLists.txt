@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project(android-neurosdk CXX)
 
-add_definitions(-DGSL_THROW_ON_CONTRACT_VIOLATION)
-set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti -pedantic-errors")
 

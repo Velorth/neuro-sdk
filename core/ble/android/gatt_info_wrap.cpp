@@ -27,6 +27,7 @@ Java_com_neuromd_bleconnection_device_DeviceGattInfo_deleteGattInfo(JNIEnv *env,
                                                                           jlong deviceInfoPtr) {
     auto gattInfo = reinterpret_cast<std::shared_ptr<Neuro::DeviceGattInfo> *>(deviceInfoPtr);
     delete gattInfo;
+
 }
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.neuromd.bleconnection.exceptions;
+package com.neuromd.neurosdk.exceptions;
 
 public class BluetoothPermissionException extends RuntimeException {
     public BluetoothPermissionException() {

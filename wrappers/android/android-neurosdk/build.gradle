@@ -87,7 +87,6 @@ task copyWrapperHeaders(type: Copy) {
     into 'src/main/assets'
 }
 
-preBuild.dependsOn(':neurosdk:build')
 preBuild.dependsOn('copyLibs')
 preBuild.dependsOn('copyNativeHeaders')
 preBuild.dependsOn('copyWrapperHeaders')

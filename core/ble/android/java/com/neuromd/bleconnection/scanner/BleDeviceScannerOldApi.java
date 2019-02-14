@@ -22,7 +22,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.neuromd.bleconnection.exceptions.BluetoothAdapterException;
-import com.neuromd.bleconnection.exceptions.BluetoothPermissionException;
 
 
 public class BleDeviceScannerOldApi extends BleDeviceScanner {
@@ -39,7 +38,7 @@ public class BleDeviceScannerOldApi extends BleDeviceScanner {
     }
 
     @Override
-    public void startScan(Context context) throws BluetoothPermissionException, BluetoothAdapterException {
+    public void startScan(Context context) throws BluetoothAdapterException {
         initAdapter(context);
         mBluetoothAdapter.startLeScan(mLeScanHandle);
     }

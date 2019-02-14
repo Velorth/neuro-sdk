@@ -16,19 +16,15 @@
 
 package com.neuromd.bleconnection.scanner;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.neuromd.bleconnection.exceptions.BluetoothAdapterException;
-import com.neuromd.bleconnection.exceptions.BluetoothPermissionException;
 
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -46,13 +42,9 @@ public class BleDeviceScanner21Api extends BleDeviceScanner {
     }
 
     @Override
-    public void startScan(Context context) throws BluetoothPermissionException, BluetoothAdapterException {
+    public void startScan(Context context) throws BluetoothAdapterException {
         initAdapter(context);
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mBluetoothAdapter.getBluetoothLeScanner().startScan(mScanCallback);
-        } else {
-            throw new BluetoothPermissionException("Location permission does not allowed");
-        }
+        mBluetoothAdapter.getBluetoothLeScanner().startScan(mScanCallback);
     }
 
     @Override
