@@ -1,23 +1,27 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-project(android-neurosdk CXX)
+project(android-neurosdk VERSION 1.4.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -fno-rtti -pedantic-errors")
+SET (TARGET_PLATFORM ${CMAKE_ANDROID_ARCH_ABI})
+SET (PLATFORM_SUFFIX "")
+SET (TARGET_OS android)
 
+SET (NEUROSDK $ENV{NEUROSDK}/${TARGET_OS}/${TARGET_PLATFORM})
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fexceptions -fno-rtti -pedantic-errors")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
+include_directories(${NEUROSDK}/include)
+include_directories(${NEUROSDK}/include/c-wrap)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../share/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/jni-support)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../utils/gsl/include)
-set(SDK_LINK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../share/${ANDROID_ABI})
-link_directories(${SDK_LINK_DIR})
+link_directories(${NEUROSDK})
 
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB SDKLIB_FILES ${SDK_LINK_DIR}/libneurosdk.so)
 
 add_library(android-neurosdk SHARED ${SOURCE_FILES})
-target_link_libraries(android-neurosdk log)
-target_link_libraries(android-neurosdk neurosdk)
+target_link_libraries(android-neurosdk log neurosdk)
 
 set(WRAPPER_LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
 file(MAKE_DIRECTORY ${WRAPPER_LIBDIR})

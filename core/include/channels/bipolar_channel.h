@@ -40,7 +40,15 @@ public:
 		mSecondLengthListener = mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
 	}
 
-	BipolarChannel(BipolarChannel &&rhs) noexcept = default;
+	BipolarChannel(BipolarChannel &&rhs) noexcept(false) : 
+		mInfo(std::move(rhs.mInfo)),
+		mFirst(std::move(rhs.mFirst)),
+		mSecond(std::move(rhs.mSecond)){
+		rhs.mFirstLengthListener = nullptr;
+		rhs.mSecondLengthListener = nullptr;
+		mFirstLengthListener = mFirst->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+		mSecondLengthListener = mSecond->subscribeLengthChanged([=](data_length_t) { onDataLengthChanged(); });
+	};
 
 	~BipolarChannel() = default;
 

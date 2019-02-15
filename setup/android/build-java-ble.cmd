@@ -22,4 +22,8 @@ if errorlevel 1 (
     pause
     exit
 )
+
+rmdir /S /Q %NEUROSDK%\android\lib\
+mkdir %NEUROSDK%\android\lib\
+copy %SDK_SOURCE%\core\build\android\lib\ble-neurosdk.jar %NEUROSDK%\android\lib\
 if NOT "%3"=="nopause" pause

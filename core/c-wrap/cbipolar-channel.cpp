@@ -13,9 +13,9 @@ using BipolarChannelType = Neuro::BipolarChannel<DoubleChannelWrap>;
 using BipolarChannelWrap = SpecificChannelWrapper<BipolarChannelType>;
 using BipolarWrapPtr = std::shared_ptr<BipolarChannelWrap>;
 
-BipolarDoubleChannel* create_BipolarDoubleChannel(BridgeDoubleChannel *first, BridgeDoubleChannel *second) {
-	auto& firstShared = *reinterpret_cast<DoubleChannelWrapPtr *>(first);
-	auto& secondShared = *reinterpret_cast<DoubleChannelWrapPtr *>(second);
+BipolarDoubleChannel* create_BipolarDoubleChannel(DoubleChannel *first, DoubleChannel *second) {
+	const auto& firstShared = *reinterpret_cast<DoubleChannelWrapPtr *>(first);
+	const auto& secondShared = *reinterpret_cast<DoubleChannelWrapPtr *>(second);
 	try {
 		auto bipolarChannel = Neuro::make_bipolar_from_ptrs(firstShared, secondShared);
 		const auto bipolarChannelPtr = std::make_shared<BipolarChannelType>(std::move(bipolarChannel));

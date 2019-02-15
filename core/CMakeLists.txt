@@ -174,7 +174,7 @@ add_library(neurosdk${PLATFORM_SUFFIX} SHARED ${SOURCE_FILES_COMMON}
 							${SOURCE_FILES_DEVSCAN_OS} 
 							${SOURCE_FILES_UTILS_NET}  
 							${SOURCE_FILES_UTILS_NET_OS}
-                            ${SOURCE_FILES_CWRAP}
+              ${SOURCE_FILES_CWRAP}
 							${SOURCE_FILES_UTILS_JNI}
 							${HEADER_FILES_COMMON} 
 							${HEADER_FILES_BLE} 
@@ -250,7 +250,11 @@ if (WIN32)
     target_link_libraries(neurosdk${PLATFORM_SUFFIX} WindowsApp)
 endif (WIN32)
 
+if (ANDROID) 
 install(TARGETS neurosdk${PLATFORM_SUFFIX} RUNTIME DESTINATION ${NEUROSDK})
+else(ANDROID)
+install(TARGETS neurosdk${PLATFORM_SUFFIX} DESTINATION ${NEUROSDK})
+endif(ANDROID)
 install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${NEUROSDK}/include)
 install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${NEUROSDK}/include/channels)
 install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${NEUROSDK}/include/channels/info)

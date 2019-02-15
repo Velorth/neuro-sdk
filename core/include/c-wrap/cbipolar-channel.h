@@ -5,6 +5,6 @@
 
 typedef struct _BipolarDoubleChannel BipolarDoubleChannel;
 
-SDK_SHARED BipolarDoubleChannel* create_BipolarDoubleChannel(BridgeDoubleChannel *first, BridgeDoubleChannel *second);
+SDK_SHARED BipolarDoubleChannel* create_BipolarDoubleChannel(DoubleChannel *first, DoubleChannel *second);
 
 #endif // CBIPOLAR_CHANNEL_H
