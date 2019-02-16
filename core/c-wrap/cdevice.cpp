@@ -205,7 +205,7 @@ ret_code device_subscribe_param_changed(Device* device_ptr, void(*callback)(Devi
 			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
-		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		*handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -233,7 +233,7 @@ auto setArrayDataListener(const Neuro::DeviceSharedPtr &device, Device *device_p
 	if (listener == nullptr) {
 		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
 	}
-	return reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+	return reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 }
 
 template <Neuro::ChannelInfo::Type ChannelType, typename DataArray>
@@ -252,7 +252,7 @@ auto setDataListener(const Neuro::DeviceSharedPtr &device, Device *device_ptr, C
 	if (listener == nullptr) {
 		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
 	}
-	return reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+	return reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 }
 
 int device_subscribe_double_channel_data_received(Device *device_ptr, ChannelInfo channel_info,	void(*callback)(Device*, ChannelInfo, DoubleDataArray, void*), ListenerHandle *handle, void* user_data) {

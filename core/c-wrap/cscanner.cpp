@@ -94,7 +94,7 @@ int scanner_set_device_found_callback(DeviceScanner *scanner_ptr, void(*callback
 			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
-		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		*handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {
@@ -118,7 +118,7 @@ int scanner_set_scan_state_callback(DeviceScanner *scanner_ptr, void(*callback)(
 			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
-		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		*handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

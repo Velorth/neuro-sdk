@@ -68,28 +68,19 @@ dependencies {
 }
 
 task copyLibs(type: Copy) {
-    from '../share/libs'
-    include 'classes.jar'
+    from '${System.env.NEUROSDK}/android/libs'
+    include 'ble-neurosdk.jar'
     into 'libs'
 }
 
 task copyNativeHeaders(type: Copy) {
-    from '../share/include'
+    from '${System.env.NEUROSDK}/android/armeabi-v7a/include'
     include '/**/*'
-    into 'src/main/assets'
-}
-
-task copyWrapperHeaders(type: Copy) {
-    from 'src/main/cpp/include'
-    include 'wrappers/jni_ptr_wrap.h'
-    include 'wrappers/device/jni_device_wrap.h'
-    include 'wrappers/channels/*'
     into 'src/main/assets'
 }
 
 preBuild.dependsOn('copyLibs')
 preBuild.dependsOn('copyNativeHeaders')
-preBuild.dependsOn('copyWrapperHeaders')
 
 archivesBaseName = 'neuro-sdk'
 group = publishedGroupId

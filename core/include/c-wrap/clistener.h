@@ -4,6 +4,6 @@
 #include "lib_export.h"
 
 typedef void* ListenerHandle;
-SDK_SHARED void free_listener_handle(ListenerHandle *handle);
+SDK_SHARED void free_listener_handle(ListenerHandle handle);
 
 #endif // CLISTENER_H

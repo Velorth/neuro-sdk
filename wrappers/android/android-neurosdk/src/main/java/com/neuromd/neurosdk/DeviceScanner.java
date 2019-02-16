@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Neurotech MRC. http://neuromd.com/
+ * Copyright 2016 - 2019 Neurotech MRC. http://neuromd.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.neuromd.neurosdk;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.neuromd.common.Assert;
 import com.neuromd.common.SubscribersNotifier;
@@ -25,7 +26,9 @@ import com.neuromd.common.SubscribersNotifier;
  * Provides common methods for device scanning and
  */
 public class DeviceScanner {
-    private long mNativeObjPtr;
+    private final long mScannerPtr;
+    private final long mScanStateListenerPtr;
+    private final long mDeviceFoundListenerPtr;
 
     static {
         System.loadLibrary("android-neurosdk");
@@ -44,37 +47,72 @@ public class DeviceScanner {
      * @param context Current application context
      */
     public DeviceScanner(Context context) {
-        mNativeObjPtr = create(context);
-        Assert.ensures(mNativeObjPtr != 0,
+        mScannerPtr = createDeviceScanner(context);
+        Assert.ensures(mScannerPtr != 0,
                 "Device scanner native object is null");
-        init();
+        mScanStateListenerPtr = scannerSubscribeScanState(mScannerPtr);
+        mDeviceFoundListenerPtr = scannerSubscribeDeviceFound(mScannerPtr);
     }
 
     public void finalize() throws Throwable {
-        if (mNativeObjPtr != 0) {
-            deleteNative();
-            mNativeObjPtr = 0;
-        }
+        freeListenerHandle(mDeviceFoundListenerPtr);
+        freeListenerHandle(mScanStateListenerPtr);
+        scannerDelete(mScannerPtr);
         super.finalize();
     }
 
-    /**
-     * Starts Neurotech© devices scanning. Scan stops after @timeout milliseconds
-     *
-     * @param timeout Duration of scanning. Less or equal to zero for infinity
-     */
-    public native void startScan(int timeout);
+    public void startScan(int timeoutMs) {
+        scannerStartScan(mScannerPtr, timeoutMs);
+    }
 
-    /**
-     * Stops device scan process
-     */
-    public native void stopScan();
+    public void startScan() {
+        scannerStartScan(mScannerPtr, 0);
+    }
 
-    public native Device findDeviceByAddress(String address);
+    public void stopScan() {
+        scannerStopScan(mScannerPtr);
+    }
 
-    private native long create(Context appContext);
+    public boolean isScanning(){
+        return scannerIsScanning(mScannerPtr);
+    }
 
-    private native void init();
+    public Device findDeviceByAddress(String address) {
+        return new Device(scannerGetDeviceByAddress(mScannerPtr, address));
+    }
 
-    private native void deleteNative();
+    private void onDeviceFound(long scannerPtr, long devicePtr) {
+        if (scannerPtr != mScannerPtr) return;
+        try {
+            Device device = new Device(devicePtr);
+            deviceFound.sendNotification(this, device);
+        } catch (Exception e) {
+            Log.e(
+                    "DeviceScanner",
+                    String.format("Exception in device found callback function: %s", e.getMessage())
+            );
+        }
+    }
+
+    private void onScanStateChanged(long scannerPtr, boolean isScanning) {
+        if (scannerPtr != mScannerPtr) return;
+        try {
+            scanStateChanged.sendNotification(this, isScanning);
+        } catch (Exception e) {
+            Log.e(
+                    "DeviceScanner",
+                    String.format("Exception in scan state callback function: %s", e.getMessage())
+            );
+        }
+    }
+
+    private static native void freeListenerHandle(long listenerHandle);
+    private static native long createDeviceScanner(Context context);
+    private static native void scannerDelete(long scannerPtr);
+    private static native void scannerStartScan(long scannerPtr, int timeoutMs);
+    private static native void scannerStopScan(long scannerPtr);
+    private static native boolean scannerIsScanning(long scannerPtr);
+    private native long scannerSubscribeDeviceFound(long scannerPtr);
+    private native long scannerSubscribeScanState(long scannerPtr);
+    private static native long scannerGetDeviceByAddress(long scannerPtr, String address);
 }

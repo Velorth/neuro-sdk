@@ -34,7 +34,7 @@ int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChann
 			set_sdk_last_error("Failed to subscribe length changed event: length listenr is null");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
-		*handle = reinterpret_cast<ListenerHandle *>(new decltype(listener)(listener));
+		*handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

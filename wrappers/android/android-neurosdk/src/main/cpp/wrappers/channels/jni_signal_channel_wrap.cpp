@@ -131,3 +131,4 @@ void JniSignalChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriber
         env->PopLocalFrame(nullptr);
     });
 }
+

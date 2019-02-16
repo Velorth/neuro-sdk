@@ -45,8 +45,7 @@ typedef enum _Parameter{
 	ParameterADCInputState,
 	ParameterAccelerometerSens,
 	ParameterGyroscopeSens,
-	ParameterStimulatorState,
-	ParameterMotionAssistantState,
+	ParameterStimulatorAndMaState,
 	ParameterStimulatorParamPack,
 	ParameterMotionAssistantParamPack
 }Parameter;
