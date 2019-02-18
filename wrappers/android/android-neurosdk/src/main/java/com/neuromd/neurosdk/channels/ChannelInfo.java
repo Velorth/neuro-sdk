@@ -1,32 +1,47 @@
 package com.neuromd.neurosdk.channels;
 
-/**
- * Represents information about channel
- * Channel info classes could be embedded and custom
- */
-public interface ChannelInfo {
+public class ChannelInfo {
+    private String mName;
+    private final ChannelType mType;
+    private final long mIndex;
 
-    /**
-     * Returns name of a channel
-     * @return Channel name
-     */
-    String getName();
+    public ChannelInfo(ChannelType type){
+        mType = type;
+        mName = type.name();
+        mIndex = 0;
+    }
 
-    /**
-     * Sets custom name for channel
-     * @param name New channel name
-     */
-    void setName(String name);
+    public ChannelInfo(ChannelType type, String name){
+        mType = type;
+        mName = name;
+        mIndex = 0;
+    }
 
-    /**
-     * Returns type of channel
-     * @return Channel type
-     */
-    ChannelType getType();
-    
-    /**
-     * Returns index number of channel for devices with multiple channels
-     * @return channel index
-     */
-    long getIndex();
+    public ChannelInfo(ChannelType type, String name, long index){
+        mType = type;
+        mName = name;
+        mIndex = index;
+    }
+
+    public ChannelInfo(ChannelInfo rhs){
+        mName = rhs.getName();
+        mType = rhs.getType();
+        mIndex = rhs.getIndex();
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public ChannelType getType() {
+        return mType;
+    }
+
+    public long getIndex()    {
+        return mIndex;
+    }
 }

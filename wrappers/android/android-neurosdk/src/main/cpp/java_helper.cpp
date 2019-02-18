@@ -89,3 +89,40 @@ void AttachedTaskQueue::exec(const std::function<void(JNIEnv *)> &task_function)
     mImpl->mExecutionQueue.push(task_function);
     mImpl->mQueueCondition.notify_one();
 }
+
+std::string getParamTypeName(Parameter param) {
+    switch (param){
+        case ParameterName:
+        case ParameterAddress:
+        case ParameterSerialNumber:
+            return "String";
+        case ParameterHardwareFilterState:
+            return "Boolean";
+        case ParameterStimulatorAndMAState:
+            return "StimulatorDeviceState";
+        case ParameterOffset:
+            return "Byte";
+        case ParameterExternalSwitchState:
+            return "ExternalSwitchInput";
+        case ParameterState:
+            return "DeviceState";
+        case ParameterFirmwareMode:
+            return "FirmwareMode";
+        case ParameterSamplingFrequency:
+            return "SamplingFrequency";
+        case ParameterGain:
+            return "Gain";
+        case ParameterADCInputState:
+            return "ADCInput";
+        case ParameterAccelerometerSens:
+            return "AccelerometerSensitivity";
+        case ParameterGyroscopeSens:
+            return "GyroscopeSensitivity";
+        case ParameterStimulatorParamPack:
+            return "StimulationParams";
+        case ParameterMotionAssistantParamPack:
+            return "MotionAssistantParams";
+        case ParameterFirmwareVersion:
+            return "FirmwareVersion";
+    }
+}

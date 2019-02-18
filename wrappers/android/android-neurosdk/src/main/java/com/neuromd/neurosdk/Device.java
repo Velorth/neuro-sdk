@@ -17,23 +17,62 @@
 package com.neuromd.neurosdk;
 
 import com.neuromd.common.Assert;
+import com.neuromd.common.INotificationCallback;
 import com.neuromd.common.SubscribersNotifier;
 import com.neuromd.neurosdk.channels.ChannelInfo;
 import com.neuromd.neurosdk.parameters.Command;
 import com.neuromd.neurosdk.parameters.Parameter;
 import com.neuromd.neurosdk.parameters.ParameterName;
 
+import java.util.Hashtable;
+
 public class Device {
     static {
         System.loadLibrary("android-neurosdk");
     }
 
-    private final long mParamChangedListenerPtr;
-    private final Dictionary<Action<object, ChannelData<double>>, IntPtr> _doubleChannelListenerHandles = new Dictionary<Action<object, ChannelData<double>>, IntPtr>();
-    private final Dictionary<Action<object, ChannelData<int>>, IntPtr> _intChannelListenerHandles = new Dictionary<Action<object, ChannelData<int>>, IntPtr>();
+    public class DoubleChannelData {
+        private final ChannelInfo mChannelInfo;
+        private final double[] mDataArray;
 
-    private final SubscribersNotifier<object, ChannelData<double>> mDoubleChannelDataReceived;
-    private final SubscribersNotifier<object, ChannelData<int>> mIntChannelDataReceived;
+        public ChannelInfo channelInfo() {
+            return mChannelInfo;
+        }
+
+        public double[] dataArray() {
+            return mDataArray;
+        }
+
+        public DoubleChannelData(double[] array, ChannelInfo info) {
+            mDataArray = array;
+            mChannelInfo = info;
+        }
+    }
+
+    public class IntChannelData {
+        private final ChannelInfo mChannelInfo;
+        private final int[] mDataArray;
+
+        public ChannelInfo channelInfo() {
+            return mChannelInfo;
+        }
+
+        public int[] dataArray() {
+            return mDataArray;
+        }
+
+        public IntChannelData(int[] array, ChannelInfo info) {
+            mDataArray = array;
+            mChannelInfo = info;
+        }
+    }
+
+    private final long mParamChangedListenerPtr;
+    private final Hashtable<INotificationCallback<DoubleChannelData>, Long> mDoubleChannelListenerHandles = new Hashtable<>();
+    private final Hashtable<INotificationCallback<IntChannelData>, Long> mIntChannelListenerHandles = new Hashtable<>();
+
+    private final SubscribersNotifier<DoubleChannelData> mDoubleChannelDataReceived = new SubscribersNotifier<>();
+    private final SubscribersNotifier<IntChannelData> mIntChannelDataReceived = new SubscribersNotifier<>();
 
     private final long mDevicePtr;
 
@@ -44,7 +83,7 @@ public class Device {
     }
 
     public void finalize() throws Throwable {
-        RemoveAllCahnnelListeners();
+        removeAllCahnnelListeners();
         freeListenerHandle(mParamChangedListenerPtr);
         deviceDelete(mDevicePtr);
         super.finalize();
@@ -121,18 +160,8 @@ public class Device {
      * @throws UnsupportedOperationException
      */
     public <ParamType> ParamType readParam(ParameterName param){
-        ParameterTypeInfo paramTypeInfo = new ParameterTypeInfo(parameter);
-        if (paramTypeInfo.Type != typeof(T))
-        {
-            throw new ArgumentException($"Wrong return generic type argument. Must be {paramTypeInfo.Type.Name}");
-        }
-
-        var paramValue = paramTypeInfo.ReadParamValue(this);
-        if (!(paramValue is T))
-        {
-            throw new ArgumentException("Return type of native readParam method is not equal to generic type parameter");
-        }
-
+        ParameterTypeInfo paramTypeInfo = new ParameterTypeInfo(param);
+        Object paramValue = paramTypeInfo.paramReader().readParam(this);
         return (ParamType)paramValue;
     }
 
@@ -146,92 +175,57 @@ public class Device {
      * @return Operation success
      * @throws UnsupportedOperationException
      */
-    public native boolean setParam(ParameterName param, Object value);
-
-    private native void init();
-    private native void deleteDevice();
-
-
-
-
-    public T ReadParam<T>(Parameter parameter)
-    {
-
+    public boolean setParam(ParameterName param, Object value){
+        ParameterTypeInfo paramTypeInfo = new ParameterTypeInfo(param);
+        paramTypeInfo.paramSetter().setParam(this, value);
+        return true;
     }
-
-    public void SetParam<T>(Parameter parameter, T value)
-    {
-        var paramTypeInfo = new ParameterTypeInfo(parameter);
-        if (paramTypeInfo.Type != typeof(T))
-        {
-            throw new ArgumentException($"Wrong return generic type argument. Must be {paramTypeInfo.Type.Name}");
+    public void addDoubleChannelDataListener(INotificationCallback<DoubleChannelData> callback, ChannelInfo channelInfo){
+        if (callback == null) return;
+        long listenerHandle = deviceSubscribeDoubleChannelDataReceived(mDevicePtr, channelInfo);
+        long previous = mDoubleChannelListenerHandles.put(callback, listenerHandle);
+        if (previous != 0){
+            freeListenerHandle(previous);
         }
-
-        paramTypeInfo.SetParamValue(this, value);
+        mDoubleChannelDataReceived.subscribe(callback);
     }
 
-    public void AddDoubleChannelDataListener(
-            Action<object, ChannelData<double>> callback,
-            ChannelInfo channelInfo)
-    {
-        if (_doubleChannelListenerHandles.ContainsKey(callback))
-        {
-            freeListenerHandle(_doubleChannelListenerHandles[callback]);
+    public void addIntChannelDataListener(INotificationCallback<IntChannelData> callback, ChannelInfo channelInfo){
+        if (callback == null) return;
+        long listenerHandle = deviceSubscribeIntChannelDataReceived(mDevicePtr, channelInfo);
+        long previous = mIntChannelListenerHandles.put(callback, listenerHandle);
+        if (previous != 0){
+            freeListenerHandle(previous);
         }
-
-        SdkError.ThrowIfError(deviceSubscribeDoubleChannelDataReceived(DevicePtr, channelInfo,
-                _doubleDataReceivedFunc, out var dataReceivedListenerPtr, IntPtr.Zero));
-
-        _doubleChannelListenerHandles[callback] = dataReceivedListenerPtr;
-        DoubleChannelDataReceived += callback;
+        mIntChannelDataReceived.subscribe(callback);
     }
 
-    public void AddIntChannelDataListener(
-            Action<object, ChannelData<int>> callback,
-            ChannelInfo channelInfo)
-    {
-        if (_intChannelListenerHandles.ContainsKey(callback))
+    public void removeIntChannelDataListener(INotificationCallback<IntChannelData> callback){
+        if (mIntChannelListenerHandles.containsKey(callback))
         {
-            freeListenerHandle(_intChannelListenerHandles[callback]);
-        }
-
-        SdkError.ThrowIfError(deviceSubscribeIntChannelDataReceived(DevicePtr, channelInfo,
-                _intDataReceivedFunc, out var dataReceivedListenerPtr, IntPtr.Zero));
-
-        _intChannelListenerHandles[callback] = dataReceivedListenerPtr;
-        IntChannelDataReceived += callback;
-    }
-
-    public void RemoveIntChannelDataListener(Action<object, ChannelData<int>> callback)
-    {
-        if (_intChannelListenerHandles.ContainsKey(callback))
-        {
-            freeListenerHandle(_intChannelListenerHandles[callback]);
-            _intChannelListenerHandles.Remove(callback);
+            freeListenerHandle(mIntChannelListenerHandles.get(callback));
+            mIntChannelListenerHandles.remove(callback);
         }
     }
 
-    public void RemoveDoubleChannelDataListener(Action<object, ChannelData<double>> callback)
-    {
-        if (_doubleChannelListenerHandles.ContainsKey(callback))
-        {
-            freeListenerHandle(_doubleChannelListenerHandles[callback]);
-            _doubleChannelListenerHandles.Remove(callback);
+    public void removeDoubleChannelDataListener(INotificationCallback<DoubleChannelData> callback){
+        if (mDoubleChannelListenerHandles.containsKey(callback)){
+            freeListenerHandle(mDoubleChannelListenerHandles.get(callback));
+            mDoubleChannelListenerHandles.remove(callback);
         }
     }
 
-    private void RemoveAllCahnnelListeners()
-    {
-        foreach (var listener in _intChannelListenerHandles.Values)
+    private void removeAllCahnnelListeners(){
+        for (long listener : mIntChannelListenerHandles.values())
         {
             freeListenerHandle(listener);
         }
-        _intChannelListenerHandles.Clear();
-        foreach (var listener in _doubleChannelListenerHandles.Values)
+        mIntChannelListenerHandles.clear();
+        for (long listener : mDoubleChannelListenerHandles.values())
         {
             freeListenerHandle(listener);
         }
-        _doubleChannelListenerHandles.Clear();
+        mDoubleChannelListenerHandles.clear();
     }
 
     private void onParameterChanged(long devicePtr, ParameterName parameterName){
@@ -247,42 +241,6 @@ public class Device {
     private void onIntDataReceived(long devicePtr, ChannelInfo info, int[] dataArray){
         if (mDevicePtr != devicePtr) return;
         mIntChannelDataReceived.sendNotification(this, new IntChannelData(dataArray, info));
-    }
-
-    public class DoubleChannelData {
-        private final ChannelInfo mChannelInfo;
-        private final double[] mDataArray;
-
-        public ChannelInfo channelInfo() {
-            return mChannelInfo;
-        }
-
-        public double[] dataArray() {
-            return mDataArray;
-        }
-
-        public DoubleChannelData(double[] array, ChannelInfo info) {
-            mDataArray = array;
-            mChannelInfo = info;
-        }
-    }
-
-    public class IntChannelData {
-        private final ChannelInfo mChannelInfo;
-        private final int[] mDataArray;
-
-        public ChannelInfo channelInfo() {
-            return mChannelInfo;
-        }
-
-        public int[] dataArray() {
-            return mDataArray;
-        }
-
-        public IntChannelData(int[] array, ChannelInfo info) {
-            mDataArray = array;
-            mChannelInfo = info;
-        }
     }
 
     private static native void freeListenerHandle(long listenerHandle);

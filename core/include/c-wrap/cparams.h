@@ -65,7 +65,7 @@ typedef enum _GyroscopeSensitivity{
 	GyroscopeSens2000Grad
 } GyroscopeSensitivity;
 
-typedef enum class _StimulationDeviceState {
+typedef enum _StimulationDeviceState {
 	StateNoParams,
 	StateDisabled,
 	StateEnabled
