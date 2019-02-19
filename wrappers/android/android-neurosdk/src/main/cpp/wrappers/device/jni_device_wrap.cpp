@@ -17,6 +17,11 @@
 #include "java_helper.h"
 #include "cdevice.h"
 
+void onParamChanged(Device *device, Parameter parameter, void *listener_helper){
+    auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
+    listenerHelper->notify(reinterpret_cast<jlong>(device), reinterpret_cast<jlong>(device));
+}
+
 extern "C"
 {
 
@@ -53,37 +58,38 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableChannels(JNIEnv *env, jclass, jl
         throw_if_error(env, result);
         return nullptr;
     }
-    auto channelInfoClass = env->FindClass("Lcom/neuromd/neurosdk/channels/ChannelInfo;");
-    if (channelInfoClass == nullptr){
-        java_throw(env, "ChannelInfo class not found");
-        return nullptr;
-    }
 
     if (channelsArray.info_count > std::numeric_limits<jint>::max()){
+        free_ChannelInfoArray(channelsArray);
         java_throw(env, "Too many elements in ChannelInfo array");
         return nullptr;
     }
 
-    auto channelTypeClass = env->FindClass("Lcom/neuromd/neurosdk/channels/ChannelType;");
-    if (channelTypeClass == nullptr){
-        java_throw(env, "ChannelType enum not found");
+    try {
+        const auto& channelInfoClass = global_class_refs().fromClassName("com/neuromd/neurosdk/channels/ChannelInfo");
+        const auto& channelTypeClass = global_class_refs().fromClassName("com/neuromd/neurosdk/channels/ChannelType");
+
+        auto channelInfoArray = to_obj_array(env,
+                                             channelInfoClass,
+                                             "(Lcom/neuromd/neurosdk/channels/ChannelInfo;Ljava/lang/String;J)V",
+                                             channelsArray.info_array,
+                                             static_cast<jint>(channelsArray.info_count),
+                                             [&channelTypeClass](JNIEnv *env, jclass element_class,
+                                                                jmethodID constructor,
+                                                                ChannelInfo native_info) {
+            auto channelType = get_enum_field_ref(env, channelTypeClass, enum_name_map<ChannelType>::name(native_info.type).c_str());
+            auto channelName = env->NewStringUTF(native_info.name);
+            return env->NewObject(element_class, constructor, channelType, channelName, static_cast<jlong>(native_info.index));
+        });
+
+        free_ChannelInfoArray(channelsArray);
+        return channelInfoArray;
+    }
+    catch (std::exception &e){
+        free_ChannelInfoArray(channelsArray);
+        java_throw(env, e.what());
         return nullptr;
     }
-
-    auto channelInfoArray = to_obj_array(env,
-                        channelInfoClass,
-                        "(Lcom/neuromd/neurosdk/channels/ChannelInfo;Ljava/lang/String;J)V",
-                        channelsArray.info_array,
-                        static_cast<jint>(channelsArray.info_count),
-                        [channelTypeClass](JNIEnv *env, jclass element_class, jmethodID constructor, ChannelInfo native_info){
-
-        auto channelType = get_enum_field_ref(env, channelTypeClass, enum_name_map<ChannelType>::name(native_info.type).c_str());
-        auto channelName = env->NewStringUTF(native_info.name);
-        return env->NewObject(element_class, constructor, channelType, channelName, static_cast<jlong>(native_info.index));
-    });
-
-    free_ChannelInfoArray(channelsArray);
-    return channelInfoArray;
 }
 
 JNIEXPORT jobjectArray JNICALL
@@ -95,28 +101,33 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableCommands(JNIEnv *env, jclass, jl
         throw_if_error(env, result);
         return nullptr;
     }
-    auto commandClass = env->FindClass("Lcom/neuromd/neurosdk/parameters/Command;");
-    if (commandClass == nullptr){
-        java_throw(env, "Command enum not found");
-        return nullptr;
-    }
 
-    if (commandArray.cmd_array_size > std::numeric_limits<jint>::max()){
+    if (commandArray.cmd_array_size > std::numeric_limits<jint>::max()) {
+        free_CommandArray(commandArray);
         java_throw(env, "Too many elements in Command array");
         return nullptr;
     }
 
-    auto commandJavaArray = env->NewObjectArray(static_cast<jsize>(commandArray.cmd_array_size), commandClass, nullptr);
+    try {
+        const auto &commandClass = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/Command");
+        auto commandJavaArray = env->NewObjectArray(static_cast<jsize>(commandArray.cmd_array_size), commandClass, nullptr);
 
-    for (auto i = 0 ; i < commandArray.cmd_array_size; ++i) {
-        env->PushLocalFrame(1);
-        auto commandJava = get_enum_field_ref(env, commandClass, enum_name_map<Command>::name(commandArray.cmd_array[i]).c_str());
-        env->SetObjectArrayElement(commandJavaArray, i, commandJava);
-        env->PopLocalFrame(nullptr);
+        for (auto i = 0; i < commandArray.cmd_array_size; ++i) {
+            env->PushLocalFrame(1);
+            auto commandJava = get_enum_field_ref(env, commandClass, enum_name_map<Command>::name(
+                    commandArray.cmd_array[i]).c_str());
+            env->SetObjectArrayElement(commandJavaArray, i, commandJava);
+            env->PopLocalFrame(nullptr);
+        }
+
+        free_CommandArray(commandArray);
+        return commandJavaArray;
     }
-
-    free_CommandArray(commandArray);
-    return commandJavaArray;
+    catch (std::exception &e){
+        free_CommandArray(commandArray);
+        java_throw(env, e.what());
+        return nullptr;
+    }
 }
 
 JNIEXPORT jobjectArray JNICALL
@@ -128,78 +139,64 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableParameters(JNIEnv *env, jclass, 
         throw_if_error(env, result);
         return nullptr;
     }
-    auto parameterClass = env->FindClass("Lcom/neuromd/neurosdk/parameters/Parameter;");
-    if (parameterClass == nullptr){
-        java_throw(env, "Parameter class not found");
-        return nullptr;
-    }
 
     if (paramInfoArray.info_count > std::numeric_limits<jint>::max()){
+        free_ParamInfoArray(paramInfoArray);
         java_throw(env, "Too many elements in ParamInfo array");
         return nullptr;
     }
 
-    auto paramNameClass = env->FindClass("Lcom/neuromd/neurosdk/parameters/ParameterName;");
-    if (paramNameClass == nullptr){
-        java_throw(env, "ParamName enum not found");
+    try {
+        const auto &parameterClass = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/Parameter;");
+        const auto &paramNameClass = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/ParameterName;");
+        const auto &paramAccessClass = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/ParameterAccess;");
+        const auto &paramTypeClass = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/ParameterType;");
+
+        auto paramJavaArray = to_obj_array(env,
+                                           parameterClass,
+                                           "(Lcom/neuromd/neurosdk/parameters/ParameterName;Lcom/neuromd/neurosdk/parameters/ParameterAccess;Lcom/neuromd/neurosdk/parameters/ParameterType;)V",
+                                           paramInfoArray.info_array,
+                                           static_cast<jint>(paramInfoArray.info_count),
+                                           [&paramNameClass, &paramAccessClass, &paramTypeClass](
+                                                   JNIEnv *env, jclass element_class,
+                                                   jmethodID constructor,
+                                                   ParameterInfo native_info) {
+            auto paramName = get_enum_field_ref(env, paramNameClass,enum_name_map<Parameter>::name(native_info.parameter).c_str());
+            return env->NewObject(element_class, constructor, paramName, paramAccessClass, paramTypeClass);
+        });
+
+        free_ParamInfoArray(paramInfoArray);
+        return paramJavaArray;
+    }
+    catch (std::exception &e){
+        free_ParamInfoArray(paramInfoArray);
+        java_throw(env, e.what());
         return nullptr;
     }
-
-    auto paramAccessClass = env->FindClass("Lcom/neuromd/neurosdk/parameters/ParameterAccess;");
-    if (paramAccessClass == nullptr){
-        java_throw(env, "ParamAccess enum not found");
-        return nullptr;
-    }
-
-    auto paramTypeClass = env->FindClass("Lcom/neuromd/neurosdk/parameters/ParameterType;");
-    if (paramTypeClass == nullptr){
-        java_throw(env, "ParamType enum not found");
-        return nullptr;
-    }
-
-    auto paramJavaArray = to_obj_array(env,
-                                       parameterClass,
-                                       "(Lcom/neuromd/neurosdk/parameters/ParameterName;Lcom/neuromd/neurosdk/parameters/ParameterAccess;Lcom/neuromd/neurosdk/parameters/ParameterType;)V",
-                                       paramInfoArray.info_array,
-                                       static_cast<jint>(paramInfoArray.info_count),
-                                       [paramNameClass, paramAccessClass, paramTypeClass](JNIEnv *env, jclass element_class, jmethodID constructor, ParameterInfo native_info){
-
-        auto paramName = get_enum_field_ref(env, paramNameClass, enum_name_map<Parameter>::name(native_info.parameter).c_str());
-
-        return env->NewObject(element_class, constructor, paramName);
-    });
-
-    free_ParamInfoArray(paramInfoArray);
-    return paramJavaArray;
 }
 
 JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_Device_deviceExecute(JNIEnv *env, jclass type, jlong devicePtr, jobject command) {
+Java_com_neuromd_neurosdk_Device_deviceExecute(JNIEnv *env, jclass, jlong devicePtr, jobject java_command) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
+    auto command = enum_from_java_obj<Command>(env, java_command);
+    throw_if_error(env, device_execute(device, command));
+}
 
-    // TODO
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_Device_deviceSubscribeParamChanged(JNIEnv *env, jobject instance, jlong devicePtr) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
+    auto helperPtr = make_listener_helper(env, instance, "onParameterChanged", "(JLcom/neuromd/neurosdk/parameters/Parameter;)V");
+    throw_if_error(env, device_subscribe_param_changed(device, &onParamChanged, helperPtr->listnerHandlePointer(), helperPtr));
+    return reinterpret_cast<jlong>(helperPtr);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject info) {
 
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_Device_deviceSubscribeParamChanged(JNIEnv *env, jclass type, jlong devicePtr) {
-
-    // TODO
-
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv *env, jclass type,
-                                                                          jlong devicePtr,
-                                                                          jobject info) {
-
-    // TODO
-
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_Device_deviceSubscribeIntChannelDataReceived(JNIEnv *env, jclass type,
-                                                                       jlong devicePtr,
-                                                                       jobject info) {
+Java_com_neuromd_neurosdk_Device_deviceSubscribeIntChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject info) {
 
     // TODO
 

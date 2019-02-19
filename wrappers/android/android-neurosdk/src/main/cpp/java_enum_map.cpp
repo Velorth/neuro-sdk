@@ -1,9 +1,9 @@
 #include "java_helper.h"
 
 template<>
-const std::map<ADCInput, std::string>
+const std::unordered_map<ADCInput, std::string>
         enum_name_map<ADCInput>::mEnumToNameMap = []() {
-    return std::map<ADCInput, std::string>{
+    return std::unordered_map<ADCInput, std::string>{
             {ADCInputResistance, "Resistance"},
             {ADCInputElectrodes, "Electrodes"},
             {ADCInputShort,      "Short"},
@@ -12,9 +12,9 @@ const std::map<ADCInput, std::string>
 }();
 
 template<>
-const std::map<std::string, ADCInput>
+const std::unordered_map<std::string, ADCInput>
         enum_name_map<ADCInput>::mNameToEnumMap = []() {
-    return std::map<std::string, ADCInput>{
+    return std::unordered_map<std::string, ADCInput>{
             {"Resistance", ADCInputResistance},
             {"Electrodes", ADCInputElectrodes},
             {"Short",      ADCInputShort},
@@ -23,9 +23,9 @@ const std::map<std::string, ADCInput>
 }();
 
 template<>
-const std::map<AccelerometerSensitivity, std::string>
+const std::unordered_map<AccelerometerSensitivity, std::string>
         enum_name_map<AccelerometerSensitivity>::mEnumToNameMap = []() {
-    return std::map<AccelerometerSensitivity, std::string>{
+    return std::unordered_map<AccelerometerSensitivity, std::string>{
             {AccelerometerSens2g,  "Sens2g"},
             {AccelerometerSens4g,  "Sens4g"},
             {AccelerometerSens8g,  "Sens8g"},
@@ -34,9 +34,9 @@ const std::map<AccelerometerSensitivity, std::string>
 }();
 
 template<>
-const std::map<std::string, AccelerometerSensitivity>
+const std::unordered_map<std::string, AccelerometerSensitivity>
         enum_name_map<AccelerometerSensitivity>::mNameToEnumMap = []() {
-    return std::map<std::string, AccelerometerSensitivity>{
+    return std::unordered_map<std::string, AccelerometerSensitivity>{
             {"Sens2g",  AccelerometerSens2g},
             {"Sens4g",  AccelerometerSens4g},
             {"Sens8g",  AccelerometerSens8g},
@@ -45,9 +45,9 @@ const std::map<std::string, AccelerometerSensitivity>
 }();
 
 template<>
-const std::map<GyroscopeSensitivity, std::string>
+const std::unordered_map<GyroscopeSensitivity, std::string>
         enum_name_map<GyroscopeSensitivity>::mEnumToNameMap = []() {
-    return std::map<GyroscopeSensitivity, std::string>{
+    return std::unordered_map<GyroscopeSensitivity, std::string>{
             {GyroscopeSens250Grad,  "Sens250Grad"},
             {GyroscopeSens500Grad,  "Sens500Grad"},
             {GyroscopeSens1000Grad, "Sens1000Grad"},
@@ -56,9 +56,9 @@ const std::map<GyroscopeSensitivity, std::string>
 }();
 
 template<>
-const std::map<std::string, GyroscopeSensitivity>
+const std::unordered_map<std::string, GyroscopeSensitivity>
         enum_name_map<GyroscopeSensitivity>::mNameToEnumMap = []() {
-    return std::map<std::string, GyroscopeSensitivity>{
+    return std::unordered_map<std::string, GyroscopeSensitivity>{
             {"Sens250Grad",  GyroscopeSens250Grad},
             {"Sens500Grad",  GyroscopeSens500Grad},
             {"Sens1000Grad", GyroscopeSens1000Grad},
@@ -67,9 +67,9 @@ const std::map<std::string, GyroscopeSensitivity>
 }();
 
 template<>
-const std::map<ExternalSwitchInput, std::string>
+const std::unordered_map<ExternalSwitchInput, std::string>
         enum_name_map<ExternalSwitchInput>::mEnumToNameMap = []() {
-    return std::map<ExternalSwitchInput, std::string>{
+    return std::unordered_map<ExternalSwitchInput, std::string>{
             {ExternalSwitchInputMioElectrodesRespUSB, "MioElectrodesRespUSB"},
             {ExternalSwitchInputMioElectrodes,        "MioElectrodes"},
             {ExternalSwitchInputMioUSB,               "MioUSB"},
@@ -78,9 +78,9 @@ const std::map<ExternalSwitchInput, std::string>
 }();
 
 template<>
-const std::map<std::string, ExternalSwitchInput>
+const std::unordered_map<std::string, ExternalSwitchInput>
         enum_name_map<ExternalSwitchInput>::mNameToEnumMap = []() {
-    return std::map<std::string, ExternalSwitchInput>{
+    return std::unordered_map<std::string, ExternalSwitchInput>{
             {"MioElectrodesRespUSB", ExternalSwitchInputMioElectrodesRespUSB},
             {"MioElectrodes",        ExternalSwitchInputMioElectrodes},
             {"MioUSB",               ExternalSwitchInputMioUSB},
@@ -89,27 +89,27 @@ const std::map<std::string, ExternalSwitchInput>
 }();
 
 template<>
-const std::map<FirmwareMode, std::string>
+const std::unordered_map<FirmwareMode, std::string>
         enum_name_map<FirmwareMode>::mEnumToNameMap = []() {
-    return std::map<FirmwareMode, std::string>{
+    return std::unordered_map<FirmwareMode, std::string>{
             {FirmwareModeApplication, "Application"},
             {FirmwareModeBootloader,  "Bootloader"}
     };
 }();
 
 template<>
-const std::map<std::string, FirmwareMode>
+const std::unordered_map<std::string, FirmwareMode>
         enum_name_map<FirmwareMode>::mNameToEnumMap = []() {
-    return std::map<std::string, FirmwareMode>{
+    return std::unordered_map<std::string, FirmwareMode>{
             {"Application", FirmwareModeApplication},
             {"Bootloader",  FirmwareModeBootloader}
     };
 }();
 
 template<>
-const std::map<Gain, std::string>
+const std::unordered_map<Gain, std::string>
         enum_name_map<Gain>::mEnumToNameMap = []() {
-    return std::map<Gain, std::string>{
+    return std::unordered_map<Gain, std::string>{
             {Gain1, "Gain1"},
             {Gain2, "Gain2"},
             {Gain3, "Gain3"},
@@ -121,9 +121,9 @@ const std::map<Gain, std::string>
 }();
 
 template<>
-const std::map<std::string, Gain>
+const std::unordered_map<std::string, Gain>
         enum_name_map<Gain>::mNameToEnumMap = []() {
-    return std::map<std::string, Gain>{
+    return std::unordered_map<std::string, Gain>{
             {"Gain1", Gain1},
             {"Gain2", Gain2},
             {"Gain3", Gain3},
@@ -135,9 +135,9 @@ const std::map<std::string, Gain>
 }();
 
 template<>
-const std::map<MotionAssistantLimb, std::string>
+const std::unordered_map<MotionAssistantLimb, std::string>
         enum_name_map<MotionAssistantLimb>::mEnumToNameMap = []() {
-    return std::map<MotionAssistantLimb, std::string>{
+    return std::unordered_map<MotionAssistantLimb, std::string>{
             {MotionAssistantLimbRightLeg, "RightLeg"},
             {MotionAssistantLimbLeftLeg,  "LeftLeg"},
             {MotionAssistantLimbRightArm, "RightArm"},
@@ -146,9 +146,9 @@ const std::map<MotionAssistantLimb, std::string>
 }();
 
 template<>
-const std::map<std::string, MotionAssistantLimb>
+const std::unordered_map<std::string, MotionAssistantLimb>
         enum_name_map<MotionAssistantLimb>::mNameToEnumMap = []() {
-    return std::map<std::string, MotionAssistantLimb>{
+    return std::unordered_map<std::string, MotionAssistantLimb>{
             {"RightLeg", MotionAssistantLimbRightLeg},
             {"LeftLeg", MotionAssistantLimbLeftLeg},
             {"RightArm", MotionAssistantLimbRightArm},
@@ -158,9 +158,9 @@ const std::map<std::string, MotionAssistantLimb>
 
 
 template<>
-const std::map<StimulationDeviceState, std::string>
+const std::unordered_map<StimulationDeviceState, std::string>
         enum_name_map<StimulationDeviceState>::mEnumToNameMap = []() {
-    return std::map<StimulationDeviceState, std::string>{
+    return std::unordered_map<StimulationDeviceState, std::string>{
             {StateNoParams , "NoParams"},
             {StateDisabled,  "Disabled"},
             {StateEnabled, "Enabled"}
@@ -168,9 +168,9 @@ const std::map<StimulationDeviceState, std::string>
 }();
 
 template<>
-const std::map<std::string, StimulationDeviceState>
+const std::unordered_map<std::string, StimulationDeviceState>
         enum_name_map<StimulationDeviceState>::mNameToEnumMap = []() {
-    return std::map<std::string, StimulationDeviceState>{
+    return std::unordered_map<std::string, StimulationDeviceState>{
             {"NoParams", StateNoParams},
             {"Disabled", StateDisabled},
             {"Enabled", StateEnabled}
@@ -178,9 +178,9 @@ const std::map<std::string, StimulationDeviceState>
 }();
 
 template<>
-const std::map<SamplingFrequency, std::string>
+const std::unordered_map<SamplingFrequency, std::string>
         enum_name_map<SamplingFrequency>::mEnumToNameMap = []() {
-    return std::map<SamplingFrequency, std::string>{
+    return std::unordered_map<SamplingFrequency, std::string>{
             {SamplingFrequencyHz125,  "Hz125"},
             {SamplingFrequencyHz250,  "Hz250"},
             {SamplingFrequencyHz500,  "Hz500"},
@@ -192,9 +192,9 @@ const std::map<SamplingFrequency, std::string>
 }();
 
 template<>
-const std::map<std::string, SamplingFrequency>
+const std::unordered_map<std::string, SamplingFrequency>
         enum_name_map<SamplingFrequency>::mNameToEnumMap = []() {
-    return std::map<std::string, SamplingFrequency>{
+    return std::unordered_map<std::string, SamplingFrequency>{
             {"Hz125", SamplingFrequencyHz125},
             {"Hz250", SamplingFrequencyHz250},
             {"Hz500", SamplingFrequencyHz500},
@@ -206,9 +206,9 @@ const std::map<std::string, SamplingFrequency>
 }();
 
 template<>
-const std::map<ChannelType, std::string>
+const std::unordered_map<ChannelType, std::string>
         enum_name_map<ChannelType>::mEnumToNameMap = []() {
-    return std::map<ChannelType, std::string>{
+    return std::unordered_map<ChannelType, std::string>{
             {ChannelTypeSignal,          "Signal"},
             {ChannelTypeBattery,         "Battery"},
             {ChannelTypeElectrodesState, "ElectrodesState"},
@@ -223,9 +223,9 @@ const std::map<ChannelType, std::string>
 }();
 
 template<>
-const std::map<std::string, ChannelType>
+const std::unordered_map<std::string, ChannelType>
         enum_name_map<ChannelType>::mNameToEnumMap = []() {
-    return std::map<std::string, ChannelType>{
+    return std::unordered_map<std::string, ChannelType>{
             {"Signal",          ChannelTypeSignal},
             {"Battery",         ChannelTypeBattery},
             {"ElectrodesState", ChannelTypeElectrodesState},
@@ -241,27 +241,27 @@ const std::map<std::string, ChannelType>
 
 
 template<>
-const std::map<DeviceState, std::string>
+const std::unordered_map<DeviceState, std::string>
         enum_name_map<DeviceState>::mEnumToNameMap = []() {
-    return std::map<DeviceState, std::string>{
+    return std::unordered_map<DeviceState, std::string>{
             {DeviceStateConnected,    "Connected"},
             {DeviceStateDisconnected, "Disconnected"}
     };
 }();
 
 template<>
-const std::map<std::string, DeviceState>
+const std::unordered_map<std::string, DeviceState>
         enum_name_map<DeviceState>::mNameToEnumMap = []() {
-    return std::map<std::string, DeviceState>{
+    return std::unordered_map<std::string, DeviceState>{
             {"Connected",    DeviceStateConnected},
             {"Disconnected", DeviceStateDisconnected}
     };
 }();
 
 template<>
-const std::map<Command, std::string>
+const std::unordered_map<Command, std::string>
         enum_name_map<Command>::mEnumToNameMap = []() {
-    return std::map<Command, std::string>{
+    return std::unordered_map<Command, std::string>{
             {CommandStartSignal,           "StartSignal"},
             {CommandStopSignal,            "StopSignal"},
             {CommandStartResist,           "StartResist"},
@@ -279,9 +279,9 @@ const std::map<Command, std::string>
 }();
 
 template<>
-const std::map<std::string, Command>
+const std::unordered_map<std::string, Command>
         enum_name_map<Command>::mNameToEnumMap = []() {
-    return std::map<std::string, Command>{
+    return std::unordered_map<std::string, Command>{
             {"StartSignal",           CommandStartSignal},
             {"StopSignal",            CommandStopSignal},
             {"StartResist",           CommandStartResist},
@@ -299,9 +299,9 @@ const std::map<std::string, Command>
 }();
 
 template<>
-const std::map<Parameter, std::string>
+const std::unordered_map<Parameter, std::string>
         jni::enum_name_map<Parameter>::mEnumToNameMap = []() {
-    return std::map<Parameter, std::string>{
+    return std::unordered_map<Parameter, std::string>{
             {ParameterState,                    "State"},
             {ParameterName,                     "Name"},
             {ParameterAddress,                  "Address"},
@@ -323,9 +323,9 @@ const std::map<Parameter, std::string>
 }();
 
 template<>
-const std::map<std::string, Parameter>
+const std::unordered_map<std::string, Parameter>
         enum_name_map<Parameter>::mNameToEnumMap = []() {
-    return std::map<std::string, Parameter>{
+    return std::unordered_map<std::string, Parameter>{
             {"State",                    ParameterState},
             {"Name",                     ParameterName},
             {"Address",                  ParameterAddress},
@@ -347,9 +347,9 @@ const std::map<std::string, Parameter>
 }();
 
 template<>
-const std::map<ParamAccess, std::string>
+const std::unordered_map<ParamAccess, std::string>
         enum_name_map<ParamAccess>::mEnumToNameMap = []() {
-    return std::map<ParamAccess, std::string>{
+    return std::unordered_map<ParamAccess, std::string>{
             {Read,       "Read"},
             {ReadWrite,  "ReadWrite"},
             {ReadNotify, "ReadNotify"}
@@ -357,9 +357,9 @@ const std::map<ParamAccess, std::string>
 }();
 
 template<>
-const std::map<std::string, ParamAccess>
+const std::unordered_map<std::string, ParamAccess>
         enum_name_map<ParamAccess>::mNameToEnumMap = []() {
-    return std::map<std::string, ParamAccess>{
+    return std::unordered_map<std::string, ParamAccess>{
             {"Read",       Read},
             {"ReadWrite",  ReadWrite},
             {"ReadNotify", ReadNotify}

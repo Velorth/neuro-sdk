@@ -5,6 +5,43 @@
 #include <queue>
 #include "java_helper.h"
 
+
+GlobalClassRef::GlobalClassRef(JNIEnv *env, jclass java_class):
+        mEnv(env),
+        mClassRef(static_cast<jclass>(mEnv->NewGlobalRef(java_class))){}
+
+GlobalClassRef::~GlobalClassRef() {
+    mEnv->DeleteGlobalRef(mClassRef);
+}
+
+GlobalClassRef::operator jclass() const{
+    return mClassRef;
+}
+
+void emplace_class_ref(JNIEnv *env, std::unordered_map<std::string, GlobalClassRef> &map_to_emplace, std::string class_name){
+    auto classRef = env->FindClass(class_name.c_str());
+    if (classRef == nullptr){
+        __android_log_print(ANDROID_LOG_ERROR, "ClassMap", "Class %s not found", class_name.c_str());
+        return;
+    }
+    map_to_emplace.try_emplace(class_name, classRef);
+}
+
+auto create_classes_map(JNIEnv *env){
+    std::unordered_map<std::string, GlobalClassRef> classReferences;
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/channels/ChannelInfo");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/channels/ChannelType");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/Command");
+    return classReferences;
+};
+
+SdkJavaClasses::SdkJavaClasses(JNIEnv *env):
+        mClasses(create_classes_map(env)) {}
+
+const GlobalClassRef& SdkJavaClasses::fromClassName(const std::string &name) const {
+    return mClasses.at(name);
+}
+
 struct AttachedTaskQueue::Impl final {
     std::queue<std::function<void(JNIEnv *)>> mExecutionQueue;
     std::atomic<bool> mIsRunning{ true };
@@ -126,3 +163,4 @@ std::string getParamTypeName(Parameter param) {
             return "FirmwareVersion";
     }
 }
+

@@ -251,7 +251,7 @@ public class Device {
     private static native Command[] deviceAvailableCommands(long devicePtr);
     private static native Parameter[] deviceAvailableParameters(long devicePtr);
     private static native void deviceExecute(long devicePtr, Command command);
-    private static native long deviceSubscribeParamChanged(long devicePtr);
-    private static native long deviceSubscribeDoubleChannelDataReceived(long devicePtr, ChannelInfo info);
-    private static native long deviceSubscribeIntChannelDataReceived(long devicePtr, ChannelInfo info);
+    private native long deviceSubscribeParamChanged(long devicePtr);
+    private native long deviceSubscribeDoubleChannelDataReceived(long devicePtr, ChannelInfo info);
+    private native long deviceSubscribeIntChannelDataReceived(long devicePtr, ChannelInfo info);
 }

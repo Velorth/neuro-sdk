@@ -229,7 +229,7 @@ auto setArrayDataListener(const Neuro::DeviceSharedPtr &device, Device *device_p
 			std::copy(data.begin(), data.end(), dataArray.data_array);
 			callback(device_ptr, info, dataArray, user_data);
 		}
-	});
+	}, Neuro::ChannelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index));
 	if (listener == nullptr) {
 		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
 	}
@@ -248,7 +248,7 @@ auto setDataListener(const Neuro::DeviceSharedPtr &device, Device *device_ptr, C
 			dataArray.data_array[0] = data;
 			callback(device_ptr, info, dataArray, user_data);
 		}
-	});
+	}, Neuro::ChannelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index));
 	if (listener == nullptr) {
 		throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
 	}

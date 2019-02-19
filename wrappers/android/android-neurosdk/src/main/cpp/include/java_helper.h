@@ -5,7 +5,8 @@
 #include <jni.h>
 #include <android/log.h>
 #include <string>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include "sdk_error.h"
 #include "cparams.h"
 #include "cdevice.h"
@@ -30,6 +31,41 @@ static inline bool throw_if_error(JNIEnv *env, int result_code){
     }
     return true;
 }
+
+inline std::string get_class_name(JNIEnv *env, jclass clazz) {
+    jclass clazzz = env->GetObjectClass(clazz);
+    auto mid = env->GetMethodID(clazzz, "toString", "()Ljava/lang/String;");
+    jstring strObj = (jstring) env->CallObjectMethod(clazz, mid);
+
+    const char *str = env->GetStringUTFChars(strObj, NULL);
+    std::string res(str);
+
+    env->ReleaseStringUTFChars(strObj, str);
+    env->DeleteLocalRef(strObj);
+
+    return res;
+}
+
+struct GlobalClassRef{
+    explicit GlobalClassRef(JNIEnv *, jclass);
+    GlobalClassRef(const GlobalClassRef &) = delete;
+    GlobalClassRef& operator=(const GlobalClassRef &) = delete;
+    ~GlobalClassRef();
+
+    operator jclass() const;
+private:
+    JNIEnv *mEnv;
+    jclass mClassRef;
+};
+
+class SdkJavaClasses final {
+public:
+    SdkJavaClasses(JNIEnv *env);
+
+    const GlobalClassRef& fromClassName(const std::string &) const;
+private:
+    const std::unordered_map<std::string, GlobalClassRef> mClasses;
+};
 
 class AttachedTaskQueue final{
 public:
@@ -71,6 +107,11 @@ public:
         });
     }
 
+    template <typename VoidFuncEnvParam>
+    void execInJavaThread(VoidFuncEnvParam func){
+        mNotificationQueue.exec(func);
+    }
+
 private:
     jobject mJavaSubscriber;
     jmethodID mCallbackMethodId;
@@ -82,20 +123,6 @@ static inline ListenerHelper* make_listener_helper(JNIEnv *env, jobject subscrib
     auto subscriberClass = env->GetObjectClass(subscriber);
     auto callbackMethodId = env->GetMethodID(subscriberClass, callback_name, callback_signature);
     return new ListenerHelper(env, subscriber, callbackMethodId);
-}
-
-inline std::string get_class_name(JNIEnv *env, jclass clazz) {
-    jclass clazzz = env->GetObjectClass(clazz);
-    auto mid = env->GetMethodID(clazzz, "toString", "()Ljava/lang/String;");
-    jstring strObj = (jstring) env->CallObjectMethod(clazz, mid);
-
-    const char *str = env->GetStringUTFChars(strObj, NULL);
-    std::string res(str);
-
-    env->ReleaseStringUTFChars(strObj, str);
-    env->DeleteLocalRef(strObj);
-
-    return res;
 }
 
 static inline jobject get_enum_field_ref(JNIEnv *env, jclass enum_class, const char *name) {
@@ -120,8 +147,8 @@ public:
         return mNameToEnumMap.at(name);
     }
 private:
-    static const std::map<NativeEnum, std::string> mEnumToNameMap;
-    static const std::map<std::string, NativeEnum> mNameToEnumMap;
+    static const std::unordered_map<NativeEnum, std::string> mEnumToNameMap;
+    static const std::unordered_map<std::string, NativeEnum> mNameToEnumMap;
 };
 
 template <typename Enum>
@@ -137,116 +164,116 @@ Enum enum_from_java_obj(JNIEnv *env, jobject enum_obj){
 }
 
 template<>
-const std::map<DeviceState, std::string>
+const std::unordered_map<DeviceState, std::string>
         enum_name_map<DeviceState>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, DeviceState>
+const std::unordered_map<std::string, DeviceState>
         enum_name_map<DeviceState>::mNameToEnumMap;
 
 template<>
-const std::map<Command, std::string>
+const std::unordered_map<Command, std::string>
         enum_name_map<Command>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, Command>
+const std::unordered_map<std::string, Command>
         enum_name_map<Command>::mNameToEnumMap;
 
 template<>
-const std::map<Parameter, std::string>
+const std::unordered_map<Parameter, std::string>
         enum_name_map<Parameter>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, Parameter>
+const std::unordered_map<std::string, Parameter>
         enum_name_map<Parameter>::mNameToEnumMap;
 
 template<>
-const std::map<ParamAccess, std::string>
+const std::unordered_map<ParamAccess, std::string>
         enum_name_map<ParamAccess>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, ParamAccess>
+const std::unordered_map<std::string, ParamAccess>
         enum_name_map<ParamAccess>::mNameToEnumMap;
 
 template<>
-const std::map<ADCInput, std::string>
+const std::unordered_map<ADCInput, std::string>
         enum_name_map<ADCInput>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, ADCInput>
+const std::unordered_map<std::string, ADCInput>
         enum_name_map<ADCInput>::mNameToEnumMap;
 
 template<>
-const std::map<AccelerometerSensitivity , std::string>
+const std::unordered_map<AccelerometerSensitivity , std::string>
         enum_name_map<AccelerometerSensitivity>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, AccelerometerSensitivity >
+const std::unordered_map<std::string, AccelerometerSensitivity >
         enum_name_map<AccelerometerSensitivity>::mNameToEnumMap;
 
 
 template<>
-const std::map<GyroscopeSensitivity , std::string>
+const std::unordered_map<GyroscopeSensitivity , std::string>
         enum_name_map<GyroscopeSensitivity>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, GyroscopeSensitivity >
+const std::unordered_map<std::string, GyroscopeSensitivity >
         enum_name_map<GyroscopeSensitivity>::mNameToEnumMap;
 
 template<>
-const std::map<ExternalSwitchInput, std::string>
+const std::unordered_map<ExternalSwitchInput, std::string>
         enum_name_map<ExternalSwitchInput>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, ExternalSwitchInput>
+const std::unordered_map<std::string, ExternalSwitchInput>
         enum_name_map<ExternalSwitchInput>::mNameToEnumMap;
 
 
 template<>
-const std::map<FirmwareMode, std::string>
+const std::unordered_map<FirmwareMode, std::string>
         enum_name_map<FirmwareMode>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, FirmwareMode>
+const std::unordered_map<std::string, FirmwareMode>
         enum_name_map<FirmwareMode>::mNameToEnumMap;
 
 
 template<>
-const std::map<Gain, std::string>
+const std::unordered_map<Gain, std::string>
         enum_name_map<Gain>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, Gain>
+const std::unordered_map<std::string, Gain>
         enum_name_map<Gain>::mNameToEnumMap;
 
 
 template<>
-const std::map<MotionAssistantLimb, std::string>
+const std::unordered_map<MotionAssistantLimb, std::string>
         enum_name_map<MotionAssistantLimb>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, MotionAssistantLimb>
+const std::unordered_map<std::string, MotionAssistantLimb>
         enum_name_map<MotionAssistantLimb>::mNameToEnumMap;
 
 
 
 
 template<>
-const std::map<StimulatorAndMaState, std::string>
+const std::unordered_map<StimulatorAndMaState, std::string>
         enum_name_map<StimulatorAndMaState>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, StimulatorAndMaState>
+const std::unordered_map<std::string, StimulatorAndMaState>
         enum_name_map<StimulatorAndMaState>::mNameToEnumMap;
 
 
 
 template<>
-const std::map<SamplingFrequency, std::string>
+const std::unordered_map<SamplingFrequency, std::string>
         enum_name_map<SamplingFrequency>::mEnumToNameMap;
 
 template<>
-const std::map<std::string, SamplingFrequency>
+const std::unordered_map<std::string, SamplingFrequency>
         enum_name_map<SamplingFrequency>::mNameToEnumMap;
 
 
@@ -265,5 +292,7 @@ inline jobjectArray to_obj_array(JNIEnv *env, jclass element_class, const char *
 }
 
 std::string getParamTypeName(Parameter param);
+
+const SdkJavaClasses& global_class_refs();
 
 #endif
