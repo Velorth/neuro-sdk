@@ -57,7 +57,8 @@ namespace Neuro
         GyroscopeSens,
         StimulatorAndMAState,
         StimulatorParamPack,
-        MotionAssistantParamPack
+        MotionAssistantParamPack,
+        FirmwareVersion
     }
 
     public enum ParamAccess
@@ -151,14 +152,14 @@ namespace Neuro
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct StimulatorAndMAState
+    public struct StimulatorAndMAState
     {
         public StimulationDeviceState StimulatorState;
         public StimulationDeviceState MAState;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct MotionAssistantParams
+    public struct MotionAssistantParams
     {
         public int GyroStart;
         public int GyroStop;
@@ -167,12 +168,19 @@ namespace Neuro
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct StimulationParams
+    public struct StimulationParams
     {
         public int Current;
         public int PulseWidth;
         public int Frequency;
         public int StimulusDuration;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FirmwareVersion
+    {
+        public uint Version;
+        public uint Build;
     }
 
     public class ParameterTypeInfo
@@ -396,6 +404,15 @@ namespace Neuro
                         SdkError.ThrowIfError(device_set_MotionAssistantParamPack(device.DevicePtr, motionAssistantParams));
                     };
                     break;
+                case Parameter.FirmwareVersion:
+                    Type = typeof(FirmwareVersion);
+                    ReadParamValue = device =>
+                    {
+                        SdkError.ThrowIfError(device_read_FirmwareVersion(device.DevicePtr, out var firmwareVersion));
+                        return firmwareVersion;
+                    };
+                    SetParamValue = (device, value) => throw new InvalidOperationException("Unable to set firmware version. Parameter is read-only.");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
             }
@@ -448,6 +465,9 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_read_MotionAssistantParamPack(IntPtr devicePtr, out MotionAssistantParams outMaParams);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int device_read_FirmwareVersion(IntPtr devicePtr, out FirmwareVersion outFirmwareVersion);
 
 
 

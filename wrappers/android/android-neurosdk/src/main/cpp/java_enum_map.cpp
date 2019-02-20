@@ -300,7 +300,7 @@ const std::unordered_map<std::string, Command>
 
 template<>
 const std::unordered_map<Parameter, std::string>
-        jni::enum_name_map<Parameter>::mEnumToNameMap = []() {
+        enum_name_map<Parameter>::mEnumToNameMap = []() {
     return std::unordered_map<Parameter, std::string>{
             {ParameterState,                    "State"},
             {ParameterName,                     "Name"},

@@ -151,6 +151,11 @@ private:
     static const std::unordered_map<std::string, NativeEnum> mNameToEnumMap;
 };
 
+template <typename NativeEnum>
+std::string get_enum_name(NativeEnum nativeEnum){
+    return enum_name_map<NativeEnum>::name(nativeEnum);
+}
+
 template <typename Enum>
 Enum enum_from_java_obj(JNIEnv *env, jobject enum_obj){
     auto commandEnumClass = env->GetObjectClass(enum_obj);
@@ -276,6 +281,8 @@ template<>
 const std::unordered_map<std::string, SamplingFrequency>
         enum_name_map<SamplingFrequency>::mNameToEnumMap;
 
+
+ChannelInfo channel_info_from_jobject(JNIEnv *, jobject);
 
 template<typename T, typename F>
 inline jobjectArray to_obj_array(JNIEnv *env, jclass element_class, const char *constructor_signature, T *array, jsize size, F creation_func) {

@@ -127,6 +127,44 @@ void AttachedTaskQueue::exec(const std::function<void(JNIEnv *)> &task_function)
     mImpl->mQueueCondition.notify_one();
 }
 
+ChannelInfo channel_info_from_jobject(JNIEnv *env, jobject javaChannelInfo) {
+    auto getTypeMethod = env->GetMethodID(env->GetObjectClass(javaChannelInfo), "getType", "()Lcom/neuromd/neurosdk/channels/ChannelType;");
+    if (getTypeMethod == nullptr){
+        throw std::runtime_error("Method getName was not found in class ChannelInfo");
+    }
+
+    auto getNameMethod = env->GetMethodID(env->GetObjectClass(javaChannelInfo), "getName", "()Ljava/lang/String;");
+    if (getNameMethod == nullptr){
+        throw std::runtime_error("Method getName was not found in class ChannelInfo");
+    }
+
+    auto getIndexMethod = env->GetMethodID(env->GetObjectClass(javaChannelInfo), "getIndex", "()J");
+    if (getIndexMethod == nullptr){
+        throw std::runtime_error("Method getIndex was not found in class ChannelInfo");
+    }
+
+
+    auto javaTypeEnum = env->CallObjectMethod(javaChannelInfo, getTypeMethod);
+    auto channelType = enum_from_java_obj<ChannelType>(env, javaTypeEnum);
+
+    auto javaNameString = static_cast<jstring>(env->CallObjectMethod(javaChannelInfo, getNameMethod));
+    auto nameChars = env->GetStringUTFChars(javaNameString, 0);
+    auto name = std::string(nameChars);
+    env->ReleaseStringUTFChars(javaNameString, nameChars);
+
+    auto channelIndex = env->CallLongMethod(javaChannelInfo, getIndexMethod);
+    if (channelIndex < 0){
+        throw std::runtime_error("Channel index has invalid value");
+    }
+
+    ChannelInfo nativeChannelInfo;
+    nativeChannelInfo.type = channelType;
+    strcpy(nativeChannelInfo.name, name.c_str());
+    nativeChannelInfo.index = static_cast<size_t>(channelIndex);
+
+    return nativeChannelInfo;
+}
+
 std::string getParamTypeName(Parameter param) {
     switch (param){
         case ParameterName:
@@ -163,4 +201,5 @@ std::string getParamTypeName(Parameter param) {
             return "FirmwareVersion";
     }
 }
+
 

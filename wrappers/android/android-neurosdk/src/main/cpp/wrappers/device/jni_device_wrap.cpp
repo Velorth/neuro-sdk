@@ -19,7 +19,19 @@
 
 void onParamChanged(Device *device, Parameter parameter, void *listener_helper){
     auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
-    listenerHelper->notify(reinterpret_cast<jlong>(device), reinterpret_cast<jlong>(device));
+    listenerHelper->execInJavaThread([parameter](JNIEnv *env){
+        const auto& paramEnum = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/ParameterName;");
+        auto parameterName = get_enum_field_ref(env, paramEnum, get_enum_name(parameter).c_str());
+        listenerHelper->notify(reinterpret_cast<jlong>(device), parameterName);
+    });
+}
+
+void onDoubleDataReceived(Device *device, ChannelInfo info, DoubleDataArray data, void *listener_helper){
+    auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
+    listenerHelper->execInJavaThread([info, data](JNIEnv *env){
+
+        listenerHelper->notify(reinterpret_cast<jlong>(device), ...);
+    });
 }
 
 extern "C"
@@ -77,7 +89,7 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableChannels(JNIEnv *env, jclass, jl
                                              [&channelTypeClass](JNIEnv *env, jclass element_class,
                                                                 jmethodID constructor,
                                                                 ChannelInfo native_info) {
-            auto channelType = get_enum_field_ref(env, channelTypeClass, enum_name_map<ChannelType>::name(native_info.type).c_str());
+            auto channelType = get_enum_field_ref(env, channelTypeClass, get_enum_name(native_info.type).c_str());
             auto channelName = env->NewStringUTF(native_info.name);
             return env->NewObject(element_class, constructor, channelType, channelName, static_cast<jlong>(native_info.index));
         });
@@ -114,8 +126,7 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableCommands(JNIEnv *env, jclass, jl
 
         for (auto i = 0; i < commandArray.cmd_array_size; ++i) {
             env->PushLocalFrame(1);
-            auto commandJava = get_enum_field_ref(env, commandClass, enum_name_map<Command>::name(
-                    commandArray.cmd_array[i]).c_str());
+            auto commandJava = get_enum_field_ref(env, commandClass, get_enum_name(commandArray.cmd_array[i]).c_str());
             env->SetObjectArrayElement(commandJavaArray, i, commandJava);
             env->PopLocalFrame(nullptr);
         }
@@ -161,7 +172,7 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableParameters(JNIEnv *env, jclass, 
                                                    JNIEnv *env, jclass element_class,
                                                    jmethodID constructor,
                                                    ParameterInfo native_info) {
-            auto paramName = get_enum_field_ref(env, paramNameClass,enum_name_map<Parameter>::name(native_info.parameter).c_str());
+            auto paramName = get_enum_field_ref(env, paramNameClass, get_enum_name(native_info.parameter).c_str());
             return env->NewObject(element_class, constructor, paramName, paramAccessClass, paramTypeClass);
         });
 
@@ -191,8 +202,19 @@ Java_com_neuromd_neurosdk_Device_deviceSubscribeParamChanged(JNIEnv *env, jobjec
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject info) {
+Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject javaChannelInfo) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
 
+    try {
+        auto helperPtr = make_listener_helper(env, instance, "onDoubleDataReceived", "(JLcom/neuromd/neurosdk/channels/ChannelInfo;[D)V");
+        auto channelInfo = channel_info_from_jobject(env, javaChannelInfo);
+        throw_if_error(env, device_subscribe_double_channel_data_received(device, channelInfo, &onDoubleDataReceived, helperPtr->listnerHandlePointer(), helperPtr));
+        return reinterpret_cast<jlong>(helperPtr);
+    }
+    catch (std::exception &e){
+        java_throw(env, e.what());
+        return 0;
+    }
 }
 
 JNIEXPORT jlong JNICALL

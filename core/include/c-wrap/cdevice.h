@@ -45,9 +45,10 @@ typedef enum _Parameter{
 	ParameterADCInputState,
 	ParameterAccelerometerSens,
 	ParameterGyroscopeSens,
-	ParameterStimulatorAndMaState,
+	ParameterStimulatorAndMAState,
 	ParameterStimulatorParamPack,
-	ParameterMotionAssistantParamPack
+	ParameterMotionAssistantParamPack,
+	ParameterFirmwareVersion
 }Parameter;
 
 SDK_SHARED int parameter_to_string(Parameter param, char *buffer, size_t buffer_length);

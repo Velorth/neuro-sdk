@@ -98,6 +98,11 @@ typedef struct _StimulationParams {
 	int stimulus_duration;
 } StimulationParams;
 
+typedef struct _FirmwareVersion {
+	unsigned int version;
+	unsigned int build;
+} FirmwareVersion;
+
 SDK_SHARED int device_read_Name(Device *, char *out_name, size_t length);
 SDK_SHARED int device_read_State(Device *, DeviceState *out_state);
 SDK_SHARED int device_read_Address(Device *, char *out_address, size_t length);
@@ -114,6 +119,7 @@ SDK_SHARED int device_read_GyroscopeSens(Device *, GyroscopeSensitivity *out_gur
 SDK_SHARED int device_read_StimulatorAndMAState(Device *, StimulatorAndMaState *out_state);
 SDK_SHARED int device_read_StimulatorParamPack(Device *, StimulationParams *out_stimul_params);
 SDK_SHARED int device_read_MotionAssistantParamPack(Device *, MotionAssistantParams *out_ma_params);
+SDK_SHARED int device_read_FirmwareVersion(Device *, FirmwareVersion *out_firmware_version);
 
 SDK_SHARED int device_set_Name(Device *, const char *name);
 SDK_SHARED int device_set_State(Device *, DeviceState state);

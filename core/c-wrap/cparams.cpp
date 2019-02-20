@@ -282,6 +282,22 @@ ret_code device_read_MotionAssistantParamPack(Device *device_ptr, MotionAssistan
 	}
 }
 
+int device_read_FirmwareVersion(Device *device_ptr, FirmwareVersion* out_firmware_version) {
+	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+	try {
+		const auto value = device->readParam<Neuro::Parameter::FirmwareVersion>();
+		out_firmware_version->version = value.Version;
+		out_firmware_version->build = value.Build;
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
 
 
 ret_code device_set_Name(Device *device_ptr, const char* name) {
