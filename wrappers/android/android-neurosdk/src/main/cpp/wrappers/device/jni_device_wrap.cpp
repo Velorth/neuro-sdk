@@ -19,7 +19,7 @@
 
 void onParamChanged(Device *device, Parameter parameter, void *listener_helper){
     auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
-    listenerHelper->execInJavaThread([parameter](JNIEnv *env){
+    listenerHelper->execInJavaThread([parameter, listenerHelper](JNIEnv *env){
         const auto& paramEnum = global_class_refs().fromClassName("com/neuromd/neurosdk/parameters/ParameterName;");
         auto parameterName = get_enum_field_ref(env, paramEnum, get_enum_name(parameter).c_str());
         listenerHelper->notify(reinterpret_cast<jlong>(device), parameterName);
@@ -28,9 +28,31 @@ void onParamChanged(Device *device, Parameter parameter, void *listener_helper){
 
 void onDoubleDataReceived(Device *device, ChannelInfo info, DoubleDataArray data, void *listener_helper){
     auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
-    listenerHelper->execInJavaThread([info, data](JNIEnv *env){
+    listenerHelper->execInJavaThread([info, data, listenerHelper](JNIEnv *env){
+        try {
+            auto channelInfoObj = java_channel_info_from_native(env, info);
+            auto javaDoubleArray = java_array_from_DoubleDataArray(env, data);
+            listenerHelper->notify(reinterpret_cast<jlong>(device), channelInfoObj, javaDoubleArray);
+        }
+        catch (std::exception &e){
+            free_DoubleDataArray(data);
+            __android_log_print(ANDROID_LOG_ERROR, "DoubleDataReceived", "Unable to notify: %s", e.what());
+        }
+    });
+}
 
-        listenerHelper->notify(reinterpret_cast<jlong>(device), ...);
+void onIntDataReceived(Device *device, ChannelInfo info, IntDataArray data, void *listener_helper){
+    auto listenerHelper = reinterpret_cast<ListenerHelper *>(listener_helper);
+    listenerHelper->execInJavaThread([info, data, listenerHelper](JNIEnv *env){
+        try {
+            auto channelInfoObj = java_channel_info_from_native(env, info);
+            auto javaIntArray = java_array_from_IntDataArray(env, data);
+            listenerHelper->notify(reinterpret_cast<jlong>(device), channelInfoObj, javaIntArray);
+        }
+        catch (std::exception &e){
+            free_IntDataArray(data);
+            __android_log_print(ANDROID_LOG_ERROR, "IntDataReceived", "Unable to notify: %s", e.what());
+        }
     });
 }
 
@@ -204,7 +226,6 @@ Java_com_neuromd_neurosdk_Device_deviceSubscribeParamChanged(JNIEnv *env, jobjec
 JNIEXPORT jlong JNICALL
 Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject javaChannelInfo) {
     auto device = reinterpret_cast<Device *>(devicePtr);
-
     try {
         auto helperPtr = make_listener_helper(env, instance, "onDoubleDataReceived", "(JLcom/neuromd/neurosdk/channels/ChannelInfo;[D)V");
         auto channelInfo = channel_info_from_jobject(env, javaChannelInfo);
@@ -218,10 +239,18 @@ Java_com_neuromd_neurosdk_Device_deviceSubscribeDoubleChannelDataReceived(JNIEnv
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_Device_deviceSubscribeIntChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject info) {
-
-    // TODO
-
+Java_com_neuromd_neurosdk_Device_deviceSubscribeIntChannelDataReceived(JNIEnv *env, jobject instance, jlong devicePtr, jobject javaChannelInfo) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
+    try {
+        auto helperPtr = make_listener_helper(env, instance, "onIntDataReceived", "(JLcom/neuromd/neurosdk/channels/ChannelInfo;[I)V");
+        auto channelInfo = channel_info_from_jobject(env, javaChannelInfo);
+        throw_if_error(env, device_subscribe_int_channel_data_received(device, channelInfo, &onIntDataReceived, helperPtr->listnerHandlePointer(), helperPtr));
+        return reinterpret_cast<jlong>(helperPtr);
+    }
+    catch (std::exception &e){
+        java_throw(env, e.what());
+        return 0;
+    }
 }
 
 }

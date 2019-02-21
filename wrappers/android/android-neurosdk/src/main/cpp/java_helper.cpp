@@ -165,6 +165,38 @@ ChannelInfo channel_info_from_jobject(JNIEnv *env, jobject javaChannelInfo) {
     return nativeChannelInfo;
 }
 
+
+jobject java_channel_info_from_native(JNIEnv *env, ChannelInfo info) {
+    const auto& channelInfoClass = global_class_refs().fromClassName("com/neuromd/neurosdk/channels/ChannelInfo");
+    const auto& channelTypeClass = global_class_refs().fromClassName("com/neuromd/neurosdk/channels/ChannelType");
+    auto constructor = env->GetMethodID(channelInfoClass, "<init>", "(Lcom/neuromd/neurosdk/channels/ChannelInfo;Ljava/lang/String;J)V");
+    auto channelType = get_enum_field_ref(env, channelTypeClass, get_enum_name(info.type).c_str());
+    auto channelName = env->NewStringUTF(info.name);
+    return env->NewObject(channelInfoClass, constructor, channelType, channelName, static_cast<jlong>(info.index));
+}
+
+
+jdoubleArray java_array_from_DoubleDataArray(JNIEnv *env, DoubleDataArray data) {
+    if (data.samples_count > std::numeric_limits<jsize>::max()){
+        throw std::runtime_error("Native double array is too big");
+    }
+    auto javaArraySize = static_cast<jsize>(data.samples_count);
+    auto doubleDataArray = env->NewDoubleArray(javaArraySize);
+    env->SetDoubleArrayRegion(doubleDataArray, 0 , javaArraySize, data.data_array);
+    return doubleDataArray;
+}
+
+jintArray java_array_from_IntDataArray(JNIEnv *env, IntDataArray data) {
+    if (data.samples_count > std::numeric_limits<jsize>::max()){
+        throw std::runtime_error("Native double array is too big");
+    }
+    auto javaArraySize = static_cast<jsize>(data.samples_count);
+    auto intDataArray = env->NewIntArray(javaArraySize);
+    env->SetIntArrayRegion(intDataArray, 0 , javaArraySize, data.data_array);
+    return intDataArray;
+}
+
+
 std::string getParamTypeName(Parameter param) {
     switch (param){
         case ParameterName:
@@ -201,5 +233,6 @@ std::string getParamTypeName(Parameter param) {
             return "FirmwareVersion";
     }
 }
+
 
 

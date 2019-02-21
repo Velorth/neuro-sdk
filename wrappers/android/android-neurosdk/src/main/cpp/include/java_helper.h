@@ -284,6 +284,12 @@ const std::unordered_map<std::string, SamplingFrequency>
 
 ChannelInfo channel_info_from_jobject(JNIEnv *, jobject);
 
+jobject java_channel_info_from_native(JNIEnv *, ChannelInfo);
+
+jdoubleArray java_array_from_DoubleDataArray(JNIEnv *, DoubleDataArray);
+
+jintArray java_array_from_IntDataArray(JNIEnv *, IntDataArray);
+
 template<typename T, typename F>
 inline jobjectArray to_obj_array(JNIEnv *env, jclass element_class, const char *constructor_signature, T *array, jsize size, F creation_func) {
     auto objArray = env->NewObjectArray(size, element_class, nullptr);

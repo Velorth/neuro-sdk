@@ -302,13 +302,13 @@ void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &
             res += mResistBuffer[r];
         }
 
-        double average = res / (mResistBuffer.size() - 20) / 2;
+        double average = res / (mResistBuffer.size() - 20);
         res = 0;
         for (std::size_t r = 20; r < mResistBuffer.size(); r++) {
             res += std::abs(mResistBuffer[r] - average);
         }
         res = res / (mResistBuffer.size() - 20) / 24e-9;
-        res = std::abs(res / 2);
+        res = std::abs(res / 4);
         onResistanceCalculated(res);
     }
 }

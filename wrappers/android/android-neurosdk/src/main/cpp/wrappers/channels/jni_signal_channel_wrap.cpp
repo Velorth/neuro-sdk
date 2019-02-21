@@ -1,7 +1,4 @@
-#include "wrappers/channels/jni_signal_channel_wrap.h"
-#include "saturation_cast.h"
-#include "wrappers/channels/jni_channel_factory.h"
-#include "wrappers/device/jni_device_wrap.h"
+#include "java_helper.h"
 
 extern "C"
 {
