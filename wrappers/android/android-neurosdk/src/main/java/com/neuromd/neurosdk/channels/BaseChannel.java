@@ -10,28 +10,21 @@ import com.neuromd.neurosdk.Device;
  * Inherit from this class to create you own channel
  * @param <SampleType> Specifies type of data samples stored in channel buffer
  */
-public abstract class BaseChannel<SampleType> {
+public abstract class BaseChannel {
 
     /**
      * Subscribe this event to receive notifications about changes of total length of data
      */
     public final SubscribersNotifier<Long> dataLengthChanged = new SubscribersNotifier<>();
 
+
+    public abstract long channelPtr();
+
     /**
      * Returns channel information
      * @return Channel info
      */
     public abstract ChannelInfo info();
-
-    /**
-     * Requests data from channel buffer with specified offset and length, which must be set
-     * in terms of totalLength parameter
-     * If there is no enough data to read from buffer, nonexistent samples will be filled with zeros
-     * @param offset shift of date in channel buffer relative to total length.
-     * @param length length of data to read
-     * @return data array with channel samples
-     */
-    public abstract SampleType[] readData(long offset, long length);
 
     /**
      * Returns total length of data been added to channel buffer. This value indicates how much data

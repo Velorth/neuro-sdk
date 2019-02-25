@@ -32,6 +32,19 @@ auto create_classes_map(JNIEnv *env){
     emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/channels/ChannelInfo");
     emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/channels/ChannelType");
     emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/Command");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/ParameterAccess;");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/ParameterName;");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/ParameterType;");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/Parameter;");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/StimulatorDeviceState$State");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/StimulatorDeviceState");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/StimulationParams");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/MotionAssistantLimb");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/MotionAssistantParams");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/ADCInput");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/ExternalSwitchInput");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/Gain");
+    emplace_class_ref(env, classReferences, "com/neuromd/neurosdk/parameters/types/DeviceState");
     return classReferences;
 };
 
