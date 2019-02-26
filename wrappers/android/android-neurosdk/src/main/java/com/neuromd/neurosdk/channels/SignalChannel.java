@@ -1,75 +1,81 @@
 package com.neuromd.neurosdk.channels;
 
-import com.neuromd.common.Assert;
 import com.neuromd.neurosdk.Device;
 
 
 /**
  * Built-in channel containing signal samples of one physical channel of device
  */
-public class SignalChannel extends BaseChannel<Double> {
+public class SignalChannel extends BaseChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
 
-    protected long mNativeObjPtr = 0;
+    private final Device mDevice; //store device reference to prevent its deletion
+    private final AnyChannel mAnyChannel;
+    private final DoubleDataChannel mDataChannel;
+    private final AnyChannelLengthChangedCallback lengthChangedCallback = new AnyChannelLengthChangedCallback() {
+        @Override
+        public void onDataLengthChanged(long dataLength) {
+            dataLengthChanged.sendNotification(this, dataLength);
+        }
+    };
 
-    public SignalChannel(Device device) {
-        mNativeObjPtr = create(device);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Signal channel native object is null");
-        init();
+    public SignalChannel(Device device)
+    {
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createSignalDoubleChannel(device.devicePtr()), lengthChangedCallback);
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-    public SignalChannel(Device device, ChannelInfo info) {
-        mNativeObjPtr = createWithInfo(device, info);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Signal channel native object is null");
-        init();
+    public SignalChannel(Device device, ChannelInfo info)
+    {
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createSignalDoubleChannelInfo(device.devicePtr(), info), lengthChangedCallback);
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-    public SignalChannel(Device device, Filter[] filters) {
-        mNativeObjPtr = createWithFilters(device, filters);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Signal channel native object is null");
-        init();
+    public SignalChannel(Device device, ChannelInfo info, Filter[] filters)
+    {
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createSignalDoubleChannelInfoFilters(device.devicePtr(), info, filters), lengthChangedCallback);
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-    public SignalChannel(Device device, Filter[] filters, ChannelInfo info) {
-        mNativeObjPtr = createWithFiltersAndInfo(device, filters, info);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Signal channel native object is null");
-        init();
+    public SignalChannel(Device device, Filter[] filters)
+    {
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createSignalDoubleChannelFilters(device.devicePtr(), filters), lengthChangedCallback);
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
+    public ChannelInfo info(){
+        return mAnyChannel.info();
     }
 
-    @Override
-    public native ChannelInfo info();
+    public long totalLength() {
+        return mAnyChannel.totalLength();
+    }
 
-    @Override
-    public native Double[] readData(long offset, long length);
+    public long bufferSize() {
+        return SignalDoubleChannelGetBufferSize(channelPtr());
+    }
 
-    @Override
-    public native long totalLength();
+    public float samplingFrequency(){
+        return mAnyChannel.samplingFrequency();
+    }
 
-    public native long bufferSize();
+    public long channelPtr(){
+        return mAnyChannel.channelPtr();
+    }
 
-    @Override
-    public native float samplingFrequency();
+    public double[] readData(int offset, int length) {
+        return mDataChannel.readData(offset, length);
+    }
 
-    public native Device underlyingDevice();
-
-    public native double[] readFast(long offset, long length);
-    
-    private static native long create(Device device);
-    private static native long createWithInfo(Device device, ChannelInfo info);
-    private static native long createWithFilters(Device device, Filter[] filters);
-    private static native long createWithFiltersAndInfo(Device device, Filter[] filters, ChannelInfo info);
-    private native void init();
-    private native void deleteNative();
+    private static native long createSignalDoubleChannel(long devicePtr);
+    private static native long createSignalDoubleChannelInfo(long devicePtr, ChannelInfo info);
+    private static native long createSignalDoubleChannelInfoFilters(long devicePtr, ChannelInfo info, Filter[] filtersArray);
+    private static native long createSignalDoubleChannelFilters(long devicePtr, Filter[] filtersArray);
+    private static native long SignalDoubleChannelGetBufferSize(long signalChannelPtr);
 }

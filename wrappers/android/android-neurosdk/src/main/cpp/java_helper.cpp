@@ -189,26 +189,38 @@ jobject java_channel_info_from_native(JNIEnv *env, ChannelInfo info) {
 }
 
 
-jdoubleArray java_array_from_DoubleDataArray(JNIEnv *env, DoubleDataArray data) {
-    if (data.samples_count > std::numeric_limits<jsize>::max()){
+jdoubleArray java_array_from_DoubleDataArray(JNIEnv *env, double *data, size_t count) {
+    if (count > std::numeric_limits<jsize>::max()){
         throw std::runtime_error("Native double array is too big");
     }
-    auto javaArraySize = static_cast<jsize>(data.samples_count);
+    auto javaArraySize = static_cast<jsize>(count);
     auto doubleDataArray = env->NewDoubleArray(javaArraySize);
-    env->SetDoubleArrayRegion(doubleDataArray, 0 , javaArraySize, data.data_array);
+    env->SetDoubleArrayRegion(doubleDataArray, 0 , javaArraySize, data);
     return doubleDataArray;
 }
 
-jintArray java_array_from_IntDataArray(JNIEnv *env, IntDataArray data) {
-    if (data.samples_count > std::numeric_limits<jsize>::max()){
+jintArray java_array_from_IntDataArray(JNIEnv *env, int *data, size_t count) {
+    if (count > std::numeric_limits<jsize>::max()){
         throw std::runtime_error("Native double array is too big");
     }
-    auto javaArraySize = static_cast<jsize>(data.samples_count);
+    auto javaArraySize = static_cast<jsize>(count);
     auto intDataArray = env->NewIntArray(javaArraySize);
-    env->SetIntArrayRegion(intDataArray, 0 , javaArraySize, data.data_array);
+    env->SetIntArrayRegion(intDataArray, 0 , javaArraySize, data);
     return intDataArray;
 }
 
+std::vector<Filter> filters_from_java_array(JNIEnv *env, jobjectArray filterArray) {
+    auto arrayLength = env->GetArrayLength(filterArray);
+    if (arrayLength < 0) {
+        return std::vector<Filter>();
+    }
+    std::vector<Filter> filters(static_cast<size_t>(arrayLength));
+    for (auto i = 0; i < arrayLength; ++i){
+        filters[i] = enum_from_java_obj<Filter>(env, env->GetObjectArrayElement(filterArray, i));
+    }
+
+    return filters;
+}
 
 std::string getParamTypeName(Parameter param) {
     switch (param){
@@ -246,6 +258,10 @@ std::string getParamTypeName(Parameter param) {
             return "FirmwareVersion";
     }
 }
+
+
+
+
 
 
 

@@ -1,130 +1,93 @@
 #include "java_helper.h"
+#include "csignal-channel.h"
 
 extern "C"
-{
-
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_create(JNIEnv *env, jclass type,
-                                                         jobject device) {
-    return createChannelFromDevice<JniSignalChannelWrap>(env, device);
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_createWithInfo(JNIEnv *env, jclass type,
-                                                                jobject device, jobject info) {
-    return createChannelFromDevice<JniSignalChannelWrap>(env, device, info);
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_createWithFiltersAndInfo(JNIEnv *env, jclass type,
-                                                                jobject device, jobjectArray filters, jobject info) {
-    return createChannelFromDevice<JniSignalChannelWrap>(env, device, info, filters);
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_createWithFilters(JNIEnv *env, jclass type,
-                                                                          jobject device, jobjectArray filters) {
-    return createChannelFromDevice<JniSignalChannelWrap>(env, device, filters);
-}
-
-JNIEXPORT jobject
-JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_info(JNIEnv *env, jobject instance) {
-
-    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    auto channelInfo = &signalChannelWrap->info();
-    return jni::java_object<decltype(channelInfo)>(channelInfo);
-}
-
-JNIEXPORT void
-JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_init(JNIEnv *env, jobject instance) {
-
-    auto signalChannelWrap = extract_pointer<JniSignalChannelWrap>(env, instance);
-    signalChannelWrap->subscribeLengthChanged(
-            find_notifier<decltype(signalChannelWrap)>(instance, "dataLengthChanged"));
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_deleteNative(JNIEnv *env, jobject instance) {
-    deleteNativeObject<JniSignalChannelWrap>(env, instance);
-}
-
-JNIEXPORT jobject JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    auto devicePtr = signalChannelWrap->underlyingDevice().lock();
-    if (!devicePtr){
-        return nullptr;
+Java_com_neuromd_neurosdk_channels_SignalChannel_createSignalDoubleChannel(JNIEnv *env, jclass, jlong devicePtr) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
+    auto signalChannel = create_SignalDoubleChannel(device);
+    if (signalChannel == nullptr){
+        char errorMsg[256];
+        sdk_last_error_msg(errorMsg, 256);
+        java_throw(env, errorMsg);
+        return 0;
     }
-    auto deviceWrap = new JniDeviceWrap(devicePtr);
-    return jni::java_object<decltype(deviceWrap)>(deviceWrap);
+    return reinterpret_cast<jlong>(signalChannel);
 }
 
-JNIEXPORT jfloat JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_samplingFrequency(JNIEnv *env,
-                                                                    jobject instance) {
-    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    return signalChannelWrap->samplingFrequency();
-}
-
+extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    return saturation_cast<jlong>(signalChannelWrap->bufferSize());
-}
+Java_com_neuromd_neurosdk_channels_SignalChannel_createSignalDoubleChannelInfo(JNIEnv *env, jclass, jlong devicePtr, jobject info) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
 
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-    return saturation_cast<jlong>(signalChannelWrap->totalLength());
-}
-
-JNIEXPORT jobjectArray JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_readData(JNIEnv *env, jobject instance,
-                                                           jlong offset, jlong length) {
-    try {
-        auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-        auto data = signalChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
-        return jni::to_obj_array(env, data);
+    try{
+        auto channelInfo = channel_info_from_jobject(env, info);
+        auto signalChannel = create_SignalDoubleChannel_info(device, channelInfo);
+        if (signalChannel == nullptr){
+            char errorMsg[256];
+            sdk_last_error_msg(errorMsg, 256);
+            java_throw(env, errorMsg);
+            return 0;
+        }
+        return reinterpret_cast<jlong>(signalChannel);
     }
     catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
+        java_throw(env, e.what());
+        return 0;
     }
 }
 
-JNIEXPORT jdoubleArray JNICALL
-Java_com_neuromd_neurosdk_channels_SignalChannel_readFast(JNIEnv *env, jobject instance,
-                                                          jlong offset, jlong length) {
-    try {
-        auto &signalChannelWrap = *extract_pointer<JniSignalChannelWrap>(env, instance);
-        auto data = signalChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_createSignalDoubleChannelInfoFilters(JNIEnv *env, jclass, jlong devicePtr, jobject info, jobjectArray filtersArray) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
 
-        auto dataSize = saturation_cast<jsize>(data.size());
-        auto doubleArray = env->NewDoubleArray(dataSize);
-
-        env->SetDoubleArrayRegion(doubleArray, 0, dataSize, data.data());
-        return doubleArray;
+    try{
+        auto channelInfo = channel_info_from_jobject(env, info);
+        auto filters = filters_from_java_array(env, filtersArray);
+        auto signalChannel = create_SignalDoubleChannel_info_filters(device, channelInfo, filters.data(), filters.size());
+        if (signalChannel == nullptr){
+            char errorMsg[256];
+            sdk_last_error_msg(errorMsg, 256);
+            java_throw(env, errorMsg);
+            return 0;
+        }
+        return reinterpret_cast<jlong>(signalChannel);
     }
     catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
+        java_throw(env, e.what());
+        return 0;
     }
 }
 
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_createSignalDoubleChannelFilters(JNIEnv *env, jclass, jlong devicePtr, jobjectArray filtersArray) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
+
+    try{
+        auto filters = filters_from_java_array(env, filtersArray);
+        auto signalChannel = create_SignalDoubleChannel_filters(device, filters.data(), filters.size());
+        if (signalChannel == nullptr){
+            char errorMsg[256];
+            sdk_last_error_msg(errorMsg, 256);
+            java_throw(env, errorMsg);
+            return 0;
+        }
+        return reinterpret_cast<jlong>(signalChannel);
+    }
+    catch (std::exception &e){
+        java_throw(env, e.what());
+        return 0;
+    }
 }
 
-void JniSignalChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
-    lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    mListener = this->object->subscribeLengthChanged([weakReference](auto length) {
-        JNIEnv *env;
-        jni::get_env(&env);
-        env->PushLocalFrame(1);
-        sendNotification<long>(env, weakReference, length);
-        env->PopLocalFrame(nullptr);
-    });
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_SignalChannel_SignalDoubleChannelGetBufferSize(JNIEnv *env, jclass, jlong signalChannelPtr) {
+    auto signalChannel = reinterpret_cast<SignalDoubleChannel *>(signalChannelPtr);
+    size_t bufferSize;
+    throw_if_error(env, SignalDoubleChannel_get_buffer_size(signalChannel, &bufferSize));
+    return bufferSize;
 }

@@ -31,7 +31,7 @@ void onDoubleDataReceived(Device *device, ChannelInfo info, DoubleDataArray data
     listenerHelper->execInJavaThread([info, data, listenerHelper](JNIEnv *env){
         try {
             auto channelInfoObj = java_channel_info_from_native(env, info);
-            auto javaDoubleArray = java_array_from_DoubleDataArray(env, data);
+            auto javaDoubleArray = java_array_from_DoubleDataArray(env, data.data_array, data.samples_count);
             listenerHelper->notify(reinterpret_cast<jlong>(device), channelInfoObj, javaDoubleArray);
         }
         catch (std::exception &e){
@@ -46,7 +46,7 @@ void onIntDataReceived(Device *device, ChannelInfo info, IntDataArray data, void
     listenerHelper->execInJavaThread([info, data, listenerHelper](JNIEnv *env){
         try {
             auto channelInfoObj = java_channel_info_from_native(env, info);
-            auto javaIntArray = java_array_from_IntDataArray(env, data);
+            auto javaIntArray = java_array_from_IntDataArray(env, data.data_array, data.samples_count);
             listenerHelper->notify(reinterpret_cast<jlong>(device), channelInfoObj, javaIntArray);
         }
         catch (std::exception &e){
@@ -108,12 +108,10 @@ Java_com_neuromd_neurosdk_Device_deviceAvailableChannels(JNIEnv *env, jclass, jl
                                              "(Lcom/neuromd/neurosdk/channels/ChannelInfo;Ljava/lang/String;J)V",
                                              channelsArray.info_array,
                                              static_cast<jint>(channelsArray.info_count),
-                                             [&channelTypeClass](JNIEnv *env, jclass element_class,
-                                                                jmethodID constructor,
+                                             [&channelTypeClass](JNIEnv *env, jclass,
+                                                                jmethodID,
                                                                 ChannelInfo native_info) {
-            auto channelType = get_enum_field_ref(env, channelTypeClass, get_enum_name(native_info.type).c_str());
-            auto channelName = env->NewStringUTF(native_info.name);
-            return env->NewObject(element_class, constructor, channelType, channelName, static_cast<jlong>(native_info.index));
+            return java_channel_info_from_native(env, native_info);
         });
 
         free_ChannelInfoArray(channelsArray);

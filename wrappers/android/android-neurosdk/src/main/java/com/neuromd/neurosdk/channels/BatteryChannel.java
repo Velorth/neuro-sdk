@@ -1,47 +1,55 @@
 package com.neuromd.neurosdk.channels;
 
-import com.neuromd.common.Assert;
 import com.neuromd.neurosdk.Device;
 
 /**
  * Built-in channel containing battery charge data
  */
-public class BatteryChannel extends BaseChannel<Integer> {
+public class BatteryChannel extends BaseChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
 
-    protected long mNativeObjPtr = 0;
+    private final Device mDevice; //store device reference to prevent its deletion
+    private final AnyChannel mAnyChannel;
+    private final IntDataChannel mDataChannel;
 
-    public BatteryChannel(Device device) {
-        mNativeObjPtr = create(device);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Battery channel native object is null");
-        init();
+    public BatteryChannel(Device device)
+    {
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createBatteryIntChannel(device.devicePtr()), new AnyChannelLengthChangedCallback() {
+            @Override
+            public void onDataLengthChanged(long dataLength) {
+                dataLengthChanged.sendNotification(this, dataLength);
+            }
+        });
+        mDataChannel = new IntDataChannel(mAnyChannel);
     }
 
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
+    public ChannelInfo info(){
+        return mAnyChannel.info();
     }
 
-    @Override
-    public native ChannelInfo info();
+    public long totalLength() {
+        return mAnyChannel.totalLength();
+    }
 
-    @Override
-    public native Integer[] readData(long offset, long length);
+    public long bufferSize() {
+        return BatteryIntChannelGetBufferSize(channelPtr());
+    }
 
-    @Override
-    public native long totalLength();
+    public float samplingFrequency(){
+        return mAnyChannel.samplingFrequency();
+    }
 
-    public native long bufferSize();
+    public long channelPtr(){
+        return mAnyChannel.channelPtr();
+    }
 
-    @Override
-    public native float samplingFrequency();
+    public int[] readData(int offset, int length) {
+        return mDataChannel.readData(offset, length);
+    }
 
-    public native Device underlyingDevice();
-
-    private static native long create(Device device);
-    private native void init();
-    private native void deleteNative();
+    private static native long createBatteryIntChannel(long devicePtr);
+    private static native long BatteryIntChannelGetBufferSize(long batteryChannelPtr);
 }

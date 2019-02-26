@@ -5,6 +5,7 @@
 #include <jni.h>
 #include <android/log.h>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <unordered_set>
 #include "sdk_error.h"
@@ -282,13 +283,24 @@ const std::unordered_map<std::string, SamplingFrequency>
         enum_name_map<SamplingFrequency>::mNameToEnumMap;
 
 
+template<>
+const std::unordered_map<Filter, std::string>
+        enum_name_map<Filter>::mEnumToNameMap;
+
+template<>
+const std::unordered_map<std::string, Filter>
+        enum_name_map<Filter>::mNameToEnumMap;
+
+
 ChannelInfo channel_info_from_jobject(JNIEnv *, jobject);
 
 jobject java_channel_info_from_native(JNIEnv *, ChannelInfo);
 
-jdoubleArray java_array_from_DoubleDataArray(JNIEnv *, DoubleDataArray);
+jdoubleArray java_array_from_DoubleDataArray(JNIEnv *, double*, size_t);
 
-jintArray java_array_from_IntDataArray(JNIEnv *, IntDataArray);
+jintArray java_array_from_IntDataArray(JNIEnv *, int*, size_t);
+
+std::vector<Filter> filters_from_java_array(JNIEnv *, jobjectArray);
 
 template<typename T, typename F>
 inline jobjectArray to_obj_array(JNIEnv *env, jclass element_class, const char *constructor_signature, T *array, jsize size, F creation_func) {

@@ -365,3 +365,55 @@ const std::unordered_map<std::string, ParamAccess>
             {"ReadNotify", ReadNotify}
     };
 }();
+
+template<>
+const std::unordered_map<Filter, std::string>
+        enum_name_map<Filter>::mEnumToNameMap = []() {
+    return std::unordered_map<Filter, std::string>{
+            {LowPass_1Hz_SF125,             "LowPass_1Hz_SF125"},
+            {LowPass_1Hz_SF125_Reverse,     "LowPass_1Hz_SF125_Reverse"},
+            {LowPass_5Hz_SF125_Reverse,     "LowPass_5Hz_SF125_Reverse"},
+            {LowPass_15Hz_SF125,            "LowPass_15Hz_SF125"},
+            {LowPass_15Hz_SF125_Reverse,    "LowPass_15Hz_SF125_Reverse"},
+            {LowPass_27Hz_SF125,            "LowPass_27Hz_SF125"},
+            {LowPass_27Hz_SF125_Reverse,    "LowPass_27Hz_SF125_Reverse"},
+            {LowPass_30Hz_SF250,            "LowPass_30Hz_SF250"},
+            {LowPass_30Hz_SF250_Reverse,    "LowPass_30Hz_SF250_Reverse"},
+            {HighPass_2Hz_SF250,            "HighPass_2Hz_SF250"},
+            {HighPass_2Hz_SF250_Reverse,    "HighPass_2Hz_SF250_Reverse"},
+            {HighPass_3Hz_SF125,            "HighPass_3Hz_SF125"},
+            {HighPass_3Hz_SF125_Reverse,    "HighPass_3Hz_SF125_Reverse"},
+            {HighPass_5Hz_SF125,            "HighPass_5Hz_SF125"},
+            {HighPass_5Hz_SF125_Reverse,    "HighPass_5Hz_SF125_Reverse"},
+            {HighPass_11Hz_SF125,           "HighPass_11Hz_SF125"},
+            {HighPass_11Hz_SF125_Reverse,   "HighPass_11Hz_SF125_Reverse"},
+            {BandStop_45_55Hz_SF250,        "BandStop_45_55Hz_SF250"},
+            {LowPass_5Hz_SF125,             "LowPass_5Hz_SF125"}
+    };
+}();
+
+template<>
+const std::unordered_map<std::string, Filter>
+        enum_name_map<Filter>::mNameToEnumMap = []() {
+    return std::unordered_map<std::string, Filter>{
+            {"LowPass_1Hz_SF125",           LowPass_1Hz_SF125},
+            {"LowPass_1Hz_SF125_Reverse",   LowPass_1Hz_SF125_Reverse},
+            {"LowPass_5Hz_SF125_Reverse",   LowPass_5Hz_SF125_Reverse},
+            {"LowPass_15Hz_SF125",          LowPass_15Hz_SF125},
+            {"LowPass_15Hz_SF125_Reverse",  LowPass_15Hz_SF125_Reverse},
+            {"LowPass_27Hz_SF125",          LowPass_27Hz_SF125},
+            {"LowPass_27Hz_SF125_Reverse",  LowPass_27Hz_SF125_Reverse},
+            {"LowPass_30Hz_SF250",          LowPass_30Hz_SF250},
+            {"LowPass_30Hz_SF250_Reverse",  LowPass_30Hz_SF250_Reverse},
+            {"HighPass_2Hz_SF250",          HighPass_2Hz_SF250},
+            {"HighPass_2Hz_SF250_Reverse",  HighPass_2Hz_SF250_Reverse},
+            {"HighPass_3Hz_SF125",          HighPass_3Hz_SF125},
+            {"HighPass_3Hz_SF125_Reverse",  HighPass_3Hz_SF125_Reverse},
+            {"HighPass_5Hz_SF125",          HighPass_5Hz_SF125},
+            {"HighPass_5Hz_SF125_Reverse",  HighPass_5Hz_SF125_Reverse},
+            {"HighPass_11Hz_SF125",         HighPass_11Hz_SF125},
+            {"HighPass_11Hz_SF125_Reverse", HighPass_11Hz_SF125_Reverse},
+            {"BandStop_45_55Hz_SF250",      BandStop_45_55Hz_SF250},
+            {"LowPass_5Hz_SF125",           LowPass_5Hz_SF125}
+    };
+}();
