@@ -1,115 +1,33 @@
-#include "wrappers/channels/jni_resistance_channel_wrap.h"
-#include "saturation_cast.h"
-#include "wrappers/channels/jni_channel_factory.h"
-#include "wrappers/device/jni_device_wrap.h"
+#include "java_helper.h"
+#include "cresistance-channel.h"
 
 extern "C"
-{
-
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_createWithInfo(JNIEnv *env, jclass type,
-                                                                jobject device, jobject info) {
-    return createChannelFromDevice<JniResistanceChannelWrap>(env, device, info);
-}
+Java_com_neuromd_neurosdk_channels_ResistanceChannel_createResistanceDoubleChannelInfo(JNIEnv *env, jclass, jlong devicePtr, jobject info) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
 
-JNIEXPORT jobject
-JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_info(JNIEnv *env, jobject instance) {
-
-    auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-    auto channelInfo = &resistanceChannelWrap->info();
-    return jni::java_object<decltype(channelInfo)>(channelInfo);
-}
-
-JNIEXPORT void
-JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_init(JNIEnv *env, jobject instance) {
-
-    auto resistanceChannelWrap = extract_pointer<JniResistanceChannelWrap>(env, instance);
-    resistanceChannelWrap->subscribeLengthChanged(
-            find_notifier<decltype(resistanceChannelWrap)>(instance, "dataLengthChanged"));
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_deleteNative(JNIEnv *env, jobject instance) {
-    deleteNativeObject<JniResistanceChannelWrap>(env, instance);
-}
-
-JNIEXPORT jobject JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-    auto devicePtr = resistanceChannelWrap->underlyingDevice().lock();
-    if (!devicePtr){
-        return nullptr;
-    }
-    auto deviceWrap = new JniDeviceWrap(devicePtr);
-    return jni::java_object<decltype(deviceWrap)>(deviceWrap);
-}
-
-JNIEXPORT jfloat JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_samplingFrequency(JNIEnv *env,
-                                                                    jobject instance) {
-    auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-    return resistanceChannelWrap->samplingFrequency();
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-    return saturation_cast<jlong>(resistanceChannelWrap->bufferSize());
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-    return saturation_cast<jlong>(resistanceChannelWrap->totalLength());
-}
-
-JNIEXPORT jobjectArray JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_readData(JNIEnv *env, jobject instance,
-                                                           jlong offset, jlong length) {
-    try {
-        auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-        auto data = resistanceChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
-        return jni::to_obj_array(env, data);
+    try{
+        auto channelInfo = channel_info_from_jobject(env, info);
+        auto resistChannel = create_ResistanceDoubleChannel_info(device, channelInfo);
+        if (resistChannel == nullptr){
+            char errorMsg[256];
+            sdk_last_error_msg(errorMsg, 256);
+            java_throw(env, errorMsg);
+            return 0;
+        }
+        return reinterpret_cast<jlong>(resistChannel);
     }
     catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
+        java_throw(env, e.what());
+        return 0;
     }
 }
 
-JNIEXPORT jdoubleArray JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_readFast(JNIEnv *env, jobject instance,
-                                                          jlong offset, jlong length) {
-    try {
-        auto &resistanceChannelWrap = *extract_pointer<JniResistanceChannelWrap>(env, instance);
-        auto data = resistanceChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
-
-        auto dataSize = saturation_cast<jsize>(data.size());
-        auto doubleArray = env->NewDoubleArray(dataSize);
-
-        env->SetDoubleArrayRegion(doubleArray, 0, dataSize, data.data());
-        return doubleArray;
-    }
-    catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
-    }
-}
-
-}
-
-void JniResistanceChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
-    lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    mListener = this->object->subscribeLengthChanged([weakReference](auto length) {
-        JNIEnv *env;
-        jni::get_env(&env);
-        env->PushLocalFrame(1);
-        sendNotification<long>(env, weakReference, length);
-        env->PopLocalFrame(nullptr);
-    });
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_ResistanceChannel_ResistanceDoubleChannelGetBufferSize(JNIEnv *env, jclass, jlong resistChannelPtr) {
+    auto resistChannel = reinterpret_cast<ResistanceDoubleChannel *>(resistChannelPtr);
+    size_t bufferSize;
+    throw_if_error(env, ResistanceDoubleChannel_get_buffer_size(resistChannel, &bufferSize));
+    return bufferSize;
 }

@@ -1,44 +1,51 @@
 package com.neuromd.neurosdk.channels;
 
-import com.neuromd.common.Assert;
 import com.neuromd.neurosdk.Device;
 
-public class RespirationChannel extends BaseChannel<Double> {
+public class RespirationChannel extends BaseDoubleChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
 
-    protected long mNativeObjPtr = 0;
+    private final Device mDevice; //store device reference to prevent its deletion
+    private final AnyChannel mAnyChannel;
+    private final DoubleDataChannel mDataChannel;
 
     public RespirationChannel(Device device) {
-        mNativeObjPtr = create(device);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Respiration channel native object is null");
-        init();
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createRespirationDoubleChannelInfo(device.devicePtr()), new AnyChannelLengthChangedCallback() {
+            @Override
+            public void onDataLengthChanged(long dataLength) {
+                dataLengthChanged.sendNotification(this, dataLength);
+            }
+        });
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
+    public ChannelInfo info(){
+        return mAnyChannel.info();
     }
 
-    @Override
-    public native ChannelInfo info();
+    public long totalLength() {
+        return mAnyChannel.totalLength();
+    }
 
-    @Override
-    public native Double[] readData(long offset, long length);
+    public long bufferSize() {
+        return RespirationDoubleChannelGetBufferSize(channelPtr());
+    }
 
-    @Override
-    public native long totalLength();
+    public float samplingFrequency(){
+        return mAnyChannel.samplingFrequency();
+    }
 
-    public native long bufferSize();
+    public long channelPtr(){
+        return mAnyChannel.channelPtr();
+    }
 
-    @Override
-    public native float samplingFrequency();
+    public double[] readData(long offset, long length) {
+        return mDataChannel.readData(offset, length);
+    }
 
-    public native Device underlyingDevice();
-
-    private static native long create(Device device);
-    private native void init();
-    private native void deleteNative();
+    private static native long createRespirationDoubleChannelInfo(long devicePtr);
+    private static native long RespirationDoubleChannelGetBufferSize(long respChannelPtr);
 }

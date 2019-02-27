@@ -1,44 +1,54 @@
 package com.neuromd.neurosdk.channels;
 
-import com.neuromd.common.Assert;
-import com.neuromd.neurosdk.Device;
-
-public class SpectrumChannel extends BaseChannel<Double> {
+public class SpectrumChannel extends BaseDoubleChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
-    
-    protected long mNativeObjPtr = 0;
-    
-    public SpectrumChannel(BaseChannel<Double> channel) {
-        mNativeObjPtr = createFromChannel(channel);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Spectrum channel native object is null");
-        init();
-    }
-    
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
-    }
-    
-    @Override
-    public native ChannelInfo info();
-    
-    @Override
-    public native Double[] readData(long offset, long length);
-    
-    @Override
-    public native long totalLength();
 
-    @Override
-    public native float samplingFrequency();
+    private final BaseChannel mChannel; //store device reference to prevent its deletion
+    private final AnyChannel mAnyChannel;
+    private final DoubleDataChannel mDataChannel;
 
-    public native double[] readFast(long offset, long length);
-    
-    public native double hzPerSpectrumSample();
-    
-    private static native long createFromChannel(BaseChannel<Double> channel);
-    private native void init();
-    private native void deleteNative();
+    public SpectrumChannel(BaseDoubleChannel channel) {
+        mChannel = channel;
+        mAnyChannel = new AnyChannel(createSpectrumDoubleChannel(mChannel.channelPtr()), new AnyChannelLengthChangedCallback() {
+            @Override
+            public void onDataLengthChanged(long dataLength) {
+                dataLengthChanged.sendNotification(this, dataLength);
+            }
+        });
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
+    }
+
+    public ChannelInfo info(){
+        return mAnyChannel.info();
+    }
+
+    public long totalLength() {
+        return mAnyChannel.totalLength();
+    }
+
+    public float samplingFrequency(){
+        return mAnyChannel.samplingFrequency();
+    }
+
+    public long channelPtr(){
+        return mAnyChannel.channelPtr();
+    }
+
+    public double[] readData(long offset, long length) {
+        return mDataChannel.readData(offset, length);
+    }
+
+    public double hzPerSpectrumSample() {
+        return SpectrumDoubleChannelGetHzPerSpectrumSample(mAnyChannel.channelPtr());
+    }
+
+    public long spectrumLength() {
+        return SpectrumDoubleChannelGetSpectrumLength(mAnyChannel.channelPtr());
+    }
+
+    private static native long createSpectrumDoubleChannel(long channelPtr);
+    private static native double SpectrumDoubleChannelGetHzPerSpectrumSample(long spectrumChannelPtr);
+    private static native long SpectrumDoubleChannelGetSpectrumLength(long spectrumChannelPtr);
 }

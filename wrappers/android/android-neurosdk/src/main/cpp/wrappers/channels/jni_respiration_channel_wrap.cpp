@@ -1,93 +1,33 @@
-#include "wrappers/channels/jni_respiration_channel_wrap.h"
-#include "saturation_cast.h"
-#include "wrappers/channels/jni_channel_factory.h"
-#include "wrappers/device/jni_device_wrap.h"
+#include "java_helper.h"
+/*#include "crespiration-channel.h"
 
 extern "C"
-{
-
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_create(JNIEnv *env, jclass type,
-                                                         jobject device) {
-    return createChannelFromDevice<JniRespirationChannelWrap>(env, device);
-}
+Java_com_neuromd_neurosdk_channels_ResistanceChannel_createResistanceDoubleChannelInfo(JNIEnv *env, jclass, jlong devicePtr, jobject info) {
+    auto device = reinterpret_cast<Device *>(devicePtr);
 
-JNIEXPORT jobject
-JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_info(JNIEnv *env, jobject instance) {
-
-    auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-    auto channelInfo = &respChannelWrap->info();
-    return jni::java_object<decltype(channelInfo)>(channelInfo);
-}
-
-JNIEXPORT void
-JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_init(JNIEnv *env, jobject instance) {
-
-    auto respChannelWrap = extract_pointer<JniRespirationChannelWrap>(env, instance);
-    respChannelWrap->subscribeLengthChanged(
-            find_notifier<decltype(respChannelWrap)>(instance, "dataLengthChanged"));
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_deleteNative(JNIEnv *env, jobject instance) {
-    deleteNativeObject<JniRespirationChannelWrap>(env, instance);
-}
-
-JNIEXPORT jobject JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_underlyingDevice(JNIEnv *env, jobject instance) {
-    auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-    auto devicePtr = respChannelWrap->underlyingDevice().lock();
-    if (!devicePtr){
-        return nullptr;
-    }
-    auto deviceWrap = new JniDeviceWrap(devicePtr);
-    return jni::java_object<decltype(deviceWrap)>(deviceWrap);;
-}
-
-JNIEXPORT jfloat JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_samplingFrequency(JNIEnv *env,
-                                                                    jobject instance) {
-    auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-    return respChannelWrap->samplingFrequency();
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_bufferSize(JNIEnv *env, jobject instance) {
-    auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-    return saturation_cast<jlong>(respChannelWrap->bufferSize());
-}
-
-JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-    return saturation_cast<jlong>(respChannelWrap->totalLength());
-}
-
-JNIEXPORT jobjectArray JNICALL
-Java_com_neuromd_neurosdk_channels_RespirationChannel_readData(JNIEnv *env, jobject instance,
-                                                           jlong offset, jlong length) {
-    try {
-        auto &respChannelWrap = *extract_pointer<JniRespirationChannelWrap>(env, instance);
-        auto data = respChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                              saturation_cast<Neuro::data_length_t>(length));
-        return jni::to_obj_array(env, data);
+    try{
+        auto channelInfo = channel_info_from_jobject(env, info);
+        auto resistChannel = create_ResistanceDoubleChannel_info(device, channelInfo);
+        if (resistChannel == nullptr){
+            char errorMsg[256];
+            sdk_last_error_msg(errorMsg, 256);
+            java_throw(env, errorMsg);
+            return 0;
+        }
+        return reinterpret_cast<jlong>(resistChannel);
     }
     catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
+        java_throw(env, e.what());
+        return 0;
     }
 }
 
-}
-
-void JniRespirationChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
-    lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    mListener = this->object->subscribeLengthChanged([weakReference](auto length){
-        jni::call_in_attached_thread([&weakReference, &length](auto env){
-            sendNotification<long>(env, weakReference, length);
-        });
-    });
-}
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_neuromd_neurosdk_channels_ResistanceChannel_ResistanceDoubleChannelGetBufferSize(JNIEnv *env, jclass, jlong resistChannelPtr) {
+    auto resistChannel = reinterpret_cast<ResistanceDoubleChannel *>(resistChannelPtr);
+    size_t bufferSize;
+    throw_if_error(env, ResistanceDoubleChannel_get_buffer_size(resistChannel, &bufferSize));
+    return bufferSize;
+}*/

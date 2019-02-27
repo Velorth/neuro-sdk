@@ -6,7 +6,7 @@ import com.neuromd.neurosdk.Device;
 /**
  * Built-in channel containing signal samples of one physical channel of device
  */
-public class SignalChannel extends BaseChannel {
+public class SignalChannel extends BaseDoubleChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
@@ -69,7 +69,7 @@ public class SignalChannel extends BaseChannel {
         return mAnyChannel.channelPtr();
     }
 
-    public double[] readData(int offset, int length) {
+    public double[] readData(long offset, long length) {
         return mDataChannel.readData(offset, length);
     }
 

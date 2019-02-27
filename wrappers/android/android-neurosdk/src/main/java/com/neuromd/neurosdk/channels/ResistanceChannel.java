@@ -1,50 +1,55 @@
 package com.neuromd.neurosdk.channels;
 
-import com.neuromd.common.Assert;
 import com.neuromd.neurosdk.Device;
 
 
 /**
- * Built-in channel containing signal samples of one physical channel of device
+ * Built-in channel containing resistance samples of one physical channel of device
  */
-public class ResistanceChannel extends BaseChannel<Double> {
+public class ResistanceChannel extends BaseDoubleChannel {
     static {
         System.loadLibrary("android-neurosdk");
     }
 
-    protected long mNativeObjPtr = 0;
+    private final Device mDevice; //store device reference to prevent its deletion
+    private final AnyChannel mAnyChannel;
+    private final DoubleDataChannel mDataChannel;
 
     public ResistanceChannel(Device device, ChannelInfo info) {
-        mNativeObjPtr = createWithInfo(device, info);
-        Assert.ensures(mNativeObjPtr != 0,
-                "Signal channel native object is null");
-        init();
+        mDevice = device;
+        mAnyChannel = new AnyChannel(createResistanceDoubleChannelInfo(device.devicePtr(), info), new AnyChannelLengthChangedCallback() {
+            @Override
+            public void onDataLengthChanged(long dataLength) {
+                dataLengthChanged.sendNotification(this, dataLength);
+            }
+        });
+        mDataChannel = new DoubleDataChannel(mAnyChannel);
     }
 
-    public void finalize() throws Throwable {
-        deleteNative();
-        super.finalize();
+    public ChannelInfo info(){
+        return mAnyChannel.info();
     }
 
-    @Override
-    public native ChannelInfo info();
+    public long totalLength() {
+        return mAnyChannel.totalLength();
+    }
 
-    @Override
-    public native Double[] readData(long offset, long length);
+    public long bufferSize() {
+        return ResistanceDoubleChannelGetBufferSize(channelPtr());
+    }
 
-    @Override
-    public native long totalLength();
+    public float samplingFrequency(){
+        return mAnyChannel.samplingFrequency();
+    }
 
-    public native long bufferSize();
+    public long channelPtr(){
+        return mAnyChannel.channelPtr();
+    }
 
-    @Override
-    public native float samplingFrequency();
+    public double[] readData(long offset, long length) {
+        return mDataChannel.readData(offset, length);
+    }
 
-    public native Device underlyingDevice();
-
-    public native double[] readFast(long offset, long length);
-    
-    private static native long createWithInfo(Device device, ChannelInfo info);
-    private native void init();
-    private native void deleteNative();
+    private static native long createResistanceDoubleChannelInfo(long devicePtr, ChannelInfo info);
+    private static native long ResistanceDoubleChannelGetBufferSize(long resistChannelPtr);
 }

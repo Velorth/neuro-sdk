@@ -1,117 +1,34 @@
-#include "wrappers/channels/jni_signal_channel_wrap.h"
-#include "wrappers/channels/jni_spectrum_channel_wrap.h"
-#include "saturation_cast.h"
-#include "wrappers/channels/jni_channel_factory.h"
-#include "wrappers/device/jni_device_wrap.h"
+#include "java_helper.h"
+#include "cspectrum-channel.h"
 
 extern "C"
-{
-
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_createFromChannel(JNIEnv *env, jclass type,
-                                                         jobject src_channel) {
-    auto& srcChannelWrapPtr = *extract_pointer<JniSignalChannelWrap>(env, src_channel);
-    try {
-        auto channel = std::make_shared<typename JniSpectrumChannelWrap::obj_t>(*srcChannelWrapPtr);
-        auto channelWrap = new JniSpectrumChannelWrap(channel);
-        return reinterpret_cast<jlong>(channelWrap);
-    }
-    catch (std::exception &e){
-        __android_log_print(ANDROID_LOG_ERROR, "CreateChannelFromChannel",
-                            "Error creating channel: %s", e.what());
-        jni::java_throw(env, "java/lang/IllegalArgumentException", e);
+Java_com_neuromd_neurosdk_channels_SpectrumChannel_createSpectrumDoubleChannel(JNIEnv *env, jclass, jlong channelPtr) {
+    auto doubleChannel = reinterpret_cast<DoubleChannel *>(channelPtr);
+    auto signalChannel = create_SpectrumDoubleChannel(doubleChannel);
+    if (signalChannel == nullptr){
+        char errorMsg[256];
+        sdk_last_error_msg(errorMsg, 256);
+        java_throw(env, errorMsg);
         return 0;
     }
+    return reinterpret_cast<jlong>(signalChannel);
 }
 
-JNIEXPORT jobject
-JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_info(JNIEnv *env, jobject instance) {
-
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    auto channelInfo = &spectrumChannelWrap->info();
-    return jni::java_object<decltype(channelInfo)>(channelInfo);
-}
-
-JNIEXPORT void
-JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_init(JNIEnv *env, jobject instance) {
-
-    auto spectrumChannelWrap = extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    spectrumChannelWrap->subscribeLengthChanged(
-            find_notifier<decltype(spectrumChannelWrap)>(instance, "dataLengthChanged"));
-}
-
-JNIEXPORT void JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_deleteNative(JNIEnv *env, jobject instance) {
-    deleteNativeObject<JniSpectrumChannelWrap>(env, instance);
-}
-
-JNIEXPORT jfloat JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_samplingFrequency(JNIEnv *env,
-                                                                    jobject instance) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    return spectrumChannelWrap->samplingFrequency();
-}
-
+extern "C"
 JNIEXPORT jdouble JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_hzPerSpectrumSample(JNIEnv *env,
-                                                                     jobject instance) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    return spectrumChannelWrap->hzPerSpectrumSample();
+Java_com_neuromd_neurosdk_channels_SpectrumChannel_SpectrumDoubleChannelGetHzPerSpectrumSample(JNIEnv *env, jclass, jlong spectrumChannelPtr) {
+    auto spectrumChannel = reinterpret_cast<SpectrumDoubleChannel *>(spectrumChannelPtr);
+    double hzPerSample;
+    throw_if_error(env, SpectrumDoubleChannel_get_hz_per_spectrum_sample(spectrumChannel, &hzPerSample));
+    return hzPerSample;
 }
 
+extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_totalLength(JNIEnv *env, jobject instance) {
-    auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-    return saturation_cast<jlong>(spectrumChannelWrap->totalLength());
-}
-
-JNIEXPORT jobjectArray JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_readData(JNIEnv *env, jobject instance,
-                                                           jlong offset, jlong length) {
-    try {
-        auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-        auto data = spectrumChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
-        return jni::to_obj_array(env, data);
-    }
-    catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
-    }
-}
-
-JNIEXPORT jdoubleArray JNICALL
-Java_com_neuromd_neurosdk_channels_SpectrumChannel_readFast(JNIEnv *env, jobject instance,
-                                                          jlong offset, jlong length) {
-    try {
-        auto &spectrumChannelWrap = *extract_pointer<JniSpectrumChannelWrap>(env, instance);
-        auto data = spectrumChannelWrap->readData(saturation_cast<Neuro::data_offset_t>(offset),
-                                                saturation_cast<Neuro::data_length_t>(length));
-
-        auto dataSize = saturation_cast<jsize>(data.size());
-        auto doubleArray = env->NewDoubleArray(dataSize);
-
-        env->SetDoubleArrayRegion(doubleArray, 0, dataSize, data.data());
-        return doubleArray;
-    }
-    catch (std::exception &e){
-        jni::java_throw(env, "UnsupportedOperationException", e);
-        return nullptr;
-    }
-}
-
-}
-
-void JniSpectrumChannelWrap::subscribeLengthChanged(jobject stateChangedSubscriberRef) {
-    lengthChangedGlobalSubscriberRef = jni::make_global_ref_ptr(stateChangedSubscriberRef);
-    std::weak_ptr<jni::jobject_t> weakReference = lengthChangedGlobalSubscriberRef;
-    mListener = this->object->subscribeLengthChanged([weakReference](auto length){
-        JNIEnv *env;
-        jni::get_env(&env);
-        env->PushLocalFrame(2);
-        sendNotification<long>(env, weakReference, length);
-        env->PopLocalFrame(nullptr);
-    });
+Java_com_neuromd_neurosdk_channels_SpectrumChannel_SpectrumDoubleChannelGetSpectrumLength(JNIEnv *env, jclass, jlong spectrumChannelPtr) {
+    auto spectrumChannel = reinterpret_cast<SpectrumDoubleChannel *>(spectrumChannelPtr);
+    size_t spectrumLength;
+    throw_if_error(env, SpectrumDoubleChannel_get_spectrum_length(spectrumChannel, &spectrumLength));
+    return spectrumLength;
 }
