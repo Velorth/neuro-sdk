@@ -7,13 +7,11 @@ namespace Neuro
     {
         private readonly IDataChannel<double> _sourceChannel; //store source channel reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
-        private readonly DataChannel<double> _dataChannel;
 
         public SpectrumChannel(IDataChannel<double> channel)
         {
             _sourceChannel = channel;
             _anyChannel = new AnyChannel(create_SpectrumDoubleChannel(channel.ChannelPtr));
-            _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
         }
 
@@ -29,7 +27,17 @@ namespace Neuro
 
         public double[] ReadData(int offset, int length)
         {
-            return _dataChannel.ReadData(offset, length);
+            var bufferSize = SpectrumLength * Marshal.SizeOf<double>();
+            var bufferPtr = Marshal.AllocHGlobal(bufferSize);
+            try
+            {
+                SdkError.ThrowIfError(NativeDataReadFunction.DoubleChannel_read_data(_anyChannel.ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr, (IntPtr)bufferSize, out var dataRead));
+                return new NativeArrayMarshaler<double>().MarshalArray(bufferPtr, dataRead);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(bufferPtr);
+            }
         }
 
         public double HzPerSpectrumSample

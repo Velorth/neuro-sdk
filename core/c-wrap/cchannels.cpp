@@ -56,16 +56,16 @@ int AnyChannel_get_total_length(AnyChannel* channel, size_t* out_length) {
 
 using IntChannelWrapperPtr = std::shared_ptr<DataChannelWrapper<int>>;
 
-int IntChannel_read_data(IntChannel *channel, size_t offset, size_t length, int *out_buffer) {
+int IntChannel_read_data(IntChannel *channel, size_t offset, size_t length, int *out_buffer, size_t buffer_size, size_t *samples_read) {
 	auto& intChannel = *reinterpret_cast<IntChannelWrapperPtr *>(channel);
-	return readChannelData(*intChannel, offset, length, out_buffer);
+	return readChannelData(*intChannel, offset, length, out_buffer, buffer_size, samples_read);
 }
 
 
 
 using DoubleChannelWrapperPtr = std::shared_ptr<DataChannelWrapper<double>>;
 
-int DoubleChannel_read_data(DoubleChannel *channel, size_t offset, size_t length, double *out_buffer) {
+int DoubleChannel_read_data(DoubleChannel *channel, size_t offset, size_t length, double *out_buffer, size_t buffer_size, size_t *samples_read) {
 	auto& doubleChannel = *reinterpret_cast<DoubleChannelWrapperPtr *>(channel);
-	return readChannelData(*doubleChannel, offset, length, out_buffer);
+	return readChannelData(*doubleChannel, offset, length, out_buffer, buffer_size, samples_read);
 }

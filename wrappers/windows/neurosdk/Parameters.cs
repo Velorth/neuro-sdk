@@ -37,7 +37,7 @@ namespace Neuro
     struct CommandArray
     {
         public IntPtr CmdArray;
-        public UIntPtr CmdArraySize;
+        public IntPtr CmdArraySize;
     }
 
     public enum Parameter
@@ -79,7 +79,7 @@ namespace Neuro
     struct ParamInfoArray
     {
         public IntPtr InfoArray;
-        public UIntPtr InfoCount;
+        public IntPtr InfoCount;
     }
 
     public enum SamplingFrequency

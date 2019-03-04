@@ -88,14 +88,15 @@ SDK_SHARED std::unique_ptr<DSP::DigitalFilter<double>> createFilter(Filter filte
 SDK_SHARED std::unique_ptr<DSP::DigitalFilter<double>> getCompoundFilter(Filter *filters, size_t filter_count);
 
 template <typename Channel>
-int readChannelData(const Channel &channel, size_t offset, size_t length, typename Channel::DataType *out_buffer) {
+int readChannelData(const Channel &channel, size_t offset, size_t length, typename Channel::DataType *out_buffer, size_t buffer_size, size_t *samples_read) {
 	try {
 		auto data = channel.readData(offset, length);
-		if (data.size() > length) {
-			set_sdk_last_error("Read data length is greater than requested");
+		if (data.size() > buffer_size) {
+			set_sdk_last_error("Read data length is greater than read buffer size");
 			return ERROR_EXCEPTION_WITH_MESSAGE;
 		}
 		std::copy(data.begin(), data.end(), out_buffer);
+		*samples_read = data.size();
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

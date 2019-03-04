@@ -27,13 +27,13 @@ namespace Neuro
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public string Name;
         public ChannelType Type;
-        public UIntPtr Index;
+        public IntPtr Index;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct ChannelInfoArray
     {
         public IntPtr InfoArray;
-        public UIntPtr InfoCount;
+        public IntPtr InfoCount;
     }
 }

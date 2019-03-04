@@ -1,14 +1,14 @@
 #include "java_helper.h"
-/*#include "crespiration-channel.h"
+#include "crespiration-channel.h"
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_createResistanceDoubleChannelInfo(JNIEnv *env, jclass, jlong devicePtr, jobject info) {
+Java_com_neuromd_neurosdk_channels_RespirationChannel_createRespirationDoubleChannel(JNIEnv *env, jclass, jlong devicePtr) {
     auto device = reinterpret_cast<Device *>(devicePtr);
 
     try{
         auto channelInfo = channel_info_from_jobject(env, info);
-        auto resistChannel = create_ResistanceDoubleChannel_info(device, channelInfo);
+        auto resistChannel = create_RespirationDoubleChannel(device);
         if (resistChannel == nullptr){
             char errorMsg[256];
             sdk_last_error_msg(errorMsg, 256);
@@ -25,9 +25,9 @@ Java_com_neuromd_neurosdk_channels_ResistanceChannel_createResistanceDoubleChann
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_neuromd_neurosdk_channels_ResistanceChannel_ResistanceDoubleChannelGetBufferSize(JNIEnv *env, jclass, jlong resistChannelPtr) {
-    auto resistChannel = reinterpret_cast<ResistanceDoubleChannel *>(resistChannelPtr);
+Java_com_neuromd_neurosdk_channels_RespirationChannel_RespirationDoubleChannelGetBufferSize(JNIEnv *env, jclass, jlong resistChannelPtr) {
+    auto resistChannel = reinterpret_cast<RespirationDoubleChannel *>(resistChannelPtr);
     size_t bufferSize;
-    throw_if_error(env, ResistanceDoubleChannel_get_buffer_size(resistChannel, &bufferSize));
+    throw_if_error(env, RespirationDoubleChannel_get_buffer_size(resistChannel, &bufferSize));
     return bufferSize;
-}*/
+}

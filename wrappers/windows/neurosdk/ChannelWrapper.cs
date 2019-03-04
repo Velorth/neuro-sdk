@@ -105,7 +105,7 @@ namespace Neuro
 
     internal class NativeChannelDataReader<T>
     {
-        private delegate int ReaderFuncDelegate(IntPtr signalChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
+        private delegate int ReaderFuncDelegate(IntPtr signalChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer, IntPtr bufferSize, out IntPtr dataRead);
 
         private readonly ReaderFuncDelegate _readerFunc;
         private readonly NativeArrayMarshaler<T> _arrayMarshaler;
@@ -118,11 +118,12 @@ namespace Neuro
 
         internal T[] ReadChannelData(IntPtr channelPtr, int offset, int length)
         {
-            var bufferPtr = Marshal.AllocHGlobal(length * Marshal.SizeOf<T>());
+            var bufferSize = length * Marshal.SizeOf<T>();
+            var bufferPtr = Marshal.AllocHGlobal(bufferSize);
             try
             {
-                SdkError.ThrowIfError(_readerFunc(channelPtr, (IntPtr) offset, (IntPtr) length, bufferPtr));
-                return _arrayMarshaler.MarshalArray(bufferPtr, (UIntPtr)length);
+                SdkError.ThrowIfError(_readerFunc(channelPtr, (IntPtr) offset, (IntPtr) length, bufferPtr, (IntPtr)bufferSize, out var dataRead));
+                return _arrayMarshaler.MarshalArray(bufferPtr, dataRead);
             }
             finally
             {
@@ -150,10 +151,10 @@ namespace Neuro
     {
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int IntChannel_read_data(IntPtr signalChannelPtr, IntPtr offset, IntPtr length,
-            IntPtr buffer);
+            IntPtr buffer, IntPtr bufferSize, out IntPtr dataRead);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int DoubleChannel_read_data(IntPtr signalChannelPtr, IntPtr offset, IntPtr length,
-            IntPtr buffer);
+            IntPtr buffer, IntPtr bufferSize, out IntPtr dataRead);
     }
 }

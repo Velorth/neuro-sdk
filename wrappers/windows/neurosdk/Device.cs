@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class Device
+    public class Device : IDisposable
     {
         private readonly IntPtr _paramChangedListenerPtr;
         private readonly DeviceParamChangedFunc _paramChangedFunc;
@@ -35,11 +35,22 @@ namespace Neuro
             _intDataReceivedFunc = OnIntDataReceived;
         }
 
-        ~Device()
+        private void ReleaseUnmanagedResources()
         {
             RemoveAllCahnnelListeners();
             free_listener_handle(_paramChangedListenerPtr);
             device_delete(DevicePtr);
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~Device()
+        {
+            ReleaseUnmanagedResources();
         }
 
         public IEnumerable<ChannelInfo> Channels
@@ -277,14 +288,14 @@ namespace Neuro
         private struct DoubleDataArray
         {
             public IntPtr DoubleArray;
-            public UIntPtr SamplesCount;
+            public IntPtr SamplesCount;
         }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct IntDataArray
         {
             public IntPtr IntArray;
-            public UIntPtr SamplesCount;
+            public IntPtr SamplesCount;
         }
     }
 }

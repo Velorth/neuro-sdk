@@ -12,19 +12,19 @@ namespace Neuro
             _marshaler = typeof(T).IsPrimitive ? (IMarshaler) new PrimitiveMarshaller() : new StructEnumMarshaller();
         }
 
-        public T[] MarshalArray(IntPtr firstElementPtr, UIntPtr elementCount)
+        public T[] MarshalArray(IntPtr firstElementPtr, IntPtr elementCount)
         {
             return _marshaler.MarshalArray(firstElementPtr, elementCount);
         }
 
         private interface IMarshaler
         {
-            T[] MarshalArray(IntPtr firstElementPtr, UIntPtr elementCount);
+            T[] MarshalArray(IntPtr firstElementPtr, IntPtr elementCount);
         }
 
         private class PrimitiveMarshaller : IMarshaler
         {
-            private delegate T[] PrimitiveArrayCopyDelegate(IntPtr firstElementPtr, UIntPtr elementCount);
+            private delegate T[] PrimitiveArrayCopyDelegate(IntPtr firstElementPtr, IntPtr elementCount);
 
             private readonly PrimitiveArrayCopyDelegate _copyFunction;
 
@@ -33,7 +33,7 @@ namespace Neuro
                 _copyFunction = GetCopyFunctionForType(typeof(T));
             }
 
-            public T[] MarshalArray(IntPtr firstElementPtr, UIntPtr elementCount)
+            public T[] MarshalArray(IntPtr firstElementPtr, IntPtr elementCount)
             {
                 var resultArray = _copyFunction(firstElementPtr, elementCount);
                 return resultArray ??
@@ -54,16 +54,16 @@ namespace Neuro
                 throw new ArgumentException($"There is no reader function for type {type.Name}");
             }
 
-            private static T[] CopyDouble(IntPtr firstElementPtr, UIntPtr elementCount)
+            private static T[] CopyDouble(IntPtr firstElementPtr, IntPtr elementCount)
             {
-                var buffer = new double[elementCount.ToUInt32()];
+                var buffer = new double[elementCount.ToInt32()];
                 Marshal.Copy(firstElementPtr, buffer, 0, (int)elementCount);
                 return buffer as T[];
             }
 
-            private static T[] CopyInt(IntPtr firstElementPtr, UIntPtr elementCount)
+            private static T[] CopyInt(IntPtr firstElementPtr, IntPtr elementCount)
             {
-                var buffer = new int[elementCount.ToUInt32()];
+                var buffer = new int[elementCount.ToInt32()];
                 Marshal.Copy(firstElementPtr, buffer, 0, (int)elementCount);
                 return buffer as T[];
             }
@@ -80,12 +80,12 @@ namespace Neuro
                 _ptrReaderFunc = typeof(T).IsEnum ? (NativePtrReader)NativeEnumPtrReader : NativeStructPtrReader;
             }
 
-            public T[] MarshalArray(IntPtr firstElementPtr, UIntPtr elementCount)
+            public T[] MarshalArray(IntPtr firstElementPtr, IntPtr elementCount)
             {
-                var result = new T[elementCount.ToUInt32()];
+                var result = new T[elementCount.ToInt32()];
 
                 var type = typeof(T).IsEnum ? typeof(T).GetEnumUnderlyingType() : typeof(T);
-                for (uint i = 0; i < elementCount.ToUInt32(); i++)
+                for (uint i = 0; i < elementCount.ToInt32(); i++)
                 {
                     result[i] = _ptrReaderFunc(firstElementPtr);
                     firstElementPtr = IntPtr.Add(firstElementPtr, Marshal.SizeOf(type));

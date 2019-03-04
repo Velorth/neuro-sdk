@@ -13,7 +13,7 @@ public class RespirationChannel extends BaseDoubleChannel {
 
     public RespirationChannel(Device device) {
         mDevice = device;
-        mAnyChannel = new AnyChannel(createRespirationDoubleChannelInfo(device.devicePtr()), new AnyChannelLengthChangedCallback() {
+        mAnyChannel = new AnyChannel(createRespirationDoubleChannel(device.devicePtr()), new AnyChannelLengthChangedCallback() {
             @Override
             public void onDataLengthChanged(long dataLength) {
                 dataLengthChanged.sendNotification(this, dataLength);
@@ -46,6 +46,6 @@ public class RespirationChannel extends BaseDoubleChannel {
         return mDataChannel.readData(offset, length);
     }
 
-    private static native long createRespirationDoubleChannelInfo(long devicePtr);
+    private static native long createRespirationDoubleChannel(long devicePtr);
     private static native long RespirationDoubleChannelGetBufferSize(long respChannelPtr);
 }

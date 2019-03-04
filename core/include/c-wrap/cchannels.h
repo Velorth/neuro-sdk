@@ -43,7 +43,7 @@ SDK_SHARED int AnyChannel_get_sampling_frequency(AnyChannel *channel, float * ou
 SDK_SHARED int AnyChannel_add_length_callback(AnyChannel *channel, void(*callback)(AnyChannel *, size_t, void *), ListenerHandle *handle, void *user_data);
 SDK_SHARED int AnyChannel_get_total_length(AnyChannel *channel, size_t *out_length);
 
-SDK_SHARED int IntChannel_read_data(IntChannel *channel, size_t offset, size_t length, int *out_buffer);
-SDK_SHARED int DoubleChannel_read_data(DoubleChannel *channel, size_t offset, size_t length, double *out_buffer);
+SDK_SHARED int IntChannel_read_data(IntChannel *channel, size_t offset, size_t length, int *out_buffer, size_t buffer_size, size_t *samples_read);
+SDK_SHARED int DoubleChannel_read_data(DoubleChannel *channel, size_t offset, size_t length, double *out_buffer, size_t buffer_size, size_t *samples_read);
 
 #endif // CCHANNELS_H
