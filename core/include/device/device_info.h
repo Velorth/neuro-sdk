@@ -17,12 +17,13 @@
 #ifndef DEVICE_INFO_H
 #define DEVICE_INFO_H
 
-#include ""
+#include "platform_traits.h"
 
 namespace Neuro {
 
 struct DeviceInfo {
-    
+    std::string Name;
+    DeviceAddressType Address;
 };
 
 }

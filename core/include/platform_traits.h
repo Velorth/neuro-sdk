@@ -2,12 +2,15 @@
 #define PLATFORM_TRAITS_H
 
 #ifdef _WIN32
-    
+#include "ble/windows/windows_ble_enumerator.h"
+namespace {
+    using DeviceAddressType = unsigned long;
+    using BleEnumerator = WindowsBleEnumerator;
+}
 #elif __APPLE__
-    #include "TargetConditionals.h"
-    #include <impl/platforms/apple/apple_traits.h>
+    
     #if TARGET_IPHONE_SIMULATOR
-        using CurrentPlatform = bluetooth::_impl::IPhoneSimulator;
+
     #elif TARGET_OS_IPHONE
         
     #elif TARGET_OS_MAC
@@ -16,11 +19,13 @@
         static_assert(false);
     #endif
 #elif __ANDROID__
-    #include <impl/platforms/android/android_traits.h>
-    using CurrentPlatform = bluetooth::_impl::Android;
+#include "ble/android/android_ble_enumerator.h"
+namespace {
+    using DeviceAddressType = unsigned long;
+    using BleEnumerator = AndroidBleEnumerator;
+}
 #elif __linux__
-    #include <impl/platforms/linux/linux_traits.h>
-    using CurrentPlatform = bluetooth::_impl::Linux;
+    
 #else
     static_assert(false);
 #endif

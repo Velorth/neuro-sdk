@@ -17,7 +17,6 @@
 #ifndef BLE_DEVICE_ENUMERATOR_H
 #define BLE_DEVICE_ENUMERATOR_H
 
-#include "platform_traits.h"
 #include "device/device_info.h"
 #include "event_listener.h"
 
@@ -27,27 +26,37 @@ template <typename Device>
 class DeviceEnumerator {
 public:
 	using DeviceType = Device;
+
 	DeviceEnumerator(BleEnumerator &&enumerator) : 
-		mEnumerator(std::move(enumerator)){
-			mEnumerator.setServiceFilter(DeviceTraits<Device>::serviceUUIDString());
-		}
+		mEnumerator(std::move(enumerator)){			
+		mEnumerator.setServiceFilter(DeviceTraits<Device>::serviceUUIDString());
+		mEnumerator.subscribeAdvertisementReceived([=](const AdvertisementData &advertisement){ 
+			mDeviceList.onAdvertiseReceived(advertisement); 
+		});
+	}
+
+	DeviceEnumerator(const DeviceEnumerator &) = delete;
+	DeviceEnumerator& operator=(const DeviceEnumerator &) = delete;
+
+	DeviceEnumerator(DeviceEnumerator &&) = default;
+	DeviceEnumerator& operator=(DeviceEnumerator &&) = default;
 
 	std::vector<DeviceInfo> devices() const {
-
+		return mDeviceList.devices();
 	}
 
-	ListenerPtr<void> subscribeDeviceListChanged(std::function<void()>) {
-
+	ListenerPtr<void> subscribeDeviceListChanged(const std::function<void()> &callback) {
+		return mDeviceList.subscribeListChanged(callback);
 	}
 
-private:
+private:	
+	DeviceList mDeviceList;
 	BleEnumerator mEnumerator;
 };
 
 template <typename Device, typename... PlatformArgs>
 DeviceEnumerator make_device_enumerator(PlatformArgs&&... args){
-	auto bleEnumerator = make_ble_enumerator(std::forward<PlatformArgs>(args)...);
-	return DeviceEnumerator
+	return DeviceEnumerator(make_ble_enumerator(std::forward<PlatformArgs>(args)...))
 }
 
 }
