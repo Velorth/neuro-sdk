@@ -17,7 +17,8 @@
 #ifndef DEVICE_INFO_H
 #define DEVICE_INFO_H
 
-#include "platform_traits.h"
+#include "ble/platform_traits.h"
+#include <string>
 
 namespace Neuro {
 
@@ -26,6 +27,21 @@ struct DeviceInfo {
     DeviceAddressType Address;
 };
 
+inline bool operator==(const DeviceInfo &lhs, const DeviceInfo &rhs) {
+	return lhs.Address == rhs.Address;
 }
+
+template <typename Device>
+struct DeviceTraits;
+
+}
+
+template <>
+struct std::hash<Neuro::DeviceInfo> {
+	size_t operator()(const Neuro::DeviceInfo &info) const noexcept {
+		using std::hash;
+		return hash<Neuro::DeviceAddressType>()(info.Address);
+	}
+};
 
 #endif

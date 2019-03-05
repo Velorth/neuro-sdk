@@ -2,10 +2,14 @@
 #define PLATFORM_TRAITS_H
 
 #ifdef _WIN32
-#include "ble/windows/windows_ble_enumerator.h"
-namespace {
-    using DeviceAddressType = unsigned long;
-    using BleEnumerator = WindowsBleEnumerator;
+#include "ble/win/windows_ble_enumerator.h"
+#include <winrt/base.h>
+namespace Neuro {
+using DeviceAddressType = unsigned long;
+using BleEnumerator = WindowsBleEnumerator;
+using UUIDType = GUID;
+using BleTimeType = winrt::Windows::Foundation::DateTime;
+using BleTimeDuration = BleTimeType::duration;
 }
 #elif __APPLE__
     

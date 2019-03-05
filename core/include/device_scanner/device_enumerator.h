@@ -14,40 +14,52 @@
  * limitations under the License.
  */
 
-#ifndef BLE_DEVICE_ENUMERATOR_H
-#define BLE_DEVICE_ENUMERATOR_H
+#ifndef DEVICE_ENUMERATOR_H
+#define DEVICE_ENUMERATOR_H
 
-#include "platform_traits.h"
 #include "device/device_info.h"
+#include "enumeration_list.h"
 #include "event_listener.h"
 
 namespace Neuro {
 
 template <typename Device>
-class DeviceEnumerator {
+class DeviceEnumerator final {
 public:
 	using DeviceType = Device;
-	DeviceEnumerator(BleEnumerator &&enumerator) : 
-		mEnumerator(std::move(enumerator)){
-			mEnumerator.setServiceFilter(DeviceTraits<Device>::serviceUUIDString());
-		}
+
+	explicit DeviceEnumerator(BleEnumerator &&enumerator) : 
+		mEnumerator(std::move(enumerator)),
+		mAdvertiseListenerHandle(mEnumerator.subscribeAdvertisementReceived([=](const AdvertisementData &advertisement) {
+			mDeviceList.onAdvertisementReceived(advertisement);
+		})){}
+
+	DeviceEnumerator(const DeviceEnumerator &) = delete;
+	DeviceEnumerator& operator=(const DeviceEnumerator &) = delete;
+
+	DeviceEnumerator(DeviceEnumerator &&) = default;
+	DeviceEnumerator& operator=(DeviceEnumerator &&) = default;
+
+	~DeviceEnumerator() = default;
 
 	std::vector<DeviceInfo> devices() const {
-
+		return mDeviceList.devices();
 	}
 
-	ListenerPtr<void> subscribeDeviceListChanged(std::function<void()>) {
-
+	template <typename VoidCallable>
+	ListenerPtr<void> subscribeDeviceListChanged(const VoidCallable &callback) {
+		return mDeviceList.subscribeListChanged(callback);
 	}
 
-private:
+private:	
+	EnumerationList mDeviceList{ 3_s };
 	BleEnumerator mEnumerator;
+	ListenerPtr<void, const AdvertisementData &> mAdvertiseListenerHandle;
 };
 
 template <typename Device, typename... PlatformArgs>
-DeviceEnumerator make_device_enumerator(PlatformArgs&&... args){
-	auto bleEnumerator = make_ble_enumerator(std::forward<PlatformArgs>(args)...);
-	return DeviceEnumerator
+DeviceEnumerator<Device> make_device_enumerator(PlatformArgs&&... args){
+	return DeviceEnumerator<Device>(make_ble_enumerator(DeviceTraits<Device>::serviceUUID(), std::forward<PlatformArgs>(args)...));
 }
 
 }
