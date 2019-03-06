@@ -47,19 +47,19 @@ public:
 	}
 
 	template <typename VoidCallable>
-	ListenerPtr<void> subscribeDeviceListChanged(const VoidCallable &callback) {
-		return mDeviceList.subscribeListChanged(callback);
+	ListenerPtr<void> subscribeDeviceListChanged(VoidCallable&& callback) {
+		return mDeviceList.subscribeListChanged(std::forward<VoidCallable>(callback));
 	}
 
 private:	
-	EnumerationList mDeviceList{ 3_s };
+	EnumerationList mDeviceList;
 	BleEnumerator mEnumerator;
 	ListenerPtr<void, const AdvertisementData &> mAdvertiseListenerHandle;
 };
 
 template <typename Device, typename... PlatformArgs>
 DeviceEnumerator<Device> make_device_enumerator(PlatformArgs&&... args){
-	return DeviceEnumerator<Device>(make_ble_enumerator(DeviceTraits<Device>::serviceUUID(), std::forward<PlatformArgs>(args)...));
+	return DeviceEnumerator<Device>(make_ble_enumerator(DeviceTraits<Device>::validNames(), std::forward<PlatformArgs>(args)...));
 }
 
 }

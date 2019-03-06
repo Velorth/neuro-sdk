@@ -8,13 +8,19 @@
 
 namespace Neuro {
 
+struct AdvertisementData;
+
 class EnumerationList final {
 public:
-	explicit EnumerationList(BleTimeDuration refresh_period);
-	~EnumerationList();
-	std::vector<DeviceInfo> devices() const;
-	ListenerPtr<void> subscribeDeviceListChanged(std::function<void()> &callback) const;
-	void onAdvertisementReceived(const AdvertisementData &advertisement);
+	SDK_SHARED EnumerationList();
+	EnumerationList(const EnumerationList &) = delete;
+	EnumerationList& operator=(const EnumerationList &) = delete;
+	SDK_SHARED EnumerationList(EnumerationList &&) noexcept;
+	SDK_SHARED EnumerationList& operator=(EnumerationList &&) noexcept;
+	SDK_SHARED ~EnumerationList();
+	SDK_SHARED std::vector<DeviceInfo> devices() const;
+	SDK_SHARED ListenerPtr<void> subscribeListChanged(const std::function<void()> &callback) const;
+	SDK_SHARED void onAdvertisementReceived(const AdvertisementData &advertisement);
 
 private:
 	struct Impl;

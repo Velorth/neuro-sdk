@@ -3,13 +3,10 @@
 
 #ifdef _WIN32
 #include "ble/win/windows_ble_enumerator.h"
-#include <winrt/base.h>
+#include "ble/win/ble_device_address.h"
 namespace Neuro {
-using DeviceAddressType = unsigned long;
+using DeviceAddressType = BleDeviceAddress;
 using BleEnumerator = WindowsBleEnumerator;
-using UUIDType = GUID;
-using BleTimeType = winrt::Windows::Foundation::DateTime;
-using BleTimeDuration = BleTimeType::duration;
 }
 #elif __APPLE__
     

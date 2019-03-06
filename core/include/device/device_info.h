@@ -19,6 +19,7 @@
 
 #include "ble/platform_traits.h"
 #include <string>
+#include <iosfwd>
 
 namespace Neuro {
 
@@ -30,6 +31,8 @@ struct DeviceInfo {
 inline bool operator==(const DeviceInfo &lhs, const DeviceInfo &rhs) {
 	return lhs.Address == rhs.Address;
 }
+
+SDK_SHARED std::ostream& operator<<(std::ostream& out_stream, const DeviceInfo &info);
 
 template <typename Device>
 struct DeviceTraits;

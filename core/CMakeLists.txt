@@ -174,7 +174,7 @@ add_library(neurosdk${PLATFORM_SUFFIX} SHARED ${SOURCE_FILES_COMMON}
 							${SOURCE_FILES_DEVSCAN_OS} 
 							${SOURCE_FILES_UTILS_NET}  
 							${SOURCE_FILES_UTILS_NET_OS}
-              ${SOURCE_FILES_CWRAP}
+							${SOURCE_FILES_CWRAP}
 							${SOURCE_FILES_UTILS_JNI}
 							${HEADER_FILES_COMMON} 
 							${HEADER_FILES_BLE} 
@@ -211,13 +211,21 @@ file(GLOB SHARED_HEADERS_CHANNELS_INFO 	${CMAKE_CURRENT_SOURCE_DIR}/include/chan
 										${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/quaternion.h
 										${CMAKE_CURRENT_SOURCE_DIR}/include/channels/info/electrode_state.h)
 file(GLOB SHARED_HEADERS_DEVICE ${CMAKE_CURRENT_SOURCE_DIR}/include/device/device.h
+                                ${CMAKE_CURRENT_SOURCE_DIR}/include/device/brainbit.h
+                                ${CMAKE_CURRENT_SOURCE_DIR}/include/device/callibri.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/device/device_parameters.h
+                                ${CMAKE_CURRENT_SOURCE_DIR}/include/device/device_info.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/device/ma_device_params.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/device/mems_device_params.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/device/param_values.h
 								${CMAKE_CURRENT_SOURCE_DIR}/include/device/signal_device_params.h)
+file(GLOB SHARED_HEADERS_BLE ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/platform_traits.h)
+file(GLOB SHARED_HEADERS_BLE_WIN ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/win/windows_ble_enumerator.h
+								${CMAKE_CURRENT_SOURCE_DIR}/include/ble/win/ble_device_address.h)                                  
 file(GLOB SHARED_HEADERS_DEVSCAN 	${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/device_scanner.h
-									${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/scanner_factory.h)
+									${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/scanner_factory.h
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/device_enumerator.h
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/enumeration_list.h)
 file(GLOB SHARED_HEADERS_FILTERS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/filter/*.h)
 file(GLOB SHARED_HEADERS_ALG ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/algorithm.h)
 file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
@@ -259,6 +267,8 @@ install(FILES ${SHARED_HEADERS_COMMON} DESTINATION ${NEUROSDK}/include)
 install(FILES ${SHARED_HEADERS_CHANNELS} DESTINATION ${NEUROSDK}/include/channels)
 install(FILES ${SHARED_HEADERS_CHANNELS_INFO} DESTINATION ${NEUROSDK}/include/channels/info)
 install(FILES ${SHARED_HEADERS_DEVICE} DESTINATION ${NEUROSDK}/include/device)
+install(FILES ${SHARED_HEADERS_BLE} DESTINATION ${NEUROSDK}/include/ble)
+install(FILES ${SHARED_HEADERS_BLE_WIN} DESTINATION ${NEUROSDK}/include/ble/win)
 install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${NEUROSDK}/include/device_scanner)
 install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/include/filter)
 install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/include)
@@ -267,5 +277,4 @@ install(FILES ${SHARED_HEADERS_CWRAP} DESTINATION ${NEUROSDK}/include/c-wrap)
 if (WIN32)  
 install(FILES $<TARGET_PDB_FILE:neurosdk${PLATFORM_SUFFIX}> DESTINATION ${NEUROSDK} OPTIONAL)
 endif (WIN32)
-
 ##################

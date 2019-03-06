@@ -1,19 +1,19 @@
-#define SRC GetEnv('NEUROSDK_64')
+#define SRC GetEnv('NEUROSDK')
 #define SAMPLES GetEnv('NEUROSDK-SAMPLES')
 
 [Setup]
 
 AppId={{NEUROMD-SDK}
-AppVersion=1.3.1
+AppVersion=1.4.0
 AppName=NeuroMD Software development kit
-AppVerName=1.3.1
+AppVerName=1.4.0
 AppPublisher=NeuroMD
 AppCopyright=NeuroMD
 
 AppPublisherURL=http://www.neuromd.com
 AppSupportURL=http://www.neuromd.com
 
-VersionInfoVersion=1.3.1
+VersionInfoVersion=1.4.0
 VersionInfoCompany=NeuroMD
 VersionInfoCopyright=NeuroMD
 VersionInfoDescription=NeuroMD Software development kit 
@@ -26,7 +26,7 @@ UsePreviousAppDir =no
 DisableProgramGroupPage=no
 DefaultGroupName=NeuroMD
 OutputDir=bin
-OutputBaseFilename=neurosdk-setup-win-x64-v1.3.1
+OutputBaseFilename=neurosdk-setup-win-x64-v1.4.0
 Compression=lzma2/ultra64
 LZMANumBlockThreads=4
 LZMAUseSeparateProcess=yes
@@ -43,7 +43,7 @@ UsePreviousLanguage=no
 Name: "{app}";
 
 [Files]
-Source: "{#SRC}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs;
+Source: "{#SRC}\windows\x64*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs;
 Source: "{#SAMPLES}\windows\*"; DestDir: "{code:GetSamplesDir}\.net"; Flags: recursesubdirs createallsubdirs; 
 Source: "{#SAMPLES}\cross-platform\c\*"; DestDir: "{code:GetSamplesDir}\c"; Flags: recursesubdirs createallsubdirs;  
 Source: "{#SAMPLES}\cross-platform\cpp\*"; DestDir: "{code:GetSamplesDir}\cpp"; Flags: recursesubdirs createallsubdirs; 

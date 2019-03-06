@@ -1,19 +1,23 @@
-#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 #include "ble/advertisement_data.h"
 #include "device_scanner/enumeration_list.h"
 #include "event_notifier.h"
+#include "loop.h"
+
+using namespace std::chrono_literals;
 
 namespace Neuro {
 
 struct EnumerationList::Impl final {
-	const BleTimeDuration mRefreshPeriod;
+	const BleTimeDuration mRefreshPeriod{3s};
 	Notifier<void> mListChangedNotifier;
 	mutable std::shared_mutex mDeviceMapMutex;
 	std::unordered_map<DeviceInfo, BleTimeType> mDeviceMap;
+	Loop<void()> mClearListLoop;
 
-	explicit Impl(BleTimeDuration refresh_period):
-		mRefreshPeriod(refresh_period){}
+	explicit Impl():
+		mClearListLoop([=]() {checkTimeStamps(); }, mRefreshPeriod * 2) {}
 
 	auto findFirstOverdue() {
 		return std::find_if(mDeviceMap.begin(), mDeviceMap.end(), [=](const auto &device_time_pair) {
@@ -36,14 +40,21 @@ struct EnumerationList::Impl final {
 			while (overdue != mDeviceMap.end()) {
 				mDeviceMap.erase(overdue);
 				overdue = findFirstOverdue();
-			}			
+			}
+
+			removeOverdueLock.unlock();
+			mListChangedNotifier.notifyAll();
 		}
 
 	}
 };
 
-EnumerationList::EnumerationList(BleTimeDuration refresh_period) :
-	mImpl(std::make_unique<Impl>(refresh_period)){}
+EnumerationList::EnumerationList() :
+	mImpl(std::make_unique<Impl>()){}
+
+EnumerationList::EnumerationList(EnumerationList&&) noexcept = default;
+
+EnumerationList& EnumerationList::operator=(EnumerationList&&) noexcept = default;
 
 EnumerationList::~EnumerationList() = default;
 
@@ -60,7 +71,7 @@ std::vector<DeviceInfo> EnumerationList::devices() const {
 	return deviceList;
 }
 
-ListenerPtr<void> EnumerationList::subscribeDeviceListChanged(std::function<void()> &callback) const {
+ListenerPtr<void> EnumerationList::subscribeListChanged(const std::function<void()> &callback) const {
 	return mImpl->mListChangedNotifier.addListener(callback);
 }
 
@@ -70,12 +81,13 @@ void EnumerationList::onAdvertisementReceived(const AdvertisementData& advertise
 	deviceInfo.Address = advertisement.Address;
 
 	std::unique_lock writeListLock(mImpl->mDeviceMapMutex);
-	const auto isNewDevice = mImpl->mDeviceMap.find(deviceInfo) != mImpl->mDeviceMap.end();
+	const auto isNewDevice = mImpl->mDeviceMap.find(deviceInfo) == mImpl->mDeviceMap.end();
 	mImpl->mDeviceMap[deviceInfo] = advertisement.TimeStamp;
 	
 	if (!isNewDevice)
 		return;
 
+	writeListLock.unlock();
 	mImpl->mListChangedNotifier.notifyAll();
 }
 

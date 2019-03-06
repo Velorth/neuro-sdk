@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef DEVICE_INFO_H
-#define DEVICE_INFO_H
+#ifndef BLE_DEVICE_INFO_H
+#define BLE_DEVICE_INFO_H
 
 #include <string>
 #include <unordered_map>
@@ -173,4 +173,4 @@ private:
 };
 
 }
-#endif //DEVICE_INFO_H
+#endif //BLE_DEVICE_INFO_H

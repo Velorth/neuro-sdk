@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "platform_traits.h"
+#include "platform_traits_impl.h"
 
 namespace Neuro {
 
