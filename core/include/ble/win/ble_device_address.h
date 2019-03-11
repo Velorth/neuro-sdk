@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <cstdint>
 #include <functional>
+#include <string>
 #include "lib_export.h"
 
 namespace Neuro {
@@ -26,6 +27,8 @@ inline bool operator==(const BleDeviceAddress &lhs, const BleDeviceAddress &rhs)
 }
 
 SDK_SHARED std::ostream& operator<<(std::ostream& out_stream, const BleDeviceAddress &address);
+
+SDK_SHARED std::string to_string(const BleDeviceAddress &);
 
 }
 

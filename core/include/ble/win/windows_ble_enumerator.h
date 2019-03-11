@@ -25,7 +25,7 @@ private:
 	std::unique_ptr<Impl> mImpl;
 };
 
-SDK_SHARED WindowsBleEnumerator make_ble_enumerator(const std::vector<std::string> &uuid_filters);
+SDK_SHARED WindowsBleEnumerator make_ble_enumerator(const std::vector<std::string> &name_filters);
 
 }
 #endif

@@ -20,7 +20,8 @@ typedef struct _Device Device;
 
 typedef enum _DeviceType {
 	DeviceTypeBrainbit,
-	DeviceTypeCallibri
+	DeviceTypeCallibri,
+	DeviceTypeAny
 } DeviceType;
 
 typedef struct _DeviceInfo {

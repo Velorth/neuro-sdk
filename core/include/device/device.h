@@ -19,6 +19,8 @@ private:
     std::unique_ptr<DeviceImpl> mImpl;
 
 public:
+	explicit Device(const DeviceInfo &);
+
 	Device(const Device &) = delete;
 	Device& operator=(const Device &) = delete;
 

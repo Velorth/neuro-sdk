@@ -2,8 +2,30 @@
 #include <vector>
 #include "device/device.h"
 #include "device/device_impl.h"
+#include "ble/ble_device_wrapper.h"
+#include "device/callibri/callibri_impl.h"
+#include "device/callibri/callibri_common_parameters.h"
+#include "device/brainbit/brainbit_impl.h"
 
 namespace Neuro {
+
+static std::unique_ptr<DeviceImpl> device_impl_from_info(const DeviceInfo &device_info) {
+	auto bleDevice = std::make_shared<BleDeviceWrapper>(device_info);
+	if (bleDevice->getGattInfo()->getDeviceType() == DeviceType::Brainbit) {
+		return std::make_unique<BrainbitImpl>(bleDevice);
+	}
+	else if (bleDevice->getGattInfo()->getDeviceType() == DeviceType::Callibri) {
+		auto requestHandler = std::make_shared<CallibriRequestScheduler>();
+		auto commonParams = std::make_shared<CallibriCommonParameters>(requestHandler);
+		return std::make_unique<CallibriImpl>(bleDevice, requestHandler, commonParams);
+	}
+	else {
+		throw std::runtime_error("Unknown device type");
+	}
+}
+
+Device::Device(const DeviceInfo &info):
+	mImpl(device_impl_from_info(info)){}
 
 Device::Device(Device &&rhs) noexcept : mImpl(std::move(rhs.mImpl)){}
 

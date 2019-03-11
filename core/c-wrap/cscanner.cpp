@@ -43,6 +43,7 @@ DeviceScanner* create_device_scanner(jobject context) {
 		return nullptr;
 	}
 }
+
 DeviceEnumerator* create_device_enumerator(DeviceType, jobject context) {
 	try {
 		if (device_type == DeviceTypeBrainbit) {
@@ -65,6 +66,11 @@ DeviceEnumerator* create_device_enumerator(DeviceType, jobject context) {
 		return nullptr;
 	}
 }
+
+static void copy_address(AddressType &dest, const Neuro::DeviceAddressType &source) {
+	strcpy(dest, static_cast<std::string>(source).c_str());
+}
+
 #else
 DeviceScanner* create_device_scanner() {
 	try {
@@ -90,6 +96,11 @@ DeviceEnumerator* create_device_enumerator(DeviceType device_type) {
 			const auto enumeratorPtr = new ConcreteEnumeratorWrapper<Neuro::Callibri>(std::move(deviceEnumerator));
 			return reinterpret_cast<DeviceEnumerator *>(enumeratorPtr);
 		}
+		else if (device_type == DeviceTypeAny) {
+			auto deviceEnumerator = Neuro::make_device_enumerator<Neuro::Device>();
+			const auto enumeratorPtr = new ConcreteEnumeratorWrapper<Neuro::Device>(std::move(deviceEnumerator));
+			return reinterpret_cast<DeviceEnumerator *>(enumeratorPtr);
+		}
 		else {
 			set_sdk_last_error("Unknown device type");
 			return nullptr;
@@ -100,6 +111,11 @@ DeviceEnumerator* create_device_enumerator(DeviceType device_type) {
 		return nullptr;
 	}
 }
+
+static void copy_address(AddressType &dest, const Neuro::DeviceAddressType &source) {
+	dest = static_cast<uint64_t>(source);
+}
+
 #endif
 
 void scanner_delete(DeviceScanner *scanner_ptr) {
@@ -225,14 +241,52 @@ SDK_SHARED void enumerator_delete(DeviceEnumerator *scanner_ptr) {
 	delete scanner;
 }
 
-SDK_SHARED int enumerator_set_device_list_changed_callback(DeviceEnumerator *scanner_ptr, void(*)(DeviceEnumerator *, void *), ListenerHandle *, void *user_data) {
+SDK_SHARED int enumerator_set_device_list_changed_callback(DeviceEnumerator *scanner_ptr, void(*callback)(DeviceEnumerator *, void *), ListenerHandle *handle, void *user_data) {
 	auto& scanner = *reinterpret_cast<DeviceEnumeratorWrapper *>(scanner_ptr);
-	return 0;
+	try {
+		auto listener = scanner.subscribeDeviceListChanged([scanner_ptr, callback, user_data]() {
+			if (callback != nullptr) {
+				callback(scanner_ptr, user_data);
+			}
+		});
+		if (listener == nullptr) {
+			set_sdk_last_error("Failed to subscribe device list changed event: listener handle is null");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		*handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
 SDK_SHARED int enumerator_get_device_list(DeviceEnumerator *scanner_ptr, DeviceInfoArray *out_device_array) {
 	auto& scanner = *reinterpret_cast<DeviceEnumeratorWrapper *>(scanner_ptr);
-	return 0;
+	try {
+		auto devices = scanner.devices();
+		out_device_array->info_count = devices.size();
+		const auto memorySize = out_device_array->info_count * sizeof(DeviceInfo);
+		out_device_array->info_array = reinterpret_cast<DeviceInfo *>(malloc(memorySize));
+		std::transform(devices.begin(), devices.end(), out_device_array->info_array, [](const auto& device_info) {
+			DeviceInfo info;
+			strcpy(info.Name, device_info.Name.c_str());
+			copy_address(info.Address, device_info.Address);
+			return info;
+		});
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
 }
 
 SDK_SHARED void free_DeviceInfoArray(DeviceInfoArray info_array) {
