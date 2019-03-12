@@ -58,7 +58,6 @@ private:
 
     std::shared_ptr<BleDevice> mBleDevice;
     DeviceState mState{DeviceState::Disconnected};
-    bool mPendingDisconnectRequest{false};
     param_changed_callback_t parameterChangedCallback;
 
     void subscribeBleDeviceStateChanged();

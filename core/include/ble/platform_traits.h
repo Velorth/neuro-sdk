@@ -3,7 +3,6 @@
 
 #ifdef _WIN32
 #include "ble/win/windows_ble_enumerator.h"
-#include "ble/win/ble_device_win.h"
 #include "ble/win/ble_device_address.h"
 namespace Neuro {
 using DeviceAddressType = BleDeviceAddress;
@@ -26,7 +25,6 @@ using BleEnumerator = WindowsBleEnumerator;
 namespace {
     using DeviceAddressType = std::string;
     using BleEnumerator = AndroidBleEnumerator;
-	using BluetoothLEDevice = BleDeviceWin;
 }
 #elif __linux__
     

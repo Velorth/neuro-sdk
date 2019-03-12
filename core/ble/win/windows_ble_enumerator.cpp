@@ -89,16 +89,6 @@ struct WindowsBleEnumerator::Impl final {
 	}
 };
 
-static GUID guid_from_string(const std::string &guid_string) {
-	GUID guid;
-	sscanf(guid_string.c_str(),
-		"%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
-		&guid.Data1, &guid.Data2, &guid.Data3,
-		&guid.Data4[0], &guid.Data4[1], &guid.Data4[2], &guid.Data4[3],
-		&guid.Data4[4], &guid.Data4[5], &guid.Data4[6], &guid.Data4[7]);
-	return guid;
-}
-
 static std::vector<GUID> make_guids_from_strings(const std::vector<std::string> &guid_strings) {
 	std::vector<GUID> guidList(guid_strings.size());
 	std::transform(guid_strings.begin(), guid_strings.end(), guidList.begin(), [](const auto &guid_string) {

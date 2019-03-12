@@ -1,5 +1,6 @@
 #include "ble/ble_device_wrapper.h"
 #include "ble/platform_traits_impl.h"
+#include "logger.h"
 
 namespace Neuro {
 
@@ -23,6 +24,9 @@ struct BleDeviceWrapperState {
 
 	virtual ListenerPtr<void, const std::vector<Byte> &> 
 	subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) = 0;
+
+	virtual ListenerPtr<void, BleDeviceState>
+	subscribeConnectionStateChanged(const std::function<void(BleDeviceState)> &callback) = 0;
 };
 
 static std::unique_ptr<BleDeviceWrapperState> make_closed_impl();
@@ -58,11 +62,15 @@ struct ClosedImpl final : public BleDeviceWrapperState {
 		throw std::runtime_error("Cannot perform operation on device. Device is closed");
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
 		throw std::runtime_error("Cannot perform operation on device. Device is closed");
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
+		throw std::runtime_error("Cannot perform operation on device. Device is closed");
+	}
+
+	ListenerPtr<void, BleDeviceState> subscribeConnectionStateChanged(const std::function<void(BleDeviceState)> &callback) override {
 		throw std::runtime_error("Cannot perform operation on device. Device is closed");
 	}
 };
@@ -101,11 +109,15 @@ struct DisconnectedImpl final : public BleDeviceWrapperState {
 		throw std::runtime_error("Unable to send command. Device is disconnected");
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
 		return nullptr;
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
+		return nullptr;
+	}
+
+	ListenerPtr<void, BleDeviceState> subscribeConnectionStateChanged(const std::function<void(BleDeviceState)> &callback) override {
 		return nullptr;
 	}
 
@@ -114,23 +126,40 @@ private:
 	const DeviceGattInfo &mGattInfo;
 };
 
-GattCharacteristic find_tx_characteristic(BluetoothLEDevice device, const DeviceGattInfo &gatt_info) {
+GattService find_service(const BluetoothLEDevice &device, const std::string &service_guid) {
 	auto services = device.services();
-	auto guid = guid_from_string(gatt_info.deviceServiceUUID());
-	const auto serviceIterator = std::find_if(services.begin(), services.end(), [](const auto &service) { return service.uuid() == guid; });
+	auto serviceGuid = guid_from_string(service_guid);
+	const auto serviceIterator = std::find_if(services.begin(), services.end(), [&serviceGuid](const auto &service) { return service.uuid() == serviceGuid; });
 	if (serviceIterator == services.end()) {
 		throw std::runtime_error("Main service not found");
 	}
 
+	return std::move(*serviceIterator);
+}
 
+GattCharacteristic find_characteristic(const GattService &service, const std::string &char_guid) {
+	auto txGuid = guid_from_string(char_guid);
+	auto characteristics = service.characteristics();
+	const auto characteristic = std::find_if(characteristics.begin(), characteristics.end(), [&txGuid](const auto &characteristic) { return characteristic.uuid() == txGuid; });
+	if (characteristic == characteristics.end()) {
+		throw std::runtime_error("Requested characteristic not found");
+	}
+	return std::move(*characteristic);
 }
 
 struct ConnectedImpl final : public BleDeviceWrapperState {
-	ConnectedImpl(const DeviceInfo &info, const DeviceGattInfo &gatt_info) :
+
+	template <typename... DeviceArgs>
+	ConnectedImpl(const DeviceInfo &info, const DeviceGattInfo &gatt_info, DeviceArgs... args) :
 		mInfo(info),
 		mGattInfo(gatt_info),
-		mDevice(mInfo),
-		mTxCharacteristic(find_tx_characteristic(mDevice, mGattInfo)){}
+		mDevice(mInfo, args...),
+		mService(find_service(mDevice, mGattInfo.deviceServiceUUID())),
+		mTxCharacteristic(find_characteristic(mService, mGattInfo.txCharacteristicUUID())),
+		mRxCharacteristic(find_characteristic(mService, mGattInfo.rxCharacteristicUUID())){
+		subscribeDataReceived();
+		subscribeStatusReceived();
+	}
 
 	std::unique_ptr<BleDeviceWrapperState> getClosedImpl() override {
 		return make_closed_impl();
@@ -141,7 +170,7 @@ struct ConnectedImpl final : public BleDeviceWrapperState {
 	}
 
 	std::unique_ptr<BleDeviceWrapperState> getConnectedImpl() override {
-		return make_connected_impl(mInfo, mGattInfo);
+		throw std::runtime_error("Device is already in connected state");
 	}
 
 	std::string getName() override {
@@ -154,29 +183,57 @@ struct ConnectedImpl final : public BleDeviceWrapperState {
 	}
 
 	BleDeviceState getState() override {
-		return BleDeviceState::Connected;
+		return mDevice.connectionState();
 	}
 
 	bool sendCommand(const std::vector<Byte>& commandData) override {
-		mTxCharacteristic.write(commandData);
-		return true;
+		try {
+			mTxCharacteristic.write(commandData);
+			return true;
+		}
+		catch (std::exception &e) {
+			LOG_ERROR_V("Failed write tx characteristic: %s", e.what());
+			return false;
+		}
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeDataReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
 		return mDataReceivedCallback.addListener(callback);
 	}
 
-	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) {
+	ListenerPtr<void, const std::vector<Byte> &> subscribeStatusReceived(const std::function<void(const std::vector<Byte> &)> &callback) override {
 		return mStatusReceivedCallback.addListener(callback);
 	}
 
+	ListenerPtr<void, BleDeviceState> subscribeConnectionStateChanged(const std::function<void(BleDeviceState)>& callback) override {
+		return mDevice.subscribeStateChanged(callback);
+	}
+
 private:
+	static constexpr const char *class_name = "BleDeviceWrapper";
 	const DeviceInfo mInfo;
 	const DeviceGattInfo &mGattInfo;
 	BluetoothLEDevice mDevice;
+	GattService mService;
 	GattCharacteristic mTxCharacteristic;
+	GattCharacteristic mRxCharacteristic;
+	std::unique_ptr<GattCharacteristic> mStatusCharacteristic;
+	ListenerPtr<void, const std::vector<Byte> &> mDataListenHandle;
+	ListenerPtr<void, const std::vector<Byte> &> mStatusListenHandle;
 	Notifier<void, const std::vector<Byte> &> mDataReceivedCallback;
 	Notifier<void, const std::vector<Byte> &> mStatusReceivedCallback;
+
+	void subscribeDataReceived() {
+		mDataListenHandle = mRxCharacteristic.subscribeCharacteristicChanged([=](const auto &data) { mDataReceivedCallback.notifyAll(data); });
+	}
+
+	void subscribeStatusReceived() {
+		if (mGattInfo.statusCharacteristicUUID().empty())
+			return;
+
+		mStatusCharacteristic = std::make_unique<GattCharacteristic>(find_characteristic(mService, mGattInfo.statusCharacteristicUUID()));
+		mStatusListenHandle = mStatusCharacteristic->subscribeCharacteristicChanged([=](const auto &data) { mStatusReceivedCallback.notifyAll(data); });
+	}
 };
 
 static std::unique_ptr<BleDeviceWrapperState> make_closed_impl() {
@@ -199,7 +256,8 @@ BleDeviceWrapper::BleDeviceWrapper(const DeviceInfo &device_info):
 	BleDevice(BleDeviceInfo::fromDeviceName(device_info.Name)),
 	mState(make_init_state(device_info, *getGattInfo()->getGattInfo())),
 	mDataListener(mState->subscribeDataReceived([=](const auto &data) { notifyDataReceived(data); })),
-	mStatusListener(mState->subscribeStatusReceived([=](const auto &data) { notifyStatusReceived(data); })) {
+	mStatusListener(mState->subscribeStatusReceived([=](const auto &data) { notifyStatusReceived(data); })),
+	mConnectionListener(mState->subscribeConnectionStateChanged([=](const auto &state) { notifyStateChanged(state, BleDeviceError::NoError); })) {
 }
 
 BleDeviceWrapper::~BleDeviceWrapper() = default;
@@ -209,7 +267,8 @@ void BleDeviceWrapper::connect() {
 		mState = mState->getConnectedImpl();
 		mDataListener = mState->subscribeDataReceived([=](const auto &data) { notifyDataReceived(data); });
 		mStatusListener = mState->subscribeStatusReceived([=](const auto &data) { notifyStatusReceived(data); });
-		notifyStateChanged(BleDeviceState::Connected, BleDeviceError::NoError);
+		mConnectionListener = mState->subscribeConnectionStateChanged([=](const auto &state) { notifyStateChanged(state, BleDeviceError::NoError); });
+		notifyStateChanged(mState->getState(), BleDeviceError::NoError);
 	}
 }
 

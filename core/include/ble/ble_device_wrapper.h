@@ -25,6 +25,7 @@ private:
 	std::unique_ptr<BleDeviceWrapperState> mState;
 	ListenerPtr<void, const std::vector<Byte> &> mDataListener;
 	ListenerPtr<void, const std::vector<Byte> &> mStatusListener;
+	ListenerPtr<void, BleDeviceState> mConnectionListener;
 };
 }
 #endif // BLE_DEVICE_WRAPPER_H

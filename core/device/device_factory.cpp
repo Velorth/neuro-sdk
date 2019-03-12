@@ -13,7 +13,6 @@ std::unique_ptr<Device, DeviceDeleter> DeviceFactory::createFromImpl(std::unique
     return device;
 }
 
-
 std::unique_ptr<Device, DeviceDeleter> CallibriDeviceFactory::create(std::unique_ptr<BleDevice> ble_device){
     auto sharedDevice = std::shared_ptr<BleDevice>(ble_device.release());
     auto requestHandler = std::make_shared<CallibriRequestScheduler>();
@@ -29,6 +28,5 @@ std::unique_ptr<Device, DeviceDeleter> BrainbitDeviceFactory::create(std::unique
     auto device = createFromImpl(std::move(brainbitImpl));
     return device;
 }
-
 
 }

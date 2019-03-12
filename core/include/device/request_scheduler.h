@@ -90,7 +90,14 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
 
                                        //trying to send request to a beacon until deadline reached
                                        LOG_TRACE_V("Sending command %d. Requests left: %zd", requestCommandData->getCommand(), requestQueue.size());
-                                       if (sendCommandFunc) sendCommandFunc(requestCommandData);
+									   if (sendCommandFunc) {
+										   try {
+											   sendCommandFunc(requestCommandData);
+										   }
+										   catch (std::exception &e) {
+											   LOG_ERROR_V("Failed to send command: %s", e.what());
+										   }
+									   }
                                        auto status = responseReceivedCondition.wait_for(requestLock,
                                                                                         std::chrono::milliseconds(
                                                                                                 CommandData::SEND_TIMEOUT_MS));

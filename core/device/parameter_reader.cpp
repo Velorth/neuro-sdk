@@ -16,7 +16,6 @@ void ParameterReader::requestConnect(){
 }
 
 void ParameterReader::requestDisconnect(){
-    mPendingDisconnectRequest = true;
     mBleDevice->disconnect();
 }
 
@@ -78,14 +77,6 @@ void ParameterReader::onBleDisconnected(BleDeviceError error){
         LOG_DEBUG_V("Ble device disconnected. Device %s, address: %s",
                     mBleDevice->getName().c_str(),
                     mBleDevice->getNetAddress().c_str());
-        if (!mPendingDisconnectRequest){
-            LOG_DEBUG("No pending disconnect requests registered. Reconnecting...");
-            mBleDevice->connect();
-        }
-        else {
-            LOG_DEBUG("Pending disconnect requests registered. Device disconnected.");
-            mPendingDisconnectRequest = false;
-        }
     }
 }
 

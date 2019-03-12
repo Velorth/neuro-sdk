@@ -1,22 +1,20 @@
 #ifndef PLATFORM_TRAITS_IMPL_H
 #define PLATFORM_TRAITS_IMPL_H
 
-#include "platform_traits.h"
+#include "ble/platform_traits.h"
 
 #ifdef _WIN32
 #include <guiddef.h>
 #include <winrt/Windows.Foundation.h>
-#include "win/bluetooth_le_device_win.h"
-#include "win/gatt_characteristic_win.h"
-#include "win/gatt_service_win.h"
+#include "ble/win/bluetooth_le_device_win.h"
 
 namespace Neuro {
 using UUIDType = _GUID;
 using BleTimeType = winrt::Windows::Foundation::DateTime;
 using BleTimeDuration = BleTimeType::duration;
 using BluetoothLEDevice = BluetoothLEDeviceWin;
-using GattService = GattServiceWin;
 using GattCharacteristic = GattCharacteristicWin;
+using GattService = GattServiceWin;
 
 static UUIDType guid_from_string(const std::string &guid_string) {
 	GUID guid;
