@@ -17,6 +17,7 @@ public:
 	EnumerationList& operator=(const EnumerationList &) = delete;
 	SDK_SHARED EnumerationList(EnumerationList &&) noexcept;
 	SDK_SHARED EnumerationList& operator=(EnumerationList &&) noexcept;
+	SDK_SHARED void swap(EnumerationList&) noexcept;
 	SDK_SHARED ~EnumerationList();
 	SDK_SHARED std::vector<DeviceInfo> devices() const;
 	SDK_SHARED ListenerPtr<void> subscribeListChanged(const std::function<void()> &callback) const;
@@ -26,6 +27,8 @@ private:
 	struct Impl;
 	std::unique_ptr<Impl> mImpl;
 };
+
+SDK_SHARED void swap(EnumerationList &lhs, EnumerationList &rhs) noexcept;
 
 }
 #endif // ENUMERATION_LIST_H

@@ -30,15 +30,30 @@ public:
 
 	explicit DeviceEnumerator(BleEnumerator &&enumerator) : 
 		mEnumerator(std::move(enumerator)),
-		mAdvertiseListenerHandle(mEnumerator.subscribeAdvertisementReceived([=](const AdvertisementData &advertisement) {
-			mDeviceList.onAdvertisementReceived(advertisement);
-		})){}
+		mAdvertiseListenerHandle(subscribeAdvertisement()){}
 
 	DeviceEnumerator(const DeviceEnumerator &) = delete;
 	DeviceEnumerator& operator=(const DeviceEnumerator &) = delete;
 
-	DeviceEnumerator(DeviceEnumerator &&) = default;
-	DeviceEnumerator& operator=(DeviceEnumerator &&) = default;
+	DeviceEnumerator(DeviceEnumerator &&rhs) noexcept :
+		mDeviceList(std::move(rhs.mDeviceList)),
+		mEnumerator(std::move(rhs.mEnumerator)),
+		mAdvertiseListenerHandle(subscribeAdvertisement()){
+		rhs.mAdvertiseListenerHandle = nullptr;
+	}
+
+	DeviceEnumerator& operator=(DeviceEnumerator &&rhs) noexcept {
+		this->swap(rhs);
+		return *this;
+	}
+
+	void swap(DeviceEnumerator &other) noexcept {
+		using std::swap;
+		swap(this->mDeviceList, other.mDeviceList);
+		swap(this->mEnumerator, other.mEnumerator);
+		this->mAdvertiseListenerHandle = this->subscribeAdvertisement();
+		other.mAdvertiseListenerHandle = other.subscribeAdvertisement();
+	}
 
 	~DeviceEnumerator() = default;
 
@@ -55,11 +70,24 @@ private:
 	EnumerationList mDeviceList;
 	BleEnumerator mEnumerator;
 	ListenerPtr<void, const AdvertisementData &> mAdvertiseListenerHandle;
+
+	ListenerPtr<void, const AdvertisementData &> subscribeAdvertisement() {
+		return mEnumerator.subscribeAdvertisementReceived(
+			[=](const AdvertisementData &advertisement) {
+				mDeviceList.onAdvertisementReceived(advertisement);
+			}
+		);
+	}
 };
 
 template <typename Device, typename... PlatformArgs>
 DeviceEnumerator<Device> make_device_enumerator(PlatformArgs&&... args){
 	return DeviceEnumerator<Device>(make_ble_enumerator(DeviceTraits<Device>::validNames(), std::forward<PlatformArgs>(args)...));
+}
+
+template <typename Device>
+void swap(DeviceEnumerator<Device> &lhs, DeviceEnumerator<Device> &rhs) noexcept {
+	lhs.swap(rhs);
 }
 
 }

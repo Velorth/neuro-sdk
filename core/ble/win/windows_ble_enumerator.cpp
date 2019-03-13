@@ -104,6 +104,11 @@ WindowsBleEnumerator::WindowsBleEnumerator(WindowsBleEnumerator&&) noexcept = de
 
 WindowsBleEnumerator& WindowsBleEnumerator::operator=(WindowsBleEnumerator&&) noexcept = default;
 
+void WindowsBleEnumerator::swap(WindowsBleEnumerator &other) noexcept {
+	using std::swap;
+	swap(mImpl, other.mImpl);
+}
+
 WindowsBleEnumerator::~WindowsBleEnumerator() = default;
 
 ListenerPtr<void, const AdvertisementData&> 
@@ -114,6 +119,10 @@ WindowsBleEnumerator::subscribeAdvertisementReceived(const std::function<void(co
 WindowsBleEnumerator make_ble_enumerator(const std::vector<std::string> &uuid_filters) {
 	winrt::init_apartment();
 	return WindowsBleEnumerator(uuid_filters);
+}
+
+void swap(WindowsBleEnumerator& lhs, WindowsBleEnumerator& rhs) noexcept {
+	lhs.swap(rhs);
 }
 
 

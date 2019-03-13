@@ -56,6 +56,11 @@ EnumerationList::EnumerationList(EnumerationList&&) noexcept = default;
 
 EnumerationList& EnumerationList::operator=(EnumerationList&&) noexcept = default;
 
+void EnumerationList::swap(EnumerationList &other) noexcept {
+	using std::swap;
+	swap(this->mImpl, other.mImpl);
+}
+
 EnumerationList::~EnumerationList() = default;
 
 std::vector<DeviceInfo> EnumerationList::devices() const {
@@ -89,6 +94,10 @@ void EnumerationList::onAdvertisementReceived(const AdvertisementData& advertise
 
 	writeListLock.unlock();
 	mImpl->mListChangedNotifier.notifyAll();
+}
+
+void swap(EnumerationList& lhs, EnumerationList& rhs) noexcept {
+	lhs.swap(rhs);
 }
 
 }

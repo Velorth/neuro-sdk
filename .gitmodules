@@ -1,12 +1,3 @@
-[submodule "utils/gsl"]
-	path = utils/gsl
-url=https://github.com/NeuroMD/GSL.git
-[submodule "utils/network"]
-	path = utils/network
-url=https://github.com/NeuroMD/networking.git
-[submodule "utils/dsp"]
-	path = utils/dsp
-url=https://github.com/NeuroMD/dsp.git
 [submodule "utils/jni-support"]
 	path = utils/jni-support
 url = https://github.com/NeuroMD/jni-support.git

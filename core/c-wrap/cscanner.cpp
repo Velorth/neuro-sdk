@@ -1,3 +1,5 @@
+#include <forward_list>
+
 extern "C"
 {
 #include "cscanner.h"

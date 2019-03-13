@@ -57,7 +57,7 @@ namespace Neuro
             try
             {
                 SdkError.ThrowIfError(EegArtifactChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
-                return _arrayMarshaler.MarshalArray(bufferPtr, (UIntPtr)length);
+                return _arrayMarshaler.MarshalArray(bufferPtr, (IntPtr)length);
             }
             finally
             {
@@ -74,13 +74,13 @@ namespace Neuro
             }
         }
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegArtifactChannel_eeg_channels(IntPtr t3, IntPtr t4, IntPtr o1, IntPtr o2);
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EegArtifactChannel_read_data(IntPtr signalChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EegArtifactChannel_get_buffer_size(IntPtr eegChannelPtr, out IntPtr bufferSize);
     }
 }

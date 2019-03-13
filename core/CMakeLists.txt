@@ -66,9 +66,11 @@ endif()
 ##INCLUDE PATHS SECTION##
 #########################
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/network)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/include)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extensions)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extensions/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extensions/include/c-wrap)
+ENDIF()
 if (ANDROID)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support)
 endif()
@@ -80,19 +82,16 @@ endif()
 ###################
 file(GLOB HEADER_FILES_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 file(GLOB HEADER_FILES_BLE ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/*.h)
-file(GLOB HEADER_FILES_BLE_EMUL ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/emulator/*.h)
 file(GLOB_RECURSE HEADER_FILES_CHANNELS ${CMAKE_CURRENT_SOURCE_DIR}/include/channels/*.h)
 file(GLOB_RECURSE HEADER_FILES_DEVICE ${CMAKE_CURRENT_SOURCE_DIR}/include/device/*.h)
 file(GLOB HEADER_FILES_DEVSCAN ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/*.h)
 file(GLOB HEADER_FILES_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
-file(GLOB HEADER_FILES_UTILS_NET ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/*.h)
-file(GLOB_RECURSE HEADER_FILES_UTILS_DSP ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/*.h)
-file(GLOB HEADER_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap/*.h)
+file(GLOB HEADER_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/include/*.h)
+
 
 if (UNIX)
   if (APPLE)
     file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/ios/*.h)
-    file(GLOB HEADER_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.h)
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf
@@ -100,11 +99,9 @@ if (UNIX)
       )
     if (DEBIAN_FOUND)
     file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/linux/*.h)
-    file(GLOB HEADER_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.h)
     else(DEBIAN_FOUND)
         if (ANDROID)
             file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/android/*.h)
-            file(GLOB HEADER_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.h)
             file(GLOB HEADER_FILES_UTILS_JNI ${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support/*.h)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
@@ -114,7 +111,6 @@ if (UNIX)
 endif (UNIX)
 if (WIN32) 	
     file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/win/*.h)
-    file(GLOB HEADER_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/windows/*.h)
 endif (WIN32)
 ##################
 
@@ -124,18 +120,15 @@ endif (WIN32)
 ###################
 file(GLOB SOURCE_FILES_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB SOURCE_FILES_BLE ${CMAKE_CURRENT_SOURCE_DIR}/ble/*.cpp)
-file(GLOB SOURCE_FILES_BLE_EMUL ${CMAKE_CURRENT_SOURCE_DIR}/ble/emulator/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_CHANNELS ${CMAKE_CURRENT_SOURCE_DIR}/channels/*.cpp)
 file(GLOB_RECURSE SOURCE_FILES_DEVICE ${CMAKE_CURRENT_SOURCE_DIR}/device/*.cpp)
 file(GLOB SOURCE_FILES_DEVSCAN ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/*.cpp)
-file(GLOB SOURCE_FILES_UTILS_NET ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/*.cpp)
 file(GLOB SOURCE_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/*.cpp)
 
 if (UNIX)
   if (APPLE)
 	file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/ios/*.mm)
     file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/mm/*.mm)
-	file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf
@@ -144,12 +137,10 @@ if (UNIX)
     if (DEBIAN_FOUND)
     	file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/linux/*.cpp)
     	file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
-    	file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
     else(DEBIAN_FOUND)
 		    if (ANDROID) 
     		file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/android/*.cpp)
     		file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
-    		file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/posix/*.cpp)
     		file(GLOB SOURCE_FILES_UTILS_JNI ${CMAKE_CURRENT_SOURCE_DIR}/../utils/jni-support/*.cpp)
         else (ANDROID)
     	    message(SEND_ERROR "Operating system is not supported")
@@ -160,36 +151,51 @@ endif (UNIX)
 if (WIN32) 	
     file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/win/*.cpp)
     file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/cpp/*.cpp)
-    file(GLOB SOURCE_FILES_UTILS_NET_OS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/network/windows/*.cpp)
 endif (WIN32)
 ##################
 
-add_library(neurosdk${PLATFORM_SUFFIX} SHARED ${SOURCE_FILES_COMMON} 
-							${SOURCE_FILES_BLE}  
-							${SOURCE_FILES_BLE_OS}
-							${SOURCE_FILES_BLE_EMUL} 
-							${SOURCE_FILES_CHANNELS}  
-							${SOURCE_FILES_DEVICE}
-							${SOURCE_FILES_DEVSCAN}
-							${SOURCE_FILES_DEVSCAN_OS} 
-							${SOURCE_FILES_UTILS_NET}  
-							${SOURCE_FILES_UTILS_NET_OS}
-							${SOURCE_FILES_CWRAP}
-							${SOURCE_FILES_UTILS_JNI}
-							${HEADER_FILES_COMMON} 
-							${HEADER_FILES_BLE} 
-							${HEADER_FILES_BLE_OS} 
-							${HEADER_FILES_BLE_EMUL}
-							${HEADER_FILES_CHANNELS} 
-							${HEADER_FILES_DEVICE} 
-							${HEADER_FILES_DEVSCAN} 
-							${HEADER_FILES_DEVSCAN_OS}
-							${HEADER_FILES_SIGNAL} 
-							${HEADER_FILES_UTILS_NET}
-							${HEADER_FILES_UTILS_NET_OS}
-							${HEADER_FILES_UTILS_DSP}
-                            ${HEADER_FILES_CWRAP}
-							${HEADER_FILES_UTILS_JNI})
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extensions)
+	add_subdirectory(extensions)
+ENDIF()
+
+add_library(neurosdk${PLATFORM_SUFFIX} SHARED 
+			${SOURCE_FILES_COMMON} 
+			${SOURCE_FILES_BLE}  
+			${SOURCE_FILES_BLE_OS}
+			${SOURCE_FILES_CHANNELS}  
+			${SOURCE_FILES_DEVICE}
+			${SOURCE_FILES_DEVSCAN}
+			${SOURCE_FILES_DEVSCAN_OS} 
+			${SOURCE_FILES_UTILS_JNI} 
+			${EXT_SOURCES} 
+
+			${HEADER_FILES_COMMON} 
+			${HEADER_FILES_BLE} 
+			${HEADER_FILES_BLE_OS} 
+			${HEADER_FILES_CHANNELS} 
+			${HEADER_FILES_DEVICE} 
+			${HEADER_FILES_DEVSCAN} 
+			${HEADER_FILES_DEVSCAN_OS}
+			${HEADER_FILES_SIGNAL} 
+			${HEADER_FILES_UTILS_JNI} 
+			${SOURCE_FILES_CWRAP} 
+			${HEADER_FILES_CWRAP}
+			${EXT_HEADERS})
+
+source_group(c-wrap FILES ${SOURCE_FILES_CWRAP})
+source_group(c-wrap\\include FILES ${HEADER_FILES_CWRAP})
+source_group(extensions FILES ${EXT_SOURCES})
+source_group(extensions\\include FILES ${EXT_HEADERS})
+source_group(device FILES ${SOURCE_FILES_DEVICE})
+source_group(device\\include FILES ${HEADER_FILES_DEVICE})
+source_group(device\\ble FILES ${SOURCE_FILES_BLE} ${SOURCE_FILES_BLE_OS})
+source_group(device\\ble\\include FILES ${HEADER_FILES_BLE} ${HEADER_FILES_BLE_OS})
+source_group(channels FILES ${SOURCE_FILES_CHANNELS})
+source_group(channels\\include FILES ${HEADER_FILES_CHANNELS})
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/extensions)
+	
+ENDIF()
 
 ##########################
 ##EXPORT HEADERS SECTION##
@@ -226,8 +232,7 @@ file(GLOB SHARED_HEADERS_DEVSCAN 	${CMAKE_CURRENT_SOURCE_DIR}/include/device_sca
 									${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/scanner_factory.h
                                     ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/device_enumerator.h
                                     ${CMAKE_CURRENT_SOURCE_DIR}/include/device_scanner/enumeration_list.h)
-file(GLOB SHARED_HEADERS_FILTERS ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/filter/*.h)
-file(GLOB SHARED_HEADERS_ALG ${CMAKE_CURRENT_SOURCE_DIR}/../utils/dsp/include/algorithm.h)
+file(GLOB SHARED_HEADERS_FILTERS ${CMAKE_CURRENT_SOURCE_DIR}/include/filter/*.h)
 file(GLOB_RECURSE SHARED_HEADERS_SIGNAL ${CMAKE_CURRENT_SOURCE_DIR}/include/signal/*.h)
 file(GLOB SHARED_HEADERS_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap/*.h)
 #########################
@@ -258,10 +263,6 @@ if (WIN32)
     target_link_libraries(neurosdk${PLATFORM_SUFFIX} WindowsApp)
 endif (WIN32)
 
-if (EXISTS "extensions")
-	add_subdirectory(extensions)
-	target_link_libraries(neurosdk${PLATFORM_SUFFIX} sdk-extensions)
-ENDIF()
 
 if (ANDROID) 
 install(TARGETS neurosdk${PLATFORM_SUFFIX} RUNTIME DESTINATION ${NEUROSDK})
@@ -276,9 +277,8 @@ install(FILES ${SHARED_HEADERS_BLE} DESTINATION ${NEUROSDK}/include/ble)
 install(FILES ${SHARED_HEADERS_BLE_WIN} DESTINATION ${NEUROSDK}/include/ble/win)
 install(FILES ${SHARED_HEADERS_DEVSCAN} DESTINATION ${NEUROSDK}/include/device_scanner)
 install(FILES ${SHARED_HEADERS_FILTERS} DESTINATION ${NEUROSDK}/include/filter)
-install(FILES ${SHARED_HEADERS_ALG} DESTINATION ${NEUROSDK}/include)
 install(FILES ${SHARED_HEADERS_SIGNAL} DESTINATION ${NEUROSDK}/include/signal)
-install(FILES ${SHARED_HEADERS_CWRAP} DESTINATION ${NEUROSDK}/include/c-wrap)
+install(FILES ${HEADER_FILES_CWRAP} DESTINATION ${NEUROSDK}/include/c-wrap)
 if (WIN32)  
 install(FILES $<TARGET_PDB_FILE:neurosdk${PLATFORM_SUFFIX}> DESTINATION ${NEUROSDK} OPTIONAL)
 endif (WIN32)

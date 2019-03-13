@@ -15,6 +15,7 @@ public:
 	WindowsBleEnumerator& operator=(const WindowsBleEnumerator &) = delete;
 	SDK_SHARED WindowsBleEnumerator(WindowsBleEnumerator &&) noexcept;
 	SDK_SHARED WindowsBleEnumerator& operator=(WindowsBleEnumerator &&) noexcept;
+	SDK_SHARED void swap(WindowsBleEnumerator &) noexcept;
 	SDK_SHARED ~WindowsBleEnumerator();
 
 	SDK_SHARED ListenerPtr<void, const AdvertisementData &>
@@ -26,6 +27,8 @@ private:
 };
 
 SDK_SHARED WindowsBleEnumerator make_ble_enumerator(const std::vector<std::string> &name_filters);
+
+SDK_SHARED void swap(WindowsBleEnumerator &lhs, WindowsBleEnumerator &rhs) noexcept;
 
 }
 #endif

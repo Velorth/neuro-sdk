@@ -65,10 +65,10 @@ namespace Neuro
         }
 
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegIndexDoubleChannel_channels(EegIndex eegIndex, IntPtr[] channels, IntPtr channelsCount, double windowDuration, double overlappingCoeff);
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegIndexDoubleChannel_channels_artifacts(EegIndex eegIndex, IntPtr[] channels, IntPtr channelsCount, IntPtr artifactChannel, double windowDuration, double overlappingCoeff);
        
     }

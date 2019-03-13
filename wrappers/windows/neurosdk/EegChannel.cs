@@ -48,13 +48,13 @@ namespace Neuro
             return _dataChannel.ReadData(offset, length);
         }
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegDoubleChannel(IntPtr devicePtr);
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegDoubleChannel_info(IntPtr devicePtr, ChannelInfo info);
 
-        [DllImport(SdkExt.LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EegDoubleChannel_get_buffer_size(IntPtr eegChannelPtr, out IntPtr bufferSize);
     }
 }

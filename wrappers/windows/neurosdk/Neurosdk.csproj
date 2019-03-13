@@ -72,6 +72,9 @@
     <Compile Include="Device.cs" />
     <Compile Include="DeviceScanner.cs" />
     <Compile Include="DeviceTraits.cs" />
+    <Compile Include="EegArtifactChannel.cs" />
+    <Compile Include="EegChannel.cs" />
+    <Compile Include="EegIndexChannel.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="NativeArrayMarshaler.cs" />
     <Compile Include="Parameters.cs" />
