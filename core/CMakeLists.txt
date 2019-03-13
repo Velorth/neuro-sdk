@@ -258,6 +258,11 @@ if (WIN32)
     target_link_libraries(neurosdk${PLATFORM_SUFFIX} WindowsApp)
 endif (WIN32)
 
+if (EXISTS "extensions")
+	add_subdirectory(extensions)
+	target_link_libraries(neurosdk${PLATFORM_SUFFIX} sdk-extensions)
+ENDIF()
+
 if (ANDROID) 
 install(TARGETS neurosdk${PLATFORM_SUFFIX} RUNTIME DESTINATION ${NEUROSDK})
 else(ANDROID)

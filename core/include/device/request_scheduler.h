@@ -116,7 +116,6 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
                                    }
 
                                    std::unique_lock<std::mutex> queueChangeLock(queueMutex);
-                                   LOG_TRACE("Pop command record");
                                    requestQueue.pop();
                                }
                            });
@@ -125,7 +124,6 @@ RequestScheduler<CommandData>::RequestScheduler(std::function<void (std::shared_
 template <class CommandData>
 RequestScheduler<CommandData>::~RequestScheduler()
 {
-    LOG_TRACE("Request handler destructor");
     threadStop.store(true);
     queueEmptyCondition.notify_all();
     responseReceivedCondition.notify_all();
@@ -136,7 +134,6 @@ RequestScheduler<CommandData>::~RequestScheduler()
     }
     catch(std::system_error&)
     {}
-    LOG_TRACE("Request handler destructor EXIT");
 }
 
 template<class CommandData>
