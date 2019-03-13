@@ -22,7 +22,7 @@ namespace Neuro
         public static EegIndex Theta => new EegIndex() { Name = "Theta", FrequencyBottom = 4.0f, FrequencyTop = 8.0f };
     }
 
-    public class EegIndexChannel : IDataChannel<double>
+    public class EegIndexChannel : IDataChannel<double>, IDisposable
     {
         private readonly IntPtr[] _channelsPointers;
         private EegArtifactChannel _artifactChannel;
@@ -48,6 +48,10 @@ namespace Neuro
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
         }
 
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
+        }
 
         public event EventHandler<int> LengthChanged;
 

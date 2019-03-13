@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class BatteryChannel : IDataChannel<int>
+    public sealed class BatteryChannel : IDataChannel<int>, IDisposable
     {
         private readonly Device _device; //store device reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
@@ -15,6 +15,11 @@ namespace Neuro
             _anyChannel = new AnyChannel(create_BatteryIntChannel(device.DevicePtr));
             _dataChannel = new DataChannel<int>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
+        }
+        
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
         }
 
         public event EventHandler<int> LengthChanged;

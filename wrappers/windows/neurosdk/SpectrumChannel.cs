@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class SpectrumChannel : IDataChannel<double>
+    public class SpectrumChannel : IDataChannel<double>, IDisposable
     {
         private readonly IDataChannel<double> _sourceChannel; //store source channel reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
@@ -13,6 +13,11 @@ namespace Neuro
             _sourceChannel = channel;
             _anyChannel = new AnyChannel(create_SpectrumDoubleChannel(channel.ChannelPtr));
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
+        }
+
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
         }
 
         public event EventHandler<int> LengthChanged;

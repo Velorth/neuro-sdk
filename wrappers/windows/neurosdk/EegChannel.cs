@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class EegChannel : IDataChannel<double>
+    public class EegChannel : IDataChannel<double>, IDisposable
     {
         private readonly Device _device; //store device reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
@@ -22,6 +22,11 @@ namespace Neuro
             _anyChannel = new AnyChannel(create_EegDoubleChannel_info(device.DevicePtr, info));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
+        }
+
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
         }
 
         public event EventHandler<int> LengthChanged;

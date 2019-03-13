@@ -19,6 +19,22 @@ namespace Neuro
         public readonly IntPtr DevicePtr;
         public event EventHandler<Parameter> ParameterChanged;
 
+        public Device(DeviceInfo info)
+        {
+            DevicePtr = create_Device(info);
+            if (DevicePtr == null)
+            {
+                throw new InvalidOperationException(SdkError.LastErrorMessage);
+            }
+
+            _paramChangedFunc = OnParameterChanged;
+            var result = device_subscribe_param_changed(DevicePtr, _paramChangedFunc, out _paramChangedListenerPtr, IntPtr.Zero);
+            SdkError.ThrowIfError(result);
+
+            _doubleDataReceivedFunc = OnDoubleDataReceived;
+            _intDataReceivedFunc = OnIntDataReceived;
+        }
+
         internal Device(IntPtr devicePtr)
         {
             DevicePtr = devicePtr;
@@ -253,6 +269,9 @@ namespace Neuro
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void DeviceIntDataReceivedFunc(IntPtr devicePtr, ChannelInfo info, IntDataArray dataArray, IntPtr userData);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr create_Device(DeviceInfo info);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int device_connect(IntPtr devicePtr);

@@ -19,7 +19,7 @@ namespace Neuro
         public ArtifactType Type;
     }
 
-    public class EegArtifactChannel : IDataChannel<ArtifactZone>
+    public class EegArtifactChannel : IDataChannel<ArtifactZone>, IDisposable
     {
         private readonly AnyChannel _anyChannel;
         private readonly NativeArrayMarshaler<ArtifactZone> _arrayMarshaler = new NativeArrayMarshaler<ArtifactZone>();
@@ -39,8 +39,12 @@ namespace Neuro
             _anyChannel = new AnyChannel(create_EegArtifactChannel_eeg_channels(_t3.ChannelPtr, _t4.ChannelPtr, _o1.ChannelPtr, _o2.ChannelPtr));
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
         }
-
-
+        
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
+        }
+        
         public event EventHandler<int> LengthChanged;
 
         public ChannelInfo Info => _anyChannel.Info;

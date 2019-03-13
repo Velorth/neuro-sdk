@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class AnyChannel
+    public class AnyChannel : IDisposable
     {
         private readonly IntPtr _listenerPtr;
         private readonly LengthChangedFunc _lengthChangedFunc;
@@ -51,10 +51,21 @@ namespace Neuro
             SdkError.ThrowIfError(AnyChannel_add_length_callback(ChannelPtr, _lengthChangedFunc, out _listenerPtr, IntPtr.Zero));
         }
 
-        ~AnyChannel()
+        private void ReleaseUnmanagedResources()
         {
             free_listener_handle(_listenerPtr);
             AnyChannel_delete(ChannelPtr);
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~AnyChannel()
+        {
+            ReleaseUnmanagedResources();
         }
 
         private void OnTotalLengthChanged(IntPtr channelPtr, IntPtr length, IntPtr userData)
@@ -86,8 +97,7 @@ namespace Neuro
         private static extern int AnyChannel_get_total_length(IntPtr anyChannelPtr, out IntPtr totalLength);
     }
 
-    public sealed class DataChannel<T>
-    {
+    public sealed class DataChannel<T>{
         private readonly NativeChannelDataReader<T> _channelDataReader;
         private readonly AnyChannel _anyChannel;
 

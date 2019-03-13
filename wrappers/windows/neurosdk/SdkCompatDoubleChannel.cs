@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public abstract class SdkCompatDoubleChannel : IDataChannel<double>
+    public abstract class SdkCompatDoubleChannel : IDataChannel<double>, IDisposable
     {
         private LengthChangedFunc _lengthCallback;
         private readonly ReadDataFunc _readDataFunc;
@@ -22,9 +22,20 @@ namespace Neuro
             Info = info;
         }
 
-        ~SdkCompatDoubleChannel()
+        private void ReleaseUnmanagedResources()
         {
             AnyChannel_delete(ChannelPtr);
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~SdkCompatDoubleChannel()
+        {
+            ReleaseUnmanagedResources();
         }
 
         public event EventHandler<int> LengthChanged;
@@ -118,5 +129,6 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void AnyChannel_delete(IntPtr baseDoubleChannel);
+
     }
 }

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public sealed class SignalChannel : IDataChannel<double>
+    public sealed class SignalChannel : IDataChannel<double>, IDisposable
     {
         private readonly Device _device; //store device reference to prevent its deletion
         private readonly AnyChannel _anyChannel;
@@ -39,6 +39,11 @@ namespace Neuro
             _anyChannel = new AnyChannel(create_SignalDoubleChannel_filters(device.DevicePtr, filters, (IntPtr)filters.Length));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
+        }
+
+        public void Dispose()
+        {
+            _anyChannel.Dispose();
         }
 
         public event EventHandler<int> LengthChanged;

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
-    public class DeviceScanner
+    public class DeviceScanner : IDisposable
     {
         private readonly IntPtr _scannerPtr;
 
@@ -31,11 +31,22 @@ namespace Neuro
             SdkError.ThrowIfError(scanner_set_device_found_callback(_scannerPtr, _deviceFoundFunc, out _deviceFoundListenerPtr, IntPtr.Zero));
         }
 
-        ~DeviceScanner()
+        private void ReleaseUnmanagedResources()
         {
             free_listener_handle(_scanStateListenerPtr);
             free_listener_handle(_deviceFoundListenerPtr);
             scanner_delete(_scannerPtr);
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        ~DeviceScanner()
+        {
+            ReleaseUnmanagedResources();
         }
 
         public void StartScan(int timeoutMs = 0)
