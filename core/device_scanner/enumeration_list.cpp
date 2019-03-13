@@ -13,7 +13,7 @@ struct EnumerationList::Impl final {
 	const BleTimeDuration mRefreshPeriod{3s};
 	Notifier<void> mListChangedNotifier;
 	mutable std::shared_mutex mDeviceMapMutex;
-	std::unordered_map<DeviceInfo, BleTimeType> mDeviceMap;
+	std::unordered_map<DeviceInfo, BleTimeType> mDeviceMap{};
 	Loop<void()> mClearListLoop;
 
 	explicit Impl():

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "clistener.h"
+#include "cscanner.h"
 
 typedef struct _Device Device;
 
@@ -105,6 +106,7 @@ typedef struct _IntDataArray {
 	size_t samples_count;
 } IntDataArray;
 
+SDK_SHARED Device* create_Device(DeviceInfo);
 SDK_SHARED int device_connect(Device *);
 SDK_SHARED int device_disconnect(Device *);
 SDK_SHARED void device_delete(Device *);

@@ -68,6 +68,14 @@ int parameter_access_to_string(ParamAccess access, char* buffer, size_t buffer_l
 	}
 }
 
+Device* create_Device(DeviceInfo device_info) {
+	Neuro::DeviceInfo deviceInfo;
+	deviceInfo.Address = static_cast<Neuro::DeviceAddressType>(device_info.Address);
+	deviceInfo.Name = device_info.Name;
+	auto devicePtr = new std::shared_ptr<Neuro::Device>(new Neuro::Device(deviceInfo));
+	return reinterpret_cast<Device *>(devicePtr);
+}
+
 ret_code device_connect(Device *device_ptr) {
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
