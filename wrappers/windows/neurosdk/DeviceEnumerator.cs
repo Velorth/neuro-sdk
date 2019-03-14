@@ -7,7 +7,7 @@ namespace Neuro
     [StructLayout(LayoutKind.Sequential)]
     public struct DeviceInfo
     {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public string Name;
         public ulong Address;
     }
