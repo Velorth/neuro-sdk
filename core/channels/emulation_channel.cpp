@@ -11,7 +11,7 @@ static std::vector<double> create_sine(EmulationSine sine_params, data_offset_t 
 
 	auto sineFrequencyInSamples = sine_params.FrequencyHz / sampling_frequency;
 	for (auto i = offset; i < offset + length; ++i) {
-		sine[i - offset] = sine_params.AmplitudeV * std::sin(2 * alg::Pi * sampling_frequency * i + sine_params.PhaseShiftRad);
+		sine[i - offset] = sine_params.AmplitudeV * std::sin(2 * alg::Pi * sineFrequencyInSamples * i + sine_params.PhaseShiftRad);
 	}
 
 	return sine;
@@ -71,9 +71,9 @@ sampling_frequency_t EmulationChannel::samplingFrequency() const noexcept {
 
 void EmulationChannel::startTimer() {
 	if (mImpl->mNotificationTimer == nullptr) {
-		auto delay = std::chrono::duration<double>(2.f / mImpl->mSamplingFrequency);
+		auto delay = std::chrono::duration<double>(20.f / mImpl->mSamplingFrequency);
 		mImpl->mNotificationTimer = std::make_unique<Loop<void()>>([=]() {
-			mImpl->mCurrentLength += 2;
+			mImpl->mCurrentLength += 20;
 			mImpl->mLengthNotifier.notifyAll(mImpl->mCurrentLength);
 		}, delay);
 	}

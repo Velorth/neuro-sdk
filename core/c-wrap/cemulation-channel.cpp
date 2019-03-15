@@ -51,7 +51,7 @@ int EmulationDoubleChannel_start_timer(EmulationDoubleChannel* channel) {
 int EmulationDoubleChannel_stop_timer(EmulationDoubleChannel* channel) {
 	auto& emulationChannel = *reinterpret_cast<EmulationWrapPtr *>(channel);
 	try {
-		emulationChannel->channelPtr()->startTimer();
+		emulationChannel->channelPtr()->stopTimer();
 		return SDK_NO_ERROR;
 	}
 	catch (std::exception &e) {

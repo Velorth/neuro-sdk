@@ -13,4 +13,7 @@ SDK_SHARED SpectrumPowerDoubleChannel* create_SpectrumPowerDoubleChannel(
 	char *name,
 	double window_duration, double overlapping_coeff);
 
+SDK_SHARED int SpectrumPowerDoubleChannel_set_window_duration(SpectrumPowerDoubleChannel *channel, double duration);
+SDK_SHARED int SpectrumPowerDoubleChannel_set_overlapping_coefficient(SpectrumPowerDoubleChannel *channel, double overlap);
+
 #endif

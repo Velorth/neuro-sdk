@@ -77,6 +77,7 @@
     <Compile Include="EegChannel.cs" />
     <Compile Include="EegIndexChannel.cs" />
     <Compile Include="EmulationChannel.cs" />
+    <Compile Include="FilteredChannel.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="NativeArrayMarshaler.cs" />
     <Compile Include="Parameters.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="SdkLib.cs" />
     <Compile Include="SignalChannel.cs" />
     <Compile Include="SpectrumChannel.cs" />
+    <Compile Include="SpectrumPowerChannel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(PlatformName)'=='x64'">

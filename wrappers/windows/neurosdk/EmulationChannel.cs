@@ -18,10 +18,10 @@ namespace Neuro
         private readonly AnyChannel _anyChannel;
         private readonly DataChannel<double> _dataChannel;
 
-        public EmulationChannel(IEnumerable<EmulationSine> components, float samplingFrequency)
+        public EmulationChannel(IEnumerable<EmulationSine> components, float samplingFrequency, int initialLength)
         {
             var componentArray = components.ToArray();
-            _anyChannel = new AnyChannel(create_EmulationDoubleChannel(componentArray, (IntPtr)componentArray.Length, samplingFrequency));
+            _anyChannel = new AnyChannel(create_EmulationDoubleChannel(componentArray, (IntPtr)componentArray.Length, samplingFrequency, (IntPtr)initialLength));
             _dataChannel = new DataChannel<double>(_anyChannel);
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
         }
@@ -62,7 +62,7 @@ namespace Neuro
         }
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_EmulationDoubleChannel(EmulationSine[] components, IntPtr componentsCount, float samplingFrequency);
+        private static extern IntPtr create_EmulationDoubleChannel(EmulationSine[] components, IntPtr componentsCount, float samplingFrequency, IntPtr initialLength);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EmulationDoubleChannel_start_timer(IntPtr emulationChannelPtr);
