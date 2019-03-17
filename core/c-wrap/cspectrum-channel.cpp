@@ -28,6 +28,45 @@ SpectrumDoubleChannel* create_SpectrumDoubleChannel(DoubleChannel *double_channe
 	}
 }
 
+int SpectrumDoubleChannel_read_data(SpectrumDoubleChannel* channel, size_t offset, size_t length, double* out_buffer,
+	size_t buffer_size, size_t* samples_read, SpectrumWindow window_type) {
+	auto& spectrumChannel = *reinterpret_cast<SpectrumWrapPtr *>(channel);
+	try {
+		std::function<std::vector<double>(size_t, size_t)> read_function;
+		switch (window_type) {
+
+			case SpectrumWindowRectangular:
+				read_function = [&spectrumChannel](size_t offset, size_t length) {return spectrumChannel->channelPtr()->readData<alg::rectangle_window>(offset, length); };
+				break;
+			case SpectrumWindowSine:
+				read_function = [&spectrumChannel](size_t offset, size_t length) {return spectrumChannel->channelPtr()->readData<alg::sine_window>(offset, length); };
+				break;
+			case SpectrumWindowHamming:
+				read_function = [&spectrumChannel](size_t offset, size_t length) {return spectrumChannel->channelPtr()->readData<alg::hamming_window>(offset, length); };
+				break;
+			case SpectrumWindowBlackman:
+				read_function = [&spectrumChannel](size_t offset, size_t length) {return spectrumChannel->channelPtr()->readData<alg::blackman_window>(offset, length); };
+				break;
+			default: throw std::runtime_error("Unknown window type");
+		}
+		auto data = read_function(offset, length);
+		if (data.size() > buffer_size) {
+			set_sdk_last_error("Read data length is greater than read buffer size");
+			return ERROR_EXCEPTION_WITH_MESSAGE;
+		}
+		std::copy(data.begin(), data.end(), out_buffer);
+		*samples_read = data.size();
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
 int SpectrumDoubleChannel_get_hz_per_spectrum_sample(SpectrumDoubleChannel* channel, double* out_step) {
 	auto& spectrumChannel = *reinterpret_cast<SpectrumWrapPtr *>(channel);
 	try {

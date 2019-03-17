@@ -35,7 +35,8 @@ public:
 		return mSourceChannel->subscribeLengthChanged(callback);
 	}
 
-	DataContainer readData(data_offset_t offset, data_length_t length) const {
+	template <typename WindowFunction = alg::hamming_window>
+	DataContainer readData(data_offset_t offset, data_length_t length, WindowFunction window_function = WindowFunction()) const {
 		auto signal = mSourceChannel->readData(offset, length);
 		std::size_t steps = signal.size() / spectrumLength();
 		if (signal.size() % spectrumLength() != 0) {
@@ -45,10 +46,11 @@ public:
 
 		std::vector<double> signalSpectrum(spectrumLength());
 		for (std::size_t step = 0; step < steps; ++step) {
-			decltype(signal) signalPart(signal.begin() + spectrumLength() * step,
-				signal.begin() + spectrumLength() * (step + 1));
+
+			decltype(signal) signalPart(spectrumLength());
+			window_function(signal.begin() + spectrumLength() * step, signal.begin() + spectrumLength() * (step + 1), signalPart.begin());
 			auto spectrumPart = alg::fft(signalPart);
-			std::transform(signalSpectrum.begin(), signalSpectrum.end(), spectrumPart.begin(), signalSpectrum.begin(), std::plus<double>());
+			std::transform(signalSpectrum.begin(), signalSpectrum.end(), spectrumPart.begin(), signalSpectrum.begin(), std::plus<>());
 		}
 		if (steps > 1) {
 			std::transform(signalSpectrum.begin(), signalSpectrum.end(), signalSpectrum.begin(), [steps](auto value) {return value / steps; });
@@ -75,7 +77,7 @@ public:
 	}
 
 private:
-	static constexpr std::size_t SpectrumMinAccuracy = 2;
+	static constexpr std::size_t SpectrumMinAccuracy = 4;
 	ChannelInfo mInfo;
 	std::shared_ptr<Channel> mSourceChannel;
 };

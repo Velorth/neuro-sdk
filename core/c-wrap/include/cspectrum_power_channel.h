@@ -16,4 +16,6 @@ SDK_SHARED SpectrumPowerDoubleChannel* create_SpectrumPowerDoubleChannel(
 SDK_SHARED int SpectrumPowerDoubleChannel_set_window_duration(SpectrumPowerDoubleChannel *channel, double duration);
 SDK_SHARED int SpectrumPowerDoubleChannel_set_overlapping_coefficient(SpectrumPowerDoubleChannel *channel, double overlap);
 
+SDK_SHARED double spectrum_power_normalized(float low_frequency, float high_frequency, double *spectrum, size_t spectrum_length, float frequency_step);
+
 #endif

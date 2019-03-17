@@ -71,4 +71,13 @@ int SpectrumPowerDoubleChannel_set_overlapping_coefficient(SpectrumPowerDoubleCh
 	}
 }
 
+double spectrum_power_normalized(float low_frequency, float high_frequency, double* spectrum,	size_t spectrum_length, float frequency_step) {
+	try {
+		return Neuro::spectrum_power_normalized(low_frequency, high_frequency, std::vector<double>(spectrum, spectrum + spectrum_length), frequency_step);
+	}
+	catch (...) {
+		return 0.0;
+	}
+}
+
 

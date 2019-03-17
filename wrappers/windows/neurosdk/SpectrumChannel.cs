@@ -3,6 +3,14 @@ using System.Runtime.InteropServices;
 
 namespace Neuro
 {
+    public enum SpectrumWindow
+    {
+        Rectangular,
+        Sine,
+        Hamming,
+        Blackman
+    }
+
     public class SpectrumChannel : IDataChannel<double>, IDisposable
     {
         private readonly IDataChannel<double> _sourceChannel; //store source channel reference to prevent its deletion
@@ -32,11 +40,16 @@ namespace Neuro
 
         public double[] ReadData(int offset, int length)
         {
+            return ReadData(offset, length, SpectrumWindow.Rectangular);
+        }
+
+        public double[] ReadData(int offset, int length, SpectrumWindow windowType)
+        {
             var bufferSize = SpectrumLength * Marshal.SizeOf<double>();
             var bufferPtr = Marshal.AllocHGlobal(bufferSize);
             try
             {
-                SdkError.ThrowIfError(NativeDataReadFunction.DoubleChannel_read_data(_anyChannel.ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr, (IntPtr)bufferSize, out var dataRead));
+                SdkError.ThrowIfError(SpectrumDoubleChannel_read_data(_anyChannel.ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr, (IntPtr)bufferSize, out var dataRead, windowType));
                 return new NativeArrayMarshaler<double>().MarshalArray(bufferPtr, dataRead);
             }
             finally
@@ -65,7 +78,11 @@ namespace Neuro
       
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_SpectrumDoubleChannel(IntPtr channelPtr);
-        
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int SpectrumDoubleChannel_read_data(IntPtr channelPtr, IntPtr offset, IntPtr length,
+            IntPtr outBuffer, IntPtr bufferSize, out IntPtr samplesRead, SpectrumWindow windowType);
+
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SpectrumDoubleChannel_get_hz_per_spectrum_sample(IntPtr spectrumChannelPtr, out double hzPerSample);
 

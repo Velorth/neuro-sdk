@@ -51,6 +51,11 @@ namespace Neuro
             set => SdkError.ThrowIfError(SpectrumPowerDoubleChannel_set_overlapping_coefficient(ChannelPtr, value));
         }
 
+        public static double SpectrumPower(float lowFrequency, float highFrequency, double[] spectrum, double frequencyStep)
+        {
+            return spectrum_power_normalized(lowFrequency, highFrequency, spectrum, (IntPtr) spectrum.Length, (float)frequencyStep);
+        }
+
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_SpectrumPowerDoubleChannel(IntPtr[] channels, IntPtr channelsCount, float lowFreq, float highFreq, 
             [MarshalAs(UnmanagedType.LPStr)] string name, double windowDuration, double overlappingCoeff);
@@ -60,5 +65,9 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int SpectrumPowerDoubleChannel_set_window_duration(IntPtr channel, double duration);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern double spectrum_power_normalized(float lowFrequency, float highFrequency,
+            double[] spectrum, IntPtr spectrumLength, float frequencyStep);
     }
 }

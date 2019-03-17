@@ -11,7 +11,7 @@ template <typename T>
 SDK_SHARED double spectrum_power_normalized(float low_frequency, float high_frequency, const std::vector<T> &spectrum, float frequency_step) {
 	auto start = static_cast<std::size_t>(low_frequency / frequency_step);
 	auto stop = static_cast<std::size_t>(high_frequency / frequency_step);
-	return std::accumulate(spectrum.begin() + start, spectrum.begin() + stop, 0.0) / (stop - start);
+	return std::accumulate(spectrum.begin() + start, spectrum.begin() + stop, 0.0, [](const auto &init, const auto &value) { return init + value * value; }) / (stop - start);
 }
 
 template <typename SpectrumDoubleChannel>
