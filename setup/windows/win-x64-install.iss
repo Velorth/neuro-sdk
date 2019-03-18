@@ -1,3 +1,5 @@
+#include "environment.iss" 
+
 #define SRC GetEnv('NEUROSDK')
 #define SAMPLES GetEnv('NEUROSDK-SAMPLES')
 
@@ -56,20 +58,16 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
 var
   DataDirPage: TInputDirWizardPage;
 
-function NeedsAddPath(Param: string): boolean;
-var
-  OrigPath: string;
+procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
-    'SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
-    'Path', OrigPath)
-  then begin
-    Result := True;
-    exit;
-  end;
-  { look for the path with leading and trailing semicolon }
-  { Pos() returns 0 if not found }
-  Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+    if (CurStep = ssPostInstall) and IsTaskSelected('envPath')
+     then EnvAddPath(ExpandConstant('{app}'));
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+    if CurUninstallStep = usPostUninstall
+    then EnvRemovePath(ExpandConstant('{app}'));
 end;
 
 procedure InitializeWizard;

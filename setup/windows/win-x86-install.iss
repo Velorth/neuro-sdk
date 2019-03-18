@@ -1,19 +1,21 @@
+#include "environment.iss" 
+
 #define SRC GetEnv('NEUROSDK_86')
 #define SAMPLES GetEnv('NEUROSDK-SAMPLES')
 
 [Setup]
-
+ChangesEnvironment=true
 AppId={{NEUROMD-SDK}
-AppVersion=1.3.1
+AppVersion=1.4.0
 AppName=NeuroMD Software development kit
-AppVerName=1.3.1
+AppVerName=1.4.0
 AppPublisher=NeuroMD
 AppCopyright=NeuroMD
 
 AppPublisherURL=http://www.neuromd.com
 AppSupportURL=http://www.neuromd.com
 
-VersionInfoVersion=1.3.1
+VersionInfoVersion=1.4.0
 VersionInfoCompany=NeuroMD
 VersionInfoCopyright=NeuroMD
 VersionInfoDescription=NeuroMD Software development kit 
@@ -26,7 +28,7 @@ UsePreviousAppDir =no
 DisableProgramGroupPage=no
 DefaultGroupName=NeuroMD
 OutputDir=bin
-OutputBaseFilename=neurosdk-setup-win-x86-v1.3.1
+OutputBaseFilename=neurosdk-setup-win-x86-v1.4.0
 Compression=lzma2/ultra64
 LZMANumBlockThreads=4
 LZMAUseSeparateProcess=yes
@@ -39,7 +41,6 @@ UsePreviousLanguage=no
 
 
 [Dirs]
-
 Name: "{app}";
 
 [Files]
@@ -52,24 +53,23 @@ Source: "{#SAMPLES}\cross-platform\cpp\*"; DestDir: "{code:GetSamplesDir}\cpp"; 
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType:string; ValueName: "NEUROSDK_86"; \
     ValueData: "{app}"; Flags: preservestringtype
 
+[Tasks]
+Name: envPath; Description: "Add NeuroMD SDK to PATH variable" 
+
 [Code]
 var
   DataDirPage: TInputDirWizardPage;
 
-function NeedsAddPath(Param: string): boolean;
-var
-  OrigPath: string;
+procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
-    'SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
-    'Path', OrigPath)
-  then begin
-    Result := True;
-    exit;
-  end;
-  { look for the path with leading and trailing semicolon }
-  { Pos() returns 0 if not found }
-  Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
+    if (CurStep = ssPostInstall) and IsTaskSelected('envPath')
+     then EnvAddPath(ExpandConstant('{app}'));
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+    if CurUninstallStep = usPostUninstall
+    then EnvRemovePath(ExpandConstant('{app}'));
 end;
 
 procedure InitializeWizard;

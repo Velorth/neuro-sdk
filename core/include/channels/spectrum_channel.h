@@ -37,6 +37,12 @@ public:
 
 	template <typename WindowFunction = alg::hamming_window>
 	DataContainer readData(data_offset_t offset, data_length_t length, WindowFunction window_function = WindowFunction()) const {
+		if (offset >= mSourceChannel->totalLength()) {
+			return std::vector<double> (spectrumLength());
+		}
+		if (offset + length > mSourceChannel->totalLength()) {
+			length = mSourceChannel->totalLength() - offset;
+		}
 		auto signal = mSourceChannel->readData(offset, length);
 		std::size_t steps = signal.size() / spectrumLength();
 		if (signal.size() % spectrumLength() != 0) {

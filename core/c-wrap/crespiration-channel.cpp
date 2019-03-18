@@ -11,11 +11,10 @@ using RespirationChannelType = Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Re
 using RespirationChannelWrap = SpecificChannelWrapper<RespirationChannelType>;
 using RespirationChannelWrapPtr = std::shared_ptr<RespirationChannelWrap>;
 
-RespirationDoubleChannel* create_RespirationDoubleChannel(Device* device_ptr, ChannelInfo info) {
+RespirationDoubleChannel* create_RespirationDoubleChannel(Device* device_ptr) {
 	try {
 		auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
-		Neuro::ChannelInfo channelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index);
-		const auto channelPtr = std::make_shared<RespirationChannelType>(device, channelInfo);
+		const auto channelPtr = std::make_shared<RespirationChannelType>(device);
 		return getCObjectPtr<RespirationDoubleChannel>(channelPtr);
 	}
 	catch (std::exception &e) {
