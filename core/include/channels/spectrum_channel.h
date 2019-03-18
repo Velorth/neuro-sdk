@@ -41,7 +41,16 @@ public:
 		std::size_t steps = signal.size() / spectrumLength();
 		if (signal.size() % spectrumLength() != 0) {
 			++steps;
-			signal.resize(steps * spectrumLength());
+			auto newSize = steps * spectrumLength();
+			auto oldSize = signal.size();
+			auto diff = newSize - oldSize;
+			signal.resize(newSize);
+			while (oldSize * 2 <= newSize) {
+				std::copy_n(signal.begin(), oldSize, signal.begin() + oldSize);
+				oldSize *= 2;
+				diff = newSize - oldSize;
+			}
+			if (diff > 0) std::copy_n(signal.begin(), diff, signal.end() - diff);
 		}
 
 		std::vector<double> signalSpectrum(spectrumLength());
@@ -77,7 +86,7 @@ public:
 	}
 
 private:
-	static constexpr std::size_t SpectrumMinAccuracy = 4;
+	static constexpr std::size_t SpectrumMinAccuracy = 8;
 	ChannelInfo mInfo;
 	std::shared_ptr<Channel> mSourceChannel;
 };
