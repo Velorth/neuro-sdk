@@ -170,7 +170,7 @@ struct ConnectedImpl final : public BleDeviceWrapperState {
 	}
 
 	std::unique_ptr<BleDeviceWrapperState> getConnectedImpl() override {
-		throw std::runtime_error("Device is already in connected state");
+		return make_connected_impl(mInfo, mGattInfo);
 	}
 
 	std::string getName() override {
@@ -264,11 +264,16 @@ BleDeviceWrapper::~BleDeviceWrapper() = default;
 
 void BleDeviceWrapper::connect() {
 	if (mState->getState() != BleDeviceState::Connected) {
-		mState = mState->getConnectedImpl();
-		mDataListener = mState->subscribeDataReceived([=](const auto &data) { notifyDataReceived(data); });
-		mStatusListener = mState->subscribeStatusReceived([=](const auto &data) { notifyStatusReceived(data); });
-		mConnectionListener = mState->subscribeConnectionStateChanged([=](const auto &state) { notifyStateChanged(state, BleDeviceError::NoError); });
-		notifyStateChanged(mState->getState(), BleDeviceError::NoError);
+		try {
+			mState = mState->getConnectedImpl();
+			mDataListener = mState->subscribeDataReceived([=](const auto &data) { notifyDataReceived(data); });
+			mStatusListener = mState->subscribeStatusReceived([=](const auto &data) { notifyStatusReceived(data); });
+			mConnectionListener = mState->subscribeConnectionStateChanged([=](const auto &state) { notifyStateChanged(state, BleDeviceError::NoError); });
+			notifyStateChanged(mState->getState(), BleDeviceError::NoError);
+		}
+		catch (std::exception &e) {
+			throw std::runtime_error("Unable connect to device. Device is unreachable");
+		}
 	}
 }
 
