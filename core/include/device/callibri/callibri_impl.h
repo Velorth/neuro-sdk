@@ -33,8 +33,8 @@ public:
 	ListenerPtr<void, const int &>
 		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<signal_sample_t> &>
-		subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) override;
+	ListenerPtr<void, const SignalPacket &>
+		subscribeSignalDataReceived(std::function<void(const SignalPacket &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<resistance_sample_t> &>
 		subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)>, ChannelInfo) override;
@@ -61,7 +61,7 @@ private:
     static constexpr const char *class_name = "CallibriImpl";
 
 	Notifier<void, const int &> mBatteryNotifier{ class_name };
-	Notifier<void, const std::vector<signal_sample_t> &> mSignalNotifier{ class_name };
+	Notifier<void, const SignalPacket &> mSignalNotifier{ class_name };
 	Notifier<void, const std::vector<MEMS> &> mMEMSNotifier{ class_name };
 	Notifier<void, const std::vector<Quaternion> &> mOrientationNotifier{ class_name };
 	Notifier<void, const std::vector<double> &> mRespirationNotifier{ class_name };

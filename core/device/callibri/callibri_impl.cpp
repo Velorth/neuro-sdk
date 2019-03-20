@@ -93,8 +93,8 @@ CallibriImpl::subscribeBatteryDataReceived(std::function<void(const int &)> call
 	return mBatteryNotifier.addListener(callback);
 }
 
-ListenerPtr<void, const std::vector<signal_sample_t> &>
-CallibriImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info) {
+ListenerPtr<void, const SignalPacket &>
+CallibriImpl::subscribeSignalDataReceived(std::function<void(const SignalPacket &)> callback, ChannelInfo info) {
 	return mSignalNotifier.addListener(callback);
 }
 
@@ -322,7 +322,7 @@ void CallibriImpl::onCommandResponse(const ByteBuffer &packetBytes){
 }
 
 void CallibriImpl::onSignalReceived(const ByteBuffer &data){
-//    auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
+    auto packetNumber = extractPacketNumber(data, SignalPacketNumberPos);
     ByteBuffer signalData(data.begin() + SignalDataShift, data.end());
 	if (signalData.size() < 18)
 		return;
@@ -339,7 +339,10 @@ void CallibriImpl::onSignalReceived(const ByteBuffer &data){
 
 		samples.push_back(sampleValue);
 	}
-	mSignalNotifier.notifyAll(samples);
+	SignalPacket packet;
+	packet.PacketData = std::move(samples);
+	packet.FirstSampleNumber = packetNumber * 9;
+	mSignalNotifier.notifyAll(packet);
 }
 
 void CallibriImpl::onMemsReceived(const ByteBuffer &data){

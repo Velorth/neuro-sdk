@@ -36,8 +36,8 @@ public:
 	virtual ChannelDataListenerType<ChannelInfo::Type::Battery>
     subscribeBatteryDataReceived(ChannelDataCallbackFunctionType<ChannelInfo::Type::Battery>, ChannelInfo) = 0;
 
-	virtual ListenerPtr<void, const std::vector<signal_sample_t> &>
-    subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) = 0;
+	virtual ListenerPtr<void, const SignalPacket &>
+    subscribeSignalDataReceived(std::function<void(const SignalPacket &)>, ChannelInfo) = 0;
 
 	virtual ListenerPtr<void, const std::vector<resistance_sample_t> &>
     subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)>, ChannelInfo) = 0;

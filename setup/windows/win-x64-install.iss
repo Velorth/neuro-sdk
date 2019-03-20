@@ -1,6 +1,6 @@
 #include "environment.iss" 
 
-#define SRC GetEnv('NEUROSDK')
+#define SRC GetEnv('NEUROSDK_64')
 #define SAMPLES GetEnv('NEUROSDK-SAMPLES')
 
 [Setup]
@@ -45,7 +45,7 @@ UsePreviousLanguage=no
 Name: "{app}";
 
 [Files]
-Source: "{#SRC}\windows\x64*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs;
+Source: "{#SRC}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs;
 Source: "{#SAMPLES}\windows\*"; DestDir: "{code:GetSamplesDir}\.net"; Flags: recursesubdirs createallsubdirs; 
 Source: "{#SAMPLES}\cross-platform\c\*"; DestDir: "{code:GetSamplesDir}\c"; Flags: recursesubdirs createallsubdirs;  
 Source: "{#SAMPLES}\cross-platform\cpp\*"; DestDir: "{code:GetSamplesDir}\cpp"; Flags: recursesubdirs createallsubdirs; 

@@ -29,8 +29,8 @@ public:
 	ListenerPtr<void, const int &>
 		subscribeBatteryDataReceived(std::function<void(const int &)>, ChannelInfo) override;
 
-	ListenerPtr<void, const std::vector<signal_sample_t> &>
-		subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)>, ChannelInfo) override;
+	ListenerPtr<void, const SignalPacket &>
+		subscribeSignalDataReceived(std::function<void(const SignalPacket &)>, ChannelInfo) override;
 
 	ListenerPtr<void, const std::vector<resistance_sample_t> &>
 		subscribeResistanceDataReceived(std::function<void(const std::vector<resistance_sample_t> &)>, ChannelInfo) override;
@@ -59,7 +59,7 @@ private:
     static constexpr const char *class_name = "BrainbitImpl";
 
 	Notifier<void, const int &> mBatteryNotifier{ class_name };
-	std::unordered_map<std::size_t, Notifier<void, const std::vector<signal_sample_t> &>> mSignalNotifierMap;
+	std::unordered_map<std::size_t, Notifier<void, const SignalPacket &>> mSignalNotifierMap;
 	std::unordered_map<std::size_t, Notifier<void, const std::vector<resistance_sample_t> &>> mResistanceNotifierMap;
 	Notifier<void, const int &> mConnectionStatsNotifier{ class_name };
 
@@ -81,8 +81,8 @@ private:
     void parseState(BrainbitCommand cmd, const ByteBuffer &);
 	void parseVersion(const ByteBuffer &);
     void parseSignalData(const ByteBuffer &);
-    void onSignalReceived(const std::vector<signal_sample_t> &);
-    void onResistanceReceived(const std::vector<resistance_sample_t> &);
+    void onSignalReceived(const std::vector<signal_sample_t> &, int);
+    void onResistanceReceived(const std::vector<resistance_sample_t> &, int);
     void onResistanceCalculated(resistance_sample_t value);
     bool execStartSignalCommand();
     bool execStopSignalCommand();

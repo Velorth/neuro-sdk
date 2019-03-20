@@ -12,6 +12,36 @@ using SignalChannelType = Neuro::DeviceChannel<Neuro::ChannelInfo::Type::Signal>
 using SignalChannelWrap = SpecificChannelWrapper<SignalChannelType>;
 using SignalChannelWrapPtr = std::shared_ptr<SignalChannelWrap>;
 
+int device_subscribe_signal_channel_data_received(Device *device_ptr, ChannelInfo info,	void(*callback)(Device*, ChannelInfo, SignalDataArray, void*), ListenerHandle *listener_handle, void* user_data) {
+	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
+	try {
+		auto listener = device->subscribeDataReceived<Neuro::ChannelInfo::Type::Signal>([device_ptr, callback, info, user_data](const auto &data) {
+			if (callback != nullptr) {
+				SignalDataArray dataArray;
+				using  TargetDataType = std::remove_pointer_t<decltype(dataArray.data_array)>;
+				dataArray.samples_count = data.PacketData.size();
+				const auto memorySize = dataArray.samples_count * sizeof(TargetDataType);
+				dataArray.data_array = reinterpret_cast<TargetDataType *>(malloc(memorySize));
+				std::copy(data.PacketData.begin(), data.PacketData.end(), dataArray.data_array);
+				dataArray.first_samples_number = data.FirstSampleNumber;
+				callback(device_ptr, info, dataArray, user_data);
+			}
+		}, Neuro::ChannelInfo(static_cast<Neuro::ChannelInfo::Type>(info.type), info.name, info.index));
+		if (listener == nullptr) {
+			throw std::runtime_error("Failed to subscribe length changed event: length listenr is null");
+		}
+		*listener_handle = reinterpret_cast<ListenerHandle>(new decltype(listener)(listener));
+		return SDK_NO_ERROR;
+	}
+	catch (std::exception &e) {
+		set_sdk_last_error(e.what());
+		return ERROR_EXCEPTION_WITH_MESSAGE;
+	}
+	catch (...) {
+		return ERROR_UNHANDLED_EXCEPTION;
+	}
+}
+
 SignalDoubleChannel* create_SignalDoubleChannel(Device* device_ptr) {
 	auto device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
@@ -79,4 +109,8 @@ SignalDoubleChannel* create_SignalDoubleChannel_filters(Device *device_ptr, Filt
 int SignalDoubleChannel_get_buffer_size(SignalDoubleChannel* channel, size_t* out_buffer_size) {
 	auto& signalChannel = *reinterpret_cast<SignalChannelWrapPtr *>(channel);
 	return readBufferSize(*signalChannel->channelPtr(), out_buffer_size);
+}
+
+void free_SignalDataArray(SignalDataArray data_array) {
+	free(data_array.data_array);
 }

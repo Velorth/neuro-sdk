@@ -83,14 +83,19 @@ bool operator!=(const ChannelInfo &, const ChannelInfo &);
 template <ChannelInfo::Type InfoType>
 struct ChannelTraits;
 
+struct SignalPacket {
+	std::vector<signal_sample_t> PacketData;
+	unsigned short FirstSampleNumber;
+};
+
 template <>
 struct ChannelTraits<ChannelInfo::Type::Signal>{
     using DataType = signal_sample_t;
-	using CallbackFunctionType = std::function<void(const std::vector<DataType> &)>;
-	using DataListenerType = ListenerPtr<void, const std::vector<DataType> &>;
+	using CallbackFunctionType = std::function<void(const SignalPacket &)>;
+	using DataListenerType = ListenerPtr<void, const SignalPacket &>;
 	using BufferType = SafeBuffer<DataType, 150000>;
     static ChannelInfo defaultInfo(){ return ChannelInfo::Signal(); }
-	static std::vector<DataType> forwardData(const std::vector<DataType> &raw_data) { return raw_data; }
+	static std::vector<DataType> forwardData(const SignalPacket &raw_data) { return raw_data.PacketData; }
 };
 
 template <>

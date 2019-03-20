@@ -68,8 +68,8 @@ BrainbitImpl::subscribeBatteryDataReceived(std::function<void(const int &)> call
 	return mBatteryNotifier.addListener(callback);
 }
 
-ListenerPtr<void, const std::vector<signal_sample_t> &>
-BrainbitImpl::subscribeSignalDataReceived(std::function<void(const std::vector<signal_sample_t> &)> callback, ChannelInfo info) {
+ListenerPtr<void, const SignalPacket &>
+BrainbitImpl::subscribeSignalDataReceived(std::function<void(const SignalPacket &)> callback, ChannelInfo info) {
 	if (info.getType() != ChannelInfo::Type::Signal) {
         throw std::runtime_error("Wrong ChannelInfo Type value");
     }
@@ -265,10 +265,10 @@ void BrainbitImpl::parseSignalData(const ByteBuffer &data){
 
     try{
         if (mBrainbitState == BrainbitCommand::CMD_SIGNAL){
-            onSignalReceived(signalData);
+            onSignalReceived(signalData, packetNumber);
         }
         else if (mBrainbitState == BrainbitCommand::CMD_RESIST){
-            onResistanceReceived(signalData);
+            onResistanceReceived(signalData, packetNumber);
         }
     }
     catch (std::exception &e){
@@ -276,17 +276,20 @@ void BrainbitImpl::parseSignalData(const ByteBuffer &data){
     }
 }
 
-void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data){
+void BrainbitImpl::onSignalReceived(const std::vector<signal_sample_t> &data, int packet_number){
     for (auto& info : mChannels){
         if (info.getType() == ChannelInfo::Type::Signal){
             std::vector<signal_sample_t> channelSamples{data[info.getIndex()], data[info.getIndex()+4]};
-            mSignalNotifierMap[info.getIndex()].notifyAll(channelSamples);
+			SignalPacket packet;
+			packet.PacketData = std::move(channelSamples);
+			packet.FirstSampleNumber = packet_number * 2;
+            mSignalNotifierMap[info.getIndex()].notifyAll(packet);
         }
     }
 }
 
-void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data){
-    onSignalReceived(std::vector<signal_sample_t>(8));
+void BrainbitImpl::onResistanceReceived(const std::vector<resistance_sample_t> &data, int packet_number){
+    onSignalReceived(std::vector<signal_sample_t>(8), packet_number);
     if (std::abs(data[mCurrentResistChannel]) == 0.0 || std::abs(data[mCurrentResistChannel+4]) == 0.0 ){
         return;
     }

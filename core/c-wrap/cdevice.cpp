@@ -267,10 +267,6 @@ int device_subscribe_double_channel_data_received(Device *device_ptr, ChannelInf
 	auto& device = *reinterpret_cast<Neuro::DeviceSharedPtr *>(device_ptr);
 	try {
 		switch (channel_info.type) {
-		case ChannelTypeSignal: {
-			*handle = setArrayDataListener<Neuro::ChannelInfo::Type::Signal, DoubleDataArray>(device, device_ptr, channel_info, callback, user_data);
-			break;
-		}
 		case ChannelTypeRespiration: {
 			*handle = setArrayDataListener<Neuro::ChannelInfo::Type::Respiration, DoubleDataArray>(device, device_ptr, channel_info, callback, user_data);
 			break;
