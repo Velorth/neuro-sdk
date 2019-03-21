@@ -9,22 +9,14 @@ using DeviceAddressType = BleDeviceAddress;
 using BleEnumerator = WindowsBleEnumerator;
 }
 #elif __APPLE__
-    
-    #if TARGET_IPHONE_SIMULATOR
-
-    #elif TARGET_OS_IPHONE
-        
-    #elif TARGET_OS_MAC
-        
-    #else
-        static_assert(false);
-    #endif
+using DeviceAddressType = NSUUID;
+using BleEnumerator = MacOsBleEnumerator;
 #elif __ANDROID__
 #include "ble/android/android_ble_enumerator.h"
 #include "ble/android/ble_device_jni.h"
 namespace {
-    using DeviceAddressType = std::string;
-    using BleEnumerator = AndroidBleEnumerator;
+using DeviceAddressType = std::string;
+using BleEnumerator = AndroidBleEnumerator;
 }
 #elif __linux__
     

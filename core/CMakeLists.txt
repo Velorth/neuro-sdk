@@ -92,6 +92,8 @@ file(GLOB HEADER_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/include/*.h)
 if (UNIX)
   if (APPLE)
     file(GLOB HEADER_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/ios/*.h)
+    file(GLOB HEADER_FILES_BLE_OS_NEW ${CMAKE_CURRENT_SOURCE_DIR}/include/ble/mac/*.h)
+    set(HEADER_FILES_BLE_OS ${HEADER_FILES_BLE_OS} ${HEADER_FILES_BLE_OS_NEW})
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf
@@ -128,7 +130,9 @@ file(GLOB SOURCE_FILES_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/c-wrap/*.cpp)
 if (UNIX)
   if (APPLE)
 	file(GLOB SOURCE_FILES_BLE_OS ${CMAKE_CURRENT_SOURCE_DIR}/ble/ios/*.mm)
-    file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/mm/*.mm)
+  file(GLOB SOURCE_FILES_BLE_OS_NEW ${CMAKE_CURRENT_SOURCE_DIR}/ble/mac/*.mm)
+  set(SOURCE_FILES_BLE_OS ${SOURCE_FILES_BLE_OS} ${SOURCE_FILES_BLE_OS_NEW})
+  file(GLOB SOURCE_FILES_DEVSCAN_OS ${CMAKE_CURRENT_SOURCE_DIR}/device_scanner/mm/*.mm)
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf
@@ -243,7 +247,14 @@ file(GLOB SHARED_HEADERS_CWRAP ${CMAKE_CURRENT_SOURCE_DIR}/include/c-wrap/*.h)
 ############################
 if (UNIX)
   if (APPLE)
-
+    set_target_properties(neurosdk${PLATFORM_SUFFIX} PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION C
+      MACOSX_FRAMEWORK_IDENTIFIER com.neuromd.neurosdk
+      #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+      PUBLIC_HEADER neurosdk.h
+      #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+    )
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf

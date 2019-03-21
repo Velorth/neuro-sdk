@@ -28,19 +28,19 @@ static UUIDType guid_from_string(const std::string &guid_string) {
 
 }
 #elif __APPLE__
-    
-    #if TARGET_IPHONE_SIMULATOR
+#include <CoreBluetooth/CoreBluetooth.h>
+#include "ble/mac/bluetooth_le_device_mac.h"
 
-    #elif TARGET_OS_IPHONE
-        
-    #elif TARGET_OS_MAC
-        
-    #else
-        static_assert(false);
-    #endif
+using UUIDType = CBUUID;
+using BleTimeType = winrt::Windows::Foundation::DateTime;
+using BleTimeDuration = BleTimeType::duration;
+using BluetoothLEDevice = BluetoothLEDeviceMac;
+using GattCharacteristic = GattCharacteristicMac;
+using GattService = GattServiceMac;
+
 #elif __ANDROID__
 namespace Neuro {
-using UUIDType = _GUID;
+using UUIDType = std::string;
 using BleTimeType = winrt::Windows::Foundation::DateTime;
 using BleTimeDuration = BleTimeType::duration;
 
