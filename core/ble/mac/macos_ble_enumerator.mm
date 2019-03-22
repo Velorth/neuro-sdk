@@ -1,5 +1,6 @@
 #include <CoreBluetooth/CoreBluetooth.h>
 #include "ble/mac/macos_ble_enumerator.h"
+#include "ble/ios/ble_delegate.h"
 #include "ble/advertisement_data.h"
 #include "event_notifier.h"
 #include "string_utils.h"
@@ -9,30 +10,24 @@
 using namespace std::chrono_literals;
 
 namespace Neuro {
-
+    
 struct MacOsBleEnumerator::Impl final {
-	static constexpr const char *class_name = "WindowsBleEnumerator";
+	static constexpr const char *class_name = "MacOSBleEnumerator";
 	std::unordered_set<std::string> mFilters;
 	Notifier<void, const AdvertisementData &> mAdvertiseNotifier;
 	std::mutex mStopScanMutex;
 	std::condition_variable mStopScanCondition;
-	BluetoothLEAdvertisementWatcher mWatcher;
-	winrt::event_token mReceivedEventToken;
-	winrt::event_token mStoppedEventToken;
+    CBScannerDelegate* mScanResultDelegate;
+	CBCentralManager* mCentralManager;
+    
 
 	explicit Impl(const std::vector<std::string> &name_filters) :
 		mFilters(name_filters.begin(), name_filters.end()),
-		mReceivedEventToken(mWatcher.Received([=](auto&& watcher, auto&& args) {
-			onAdvertisementReceived(std::forward<decltype(watcher)>(watcher), std::forward<decltype(args)>(args));
-		})),
-		mStoppedEventToken(mWatcher.Stopped([=](const BluetoothLEAdvertisementWatcher &, auto args) {
-			std::unique_lock<std::mutex> stopLock(mStopScanMutex);
-			if (mStoppedEventToken) {
-				mWatcher.Stopped(mStoppedEventToken);
-			}
-			mStopScanCondition.notify_all();
-		})) {
-		mWatcher.Start();
+        mScanResultDelegate([[CBScannerDelegate alloc] initWithDeviceFoundCallback:[=](auto *peripheral){
+            
+        }]),
+		mCentralManager([CBCentralManager alloc] initWithDelegate:mScanResultDelegate queue:dispatch_queue_create("central_queue", 0)]) {
+		
 	}
 
 	Impl(const Impl &) = delete;
@@ -41,29 +36,10 @@ struct MacOsBleEnumerator::Impl final {
 	Impl& operator=(Impl &&) = delete;
 
 	~Impl() {
-		try {
-			std::unique_lock<std::mutex> stopLock(mStopScanMutex);		
-			const auto status = mWatcher.Status();
-			if (status != BluetoothLEAdvertisementWatcherStatus::Started)
-				return;
-
-			if (mReceivedEventToken) {
-				mWatcher.Received(mReceivedEventToken);
-			}
-			mWatcher.Stop();
-			if (mStopScanCondition.wait_for(stopLock, 3s) != std::cv_status::no_timeout) {
-				LOG_ERROR("Failed to destroy WindowsBleEnumerator properly: stop scan timeout");
-			}
-		}
-		catch (std::exception &e) {
-			LOG_ERROR_V("Failed to destroy WindowsBleEnumerator properly: %s", e.what());
-		}
-		catch (...) {
-			LOG_ERROR("Failed to destroy WindowsBleEnumerator properly: Unknown error");
-		}
+		
 	}
 
-	void onAdvertisementReceived(const BluetoothLEAdvertisementWatcher&, const BluetoothLEAdvertisementReceivedEventArgs& args) {
+	void onAdvertisementReceived(CBPeripheral *peripheral, ) {
 		if (args.AdvertisementType() != BluetoothLEAdvertisementType::ConnectableUndirected)
 			return;
 

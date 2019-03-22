@@ -20,31 +20,34 @@
 
 @implementation CBScannerDelegate
 {
-    void (^deviceFoundCallbackFunc)(CBPeripheral*);
-    std::list<std::pair<CBPeripheral*, void(^)()>> deviceConnectedCallbacks;
-    std::list<std::pair<CBPeripheral*, void(^)()>> deviceDisconnectedCallbacks;
-    std::list<std::pair<CBPeripheral*, void(^)()>> deviceConnectionErrorCallbacks;
+    void (^mDeviceFoundCallbackFunc)(CBPeripheral*);
+    std::unordered_map<CBPeripheral*, void(^)()> mDeviceConnectedCallbacks;
+    std::unordered_map<CBPeripheral*, void(^)()> mDeviceDisconnectedCallbacks;
+    std::unordered_map<CBPeripheral*, void(^)()> mDeviceConnectionErrorCallbacks;
 }
 
--(void) setDeviceFoundCallback: (void (^)(CBPeripheral*))deviceFoundCallback
+-(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*))deviceFoundCallback
 {
-    deviceFoundCallbackFunc = deviceFoundCallback;
+    if (self = [super init])
+    {
+        mDeviceFoundCallbackFunc = deviceFoundCallback;
+    }
+    return self;
 }
 
 -(void) setDeviceConnectedCallback: (CBPeripheral*)device callback:(void(^)())callback
 {
-    NSLog(@"Setting connected callback");
-    deviceConnectedCallbacks.push_back(std::pair<CBPeripheral*, void(^)()>(device, callback));
+    mDeviceConnectedCallbacks[device] = callback;
 }
 
 -(void) setDeviceDisconnectedCallback: (CBPeripheral*)device callback:(void(^)())callback
 {
-    deviceDisconnectedCallbacks.push_back(std::pair<CBPeripheral*, void(^)()>(device, callback));
+    mDeviceDisconnectedCallbacks[device] = callback;
 }
 
 -(void) setDeviceConnectionErrorCallback: (CBPeripheral*)device callback:(void(^)())callback
 {
-    deviceConnectionErrorCallbacks.push_back(std::pair<CBPeripheral*, void(^)()>(device, callback));
+    mDeviceConnectionErrorCallbacks[device] = callback;
 }
 
 
@@ -55,91 +58,43 @@
 
 -(void) removeDeviceConnectedCallback: (CBPeripheral*)device
 {
-    NSLog(@"Remove device connected callback");
-    if (!deviceConnectedCallbacks.size()) return;
-    
-    for (auto it = deviceConnectedCallbacks.begin(); it!=deviceConnectedCallbacks.end(); ++it)
-    {
-        if (it->first == device)
-        {
-            deviceConnectedCallbacks.remove(*it);
-        }
-    }
+    mDeviceConnectedCallbacks.erase(device);
 }
 
 -(void) removeDeviceDisconnectedCallback: (CBPeripheral*)device
 {
-    if (!deviceDisconnectedCallbacks.size()) return;
-    
-    for (auto it = deviceDisconnectedCallbacks.begin(); it!=deviceDisconnectedCallbacks.end(); ++it)
-    {
-        if (it->first == device)
-        {
-            deviceDisconnectedCallbacks.remove(*it);
-        }
-    }
+    mDeviceDisconnectedCallbacks.erase(device);
 }
 
 -(void) removeDeviceConnectionErrorCallback: (CBPeripheral*)device
 {
-    if (!deviceConnectionErrorCallbacks.size()) return;
-    
-    for (auto it = deviceConnectionErrorCallbacks.begin(); it!=deviceConnectionErrorCallbacks.end(); ++it)
-    {
-        if (it->first == device)
-        {
-            deviceConnectionErrorCallbacks.remove(*it);
-        }
-    }
+    mDeviceConnectionErrorCallbacks.erase(device);
 }
 
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary<NSString *, id> *)advertisementData RSSI:(NSNumber *)RSSI
 {
-        if (deviceFoundCallbackFunc) deviceFoundCallbackFunc(peripheral);
+    if (mDeviceFoundCallbackFunc) mDeviceFoundCallbackFunc(peripheral);
     
 }
 
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
-    NSLog(@"Connected to peripheral");
-    if (!deviceConnectedCallbacks.size()) return;
-    
-    NSLog(@"Notifiyng all");
-    for (auto it = deviceConnectedCallbacks.begin(); it!=deviceConnectedCallbacks.end(); ++it)
-    {
-        if (it->first == peripheral)
-        {
-            it->second();
-            break;
-        }
+    if (mDeviceConnectedCallbacks.find(device) != mDeviceConnectedCallbacks.end()){
+        mDeviceConnectedCallbacs[device]()
     }
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(nullable NSError *)error
 {
-    if (!deviceConnectionErrorCallbacks.size()) return;
-    
-    for (auto it = deviceConnectionErrorCallbacks.begin(); it!=deviceConnectionErrorCallbacks.end(); ++it)
-    {
-        if (it->first == peripheral)
-        {
-            it->second();
-            break;
-        }
+    if (mDeviceConnectionErrorCallbacks.find(device) != mDeviceConnectionErrorCallbacks.end()){
+        mDeviceConnectionErrorCallbacks[device]()
     }
 }
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(nullable NSError *)error
 {
-    if (!deviceDisconnectedCallbacks.size()) return;
-    
-    for (auto it = deviceDisconnectedCallbacks.begin(); it!=deviceDisconnectedCallbacks.end(); ++it)
-    {
-        if (it->first == peripheral)
-        {
-            it->second();
-            break;
-        }
+    if (mDeviceDisconnectedCallbacks.find(device) != mDeviceDisconnectedCallbacks.end()){
+        mDeviceDisconnectedCallbacks[device]()
     }
 }
 

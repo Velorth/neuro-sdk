@@ -22,7 +22,7 @@
 
 @interface CBScannerDelegate:NSObject <CBCentralManagerDelegate>
 
--(void) setDeviceFoundCallback: (void (^)(CBPeripheral*))deviceFoundCallback;
+-(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*))deviceFoundCallback;
 
 -(void) setDeviceConnectedCallback: (CBPeripheral*)device callback:(void(^)())callback;
 -(void) setDeviceDisconnectedCallback: (CBPeripheral*)device callback:(void(^)())callback;
