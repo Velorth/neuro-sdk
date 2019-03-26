@@ -7,10 +7,16 @@
 namespace Neuro {
 using DeviceAddressType = BleDeviceAddress;
 using BleEnumerator = WindowsBleEnumerator;
+using PlatformBleDeviceWrapper = BleDeviceWrapper;
 }
 #elif __APPLE__
-using DeviceAddressType = NSUUID;
+#include "ble/mac/macos_ble_enumerator.h"
+#include "ble/ios/ble_device_objc.h"
+namespace Neuro {
+using DeviceAddressType = std::string;
 using BleEnumerator = MacOsBleEnumerator;
+using PlatformBleDeviceWrapper = NCBleDevice;
+}
 #elif __ANDROID__
 #include "ble/android/android_ble_enumerator.h"
 #include "ble/android/ble_device_jni.h"

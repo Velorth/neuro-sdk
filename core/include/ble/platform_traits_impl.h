@@ -28,20 +28,16 @@ static UUIDType guid_from_string(const std::string &guid_string) {
 
 }
 #elif __APPLE__
+#include <chrono>
 #include <CoreBluetooth/CoreBluetooth.h>
-#include "ble/mac/bluetooth_le_device_mac.h"
-
-using UUIDType = CBUUID;
-using BleTimeType = winrt::Windows::Foundation::DateTime;
+namespace Neuro {
+using BleTimeType = std::chrono::system_clock::time_point;
 using BleTimeDuration = BleTimeType::duration;
-using BluetoothLEDevice = BluetoothLEDeviceMac;
-using GattCharacteristic = GattCharacteristicMac;
-using GattService = GattServiceMac;
-
+}
 #elif __ANDROID__
 namespace Neuro {
 using UUIDType = std::string;
-using BleTimeType = winrt::Windows::Foundation::DateTime;
+using BleTimeType = std::chrono::system_clock::time_point;
 using BleTimeDuration = BleTimeType::duration;
 
 static UUIDType guid_from_string(const std::string &guid_string) {

@@ -18,15 +18,12 @@
 #include <list>
 
 
-@implementation CBScannerDelegate
+@implementation ScannerDelegate
 {
-    void (^mDeviceFoundCallbackFunc)(CBPeripheral*);
-    std::unordered_map<CBPeripheral*, void(^)()> mDeviceConnectedCallbacks;
-    std::unordered_map<CBPeripheral*, void(^)()> mDeviceDisconnectedCallbacks;
-    std::unordered_map<CBPeripheral*, void(^)()> mDeviceConnectionErrorCallbacks;
+    void (^mDeviceFoundCallbackFunc)(CBPeripheral*, NSNumber *rssi);
 }
 
--(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*))deviceFoundCallback
+-(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*, NSNumber*))deviceFoundCallback
 {
     if (self = [super init])
     {
@@ -35,182 +32,101 @@
     return self;
 }
 
--(void) setDeviceConnectedCallback: (CBPeripheral*)device callback:(void(^)())callback
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
-    mDeviceConnectedCallbacks[device] = callback;
+    
 }
 
--(void) setDeviceDisconnectedCallback: (CBPeripheral*)device callback:(void(^)())callback
+- (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary<NSString *, id> *)advertisementData RSSI:(NSNumber *)RSSI
 {
-    mDeviceDisconnectedCallbacks[device] = callback;
+    if (mDeviceFoundCallbackFunc) mDeviceFoundCallbackFunc(peripheral, RSSI);
 }
 
--(void) setDeviceConnectionErrorCallback: (CBPeripheral*)device callback:(void(^)())callback
+@end
+
+
+@implementation ConnectionDelegate
 {
-    mDeviceConnectionErrorCallbacks[device] = callback;
+    void(^mDeviceConnectedCallback)(CBPeripheral *);
+    void(^mDeviceDisconnectedCallback)(CBPeripheral *);
+    void(^mDeviceConnectionErrorCallback)(CBPeripheral *);
 }
 
+-(id) initWithConnectionCallbacks:(void(^)(CBPeripheral *))connectedCallback disconnectedCallback:(void(^)(CBPeripheral *))disconnectedCallback errorCallback:(void(^)(CBPeripheral *))errorCallback;
+{
+    if (self = [super init])
+    {
+        mDeviceConnectedCallback = connectedCallback;
+        mDeviceDisconnectedCallback = disconnectedCallback;
+        mDeviceConnectionErrorCallback = errorCallback;
+    }
+    return self;
+}
 
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
     
 }
 
--(void) removeDeviceConnectedCallback: (CBPeripheral*)device
-{
-    mDeviceConnectedCallbacks.erase(device);
-}
-
--(void) removeDeviceDisconnectedCallback: (CBPeripheral*)device
-{
-    mDeviceDisconnectedCallbacks.erase(device);
-}
-
--(void) removeDeviceConnectionErrorCallback: (CBPeripheral*)device
-{
-    mDeviceConnectionErrorCallbacks.erase(device);
-}
-
-- (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary<NSString *, id> *)advertisementData RSSI:(NSNumber *)RSSI
-{
-    if (mDeviceFoundCallbackFunc) mDeviceFoundCallbackFunc(peripheral);
-    
-}
-
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
-    if (mDeviceConnectedCallbacks.find(device) != mDeviceConnectedCallbacks.end()){
-        mDeviceConnectedCallbacs[device]()
+    if (mDeviceConnectedCallback){
+        mDeviceConnectedCallback(peripheral);
     }
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(nullable NSError *)error
 {
-    if (mDeviceConnectionErrorCallbacks.find(device) != mDeviceConnectionErrorCallbacks.end()){
-        mDeviceConnectionErrorCallbacks[device]()
+    if (mDeviceConnectionErrorCallback){
+        mDeviceConnectionErrorCallback(peripheral);
     }
 }
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(nullable NSError *)error
 {
-    if (mDeviceDisconnectedCallbacks.find(device) != mDeviceDisconnectedCallbacks.end()){
-        mDeviceDisconnectedCallbacks[device]()
+    if (mDeviceDisconnectedCallback){
+        mDeviceDisconnectedCallback(peripheral);
     }
 }
-
 @end
 
 
-@implementation CBDeviceDelegate
+@implementation DeviceDelegate
 {
-    std::shared_ptr<DeviceGattInfo> deviceGattInfo;
-    std::shared_ptr<DeviceCommInterface> deviceCommCallback;
-    CBCharacteristic* txCharacteristic;
-    CBPeripheral* transmitPeripheral;
-    CBCharacteristic* rxCharacteristic;
-    CBCharacteristic* statusCharacteristic;
+    void(^mServicesDiscoveredCallback)();
+    void(^mCharacteristicsDiscoveredCallback)(CBService *);
+    void(^mCharacteristicChangedCallback)(CBCharacteristic *);
 }
 
--(id)initWithGattInfo:(std::shared_ptr<DeviceGattInfo>)gattInfo
+-(id)initWithCallbacks:(void(^)())servicesDiscoveredCallback
+    characteristicsDiscoveredCallback:(void(^)(CBService *))characteristicsDiscoveredCallback
+    characteristicChangedCallback:(void(^)(CBCharacteristic *))characteristicChangedCallback
 {
     if (self = [super init])
     {
-        deviceGattInfo = gattInfo;
+        mServicesDiscoveredCallback = servicesDiscoveredCallback;
+        mCharacteristicsDiscoveredCallback = characteristicsDiscoveredCallback;
+        mCharacteristicChangedCallback = characteristicChangedCallback;
     }
     return self;
 }
 
-
--(bool)sendMessage:(void*)data length:(size_t)length
-{
-    if (data == nullptr || length == 0) return false;
-    NSLog(@"Data ptr: %p, length is %zd", data, length);
-    auto nsData = [NSData dataWithBytes:data length:length];
-
-    if (txCharacteristic == nil || transmitPeripheral == nil) return false;
-    
-    [transmitPeripheral writeValue:nsData forCharacteristic:txCharacteristic type:CBCharacteristicWriteWithoutResponse];
-    return true;
-}
-
-
--(void)setCommunicationCallbacks: (std::shared_ptr<DeviceCommInterface>) commInterface
-{
-    NSLog(@"Set device comm callback");
-    deviceCommCallback = commInterface;
-}
-
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(nullable NSError *)error
 {
-    if (error) {
-        if (deviceCommCallback)
-            deviceCommCallback->onBleDeviceError();
-        return;
-    }
-    
-    for (CBService* service in peripheral.services)
-    {
-        [peripheral discoverCharacteristics:nil forService:service];
-    }
+    if (error) return;
+    if (mServicesDiscoveredCallback) mServicesDiscoveredCallback();
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(nullable NSError *)error
 {
-    if (error) {
-        if (deviceCommCallback)
-            deviceCommCallback->onBleDeviceError();
-        return;
-    }
-    
-    for (CBCharacteristic* characteristic in service.characteristics)
-    {
-        if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:[NSString stringWithCString:deviceGattInfo->rxCharacteristicUUID().c_str() encoding:NSASCIIStringEncoding]]])
-        {
-            NSLog(@"RX characteristic found");
-            rxCharacteristic = characteristic;
-            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
-            deviceCommCallback->onReceiveReady();
-        }
-        if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:[NSString stringWithCString:deviceGattInfo->txCharacteristicUUID().c_str() encoding:NSASCIIStringEncoding]]])
-        {
-            NSLog(@"TX characteristic found");
-            txCharacteristic = characteristic;
-            transmitPeripheral = peripheral;
-            deviceCommCallback->onTransmitReady();
-        }
-        
-        if (!deviceGattInfo->statusCharacteristicUUID().empty())
-        {
-        if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:[NSString stringWithCString:deviceGattInfo->statusCharacteristicUUID().c_str() encoding:NSASCIIStringEncoding]]])
-        {
-            NSLog(@"Status characteristic found");
-            statusCharacteristic = characteristic;
-            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
-            deviceCommCallback->onStatusReceiveReady();
-        }
-        }
-    }
+    if (error) return;
+    if (mCharacteristicsDiscoveredCallback) mCharacteristicsDiscoveredCallback(service);
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(nullable NSError *)error
 {
-    if (error) {
-        NSLog(@"Receive error");
-        if (deviceCommCallback)
-           deviceCommCallback->onBleDeviceError();
-        return;
-    }
-    NSLog(@"Data received");
-    if (characteristic == rxCharacteristic)
-    {
-        deviceCommCallback->onDataReceived([characteristic.value bytes], [characteristic.value length]);
-        return;
-    }
-    
-    if (characteristic == statusCharacteristic)
-    {
-        deviceCommCallback->onStatusReceived([characteristic.value bytes], [characteristic.value length]);
-    }
+    if (error) return;
+    if (mCharacteristicChangedCallback) mCharacteristicChangedCallback(characteristic);
 }
 
 

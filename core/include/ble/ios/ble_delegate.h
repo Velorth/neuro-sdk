@@ -20,25 +20,23 @@
 #include <CoreBluetooth/CoreBluetooth.h>
 #include "ble/ble_device_info.h"
 
-@interface CBScannerDelegate:NSObject <CBCentralManagerDelegate>
+@interface ScannerDelegate:NSObject <CBCentralManagerDelegate>
 
--(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*))deviceFoundCallback;
+-(id) initWithDeviceFoundCallback:(void (^)(CBPeripheral*, NSNumber*))deviceFoundCallback;
 
--(void) setDeviceConnectedCallback: (CBPeripheral*)device callback:(void(^)())callback;
--(void) setDeviceDisconnectedCallback: (CBPeripheral*)device callback:(void(^)())callback;
--(void) setDeviceConnectionErrorCallback: (CBPeripheral*)device callback:(void(^)())callback;
-
--(void) removeDeviceConnectedCallback: (CBPeripheral*)device;
--(void) removeDeviceDisconnectedCallback: (CBPeripheral*)device;
--(void) removeDeviceConnectionErrorCallback: (CBPeripheral*)device;
 @end
 
-@interface CBDeviceDelegate:NSObject <CBPeripheralDelegate>
+@interface ConnectionDelegate : NSObject <CBCentralManagerDelegate>
 
--(id)initWithGattInfo: (std::shared_ptr<Neuro::DeviceGattInfo>) gattInfo;
+-(id) initWithConnectionCallbacks:(void(^)(CBPeripheral *))connectedCallback disconnectedCallback:(void(^)(CBPeripheral *))disconnectedCallback errorCallback:(void(^)(CBPeripheral *))errorCallback;
 
--(bool)sendMessage:(void*)data length:(size_t)length;
--(void)setCommunicationCallbacks: (std::shared_ptr<DeviceCommInterface>) commInterface;
+@end
+
+@interface DeviceDelegate:NSObject <CBPeripheralDelegate>
+
+-(id)initWithCallbacks:(void(^)())servicesDiscoveredCallback
+    characteristicsDiscoveredCallback:(void(^)(CBService *))characteristicsDiscoveredCallback
+    characteristicChangedCallback:(void(^)(CBCharacteristic *))characteristicChangedCallback;
 
 @end
 
