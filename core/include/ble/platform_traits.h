@@ -4,6 +4,7 @@
 #ifdef _WIN32
 #include "ble/win/windows_ble_enumerator.h"
 #include "ble/win/ble_device_address.h"
+#include "ble/win/ble_device_wrapper.h"
 namespace Neuro {
 using DeviceAddressType = BleDeviceAddress;
 using BleEnumerator = WindowsBleEnumerator;

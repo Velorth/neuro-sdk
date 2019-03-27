@@ -6,8 +6,20 @@ using winrt::Windows::Devices::Bluetooth::BluetoothConnectionStatus;
 
 namespace Neuro {
 
+WindowsBleDevice device_from_address(const DeviceAddressType &address) {
+	auto deviceAsyncOperation = WindowsBleDevice::FromBluetoothAddressAsync(static_cast<uint64_t>(address));
+	if (deviceAsyncOperation == nullptr) {
+		throw std::runtime_error("Device is not reachable");
+	}
+	auto device = deviceAsyncOperation.get();
+	if (device == nullptr) {
+		throw std::runtime_error("Device is not reachable");
+	}
+	return device;
+}
+
 BluetoothLEDeviceWin::BluetoothLEDeviceWin(const DeviceInfo &device_info):
-	mDevice(WindowsBleDevice::FromBluetoothAddressAsync(static_cast<uint64_t>(device_info.Address)).get()){
+	mDevice(device_from_address(device_info.Address)){
 	mDevice.ConnectionStatusChanged([=](const WindowsBleDevice &, auto) {
 		if (mDevice.ConnectionStatus() == BluetoothConnectionStatus::Disconnected) {
 			mStateNotifier.notifyAll(BleDeviceState::Disconnected);
