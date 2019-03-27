@@ -6,16 +6,16 @@
 [Setup]
 ChangesEnvironment=true
 AppId={{NEUROMD-SDK}
-AppVersion=1.4.0
+AppVersion=1.4.1
 AppName=NeuroMD Software development kit
-AppVerName=1.4.0
+AppVerName=1.4.1
 AppPublisher=NeuroMD
 AppCopyright=NeuroMD
 
 AppPublisherURL=http://www.neuromd.com
 AppSupportURL=http://www.neuromd.com
 
-VersionInfoVersion=1.4.0
+VersionInfoVersion=1.4.1
 VersionInfoCompany=NeuroMD
 VersionInfoCopyright=NeuroMD
 VersionInfoDescription=NeuroMD Software development kit 
@@ -28,7 +28,7 @@ UsePreviousAppDir =no
 DisableProgramGroupPage=no
 DefaultGroupName=NeuroMD
 OutputDir=bin
-OutputBaseFilename=neurosdk-setup-win-x86-v1.4.0
+OutputBaseFilename=neurosdk-setup-win-x86-v1.4.1
 Compression=lzma2/ultra64
 LZMANumBlockThreads=4
 LZMAUseSeparateProcess=yes

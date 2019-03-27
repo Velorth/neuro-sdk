@@ -46,6 +46,7 @@ ListenerPtr<void, BleDeviceState> BluetoothLEDeviceWin::subscribeStateChanged(st
 }
 
 BluetoothLEDeviceWin make_bluetooth_le_device(const DeviceInfo& device_info) {
+	winrt::init_apartment();
 	return BluetoothLEDeviceWin(device_info);
 }
 
