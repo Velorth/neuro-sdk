@@ -18,14 +18,15 @@
 #define ble_device_objc_h
 
 #include "ble/ble_device.h"
-#import "ble_delegate.h"
 
 namespace Neuro{
+
+struct DeviceInfo;
 
 class NCBleDevice: public BleDevice
 {
 public:
-    NCBleDevice(CBPeripheral*, CBCentralManager*, CBScannerDelegate*);
+    NCBleDevice(const DeviceInfo &);
     NCBleDevice(const NCBleDevice&) = delete;
     NCBleDevice& operator=(const NCBleDevice&) = delete;
     ~NCBleDevice();
@@ -38,14 +39,8 @@ public:
     std::string getName() const override;
     std::string getNetAddress() const override;
 private:
-    CBPeripheral* hardwareDevice;
-    CBCentralManager* scanner;
-    CBDeviceDelegate* deviceDelegate;
-    CBScannerDelegate* scannerDelegate;
-    
-    void onDeviceConnected();
-    void onDeviceDisconnected();
-    void onDeviceError();
+    struct Impl;
+    std::unique_ptr<Impl> mImpl;
 };
 
 }

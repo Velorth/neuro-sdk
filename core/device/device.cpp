@@ -10,7 +10,7 @@
 namespace Neuro {
 
 static std::unique_ptr<DeviceImpl> device_impl_from_info(const DeviceInfo &device_info) {
-	auto bleDevice = std::make_shared<BleDeviceWrapper>(device_info);
+	auto bleDevice = std::make_shared<PlatformBleDeviceWrapper>(device_info);
 	if (bleDevice->getGattInfo()->getDeviceType() == DeviceType::Brainbit) {
 		return std::make_unique<BrainbitImpl>(bleDevice);
 	}
