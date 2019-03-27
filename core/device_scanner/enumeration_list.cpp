@@ -27,14 +27,14 @@ struct EnumerationList::Impl final {
 
 	void checkTimeStamps()
 	{
-		std::shared_lock readListLock(mDeviceMapMutex);
+		std::shared_lock<std::shared_mutex> readListLock(mDeviceMapMutex);
 
 		if (mDeviceMap.empty())
 			return;
 
 		if (findFirstOverdue() != mDeviceMap.end()) {
 			readListLock.unlock();
-			std::unique_lock removeOverdueLock(mDeviceMapMutex);
+			std::unique_lock<std::shared_mutex> removeOverdueLock(mDeviceMapMutex);
 
 			auto overdue = findFirstOverdue();
 			while (overdue != mDeviceMap.end()) {
@@ -64,7 +64,7 @@ void EnumerationList::swap(EnumerationList &other) noexcept {
 EnumerationList::~EnumerationList() = default;
 
 std::vector<DeviceInfo> EnumerationList::devices() const {
-	std::shared_lock readListLock(mImpl->mDeviceMapMutex);
+	std::shared_lock<std::shared_mutex> readListLock(mImpl->mDeviceMapMutex);
 	std::vector<DeviceInfo> deviceList(mImpl->mDeviceMap.size());
 	std::transform(
 		mImpl->mDeviceMap.begin(), 
@@ -85,7 +85,7 @@ void EnumerationList::onAdvertisementReceived(const AdvertisementData& advertise
 	deviceInfo.Name = advertisement.Name;
 	deviceInfo.Address = advertisement.Address;
 
-	std::unique_lock writeListLock(mImpl->mDeviceMapMutex);
+	std::unique_lock<std::shared_mutex> writeListLock(mImpl->mDeviceMapMutex);
 	const auto isNewDevice = mImpl->mDeviceMap.find(deviceInfo) == mImpl->mDeviceMap.end();
 	mImpl->mDeviceMap[deviceInfo] = advertisement.TimeStamp;
 	

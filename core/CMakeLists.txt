@@ -259,7 +259,9 @@ if (UNIX)
       #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
       PUBLIC_HEADER neurosdk.h
       #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+      LINK_FLAGS "-Wl, -F/Library/Frameworks"
     )
+    target_link_libraries(neurosdk${PLATFORM_SUFFIX} "-framework CoreBluetooth")
   else (APPLE)
     ## Check for Debian GNU/Linux
     find_file (DEBIAN_FOUND debian_version debconf.conf

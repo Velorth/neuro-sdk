@@ -95,7 +95,7 @@ NCBleDevice::NCBleDevice(const DeviceInfo &device_info):
             errorCallback:^(CBPeripheral *peripheral){ notifyStateChanged(BleDeviceState::Disconnected, BleDeviceError::GeneralConnectionError); }
         ],
         [[DeviceDelegate alloc] initWithCallbacks:^(){mImpl->onServicesDiscovered();}
-            characteristicDiscoveredCallback:^(CBService *service){
+            characteristicsDiscoveredCallback:^(CBService *service){
                 mImpl->onCharacteristicsDiscovered(service, getGattInfo()->getGattInfo());
                 notifyStateChanged(BleDeviceState::Connected, BleDeviceError::NoError);
             }
@@ -145,6 +145,15 @@ std::string NCBleDevice::getName() const {
 
 std::string NCBleDevice::getNetAddress() const {
     return std::string([[[mImpl->mPeripheral identifier] UUIDString] cStringUsingEncoding:NSASCIIStringEncoding]);
+}
+
+BleDeviceState NCBleDevice::getState() const {
+    if (mImpl->mPeripheral.state == CBPeripheralStateConnected){
+        return BleDeviceState::Connected;
+    }
+    else {
+        return BleDeviceState::Disconnected;
+    }
 }
     
 }

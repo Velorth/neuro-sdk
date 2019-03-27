@@ -48,7 +48,7 @@ struct MacOsBleEnumerator::Impl final {
 		advertisementData.Name = name;
 		advertisementData.Address = [[[peripheral identifier] UUIDString] cStringUsingEncoding: NSUTF8StringEncoding];
 		advertisementData.RSSI = [rssi intValue];
-		advertisementData.ServicesUUIDs = std::vector<CBUUID>();
+		advertisementData.ServicesUUIDs = std::vector<std::string>();
         advertisementData.TimeStamp = std::chrono::system_clock::now();
 		mAdvertiseNotifier.notifyAll(advertisementData);
 	}

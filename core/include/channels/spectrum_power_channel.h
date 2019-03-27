@@ -4,6 +4,7 @@
 #include "channels/info/channel_info.h"
 #include "channels/spectrum_channel.h"
 #include <channels/ecg/ecg_channel.h>
+#include <unordered_map>
 
 namespace Neuro {
 

@@ -2,7 +2,6 @@
 #include <vector>
 #include "device/device.h"
 #include "device/device_impl.h"
-#include "ble/ble_device_wrapper.h"
 #include "device/callibri/callibri_impl.h"
 #include "device/callibri/callibri_common_parameters.h"
 #include "device/brainbit/brainbit_impl.h"

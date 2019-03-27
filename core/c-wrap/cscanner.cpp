@@ -113,10 +113,15 @@ DeviceEnumerator* create_device_enumerator(DeviceType device_type) {
 		return nullptr;
 	}
 }
-
+#ifdef __APPLE__
+static void copy_address(AddressType &dest, const Neuro::DeviceAddressType &source) {
+    strcpy(dest, static_cast<std::string>(source).c_str());
+}
+#else
 static void copy_address(AddressType &dest, const Neuro::DeviceAddressType &source) {
 	dest = static_cast<uint64_t>(source);
-}
+ }
+ #endif
 
 #endif
 

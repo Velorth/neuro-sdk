@@ -29,8 +29,8 @@ static UUIDType guid_from_string(const std::string &guid_string) {
 }
 #elif __APPLE__
 #include <chrono>
-#include <CoreBluetooth/CoreBluetooth.h>
 namespace Neuro {
+using UUIDType = std::string;
 using BleTimeType = std::chrono::system_clock::time_point;
 using BleTimeDuration = BleTimeType::duration;
 }

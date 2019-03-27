@@ -21,7 +21,6 @@
 #include <vector>
 #include <functional>
 #include "ble/ble_device.h"
-#include "ble/emulator/emulator_client.h"
 
 namespace Neuro {
 

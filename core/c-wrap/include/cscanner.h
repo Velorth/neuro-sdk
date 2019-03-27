@@ -10,6 +10,8 @@
 #ifdef __ANDROID__
 #include <jni.h>
 typedef char AddressType[256];
+#elif __APPLE__
+typedef char AddressType[256];
 #else
 typedef uint64_t AddressType;
 #endif
