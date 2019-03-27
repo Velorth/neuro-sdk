@@ -3,11 +3,11 @@
 
 #include <memory>
 #include "ble/ble_device.h"
-#include "device/device_info.h"
 
 namespace Neuro {
 
 struct BleDeviceWrapperState;
+struct DeviceInfo;
 
 class BleDeviceWrapper final : public BleDevice {
 public:

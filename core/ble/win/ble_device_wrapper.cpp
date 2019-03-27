@@ -1,5 +1,6 @@
-#include "ble/ble_device_wrapper.h"
+#include "ble/win/ble_device_wrapper.h"
 #include "ble/platform_traits_impl.h"
+#include "device/device_info.h"
 #include "logger.h"
 
 namespace Neuro {
