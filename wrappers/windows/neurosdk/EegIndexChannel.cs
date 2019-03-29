@@ -6,45 +6,32 @@ using System.Runtime.InteropServices;
 namespace Neuro
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public struct EegIndex
+    public struct EegIndexValues
     {
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-        public string Name;
-        public float FrequencyBottom;
-        public float FrequencyTop;
+        public double AlphaRate;
+        public double BetaRate;
+        public double DeltaRate;
+        public double ThetaRate;
     }
 
-    public static class EegStandardIndices
+    public class EegIndexChannel : IDataChannel<EegIndexValues>, IDisposable
     {
-        public static EegIndex Alpha => new EegIndex(){Name = "Alpha", FrequencyBottom = 8.0f, FrequencyTop = 14.0f};
-        public static EegIndex Beta => new EegIndex() { Name = "Beta", FrequencyBottom = 14.0f, FrequencyTop = 34.0f };
-        public static EegIndex Delta => new EegIndex() { Name = "Delta", FrequencyBottom = .5f, FrequencyTop = 4.0f };
-        public static EegIndex Theta => new EegIndex() { Name = "Theta", FrequencyBottom = 4.0f, FrequencyTop = 8.0f };
-    }
-
-    public class EegIndexChannel : IDataChannel<double>, IDisposable
-    {
-        private readonly IntPtr[] _channelsPointers;
-        private EegArtifactChannel _artifactChannel;
         private readonly AnyChannel _anyChannel;
-        private readonly DataChannel<double> _dataChannel;
+        private readonly NativeArrayMarshaler<EegIndexValues> _arrayMarshaler = new NativeArrayMarshaler<EegIndexValues>();
 
+        //store source channels reference to prevent their deletion
+        private readonly EegChannel _t3;
+        private readonly EegChannel _t4;
+        private readonly EegChannel _o1;
+        private readonly EegChannel _o2;
 
-        public EegIndexChannel(EegIndex index, IEnumerable<IDataChannel<double>> channels, double windowDuration = 8.0, double overlappingCoeff = 0.9)
+        public EegIndexChannel(EegChannel t3, EegChannel t4, EegChannel o1, EegChannel o2)
         {
-            _channelsPointers = channels.Select(x => x.ChannelPtr).ToArray();
-
-            _anyChannel = new AnyChannel(create_EegIndexDoubleChannel_channels(index, _channelsPointers, (IntPtr)_channelsPointers.Length, windowDuration, overlappingCoeff));
-            _dataChannel = new DataChannel<double>(_anyChannel);
-            _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
-        }
-
-        public EegIndexChannel(EegIndex index, IEnumerable<IDataChannel<double>> channels, EegArtifactChannel artifactChannel, double windowDuration = 8.0, double overlappingCoeff = 0.9)
-        {
-            _channelsPointers = channels.Select(x => x.ChannelPtr).ToArray();
-            _artifactChannel = artifactChannel;
-            _anyChannel = new AnyChannel(create_EegIndexDoubleChannel_channels_artifacts(index, _channelsPointers, (IntPtr)_channelsPointers.Length, _artifactChannel.ChannelPtr, windowDuration, overlappingCoeff));
-            _dataChannel = new DataChannel<double>(_anyChannel);
+            _t3 = t3;
+            _t4 = t4;
+            _o1 = o1;
+            _o2 = o2;
+            _anyChannel = new AnyChannel(create_EegIndexChannel(_t3.ChannelPtr, _t4.ChannelPtr, _o1.ChannelPtr, _o2.ChannelPtr));
             _anyChannel.LengthChanged += (sender, length) => LengthChanged?.Invoke(sender, length);
         }
 
@@ -63,17 +50,37 @@ namespace Neuro
 
         public IntPtr ChannelPtr => _anyChannel.ChannelPtr;
 
-        public double[] ReadData(int offset, int length)
+        public EegIndexValues[] ReadData(int offset, int length)
         {
-            return _dataChannel.ReadData(offset, length);
+            var bufferPtr = Marshal.AllocHGlobal(length * Marshal.SizeOf<ArtifactZone>());
+            try
+            {
+                SdkError.ThrowIfError(EegIndexChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
+                return _arrayMarshaler.MarshalArray(bufferPtr, (IntPtr)length);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(bufferPtr);
+            }
+        }
+
+        public int BufferSize
+        {
+            get
+            {
+                SdkError.ThrowIfError(EegIndexChannel_get_buffer_size(ChannelPtr, out var size));
+                return (int)size;
+            }
         }
 
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_EegIndexDoubleChannel_channels(EegIndex eegIndex, IntPtr[] channels, IntPtr channelsCount, double windowDuration, double overlappingCoeff);
+        private static extern IntPtr create_EegIndexChannel(IntPtr t3, IntPtr t4, IntPtr o1, IntPtr o2);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr create_EegIndexDoubleChannel_channels_artifacts(EegIndex eegIndex, IntPtr[] channels, IntPtr channelsCount, IntPtr artifactChannel, double windowDuration, double overlappingCoeff);
-       
+        private static extern int EegIndexChannel_read_data(IntPtr indexChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int EegIndexChannel_get_buffer_size(IntPtr indexChannelPtr, out IntPtr bufferSize);
     }
 }
