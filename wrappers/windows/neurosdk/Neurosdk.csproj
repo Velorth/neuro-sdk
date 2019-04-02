@@ -76,6 +76,7 @@
     <Compile Include="EegArtifactChannel.cs" />
     <Compile Include="EegChannel.cs" />
     <Compile Include="EegIndexChannel.cs" />
+    <Compile Include="EmotionStateChannel.cs" />
     <Compile Include="EmulationChannel.cs" />
     <Compile Include="FilteredChannel.cs" />
     <Compile Include="Filters.cs" />

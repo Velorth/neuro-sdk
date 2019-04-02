@@ -52,11 +52,11 @@ namespace Neuro
 
         public EegIndexValues[] ReadData(int offset, int length)
         {
-            var bufferPtr = Marshal.AllocHGlobal(length * Marshal.SizeOf<ArtifactZone>());
+            var bufferPtr = Marshal.AllocHGlobal(length * Marshal.SizeOf<EegIndexValues>());
             try
             {
-                SdkError.ThrowIfError(EegIndexChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr));
-                return _arrayMarshaler.MarshalArray(bufferPtr, (IntPtr)length);
+                SdkError.ThrowIfError(EegIndexChannel_read_data(ChannelPtr, (IntPtr)offset, (IntPtr)length, bufferPtr, (IntPtr)length, out var dataRead));
+                return _arrayMarshaler.MarshalArray(bufferPtr, dataRead);
             }
             finally
             {
@@ -78,7 +78,8 @@ namespace Neuro
         private static extern IntPtr create_EegIndexChannel(IntPtr t3, IntPtr t4, IntPtr o1, IntPtr o2);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int EegIndexChannel_read_data(IntPtr indexChannelPtr, IntPtr offset, IntPtr length, IntPtr buffer);
+        private static extern int EegIndexChannel_read_data(IntPtr indexChannelPtr, IntPtr offset, IntPtr length,
+            IntPtr buffer, IntPtr bufferSize, out IntPtr dataRead);
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EegIndexChannel_get_buffer_size(IntPtr indexChannelPtr, out IntPtr bufferSize);

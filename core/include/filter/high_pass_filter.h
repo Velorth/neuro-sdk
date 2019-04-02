@@ -26,6 +26,34 @@ protected:
 };
 
 template<>
+class HighPass<1, 1, 12> {
+protected:
+	static constexpr std::size_t Order = 1;
+	std::array<double, Order> Denominators{ {
+			-.86111111111111116} };
+	std::array<double, Order + 1> Numerators{ {
+			-.91210261252754174,
+			.94900849858356942} };
+	std::array<double, Order> V{ make_array<double, Order>(0.0) };
+};
+
+template<>
+class HighPass<1, 3, 12> {
+protected:
+	static constexpr std::size_t Order = 3;
+	std::array<double, Order> Denominators{ {
+			-.90434753139240893,
+			2.8039479773829997,
+			-2.899479594611864} };
+	std::array<double, Order + 1> Numerators{ {
+			-.95097188792340908,
+			2.8529156637702272,
+			-2.8529156637702272,
+			.95097188792340908} };
+	std::array<double, Order> V{ make_array<double, Order>(0.0) };
+};
+
+template<>
 class HighPass<3, 2, 125>{
 protected:
     static constexpr std::size_t Order = 2;

@@ -28,6 +28,48 @@ protected:
 };
 
 template<>
+class LowPass<1, 1, 12> {
+protected:
+	static constexpr std::size_t Order = 1;
+	std::array<double, Order> Denominators{ {
+		-.85952856038757444} };
+	std::array<double, Order + 1> Numerators{ {
+		7.0235719806212782e-02,
+		7.0235719806212782e-02} };
+	std::array<double, Order> V{ make_array<double, Order>(0.0) };
+};
+
+template<>
+class LowPass<1, 2, 12> {
+protected:
+	static constexpr std::size_t Order = 2;
+	std::array<double, Order> Denominators{ {
+		.86747213379166861,
+		-1.8580432987002593} };
+	std::array<double, Order + 1> Numerators{ {
+		2.3572087728523241e-03,
+		4.7144175457046481e-03,
+		2.3572087728523241e-03} };
+	std::array<double, Order> V{ make_array<double, Order>(0.0) };
+};
+
+template<>
+class LowPass<1, 3, 12> {
+protected:
+	static constexpr std::size_t Order = 3;
+	std::array<double, Order> Denominators{ {
+		-.90434753139240893,
+		2.8039479773829997,
+		-2.899479594611864} };
+	std::array<double, Order + 1> Numerators{ {
+		1.5106422340853152e-05,
+		4.5319267022559457e-05,
+		4.5319267022559457e-05,
+		1.5106422340853152e-05} };
+	std::array<double, Order> V{ make_array<double, Order>(0.0) };
+};
+
+template<>
 class LowPass<1, 2, 125> {
 protected:
     static constexpr std::size_t Order = 2;
