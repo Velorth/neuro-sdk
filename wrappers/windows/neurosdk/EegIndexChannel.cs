@@ -73,6 +73,15 @@ namespace Neuro
             }
         }
 
+        public double Delay
+        {
+            set => SdkError.ThrowIfError(EegIndexChannel_set_delay(ChannelPtr, value));
+        }
+
+        public void SetWeights(double alpha, double beta, double delta, double theta)
+        {
+            SdkError.ThrowIfError(EegIndexChannel_set_weight_coefficients(ChannelPtr, alpha, beta, delta, theta));
+        }
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr create_EegIndexChannel(IntPtr t3, IntPtr t4, IntPtr o1, IntPtr o2);
@@ -83,5 +92,11 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EegIndexChannel_get_buffer_size(IntPtr indexChannelPtr, out IntPtr bufferSize);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int EegIndexChannel_set_delay(IntPtr indexChannelPtr, double delaySeconds);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int EegIndexChannel_set_weight_coefficients(IntPtr indexChannelPtr, double alpha, double beta, double delta, double theta);
     }
 }

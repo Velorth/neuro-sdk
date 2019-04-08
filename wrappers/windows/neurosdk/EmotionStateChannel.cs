@@ -13,6 +13,27 @@ namespace Neuro
         public int Meditation;
     };
 
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    public struct StateCoefficients
+    {
+        public double PX1;
+        public double PX2;
+        public double PX3;
+        public double PX4;
+        public double NX1;
+        public double NX2;
+        public double NX3;
+        public double NX4;
+        public double PY1;
+        public double PY2;
+        public double PY3;
+        public double PY4;
+        public double NY1;
+        public double NY2;
+        public double NY3;
+        public double NY4;
+    }
+
     public enum EmotionalStateName
     {
         Neutral,
@@ -77,6 +98,16 @@ namespace Neuro
             }
         }
 
+        public StateCoefficients StateCoefficients
+        {
+            get
+            {
+                SdkError.ThrowIfError(EmotionalStateChannel_get_state_coefficients(ChannelPtr, out var coefficients));
+                return coefficients;
+            }
+            set => SdkError.ThrowIfError(EmotionalStateChannel_set_state_coefficients(ChannelPtr, value));
+        }
+
         public static EmotionalStateName ValueToName(int value)
         {
             if (value == 0)
@@ -122,5 +153,11 @@ namespace Neuro
 
         [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int EmotionalStateChannel_get_buffer_size(IntPtr emotionalChannelPtr, out IntPtr bufferSize);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int EmotionalStateChannel_get_state_coefficients(IntPtr emotionalChannelPtr, out StateCoefficients outStateCoeffs);
+
+        [DllImport(SdkLib.LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int EmotionalStateChannel_set_state_coefficients(IntPtr emotionalChannelPtr, StateCoefficients stateCoeffs);
     }
 }
